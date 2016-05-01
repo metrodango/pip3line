@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>FloatingDialog</class>
+ <widget class="QDialog" name="FloatingDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>835</width>
+    <height>555</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

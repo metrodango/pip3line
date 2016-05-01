@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+<comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>ByteIntegerWidget</class>
+ <widget class="QWidget" name="ByteIntegerWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="EndianGroupBox">
+     <property name="title">
+      <string>Endianness</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="littleEndianRadioButton">
+        <property name="text">
+         <string>Little endian</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="bigEndianRadioButton">
+        <property name="text">
+         <string>Big Endian</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="signGroupBox">
+     <property name="title">
+      <string>Integer sign</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="unsignedRadioButton">
+        <property name="text">
+         <string>Unsigned</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="signedRadioButton">
+        <property name="text">
+         <string>Signed</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="sizeGroupBox">
+     <property name="title">
+      <string>Integer size</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="I8bitsRadioButton">
+        <property name="text">
+         <string>8  bits</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="I16bitsRadioButton">
+        <property name="text">
+         <string>16 bits</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="I32bitsRadioButton">
+        <property name="text">
+         <string>32 bits</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QRadioButton" name="I64bitsRadioButton">
+        <property name="text">
+         <string>64 bits</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

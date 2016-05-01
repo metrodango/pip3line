@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Base32 decode" Description="" Help="">
+    <Transform PaddingChar="61" IncludePadding="1" Way="1" Order="0" Name="Base32" Variant="0"/>
+</pip3line>

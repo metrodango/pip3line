@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>XorWidget</class>
+ <widget class="QWidget" name="XorWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>283</width>
+    <height>217</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QWidget" name="keyWidget" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="keyLabel">
+        <property name="text">
+         <string>Key</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="keyPlainTextEdit">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QCheckBox" name="fromHexcheckBox">
+        <property name="text">
+         <string>Hexadecimal key</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="typeGroupBox">
+     <property name="title">
+      <string>Xor algorithm</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QComboBox" name="typeComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <item>
+         <property name="text">
+          <string>Classic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rolling using previous input</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Rolling using previous output</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="messageLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+<comment>
+ * Released as open source by Gabriel Caudrelier
+ *
+ * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+ *
+ * https://github.com/metrodango/pip3line
+ *
+ * Released under AGPL see LICENSE for more information
+</comment>
+ <class>BaseBlockSourceWidget</class>
+ <widget class="QTabWidget" name="BaseBlockSourceWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TabWidget</string>
+  </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
+  <widget class="QWidget" name="genericTab">
+   <attribute name="title">
+    <string>Generic</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="genericLayout">
+    <item>
+     <widget class="QGroupBox" name="b64BlocksGroupBox">
+      <property name="title">
+       <string>Base64 Blocks &amp;mode</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+      <layout class="QFormLayout" name="formLayout">
+       <property name="labelAlignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <item row="3" column="0">
+        <widget class="QLabel" name="maxBlockLabel">
+         <property name="text">
+          <string>Max length</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="b64MaxLengthSpinBox">
+         <property name="toolTip">
+          <string>Maximum length of base64 blocks</string>
+         </property>
+         <property name="minimum">
+          <number>100</number>
+         </property>
+         <property name="maximum">
+          <number>10000000</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="sepLabel">
+         <property name="text">
+          <string>Separator</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="HexWidget" name="b64SeparatorWidget" native="true"/>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>This mode expect Base64 data blocks separated by a special character </string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="reflexionCheckBox">
+      <property name="text">
+       <string>Enable reflexion</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="tlsCheckBox">
+      <property name="text">
+       <string>Enable SSL/TLS</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="inboundTransformTab">
+   <attribute name="title">
+    <string>Inbound</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item alignment="Qt::AlignHCenter|Qt::AlignTop">
+     <widget class="QPushButton" name="selectInboundTransformPushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Select transform</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="outboundTransformTab">
+   <attribute name="title">
+    <string>Outbound</string>
+   </attribute>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item alignment="Qt::AlignHCenter|Qt::AlignTop">
+     <widget class="QPushButton" name="selectOutboundTransformPushButton">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Select transform</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HexWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">hexwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

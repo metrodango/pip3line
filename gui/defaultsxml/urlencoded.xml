@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Url Encoded" Description="" Help="" Format="0">
+    <Transform Include="" Exclude="" Way="0" PercentChar="37" Order="0" Name="Url Encode"/>
+</pip3line>

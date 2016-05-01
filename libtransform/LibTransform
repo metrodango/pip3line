@@ -1,0 +1,4 @@
+#include "libtransform/transformfactoryplugininterface.h"
+#include "libtransform/commonstrings.h"
+#include "libtransform/transformabstract.h"
+#include "libtransform/transformmgmt.h"

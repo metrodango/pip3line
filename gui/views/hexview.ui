@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+ * Released as open source by Gabriel Caudrelier
+ *
+ * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+ *
+ * https://github.com/metrodango/pip3line
+ *
+ * Released under AGPL see LICENSE for more information
+</comment>
+ <class>HexView</class>
+ <widget class="QWidget" name="HexView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item alignment="Qt::AlignBottom">
+    <widget class="QWidget" name="statsWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="statsLabel">
+        <property name="text">
+         <string>stats</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignRight">
+       <widget class="QLabel" name="offsetLabel">
+        <property name="text">
+         <string>offset</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+  <action name="deleteSelectionAction">
+   <property name="text">
+    <string>Delete selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete selection</string>
+   </property>
+  </action>
+  <action name="importFileAction">
+   <property name="text">
+    <string>Load file</string>
+   </property>
+   <property name="toolTip">
+    <string>Load file</string>
+   </property>
+  </action>
+  <action name="saveToFileAction">
+   <property name="text">
+    <string>All</string>
+   </property>
+   <property name="toolTip">
+    <string>Save all the content to file</string>
+   </property>
+  </action>
+  <action name="selectAllAction">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+  </action>
+  <action name="keepOnlySelectionAction">
+   <property name="text">
+    <string>Keep only selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Keep only selection (crop)</string>
+   </property>
+  </action>
+  <action name="sendToNewTabAction">
+   <property name="text">
+    <string>New tab</string>
+   </property>
+  </action>
+  <action name="newMarkingAction">
+   <property name="text">
+    <string>New Marking</string>
+   </property>
+   <property name="toolTip">
+    <string>Apply new marking on selection</string>
+   </property>
+  </action>
+  <action name="clearMarkingsAction">
+   <property name="text">
+    <string>Clear markings</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear all markings on selection</string>
+   </property>
+  </action>
+  <action name="newByteArrayAction">
+   <property name="text">
+    <string>New byte array</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset to a new byte array</string>
+   </property>
+  </action>
+  <action name="saveSelectedToFileAction">
+   <property name="text">
+    <string>Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Save selected bytes to file</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

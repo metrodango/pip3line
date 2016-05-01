@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Base64 &amp;&amp; Url Encode" Help="&lt;p&gt;Quick transformation that chains a standard base64 (RFC 2045) with a standard Url Encoding.&lt;/p&gt;" Description="Transformation that chains a standard Base64 with a standard Url Encode">
+    <Transform Way="0" Order="0" Name="Base64" Variant="0"/>
+    <Transform Include="" Exclude="" Way="0" PercentChar="25" Order="1" Name="Url Encode"/>
+</pip3line>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>RegExpHelpDialog</class>
+ <widget class="QDialog" name="RegExpHelpDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>662</width>
+    <height>462</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Some help with regular expressions</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QPlainTextEdit" name="plainTextEdit">
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="plainText">
+      <string>set of characters: [a-z]
+Set of characters to be ignored: [^a-z]
+
+E?	Matches zero or one occurrences of E. 
+E+	Matches one or more occurrences of E. 
+E*	Matches zero or more occurrences of E. 
+E{n}	Matches exactly n occurrences of E.
+E{n,}	Matches at least n occurrences of E.
+E{,m}	Matches at most m occurrences of E.
+E{n,m}	Matches at least n and at most m occurrences of E.
+
+\c	A character that follows a backslash matches the character itself, except as specified below. e.g., To match a literal caret at the beginning of a string, write \^.
+\a	Matches the ASCII bell (BEL, 0x07).
+\f	Matches the ASCII form feed (FF, 0x0C).
+\n	Matches the ASCII line feed (LF, 0x0A, Unix newline).
+\r	Matches the ASCII carriage return (CR, 0x0D).
+\t	Matches the ASCII horizontal tab (HT, 0x09).
+\v	Matches the ASCII vertical tab (VT, 0x0B).
+\xhhhh	Matches the Unicode character corresponding to the hexadecimal number hhhh (between 0x0000 and 0xFFFF).
+\0ooo (i.e., \zero ooo)	matches the ASCII/Latin1 character for the octal number ooo (between 0 and 0377).
+. (dot)	Matches any character (including newline).
+\d	Matches a digit.
+\D	Matches a non-digit.
+\s	Matches a whitespace character.
+\S	Matches a non-whitespace character.
+\w	Matches a word character.
+\W	Matches a non-word character.
+\n	The n-th backreference, e.g. \1, \2, etc.
+
+^	The caret signifies the beginning of the string.
+$	The dollar signifies the end of the string.
+\b	A word boundary.
+\B	A non-word boundary.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RegExpHelpDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RegExpHelpDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>RegularExpWidget</class>
+ <widget class="QWidget" name="RegularExpWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="styleSheet">
+      <string notr="true">QLabel { color : red; }</string>
+     </property>
+     <property name="text">
+      <string>The input is considered as an UTF-8 string</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="lineByLineCheckBox">
+     <property name="text">
+      <string>Process input line by line (as opposed to one block)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="typeComboBox">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <item>
+      <property name="text">
+       <string>Match &amp; extract</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Match &amp; replace</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="greedyCheckBox">
+     <property name="text">
+      <string>Use greedy quantifier</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="regExpWidget" native="true">
+     <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </property>
+      <item row="1" column="0">
+       <widget class="QLabel" name="expLabel">
+        <property name="text">
+         <string>RegExp</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="regExpLineEdit"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="caseCheckBox">
+        <property name="text">
+         <string>Case insensitive</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="actionStackedWidget">
+     <widget class="QWidget" name="extractPage">
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="groupLabel">
+         <property name="text">
+          <string>Group number to extract</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="groupSpinBox"/>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="allGroupCheckBox">
+         <property name="text">
+          <string>Extract all groups</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="replacePage">
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="replaceLabel">
+         <property name="text">
+          <string>Replace with</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="replaceLineEdit"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/harcodedchains">
+        <file>hardcodedComposed/base64UrlEncode.xml</file>
+        <file>hardcodedComposed/octalnumber.xml</file>
+        <file>hardcodedComposed/binarynumber.xml</file>
+        <file>hardcodedComposed/hexanumber.xml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/definitions">
+        <file>FIX44.xml</file>
+    </qresource>
+    <qresource prefix="/harcoded">
+        <file>composedxml/base64UrlEncode.xml</file>
+        <file>composedxml/binarynumber.xml</file>
+        <file>composedxml/hexanumber.xml</file>
+        <file>composedxml/octalnumber.xml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Base64 RFC2048" Description="" Help="">
+    <Transform Way="0" Order="0" Name="Base64" Variant="0"/>
+</pip3line>

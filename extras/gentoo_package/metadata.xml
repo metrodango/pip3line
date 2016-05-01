@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<herd>forensics</herd>
+<use>
+  <flag name='openssl'>Compile the OpenSSL plugin</flag>
+  <flag name='python27'>Compile the python 2.7 plugin</flag>
+  <flag name='python3'>Compile the python 3 plugin</flag>
+</use>
+</pkgmetadata>

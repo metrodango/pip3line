@@ -1,0 +1,6 @@
+compare functionalities
+ability to save/load markings
+possibility to define byte "sources" : file on disk, disk , process memory, shared memory segment ...
+Ruby plugin ?
+Lua plugin ?
+

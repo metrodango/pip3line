@@ -1,0 +1,18 @@
+# Released as open source by Gabriel Caudrelier
+#
+# Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+#
+# https://github.com/metrodango/pip3line
+#
+# Released under AGPL see LICENSE for more information
+
+[Desktop Entry]
+#Encoding=UTF-8 Deprecated
+Name=Pip3line
+Type=Application
+Exec=pip3line
+Icon=/usr/share/icons/hicolor/128x128/apps/pip3line.png
+Terminal=false
+GenericName=Pip3line
+Comment=Application to decode/encode bytes blocks
+Categories=Qt;Utility;

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Hexadecimal (num)" Description="" Help="" Format="0">
+    <Transform Base="16" Way="0" Order="0" Name="BaseX" UpperCase="1"/>
+</pip3line>

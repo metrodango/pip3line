@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <comment>
+  * Released as open source by Gabriel Caudrelier
+  *
+  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
+  *
+  * https://github.com/metrodango/pip3line
+  *
+  * Released under AGPL see LICENSE for more information
+</comment>
+ <class>PaddingWidget</class>
+ <widget class="QWidget" name="PaddingWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QComboBox" name="typeComboBox">
+     <property name="toolTip">
+      <string>Choose a well defined padding</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Zero padding</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ANSI X.923</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ISO 10126</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>PKCS7</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom single char</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QFormLayout" name="formLayout">
+      <property name="labelAlignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="blockSizeLabel">
+        <property name="text">
+         <string>Block size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="blockSizeSpinBox">
+        <property name="toolTip">
+         <string>Size block to consider</string>
+        </property>
+        <property name="minimum">
+         <number>2</number>
+        </property>
+        <property name="maximum">
+         <number>512</number>
+        </property>
+        <property name="value">
+         <number>8</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="paddingcharLabel">
+        <property name="text">
+         <string>Padding char</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Use only for custom:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="HexWidget" name="charWidget" native="true"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>HexWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">hexwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

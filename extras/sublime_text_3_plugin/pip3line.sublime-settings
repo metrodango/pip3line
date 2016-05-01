@@ -1,0 +1,9 @@
+{
+    // Enable debugging
+    "debug": false,
+
+    // Default pip3line address and port
+    "ipaddress" : "127.0.0.1",
+    "port" : 40000 ,
+    "separator" : "0a"
+}

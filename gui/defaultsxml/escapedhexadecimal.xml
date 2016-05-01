@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pip3line Version="9" Name="Escaped Hexadecimal" Description="" Help="" Format="0">
+    <Transform Way="0" Type="1" Order="0" Name="Hexadecimal"/>
+</pip3line>
