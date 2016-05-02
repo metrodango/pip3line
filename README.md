@@ -29,7 +29,7 @@ http://metrodango.github.io/pip3line/index.html
 
 [Python plugins]
 
-http://metrodango.github.io/pip3line/pythonplugins.html
+https://github.com/metrodango/pip3line/wiki/Python-2.7-&-3-plugins
 
 [Native plugins]
 
