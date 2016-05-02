@@ -33,7 +33,7 @@ https://github.com/metrodango/pip3line/wiki/Python-2.7-&-3-plugins
 
 [Native plugins]
 
-http://metrodango.github.io/pip3line/nativeextensions.html
+https://github.com/metrodango/pip3line/wiki/Coding-your-own-plugins
 
 [Build process]
 
