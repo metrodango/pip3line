@@ -12,10 +12,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = transform
 TEMPLATE = lib
-CONFIG += debug plugin
+CONFIG += debug plugin c++11
 DEFINES += LIBTRANSFORM_LIBRARY
-
-QMAKE_CXXFLAGS += -std=c++11
 
 unix {
     DESTDIR = ../bin

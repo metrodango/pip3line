@@ -11,9 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = distormplugin
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin c++11
 
-QMAKE_CXXFLAGS += -std=c++11
 DEFINES += DISTORM_LIBRARY
 
 SOURCES += distormplugin.cpp \

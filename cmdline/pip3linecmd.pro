@@ -12,12 +12,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 VERSION  = 1.2
 
 TARGET   = pip3linecmd
-CONFIG  += console release
+CONFIG  += console release c++11
 CONFIG  -= app_bundle
 DESTDIR  = ../bin
 TEMPLATE = app
-
-QMAKE_CXXFLAGS += -std=c++11
 
 INCLUDEPATH += "../libtransform"
 
@@ -33,12 +31,14 @@ SOURCES += main.cpp \
     ../tools/processor.cpp \
     masterthread.cpp \
     ../tools/binaryprocessor.cpp \
+    ../tools/processingstats.cpp \
     ../tools/textprocessor.cpp
 
 HEADERS += \
     ../tools/processor.h \
     masterthread.h \
     ../tools/binaryprocessor.h \
+    ../tools/processingstats.h \
     ../tools/textprocessor.h
 
 

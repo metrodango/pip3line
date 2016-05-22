@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = opensslplugin
 TEMPLATE = lib
-CONFIG += plugin release
+CONFIG += plugin release c++11
 DEFINES += OPENSSLPLUGIN_LIBRARY
 
 SOURCES += opensslplugin.cpp \
@@ -20,8 +20,6 @@ SOURCES += opensslplugin.cpp \
 HEADERS += opensslplugin.h\
         opensslplugin_global.h \
     opensslhashes.h
-
-QMAKE_CXXFLAGS += -std=c++11
 
 unix {
     LIBS += -L"../../bin/" -ltransform

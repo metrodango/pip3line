@@ -9,11 +9,10 @@
 QT       += gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
-CONFIG += plugin debug no_keywords
+CONFIG += plugin debug no_keywords c++11
 
 # Comment this out if you want to compile the 2.7 version
 CONFIG += CONF_PYTHON_3
-QMAKE_CXXFLAGS += -std=c++11
 
 CONF_PYTHON_3 {
     DEFINES += BUILD_PYTHON_3
