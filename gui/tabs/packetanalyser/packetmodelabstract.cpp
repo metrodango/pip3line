@@ -21,12 +21,14 @@ const int PacketModelAbstract::COLUMN_DIRECTION = 0;
 const int PacketModelAbstract::COLUMN_TIMESPTAMP = 1;
 const int PacketModelAbstract::COLUMN_PAYLOAD = 2;
 const int PacketModelAbstract::COLUMN_COMMENT = 3;
+const int PacketModelAbstract::COLUMN_CID = 4;
 const int PacketModelAbstract::COLUMN_INVALID = -1;
 const qint64 PacketModelAbstract::INVALID_POS = -1;
 const QString PacketModelAbstract::COLUMN_DIRECTION_STR = "D";
 const QString PacketModelAbstract::COLUMN_TIMESPTAMP_STR = "Timestamp";
 const QString PacketModelAbstract::COLUMN_PAYLOAD_STR = "Payload";
 const QString PacketModelAbstract::COLUMN_COMMENT_STR = "Comment";
+const QString PacketModelAbstract::COLUMN_CID_STR = "CID";
 const QString PacketModelAbstract::DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy hh:mm:ss.zzz";
 
 PacketModelAbstract::PacketModelAbstract(TransformMgmt *transformFactory, QObject *parent) :
@@ -34,7 +36,8 @@ PacketModelAbstract::PacketModelAbstract(TransformMgmt *transformFactory, QObjec
     transformFactory(transformFactory)
 {
     autoMergeConsecutivePackets = false;
-    columnNames << COLUMN_DIRECTION_STR << COLUMN_TIMESPTAMP_STR << COLUMN_PAYLOAD_STR << COLUMN_COMMENT_STR;
+    columnNames << COLUMN_DIRECTION_STR << COLUMN_TIMESPTAMP_STR << COLUMN_PAYLOAD_STR << COLUMN_COMMENT_STR << COLUMN_CID_STR;
+    lastPredefinedColumn = columnNames.size() - 1 ;
     dateTimeFormat = DEFAULT_DATETIME_FORMAT;
 
     Usercolumn uc;
@@ -51,7 +54,7 @@ PacketModelAbstract::~PacketModelAbstract()
 
 void PacketModelAbstract::resetColumnNames()
 {
-    if (columnNames.size() > COLUMN_COMMENT + 1) { // difference between index and size
+    if (columnNames.size() > lastPredefinedColumn + 1) { // difference between index and size
         columnNames.clear();
         columnNames << COLUMN_DIRECTION_STR << COLUMN_TIMESPTAMP_STR << COLUMN_PAYLOAD_STR << COLUMN_COMMENT_STR;
     }
@@ -118,7 +121,9 @@ QVariant PacketModelAbstract::payloadData(const Packet * packet, int column, int
         }
         else if (column == COLUMN_COMMENT)
             return QVariant(packet->getComment());
-        else if (column > COLUMN_COMMENT && column < columnNames.size()) {
+        else if (column == COLUMN_CID)
+            return QVariant(packet->getSourceid());
+        else if (column > lastPredefinedColumn && column < columnNames.size()) {
             QHash<QString, QString> fields = packet->getAdditionalFields();
             if (fields.contains(columnNames.at(column))) {
                 return QVariant(fields.value(columnNames.at(column)));
@@ -210,7 +215,7 @@ void PacketModelAbstract::removeUserColumn(const QString &name)
 
 void PacketModelAbstract::removeUserColumn(const int &index)
 {
-    if (index > COLUMN_COMMENT && index < columnNames.size()) {
+    if (index > lastPredefinedColumn && index < columnNames.size()) {
         beginRemoveColumns(QModelIndex(), index, index);
         QString name = columnNames.at(index);
         if (userColumnsDef.contains(name)) {
@@ -245,7 +250,7 @@ bool PacketModelAbstract::isUserColumn(const QString &name) const
 
 bool PacketModelAbstract::isUserColumn(int column) const
 {
-    return column > COLUMN_COMMENT && column < columnNames.size();
+    return column > lastPredefinedColumn && column < columnNames.size();
 }
 
 bool PacketModelAbstract::isDefaultColumn(const QString &name) const
@@ -255,7 +260,7 @@ bool PacketModelAbstract::isDefaultColumn(const QString &name) const
 
 bool PacketModelAbstract::isDefaultColumn(int column) const
 {
-    return column >= 0 && column <= COLUMN_COMMENT;
+    return column >= 0 && column <= lastPredefinedColumn;
 }
 
 int PacketModelAbstract::getColumnIndex(const QString &name)
@@ -271,7 +276,7 @@ int PacketModelAbstract::getColumnIndex(const QString &name)
 
 void PacketModelAbstract::refreshAllColumn()
 {
-    for (int i = COLUMN_COMMENT + 1 ; i < columnNames.size(); i++) {
+    for (int i = lastPredefinedColumn + 1 ; i < columnNames.size(); i++) {
         if (userColumnsDef.contains(columnNames.at(i))) {
             TransformAbstract * transform = userColumnsDef.value(columnNames.at(i)).transform;
             launchUpdate(transform,0,i);
@@ -284,7 +289,7 @@ void PacketModelAbstract::onRowsInserted(const QModelIndex &parent, int start, i
     if (parent.isValid()) // not supposed to hapen for a table
         return;
 
-    for (int i = COLUMN_COMMENT + 1 ; i < columnNames.size(); i++) {
+    for (int i = lastPredefinedColumn + 1 ; i < columnNames.size(); i++) {
         if (userColumnsDef.contains(columnNames.at(i))) {
             TransformAbstract * transform = userColumnsDef.value(columnNames.at(i)).transform;
             launchUpdate(transform, start,i, end - start + 1);
@@ -306,7 +311,7 @@ QWidget *PacketModelAbstract::getGuiForUserColumn(const QString &name, QWidget *
 QWidget *PacketModelAbstract::getGuiForUserColumn(int index, QWidget *parent)
 {
 
-    if (index > COLUMN_COMMENT && index < columnNames.size()) {
+    if (index > lastPredefinedColumn && index < columnNames.size()) {
         return getGuiForUserColumn(columnNames.at(index),parent);
     } else {
         qCritical() << tr("[PacketModelAbstract::getGuiForUserColumn] Cannot find the column at (%1) T_T").arg(index);
@@ -327,7 +332,7 @@ TransformAbstract *PacketModelAbstract::getTransform(const QString &columnName)
 
 TransformAbstract *PacketModelAbstract::getTransform(int index)
 {
-    if (index > COLUMN_COMMENT && index < columnNames.size()) {
+    if (index > lastPredefinedColumn && index < columnNames.size()) {
         return getTransform(columnNames.at(index));
     } else {
         qCritical() << tr("[PacketModelAbstract::getTransform] Cannot find the column at (%1) T_T").arg(index);
@@ -338,7 +343,7 @@ TransformAbstract *PacketModelAbstract::getTransform(int index)
 
 void PacketModelAbstract::setColumnFormat(int index, OutputFormat format)
 {
-    if ((index > COLUMN_COMMENT && index < columnNames.size()) || index == COLUMN_PAYLOAD) {
+    if ((index > lastPredefinedColumn && index < columnNames.size()) || index == COLUMN_PAYLOAD) {
         setColumnFormat(columnNames.at(index), format);
     } else {
         qCritical() << tr("[PacketModelAbstract::setColumnFormat] Cannot find the column at (%1) T_T").arg(index);
@@ -364,7 +369,7 @@ void PacketModelAbstract::setColumnFormat(const QString &columnName, OutputForma
 
 OutputFormat PacketModelAbstract::getColumnFormat(int index)
 {
-    if ((index > COLUMN_COMMENT && index < columnNames.size()) || index == COLUMN_PAYLOAD) {
+    if ((index > lastPredefinedColumn && index < columnNames.size()) || index == COLUMN_PAYLOAD) {
         return getColumnFormat(columnNames.at(index));
     } else {
         qCritical() << tr("[PacketModelAbstract::getColumnFormat] Cannot find the column at (%1) T_T").arg(index);

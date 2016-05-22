@@ -24,11 +24,11 @@ ImportExportWorker::ImportExportWorker(PacketModelAbstract *model, QString filen
     currentIndex = -1;
     noMore = false;
     if (filename.isEmpty()) { // in case this is not specified
-        ops = GuiConst::UNKNOWN_OPERATION;
-        format = GuiConst::INVALID_FORMAT;
+        this->ops = GuiConst::UNKNOWN_OPERATION;
+        this->format = GuiConst::INVALID_FORMAT;
     }
 
-    if (ops == GuiConst::IMPORT_OPERATION)
+    if (this->ops == GuiConst::IMPORT_OPERATION)
         connect(this, SIGNAL(newPacket(Packet*)), model, SLOT(addPacket(Packet*)),Qt::QueuedConnection);
 
     connect(this, SIGNAL(finished()), SLOT(deleteLater()), Qt::QueuedConnection);
@@ -176,6 +176,9 @@ void ImportExportWorker::toXML(QXmlStreamWriter *stream)
         if (pac->getBackground().isValid())
             stream->writeAttribute(GuiConst::STATE_BACKGROUNG_COLOR, BaseStateAbstract::colorToString(pac->getBackground()));
 
+        if (pac->isInjected())
+            stream->writeAttribute(GuiConst::STATE_INJECTED_PACKET, QString::number(1));
+
         stream->writeTextElement(GuiConst::STATE_DATA, BaseStateAbstract::byteArrayToString(pac->getData()));
         if (pac->hasBeenModified())
             stream->writeTextElement(GuiConst::STATE_ORIGINAL_DATA, BaseStateAbstract::byteArrayToString(pac->getOriginalData()));
@@ -263,6 +266,15 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
                     if (attributes.hasAttribute(GuiConst::STATE_BACKGROUNG_COLOR)) {
                         pac->setForeground(BaseStateAbstract::stringToColor(attributes.value(GuiConst::STATE_BACKGROUNG_COLOR)));
                     }
+
+                    if (attributes.hasAttribute(GuiConst::STATE_INJECTED_PACKET)) {
+                        bool ok = false;
+                        int val = attributes.value(GuiConst::STATE_INJECTED_PACKET).toInt(&ok);
+                        if (ok) {
+                            pac->setInjected(val == 1);
+                        }
+                    }
+
                     QByteArray data;
                     QByteArray originalData;
                     while (stream->readNextStartElement()) { // should be some data here

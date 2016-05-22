@@ -313,10 +313,29 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
         case SourcesOrchestatorAbstract::BLOCKS_EXTERNAL_PROXY_TCP:
         {
             qDebug() << "TCP external proxy choosen";
+            BlocksSource * bs1 = new(std::nothrow) TLSServerListener(QHostAddress::LocalHost, 3000);
+            if (bs1 == nullptr) {
+                qFatal("Cannot allocate memory for TLSServerListener X{");
+            }
+            bs1->setFlags(BlocksSource::REFLEXION_ENABLED);
+
+            BlocksSource * bs2 = new(std::nothrow) TLSServerListener(QHostAddress::LocalHost, 3001);
+            if (bs2 == nullptr) {
+                qFatal("Cannot allocate memory for TLSServerListener X{");
+            }
+            bs2->setFlags(BlocksSource::REFLEXION_ENABLED);
+
+            ExternalProxyOrchestrator *epu = nullptr;
+            epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
+            if (epu == nullptr) {
+                qFatal("Cannot allocate memory for ExternalProxyUDPOrchestrator X{");
+            }
+            epu->setType(SourcesOrchestatorAbstract::BLOCKS_EXTERNAL_PROXY_TCP);
+            orch = epu;
             break;
         }
         default:
-            qDebug() << "Unmanaged case";
+            qCritical() << tr("[OrchestratorChooser::createOrchestratorFromType] Unmanaged type: %1").arg(type);
     }
 
     if (orch != nullptr) {

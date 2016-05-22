@@ -94,13 +94,17 @@ void ProxyOrchestrator::postPacket(Packet *packet)
         clientSource->postBlockForSending(packet->toBlock());
     } else if (packet->getDirection() == Packet::RIGHTLEFT) {
         serverSource->postBlockForSending(packet->toBlock());
-    } else { // NODIRECTION
+    } else { // NODIRECTION GIVEN
         if (source == serverSource) {
+            packet->setDirection(Packet::RIGHTLEFT);
             serverSource->postBlockForSending(packet->toBlock());
-        } else if (source == clientSource) {
+        } else if (source == clientSource || packet->getSourceid() == Block::INVALID_ID) { // if invalid id just send it to the client as new connection
+            packet->setDirection(Packet::LEFTRIGHT);
             clientSource->postBlockForSending(packet->toBlock());
         } else {
-            qCritical() << tr("[ProxyOrchestrator::postPacket] Cannot recognized the source, dropping packet T_T");
+            emit log(tr("Connection [%1] cannot be identified, the packet will not be send").arg(packet->getSourceid()),
+                     metaObject()->className(),
+                     Pip3lineConst::LERROR);
         }
     }
 

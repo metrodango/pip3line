@@ -63,6 +63,7 @@ class TransformWidget : public QWidget
         QString getDescription();
         bool isFolded() const;
         void setFolded(bool value);
+        void enableDeletetion(bool enabled);
 
     signals:
         void updated();

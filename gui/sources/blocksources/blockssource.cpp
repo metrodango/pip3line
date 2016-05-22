@@ -318,6 +318,7 @@ void BlocksSource::b64DecodeAndEmit(QByteArray data)
 
     emit blockReceived(datab);
 }
+
 quint64 BlocksSource::getFlags() const
 {
     return flags;

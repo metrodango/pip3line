@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-<comment>
+ <comment>
  * Released as open source by Gabriel Caudrelier
  *
  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -47,6 +47,9 @@
        </property>
        <item row="3" column="0">
         <widget class="QLabel" name="maxBlockLabel">
+         <property name="toolTip">
+          <string>Max length of incoming encoded blocks</string>
+         </property>
          <property name="text">
           <string>Max length</string>
          </property>
@@ -67,6 +70,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="sepLabel">
+         <property name="toolTip">
+          <string>In base64 mode, this is the separator between base64 encoded blocks</string>
+         </property>
          <property name="text">
           <string>Separator</string>
          </property>
@@ -76,7 +82,7 @@
         <widget class="HexWidget" name="b64SeparatorWidget" native="true"/>
        </item>
        <item row="0" column="1">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="base64DescrLabel">
          <property name="text">
           <string>This mode expect Base64 data blocks separated by a special character </string>
          </property>
@@ -90,6 +96,9 @@
     </item>
     <item>
      <widget class="QCheckBox" name="reflexionCheckBox">
+      <property name="toolTip">
+       <string>When enable it means that the source is expecting to receive the same data (or similar) as a response. Useful when you need to have an external source of data, such as hooking functions.</string>
+      </property>
       <property name="text">
        <string>Enable reflexion</string>
       </property>
@@ -97,6 +106,9 @@
     </item>
     <item>
      <widget class="QCheckBox" name="tlsCheckBox">
+      <property name="toolTip">
+       <string>Enable the SSL/TLS layer for this source</string>
+      </property>
       <property name="text">
        <string>Enable SSL/TLS</string>
       </property>
@@ -122,6 +134,19 @@
     <string>Inbound</string>
    </attribute>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="inboundTransformLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Transform to be applied to any incoming blocks</string>
+      </property>
+     </widget>
+    </item>
     <item alignment="Qt::AlignHCenter|Qt::AlignTop">
      <widget class="QPushButton" name="selectInboundTransformPushButton">
       <property name="sizePolicy">
@@ -142,6 +167,19 @@
     <string>Outbound</string>
    </attribute>
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QLabel" name="outboundTransformLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Transform to be applied to any outgoing blocks</string>
+      </property>
+     </widget>
+    </item>
     <item alignment="Qt::AlignHCenter|Qt::AlignTop">
      <widget class="QPushButton" name="selectOutboundTransformPushButton">
       <property name="sizePolicy">

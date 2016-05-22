@@ -95,7 +95,9 @@ void ExternalProxyOrchestrator::postPacket(Packet *packet)
         packet->setDirection(Packet::LEFTRIGHT);
         outboundSource->postBlockForSending(packet->toBlock());
     } else {
-        qCritical() << tr("[ExternalProxyUDPOrchestrator::postPacket] Cannot recognized the source, dropping packet T_T");
+        emit log(tr("Connection [%1] cannot be identified, the packet will not be send").arg(packet->getSourceid()),
+                 metaObject()->className(),
+                 Pip3lineConst::LERROR);
     }
 }
 

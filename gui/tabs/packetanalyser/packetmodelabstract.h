@@ -21,6 +21,7 @@ class PacketModelAbstract : public QAbstractTableModel
         static const int COLUMN_DIRECTION;
         static const int COLUMN_PAYLOAD;
         static const int COLUMN_COMMENT;
+        static const int COLUMN_CID;
 
         static const qint64 INVALID_POS;
         static const int COLUMN_INVALID;
@@ -99,6 +100,7 @@ class PacketModelAbstract : public QAbstractTableModel
         static const QString COLUMN_TIMESPTAMP_STR;
         static const QString COLUMN_PAYLOAD_STR;
         static const QString COLUMN_COMMENT_STR;
+        static const QString COLUMN_CID_STR;
         QStringList columnNames;
         static const QString DEFAULT_DATETIME_FORMAT;
         QString dateTimeFormat;
@@ -106,6 +108,7 @@ class PacketModelAbstract : public QAbstractTableModel
         QHash<quintptr, QPair<int, int> > transformRequests;
         TransformMgmt *transformFactory;
         bool autoMergeConsecutivePackets;
+        int lastPredefinedColumn;
 };
 
 #endif // PACKETMODELABSTRACT_H

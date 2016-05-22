@@ -21,6 +21,7 @@ Released under AGPL see LICENSE for more information
 #include <QtConcurrentRun>
 #include <transformchain.h>
 #include <QItemSelectionModel>
+#include <QPalette>
 #include <QMessageBox>
 #include "sources/basicsource.h"
 #include "views/hexview.h"
@@ -138,8 +139,9 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     ui->packetTableView->horizontalHeader()->setMovable(true);
 #endif
     ui->packetTableView->setContextMenuPolicy(Qt::CustomContextMenu);
-
     ui->packetTableView->setSortingEnabled(true);
+
+    ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_CID);
 
     // setting up the hex view
     bytesource = new(std::nothrow) BasicSource();
@@ -302,6 +304,7 @@ void PacketAnalyserTab::onImport()
         QtConcurrent::run(worker, &ImportExportWorker::run);
         ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_DIRECTION);
         ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_COMMENT);
+        ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_CID);
     }
 }
 
@@ -439,6 +442,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
         connect(orchestrator, SIGNAL(newPacket(Packet*)), this, SLOT(receiveNewPacket(Packet*)));
         connect(orchestrator, SIGNAL(connectionsChanged()), this, SLOT(onOrchestratorConnectionsChanged()));
         connect(orchestrator, SIGNAL(packetInjected(Packet*)), packetModel, SLOT(addPacket(Packet*)));
+        connect(orchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
 
         QWidget * controlWid = orchestrator->getControlGui(this);
         if (controlWid != nullptr) {
@@ -869,6 +873,18 @@ void PacketAnalyserTab::onOutboundTransformRequested()
         delete itemConfig;
     } else {
         qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] cast is null pointer T_T");
+    }
+}
+
+void PacketAnalyserTab::logMessage(const QString &message, const QString &, LOGLEVEL level)
+{
+    if (level == Pip3lineConst::LERROR) {
+        QPalette palette = ui->messagesLabel->palette();
+        palette.setColor(ui->messagesLabel->foregroundRole(), Qt::red);
+
+        ui->messagesLabel->setPalette(palette);
+        // print message in the GUI
+        ui->messagesLabel->setText(message);
     }
 }
 

@@ -160,6 +160,7 @@ namespace GuiConst
     extern const QString STATE_FLAGS;
     extern const QString STATE_INBOUNDTRANSFORM;
     extern const QString STATE_OUTBOUNDTRANSFORM;
+    extern const QString STATE_INJECTED_PACKET;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;

@@ -100,7 +100,8 @@ void TLSClientListener::sendBlock(Block *block)
             if (sockets.size() > 1000000)
                 emit log(tr("The number of client \"connections\" as reached 1 Millions. Dude for real ?"),actualID, Pip3lineConst::LERROR);
 
-            mapExtSourcesToLocal.insert(bid, sid);
+            if (bid != Block::INVALID_ID) // only adding when the block SID is valid
+                mapExtSourcesToLocal.insert(bid, sid);
 
             bwritten = socket->write(data);
             while (size > bwritten) {
@@ -154,7 +155,7 @@ QList<Target<BlocksSource *> > TLSClientListener::getAvailableConnections()
 
     if (running) { // accepting new connections
         Target<BlocksSource *> tac;
-        tac.setConnectionID(getSid());
+        tac.setConnectionID(Block::INVALID_ID);
         QString desc;
         desc = desc.append(QString("[%1] %2:%3/%4")
                 .arg(BlocksSource::NEW_CONNECTION_STRING)

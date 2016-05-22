@@ -143,6 +143,7 @@ namespace GuiConst
     const QString STATE_FLAGS = "Flags";
     const QString STATE_INBOUNDTRANSFORM = "InboundTransform";
     const QString STATE_OUTBOUNDTRANSFORM = "OutboundTransform";
+    const QString STATE_INJECTED_PACKET = "Injected";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;
@@ -252,6 +253,8 @@ namespace GuiStyles {
 #if QT_VERSION >= 0x050200
 #if defined(Q_OS_LINUX)
      const QFont DEFAULT_REGULAR_FONT = QFont("Courier",10);
+#elif defined(Q_OS_OSX)
+     const QFont DEFAULT_REGULAR_FONT = QFont("Menlo",10);
 #else
      const QFont DEFAULT_REGULAR_FONT = QFont("Courier New",10);
 #endif

@@ -147,7 +147,7 @@ QList<Target<BlocksSource *> > UdpClientListener::getAvailableConnections()
 
     if (running) { // accepting new connections
         Target<BlocksSource *> tac;
-        tac.setConnectionID(getSid());
+        tac.setConnectionID(Block::INVALID_ID);
         QString desc;
         desc.append(QString("[%1]:%2:%3/udp")
                     .arg(BlocksSource::NEW_CONNECTION_STRING)

@@ -556,6 +556,11 @@ void TransformWidget::setFolded(bool value)
     folded = value;
 }
 
+void TransformWidget::enableDeletetion(bool enabled)
+{
+    ui->deleteButton->setEnabled(enabled);
+}
+
 void TransformWidget::fromLocalFile(QString fileName)
 {
     byteSource->fromLocalFile(fileName);

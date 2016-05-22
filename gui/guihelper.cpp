@@ -994,11 +994,13 @@ void GuiHelper::processDragEnter(QDragEnterEvent *event, ByteSourceAbstract *byt
 
 void GuiHelper::processDropEvent(QDropEvent *event, ByteSourceAbstract *byteSource, DownloadManager *downloadManager)
 {
-    if (byteSource == nullptr && downloadManager == nullptr) {
-        qCritical() << tr("Bytesource and downloadManager cannot be both nullptr at the same time, ignoring the drop event");
+    if (byteSource == nullptr) {
+        qCritical() << tr("Bytesource is nullptr, ignoring the drop event");
         event->setDropAction(Qt::IgnoreAction);
         event->accept();
+        return;
     }
+
     QStringList formats  = event->mimeData()->formats();
 
 //    for (int i = 0; i < formats.size(); i++) {
@@ -1081,7 +1083,7 @@ void GuiHelper::requestDownload(QUrl url, ByteSourceAbstract *byteSource, Downlo
     if (networkManager != nullptr) {
         DownloadManager * downloadManager = nullptr;
         if (ndownloadManager == nullptr) { // caller has not defined any DownloadManager, creating a default one, which will be managed here
-            downloadManager = new(std::nothrow) DownloadManager(url, this, byteSource);
+            downloadManager = new(std::nothrow) DownloadManager(url, this);
             if (downloadManager == nullptr) {
                 qFatal("Cannot allocate memory for setDownload downloadManager X{");
                 return;

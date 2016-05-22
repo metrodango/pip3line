@@ -584,6 +584,8 @@ void TransformsGui::onInsertRequest()
                 qFatal("Cannot allocate memory for newtw X{");
             }
 
+            newtw->enableDeletetion(true);
+
             transformWidgetList.insert(index,newtw); // updating the list
 
             // Adding the widget to the gui

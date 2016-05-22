@@ -229,7 +229,7 @@ void MemoryPacketModel::transformRequestFinished(QList<QByteArray> dataList, Mes
     quintptr senderID = (quintptr)sender();
     if (transformRequests.contains(senderID)) {
         QPair<int,int> target = transformRequests.take(senderID);
-        if (target.second > COLUMN_COMMENT && target.second < columnNames.size()) {
+        if (target.second > lastPredefinedColumn && target.second < columnNames.size()) {
 
             int size = dataList.size();
             if (size > packetsList.size() - target.first) {

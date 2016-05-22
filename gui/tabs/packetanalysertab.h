@@ -88,6 +88,7 @@ class PacketAnalyserTab : public TabAbstract
         void onMergeRequested();
         void onInboundTransformRequested();
         void onOutboundTransformRequested();
+        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
     private:
         static const int TIMESTAMP_COLUMN_WIDTH;
         static const int DIRECTION_COLUMN_WIDTH;
