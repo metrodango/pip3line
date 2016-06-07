@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "shared/guiconst.h"
+#include <QUrl>
 
 const QStringList CertificatesModel::headersList = QStringList()
                             << "CN"
@@ -510,14 +511,16 @@ bool SSLOptionsWidget::setLocalCert(const QSslCertificate &cert)
         ui->subjectDataLabel->setText(concat(cert.subjectInfo(QSslCertificate::CommonName)));
         ui->IssuedByDataLabel->setText(concat(cert.issuerInfo(QSslCertificate::CommonName)));
 #else
-        ui->subjectDataLabel->setText(clientCert.subjectInfo(QSslCertificate::CommonName));
-        ui->IssuedByDataLabel->setText(clientCert.issuerInfo(QSslCertificate::CommonName));
+        ui->subjectDataLabel->setText(cert.subjectInfo(QSslCertificate::CommonName));
+        ui->IssuedByDataLabel->setText(cert.issuerInfo(QSslCertificate::CommonName));
 #endif
         ui->validityFromDataLabel->setText(cert.effectiveDate().toString());
         ui->validityUntilDataLabel->setText(cert.expiryDate().toString());
         ui->md5DataLabel->setText(prettyHex(cert.digest(QCryptographicHash::Md5)));
         ui->sha1DataLabel->setText(prettyHex(cert.digest(QCryptographicHash::Sha1)));
+#if QT_VERSION >= 0x050000
         ui->sha256DataLabel->setText(prettyHex(cert.digest(QCryptographicHash::Sha256)));
+#endif
         ui->stackedWidget->setCurrentWidget(ui->certConfPage);
         emit sslLocalCertUpdated(cert);
         ret = true;

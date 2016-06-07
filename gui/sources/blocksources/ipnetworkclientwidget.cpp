@@ -2,6 +2,7 @@
 #include "ui_ipnetworkclientwidget.h"
 #include "ipblockssources.h"
 #include "connectionswidget.h"
+#include <QDebug>
 
 IPNetworkClientWidget::IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget *parent) :
     QWidget(parent),

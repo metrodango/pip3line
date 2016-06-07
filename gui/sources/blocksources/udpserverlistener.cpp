@@ -3,6 +3,7 @@
 #include <QTabWidget>
 #include "shared/guiconst.h"
 #include "connectionswidget.h"
+#include <QDebug>
 
 const quint16 UdpServerListener::DEFAULT_PORT = 3000;
 const QHostAddress UdpServerListener::DEFAULT_ADDRESS = QHostAddress::LocalHost;

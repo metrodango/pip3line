@@ -1,8 +1,12 @@
 #include "sslconf.h"
 #include <QFile>
+#if QT_VERSION >= 0x050000
 #include <QSslCertificateExtension>
+#endif
 #include <QSslSocket>
 #include "ssloptionswidget.h"
+#include <QDebug>
+#include <QDateTime>
 
 #if QT_VERSION >= 0x050400
 const QList<QSsl::KeyAlgorithm> SslConf::keyAlgos = QList<QSsl::KeyAlgorithm>() << QSsl::Rsa << QSsl::Dsa << QSsl::Ec;
@@ -316,6 +320,7 @@ void SslConf::setLocalCert(const QString filename)
                 emit log(tr("   From  :%1").arg(localCert.effectiveDate().toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
                 emit log(tr("   Until :%1").arg(localCert.expiryDate().toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
 
+#if QT_VERSION >= 0x050000
                 QList<QSslCertificateExtension> list = localCert.extensions();
                 emit log(tr("   Extensions :%1").arg(list.size()), metaObject()->className(), Pip3lineConst::LSTATUS);
                 for (int i = 0; i < list.size(); i++) {
@@ -341,8 +346,11 @@ void SslConf::setLocalCert(const QString filename)
                             emit log(tr("    %1 %2").arg(ext.name()).arg(val.type()), metaObject()->className(), Pip3lineConst::LSTATUS);
                     }
                 }
+#endif
                 emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha1).toHex())), metaObject()->className(), Pip3lineConst::LSTATUS);
+#if QT_VERSION >= 0x050000
                 emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha256).toHex())), metaObject()->className(), Pip3lineConst::LSTATUS);
+#endif
                 setLocalCert(localCert);
             } else {
                 emit log(tr("No server local loaded [%1]").arg(certFile.fileName()), metaObject()->className(), Pip3lineConst::LERROR);

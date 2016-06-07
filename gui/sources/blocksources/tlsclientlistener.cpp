@@ -2,6 +2,7 @@
 #include "tlsclientlistener.h"
 #include "shared/sslconf.h"
 #include <QTabWidget>
+#include <QDebug>
 
 const quint16 TLSClientListener::DEFAULT_PORT = 443;
 const QHostAddress TLSClientListener::DEFAULT_ADDRESS = QHostAddress("216.21.170.226");
@@ -324,23 +325,23 @@ void TLSClientListener::onTLSStarted()
         mess.chop(1);
     }
 #else
-    QString info = sobject->peerCertificate().subjectInfo(QSslCertificate::CommonName);
+    QString info = socket->peerCertificate().subjectInfo(QSslCertificate::CommonName);
 
     if (!info.isEmpty()) {
         mess.append("CN: ").append(info);
     }
 
-    info = sobject->peerCertificate().subjectInfo(QSslCertificate::Organization);
+    info = socket->peerCertificate().subjectInfo(QSslCertificate::Organization);
 
     if (!info.isEmpty()) {
         mess.append(" O: ").append(info);
     }
-    info = sobject->peerCertificate().subjectInfo(QSslCertificate::OrganizationalUnitName);
+    info = socket->peerCertificate().subjectInfo(QSslCertificate::OrganizationalUnitName);
     if (!info.isEmpty()) {
         mess.append(" OU: ").append(info);
     }
 
-    info = sobject->peerCertificate().subjectInfo(QSslCertificate::CountryName);
+    info = socket->peerCertificate().subjectInfo(QSslCertificate::CountryName);
     if (!info.isEmpty()) {
         mess.append(" Country: ").append(info);
     }

@@ -29,7 +29,7 @@ class UDPClient {
 
 inline uint qHash(const UDPClient &key)
 {
-    return qHash(key.getAdress().toString()) ^ key.getPort();
+    return qHash(key.getAdress()) ^ key.getPort();
 }
 
 #endif // UDPCLIENT_H

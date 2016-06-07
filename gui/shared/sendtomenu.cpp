@@ -6,6 +6,7 @@
 #include "guihelper.h"
 #include <QAction>
 #include <QList>
+#include <QDebug>
 
 SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
     QMenu(title,parent),

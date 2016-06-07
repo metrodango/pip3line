@@ -3,6 +3,7 @@
 #include "guihelper.h"
 #include <transformabstract.h>
 #include <transformmgmt.h>
+#include <QDebug>
 
 TransformSelectorWidget::TransformSelectorWidget(GuiHelper *guiHelper, QWidget *parent) :
     QWidget(parent),

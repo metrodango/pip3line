@@ -1,6 +1,7 @@
 #include "tlsserverlistener.h"
 #include "shared/sslconf.h"
 #include <QDir>
+#include <QDebug>
 
 BaseTcpServer::BaseTcpServer(QObject *parent) :
     QTcpServer(parent)

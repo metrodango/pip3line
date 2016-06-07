@@ -269,7 +269,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
 
                     if (attributes.hasAttribute(GuiConst::STATE_INJECTED_PACKET)) {
                         bool ok = false;
-                        int val = attributes.value(GuiConst::STATE_INJECTED_PACKET).toInt(&ok);
+                        int val = attributes.value(GuiConst::STATE_INJECTED_PACKET).toString().toInt(&ok);
                         if (ok) {
                             pac->setInjected(val == 1);
                         }

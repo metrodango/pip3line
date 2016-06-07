@@ -2,6 +2,7 @@
 #include "udpclientlistener.h"
 #include "shared/guiconst.h"
 #include <QTabWidget>
+#include <QDebug>
 
 const int UdpClientListener::MAX_UDP_DATAGRAM_SIZE_HARD = 65507; // practical limit of a UDP packet size;
 const quint16 UdpClientListener::DEFAULT_PORT = 53;
