@@ -112,6 +112,11 @@ void TabStateObj::run()
             writer->writeAttribute(GuiConst::STATE_WIDGET_GEOM, write(windowState));
         }
     } else {
+        // need to deal with special cases where tabs data were saved independantly
+        if (reader->name() == GuiConst::STATE_PIP3LINE_DOC) {
+            reader->readNext();
+        }
+        qDebug() << tr("reading tab conf") << reader->name();
         QXmlStreamAttributes attrList = reader->attributes();
         if (attrList.hasAttribute(GuiConst::STATE_TAB_NAME)) {
             QString name = attrList.value(GuiConst::STATE_TAB_NAME).toString();

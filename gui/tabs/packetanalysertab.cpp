@@ -51,6 +51,8 @@ Released under AGPL see LICENSE for more information
 #include "quickviewitemconfig.h"
 #include "shared/sendtomenu.h"
 
+#include <state/stateorchestrator.h>
+
 const int PacketAnalyserTab::TIMESTAMP_COLUMN_WIDTH = 150;
 const int PacketAnalyserTab::DIRECTION_COLUMN_WIDTH = 25;
 const int PacketAnalyserTab::RAWDATA_COLUMN_WIDTH = 200;
@@ -296,15 +298,60 @@ void PacketAnalyserTab::onImport()
     }
 
     if (ied->exec() == QDialog::Accepted) {
-        ImportExportWorker *worker = new(std::nothrow) ImportExportWorker(packetModel,ied->getFileName(),GuiConst::IMPORT_OPERATION,ied->getFormat(),this);
-        if (worker == nullptr) {
-            qFatal("Cannot allocate memory for ImportExportWorker X{");
-        }
+        if (ied->opGuiConfSelected()) {
 
-        QtConcurrent::run(worker, &ImportExportWorker::run);
-        ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_DIRECTION);
-        ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_COMMENT);
-        ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_CID);
+            // we need to clear stuff first
+            packetModel->clearUserColumns();
+
+            int tabcount = ui->viewTabWidget->count();
+            QList<QWidget *> list;
+            for (int i = 0; i < tabcount; i++) {
+                if (ui->viewTabWidget->indexOf(hexView) != i)
+                    list.append(ui->viewTabWidget->widget(i));
+            }
+            for (int i = 0; i < list.size(); i++) {
+                delete list.at(i);
+            }
+            list.clear();
+
+            // then load the conf
+            quint64 flags = 0;
+
+            StateOrchestrator *stateOrchestrator = new(std::nothrow) StateOrchestrator(ied->getFileName(), flags);
+            if (stateOrchestrator == nullptr) {
+                qFatal("Cannot allocate memory for StateOrchestrator X{");
+            }
+
+            connect(stateOrchestrator, SIGNAL(finished()), this, SLOT(onSaveLoadFinished()));
+            connect(stateOrchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
+                    logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+
+            setEnabled(false); // disabling the tab temporarly
+            if (!stateOrchestrator->initialize()) {
+                delete stateOrchestrator;
+                stateOrchestrator = nullptr;
+                setEnabled(true);
+                return;
+            }
+
+            PacketAnalyserTabStateObj *stateObj = new(std::nothrow) PacketAnalyserTabStateObj(this);
+            if (stateObj == nullptr) {
+                qFatal("Cannot allocate memory for PacketAnalyserTabStateObj X{");
+            }
+
+            stateOrchestrator->addState(stateObj);
+            stateOrchestrator->start();
+        } else {
+            ImportExportWorker *worker = new(std::nothrow) ImportExportWorker(packetModel,ied->getFileName(),GuiConst::IMPORT_OPERATION,ied->getFormat(),this);
+            if (worker == nullptr) {
+                qFatal("Cannot allocate memory for ImportExportWorker X{");
+            }
+
+            QtConcurrent::run(worker, &ImportExportWorker::run);
+            ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_DIRECTION);
+            ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_COMMENT);
+            ui->packetTableView->hideColumn(PacketModelAbstract::COLUMN_CID);
+        }
     }
 }
 
@@ -316,33 +363,62 @@ void PacketAnalyserTab::onExport()
     }
 
     if (ied->exec() == QDialog::Accepted) {
-        ImportExportWorker *worker = new(std::nothrow) ImportExportWorker(packetModel, ied->getFileName(),GuiConst::EXPORT_OPERATION,ied->getFormat(),this);
-        if (worker == nullptr) {
-            qFatal("Cannot allocate memory for ImportExportWorker X{");
-        }
+        if (ied->opGuiConfSelected()) {
+            quint64 flags = GuiConst::STATE_SAVE_REQUEST;
 
-        if (ied->getSelectionOnly()) {
-            QList<qint64> selected;
-            QModelIndexList indexList = ui->packetTableView->selectionModel()->selectedRows();
-            for (int i = 0; i < indexList.size(); i++) {
-                selected.append(packetModel->indexToPacketIndex(indexList.at(i)));
+            StateOrchestrator *stateOrchestrator = new(std::nothrow) StateOrchestrator(ied->getFileName(), flags);
+            if (stateOrchestrator == nullptr) {
+                qFatal("Cannot allocate memory for StateOrchestrator X{");
             }
 
-            if (selected.isEmpty()){
-                QMessageBox::warning(this, tr("No selection"),tr("No packet selected!"),QMessageBox::Ok);
-                delete ied;
+            connect(stateOrchestrator, SIGNAL(finished()), this, SLOT(onSaveLoadFinished()));
+            connect(stateOrchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
+                    logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+
+            setEnabled(false); // disabling the tab temporarly
+            if (!stateOrchestrator->initialize()) {
+                delete stateOrchestrator;
+                stateOrchestrator = nullptr;
+                setEnabled(true);
                 return;
-            } else {
-                qSort(selected);
-                worker->setFilteredList(selected);
             }
+
+            PacketAnalyserTabStateObj *stateObj = new(std::nothrow) PacketAnalyserTabStateObj(this);
+            if (stateObj == nullptr) {
+                qFatal("Cannot allocate memory for PacketAnalyserTabStateObj X{");
+            }
+
+            stateOrchestrator->addState(stateObj);
+            stateOrchestrator->start();
+        } else {
+            ImportExportWorker *worker = new(std::nothrow) ImportExportWorker(packetModel, ied->getFileName(),GuiConst::EXPORT_OPERATION,ied->getFormat(),this);
+            if (worker == nullptr) {
+                qFatal("Cannot allocate memory for ImportExportWorker X{");
+            }
+
+            if (ied->getSelectionOnly()) {
+                QList<qint64> selected;
+                QModelIndexList indexList = ui->packetTableView->selectionModel()->selectedRows();
+                for (int i = 0; i < indexList.size(); i++) {
+                    selected.append(packetModel->indexToPacketIndex(indexList.at(i)));
+                }
+
+                if (selected.isEmpty()){
+                    QMessageBox::warning(this, tr("No selection"),tr("No packet selected!"),QMessageBox::Ok);
+                    delete ied;
+                    return;
+                } else {
+                    qSort(selected);
+                    worker->setFilteredList(selected);
+                }
+            }
+
+            worker->setExportFormattedXML(exportFormattedXML);
+            worker->setExportFormattedJson(exportFormattedJson);
+            worker->setPcapLinkType((PcapDef::Link_Type)pcapLinkType);
+
+            QtConcurrent::run(worker, &ImportExportWorker::run);
         }
-
-        worker->setExportFormattedXML(exportFormattedXML);
-        worker->setExportFormattedJson(exportFormattedJson);
-        worker->setPcapLinkType((PcapDef::Link_Type)pcapLinkType);
-
-        QtConcurrent::run(worker, &ImportExportWorker::run);
     }
 
     delete ied;
@@ -430,7 +506,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
         SourcesOrchestatorAbstract *old = orchestrator;
         orchestrator = nullptr;
         guiHelper->unregisterOrchestrator(old);
-        delete old;
+        old->deleteLater();
     }
     orchestrator = orch;
     if (orchestrator != nullptr) {
@@ -876,6 +952,11 @@ void PacketAnalyserTab::onOutboundTransformRequested()
     }
 }
 
+void PacketAnalyserTab::onSaveLoadFinished()
+{
+    setEnabled(true);
+}
+
 void PacketAnalyserTab::logMessage(const QString &message, const QString &, LOGLEVEL level)
 {
     if (level == Pip3lineConst::LERROR) {
@@ -973,7 +1054,9 @@ void PacketAnalyserTabStateObj::run()
             }
             writer->writeEndElement(); //STATE_COLUMNS_CONF
         }
-        worker.toXML(writer);
+
+        if (flags & GuiConst::STATE_LOADSAVE_DATA) // saving packets only if enabled
+            worker.toXML(writer);
 
         // saving view tabs
         QList<TabAbstract::ViewTab> tabs = gTab->tabData;
@@ -1003,6 +1086,7 @@ void PacketAnalyserTabStateObj::run()
 
         QMap<int, int> visualindexes;
         if (reader->readNextStartElement()) {
+            qDebug() << "trying to read the orchestrator configuration" << reader->name().toString();
             if (reader->name() == GuiConst::STATE_ORCHESTRATOR) {
                 // setting Orchestrator configuration
                 QXmlStreamAttributes attributes = reader->attributes();
@@ -1022,41 +1106,41 @@ void PacketAnalyserTabStateObj::run()
                     }
                 }
                 orch = gTab->orchCombo->getOrchestrator();
-                if (orch != nullptr)
+                if (orch != nullptr) {
                     orch->setConfiguration(conf);
+                    // settings the different blocksources configuration
+                    int index = 0;
+                    while (reader->readNext() != QXmlStreamReader::EndElement) {
+                        if (reader->name() == GuiConst::STATE_BLOCKSOURCE) {
+                            QXmlStreamAttributes attributes = reader->attributes();
+                            conf.clear();
+                            for (int i = 0; i < attributes.size(); i++) {
+                                QXmlStreamAttribute attr = attributes.at(i);
+                                conf.insert(attr.name().toString(), attr.value().toString());
+                            }
+
+                            bs = orch->getBlockSource(index);
+                            if (bs != nullptr) {
+                                bs->setConfiguration(conf);
+                            } else {
+                                qCritical() << tr("[PacketAnalyserTabStateObj] blocksource is nullptr T_T");
+                            }
+
+                            index++;
+
+                            // read closing GuiConst::STATE_BLOCKSOURCE
+                            if (!(reader->readNext() == QXmlStreamReader::EndElement && reader->name() == GuiConst::STATE_BLOCKSOURCE)) {
+                                qCritical() << tr("[PacketAnalyserTabStateObj] Expected a closing tag for %1 T_T").arg(GuiConst::STATE_BLOCKSOURCE);
+                            }
+
+                        } else {
+                            qCritical() << tr("[PacketAnalyserTabStateObj] Invalid token name, was expecting %1, got %2").arg(GuiConst::STATE_BLOCKSOURCE).arg(reader->name().toString());
+                        }
+                    }
+                }
                 else
                     qCritical() << tr("[PacketAnalyserTabStateObj] orchestrator is nullptr T_T");
 
-                // settings the different blocksources configuration
-
-                int index = 0;
-                while (reader->readNext() != QXmlStreamReader::EndElement) {
-                    if (reader->name() == GuiConst::STATE_BLOCKSOURCE) {
-                        QXmlStreamAttributes attributes = reader->attributes();
-                        conf.clear();
-                        for (int i = 0; i < attributes.size(); i++) {
-                            QXmlStreamAttribute attr = attributes.at(i);
-                            conf.insert(attr.name().toString(), attr.value().toString());
-                        }
-
-                        bs = orch->getBlockSource(index);
-                        if (bs != nullptr) {
-                            bs->setConfiguration(conf);
-                        } else {
-                            qCritical() << tr("[PacketAnalyserTabStateObj] blocksource is nullptr T_T");
-                        }
-
-                        index++;
-
-                        // read closing GuiConst::STATE_BLOCKSOURCE
-                        if (!(reader->readNext() == QXmlStreamReader::EndElement && reader->name() == GuiConst::STATE_BLOCKSOURCE)) {
-                            qCritical() << tr("[PacketAnalyserTabStateObj] Expected a closing tag for %1 T_T").arg(GuiConst::STATE_BLOCKSOURCE);
-                        }
-
-                    } else {
-                        qCritical() << tr("[PacketAnalyserTabStateObj] Invalid token name, was expecting %1, got %2").arg(GuiConst::STATE_BLOCKSOURCE).arg(reader->name().toString());
-                    }
-                }
                 reader->readNext(); // read next token
             }
 
@@ -1130,7 +1214,8 @@ void PacketAnalyserTabStateObj::run()
             }
         }
 
-        worker.loadFromXML(reader);
+        if (flags & GuiConst::STATE_LOADSAVE_DATA) // load data only if requested
+            worker.loadFromXML(reader);
 
         QMapIterator<int, int> i(visualindexes);
          while (i.hasNext()) {
@@ -1142,7 +1227,7 @@ void PacketAnalyserTabStateObj::run()
          }
 
         // restoring view tabs
-        if (readNextStart(GuiConst::STATE_TABVIEWLIST)) {
+        if (reader->name() == GuiConst::STATE_TABVIEWLIST || readNextStart(GuiConst::STATE_TABVIEWLIST)) {
             QXmlStreamAttributes attrList = reader->attributes();
             if (attrList.hasAttribute(GuiConst::STATE_SIZE)) {
                 bool ok = false;

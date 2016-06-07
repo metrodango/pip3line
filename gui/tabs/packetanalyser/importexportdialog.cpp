@@ -22,23 +22,30 @@ ImportExportDialog::ImportExportDialog(GuiConst::FileOperations type, bool hasSe
 #endif
 
     if (type == GuiConst::EXPORT_OPERATION) {
-        setWindowTitle("Exporting packets");
+        setWindowTitle("Exporting");
         ui->optionsStackedWidget->setVisible(true);
         ui->packetsOptionsGroupBox->setVisible(true);
         ui->selectionOnlyRadioButton->setEnabled(hasSelection);
     } else {
-        setWindowTitle("Importing packets");
+        setWindowTitle("Importing");
         ui->optionsStackedWidget->setVisible(false);
         ui->packetsOptionsGroupBox->setVisible(false);
     }
 
     connect(ui->fileNamePushButton, SIGNAL(clicked(bool)), SLOT(onChooseFileName()));
     connect(ui->buttonBox, SIGNAL(accepted()), SLOT(onAccept()));
+
+    connect(ui->opPacketRadioButton, SIGNAL(toggled(bool)),this, SLOT(onOpTypeToggled(bool)));
 }
 
 ImportExportDialog::~ImportExportDialog()
 {
     delete ui;
+}
+
+bool ImportExportDialog::opGuiConfSelected()
+{
+    return ui->opGuiConfRadioButton->isChecked();
 }
 
 QString ImportExportDialog::getFileName() const
@@ -80,4 +87,10 @@ void ImportExportDialog::onAccept()
     } else {
         accept();
     }
+}
+
+void ImportExportDialog::onOpTypeToggled(bool enable)
+{
+    ui->formatGroupBox->setEnabled(enable);
+    ui->packetsOptionsGroupBox->setEnabled(enable);
 }

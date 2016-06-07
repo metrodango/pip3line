@@ -80,7 +80,7 @@
         </property>
         <property name="icon">
          <iconset resource="../gui_res.qrc">
-          <normaloff>:/Images/icons/document-save-5.png</normaloff>:/Images/icons/document-save-5.png</iconset>
+          <normaloff>:/Images/icons/document-export-2.png</normaloff>:/Images/icons/document-export-2.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

@@ -340,11 +340,11 @@ int MemoryPacketModel::rowCount(const QModelIndex &parent) const
 void MemoryPacketModel::launchUpdate(TransformAbstract *transform, int row, int column, int length)
 {
 //   qDebug() << "update row" << row << "column" << column << "length" << length;
-    if (transform == nullptr)
-        return; // ntoghin to do here
+    if (transform == nullptr || packetsList.size() == 0)
+        return; // nothing to do here
 
     if (row < 0 || row >= packetsList.size()) {
-        qCritical() << tr("[MemoryPacketModel::launchUpdate] Row value out-of-bound T_T");
+        qCritical() << tr("[MemoryPacketModel::launchUpdate] Row value out-of-bound: %1 T_T").arg(row);
         return;
     }
     if (length < 0) { // all to the end of the list
@@ -352,7 +352,7 @@ void MemoryPacketModel::launchUpdate(TransformAbstract *transform, int row, int 
     }
 
     if (row > packetsList.size() - length) {
-        qCritical() << tr("[MemoryPacketModel::launchUpdate] Row + length value is out-of-bound T_T");
+        qCritical() << tr("[MemoryPacketModel::launchUpdate] Row (%1) + length (%2) value is out-of-bound T_T").arg(row).arg(length);
         return;
     }
 

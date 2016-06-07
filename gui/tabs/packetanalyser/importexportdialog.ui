@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-<comment>
+ <comment>
  * Released as open source by Gabriel Caudrelier
  *
  * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -16,13 +16,42 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>344</height>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="opTypeGroupBox">
+     <property name="title">
+      <string>Operation Type</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QRadioButton" name="opPacketRadioButton">
+        <property name="text">
+         <string>Packets</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="opGuiConfRadioButton">
+        <property name="toolTip">
+         <string>Export/import the configuration of the current packet analyser tab, for reuse later on</string>
+        </property>
+        <property name="text">
+         <string>Packet Analyser State</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="packetsOptionsGroupBox">
      <property name="title">
@@ -32,7 +61,7 @@
       <item>
        <widget class="QRadioButton" name="allPacketsRadioButton">
         <property name="text">
-         <string>All Packets</string>
+         <string>A&amp;ll Packets</string>
         </property>
         <property name="checked">
          <bool>true</bool>

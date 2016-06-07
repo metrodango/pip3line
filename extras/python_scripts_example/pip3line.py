@@ -6,11 +6,9 @@
 # https://github.com/metrodango/pip3line
 # Released under AGPL see LICENSE for more information
 
-# This script is just an example on how to communicate with the pip3line gui via sockets
+# This class is just an example on how to communicate with the pip3line gui via sockets
+# The method process expect a reponse from the pip3line server
 
-import re
-import sys
-import argparse
 import socket
 import base64
 
@@ -72,8 +70,8 @@ class Pip3line:
 		rdata = b''
 		while not endBlock:
 			rdata += self.conn.recv(1024)
-			if rdata.count('\n') > 0:
-				rdata = rdata.split('\n')[0]
+			if rdata.count(b'\n') > 0:
+				rdata = rdata.split(b'\n')[0]
 				endBlock = True
 
 

@@ -191,17 +191,10 @@ namespace GuiConst
     extern const QString TEXT_TEXT;
     extern const QString ORIGINAL_DATA_STR;
 
-#if defined(Q_OS_WIN32)
-    extern const QString DEFAULT_PIPE_MASS;
-    extern const QString DEFAULT_PIPE;
-    extern const QString PIPE_SERVER ;
-    extern const QString PIPE_SOCKET;
-#else
     extern const QString DEFAULT_PIPE_MASS ;
     extern const QString DEFAULT_PIPE;
     extern const QString PIPE_SERVER;
     extern const QString PIPE_SOCKET;
-#endif
 
     extern const bool DEFAULT_AUTO_COPY_TEXT;
     extern const bool DEFAULT_IGNORE_SSL;
