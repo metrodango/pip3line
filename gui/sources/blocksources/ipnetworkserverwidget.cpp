@@ -20,7 +20,7 @@ IPNetworkServerWidget::IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget
         ui->bindToComboBox->setCurrentIndex(index);
 
     connect(ui->portSpinBox, SIGNAL(valueChanged(int)), SLOT(onPortChanged(int)));
-    connect(ui->bindToComboBox, SIGNAL(currentTextChanged(QString)), SLOT(onIPChanged(QString)));
+    connect(ui->bindToComboBox, SIGNAL(editTextChanged(QString)), SLOT(onIPChanged(QString)));
     connect(ui->refreshPushButton, SIGNAL(clicked(bool)), SLOT(refreshIPs()));
 }
 
