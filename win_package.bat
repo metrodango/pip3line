@@ -11,7 +11,7 @@ SET VSVERSION=%1
 REM Default Qt dir
 SET "BASE_DIR_QT=C:\Qt\5.6"
 
-IF "%VSVERSION%"=="2015_32" set QT_LIBS="%BASE_DIR_QT%\msvc2015"
+IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 IF "%VSVERSION%"=="2015_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2015_64"
 
 REM Openssl lib (default is 32 bit, change for anything else if needed)
@@ -78,7 +78,13 @@ copy %QT_LIBS%"\bin\libEGL.dll"
 copy %QT_LIBS%"\bin\libGLESv2.dll"
 
 :EndInstall
-%QT_LIBS%/bin/windeployqt --release pip3line.exe
+
+SET WINDEPLOY=%QT_LIBS%\bin\windeployqt.exe --release pip3line.exe
+
+echo [7] Running Qt deployement tool %WINDEPLOY%
+
+%WINDEPLOY%
+
 cd ..
 GOTO End
 
@@ -89,7 +95,7 @@ ECHO %~n0.bat 2015
 ECHO 
 ECHO Available versions : 
 ECHO     2015_64 : VS 2015 amd64
-ECHO     2015      : VS 2015 x86
+ECHO     2015_32 : VS 2015 x86
 GOTO End
 
 :Nonexistentdir

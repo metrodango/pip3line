@@ -270,12 +270,12 @@ const QList<QSsl::KeyAlgorithm> SSLOptionsWidget::keyAlgos = QList<QSsl::KeyAlgo
 #else
 const QList<QSsl::KeyAlgorithm> SSLOptionsWidget::keyAlgos = QList<QSsl::KeyAlgorithm>() << QSsl::Rsa << QSsl::Dsa;
 #endif
-const QString SSLOptionsWidget::KEY_LOADED = tr("Private Key loaded");
-const QString SSLOptionsWidget::KEY_NOT_LOADED = tr("Private Key Not loaded");
+const QString SSLOptionsWidget::KEY_LOADED = QObject::tr("Private Key loaded");
+const QString SSLOptionsWidget::KEY_NOT_LOADED = QObject::tr("Private Key Not loaded");
 const QList<QSsl::EncodingFormat> SSLOptionsWidget::encodingFormats = QList<QSsl::EncodingFormat>() << QSsl::Pem << QSsl::Der;
-const QStringList SSLOptionsWidget::SSL_VERIFICATION_MODES = QStringList() << tr("No verification, no asking for certificate")
-                                                                           << tr("Ask for certificate, but skip validation")
-                                                                           << tr("Ask for certificate, and validate it");
+const QStringList SSLOptionsWidget::SSL_VERIFICATION_MODES = QStringList() << QObject::tr("No verification, no asking for certificate")
+                                                                           << QObject::tr("Ask for certificate, but skip validation")
+                                                                           << QObject::tr("Ask for certificate, and validate it");
 
 SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf, bool sniEnabled, QString SNIValue, bool usingSystemsCAs, QWidget *parent) :
     QWidget(parent),

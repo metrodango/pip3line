@@ -61,7 +61,7 @@ void ServerAbstract::stopServer()
         Processor * processor = clientProcessor.at(i);
         processor->stop();
         if (!processor->wait(10000))
-            logError(QObject::tr("%1 Client Processor %1 seems stuck, this may cause a crash ...").arg(getServerType()).arg((long)processor,0,16),"");
+            logError(QObject::tr("%1 Client Processor %1 seems stuck, this may cause a crash ...").arg(getServerType()).arg((quintptr)processor,0,16),"");
 
     }
     stats.reset();

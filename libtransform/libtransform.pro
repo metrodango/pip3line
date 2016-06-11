@@ -12,7 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = transform
 TEMPLATE = lib
-CONFIG += debug plugin c++11
+CONFIG += debug plugin c++11 warn_on
 DEFINES += LIBTRANSFORM_LIBRARY
 
 unix {

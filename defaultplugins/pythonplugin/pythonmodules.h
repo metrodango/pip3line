@@ -64,6 +64,10 @@ class PythonModules : public ModulesManagement
         void disablingSIGINT();
         bool checkModuleNameAndPath(QString modulePath, QString moduleName);
         QString errorMessage;
+#if defined(Q_OS_WIN) && !defined(BUILD_PYTHON_3)
+        char * pythonPath;
+        static char * initPythonPath();
+#endif // Q_OS_WIN && !BUILD_PYTHON_3
 };
 
 #endif // PYTHONMODULES_H

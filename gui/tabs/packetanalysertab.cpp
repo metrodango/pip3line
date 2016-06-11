@@ -508,6 +508,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
         guiHelper->unregisterOrchestrator(old);
         old->deleteLater();
     }
+    ui->messagesLabel->clear();
     orchestrator = orch;
     if (orchestrator != nullptr) {
          setForwarding(orchestrator->isForwarder());
@@ -519,6 +520,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
         connect(orchestrator, SIGNAL(connectionsChanged()), this, SLOT(onOrchestratorConnectionsChanged()));
         connect(orchestrator, SIGNAL(packetInjected(Packet*)), packetModel, SLOT(addPacket(Packet*)));
         connect(orchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+        connect(orchestrator, SIGNAL(stopped()), ui->messagesLabel, SLOT(clear()));
 
         QWidget * controlWid = orchestrator->getControlGui(this);
         if (controlWid != nullptr) {

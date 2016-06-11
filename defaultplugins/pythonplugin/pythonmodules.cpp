@@ -32,6 +32,67 @@ const QString PythonModules::PYTHON_EXTENSION = ".py";
 const char * PythonModules::MAIN_FUNCTION_NAME = "pip3line_transform";
 const char * PythonModules::MODULE_FILE_PATH_STR = "__file__";
 
+// some mandatory initialization on Windows platform (thank you Python dev)
+// see Bug https://bugs.python.org/issue26108 -_-'
+#if defined(Q_OS_WIN) && !defined(BUILD_PYTHON_3)
+#include <windows.h>
+
+char * PythonModules::initPythonPath()
+{
+    QByteArray newPythonPath;
+
+    // looks for Python libraries path
+
+    QString pythonVersionToSearch;
+    pythonVersionToSearch.append(QString::number(PY_MAJOR_VERSION))
+            .append(".")
+            .append(QString::number(PY_MINOR_VERSION));
+
+    qDebug() << "looking for" << pythonVersionToSearch;
+
+    QStringList pythonRegistry;
+    pythonRegistry << QString("HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\");
+    pythonRegistry << QString("HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\");
+
+    for (int k = 0; k < pythonRegistry.size(); k++) {
+        QSettings setting(pythonRegistry.at(k), QSettings::NativeFormat);
+        QStringList list = setting.childGroups();
+        for (int i = 0; i < list.size(); i++ ) {
+            if (pythonVersionToSearch == list.at(i)) {
+                setting.beginGroup(list.at(i));
+                QStringList groups = setting.childGroups();
+                for (int j = 0; j < groups.size(); j++ ) {
+                    if (groups.at(j) == QString("InstallPath")) {
+                        setting.beginGroup(groups.at(j));
+                        newPythonPath.append(setting.value(".").toString().toUtf8());
+                        setting.endGroup();
+                        break;
+                    }
+                }
+                setting.endGroup();
+            }
+            if (!newPythonPath.isEmpty())
+                break;
+        }
+    }
+
+    qDebug() << "Found path" << QString::fromUtf8(newPythonPath, newPythonPath.size());
+
+    int baseSize = newPythonPath.size();
+    if (baseSize < 1 || baseSize > MAX_PATH) // on Windows MAX_PATH = 260
+        qFatal(tr("Something is (once again) wrong with the Python %1 registry key ... can't do anything about it").arg(pythonVersionToSearch).toUtf8().data());
+
+    size_t size = (size_t)baseSize;
+
+    char * pythonHome = new(std::nothrow) char[size + 1];
+    memset(pythonHome, 0, size + 1);
+    memcpy(pythonHome, newPythonPath.data(), size);
+
+    return pythonHome;
+}
+
+#endif //Q_OS_WIN && !BUILD_PYTHON_3
+
 PythonModules::PythonModules(QString name, Pip3lineCallback *callback) :
     ModulesManagement(name, PYTHON_EXTENSION, BASE_SCRIPTS_DIR, callback)
 {
@@ -43,6 +104,11 @@ PythonModules::PythonModules(QString name, Pip3lineCallback *callback) :
 
     Py_SetProgramName(PROG_NAME);
     Py_DontWriteBytecodeFlag++;
+
+#if defined(Q_OS_WIN) && !defined(BUILD_PYTHON_3)
+    pythonPath = PythonModules::initPythonPath();
+    Py_SetPythonHome(pythonPath);
+#endif //Q_OS_WIN && !BUILD_PYTHON_3
 
     // initialize the Python interpreter without signal handler
     Py_InitializeEx(0);
@@ -68,6 +134,11 @@ PythonModules::~PythonModules()
     cleaningPyObjs();
 
     Py_Finalize();
+
+#if defined(Q_OS_WIN) && !defined(BUILD_PYTHON_3)
+    // this value is only used for the Python 2.7 module
+    delete [] pythonPath;
+#endif //Q_OS_WIN && !BUILD_PYTHON_3
 }
 
 bool PythonModules::initialize()

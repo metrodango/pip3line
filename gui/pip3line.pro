@@ -9,7 +9,7 @@
 
 QT       += core gui xml network concurrent
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-CONFIG += debug WITH_THREAD c++11
+CONFIG += debug WITH_THREAD c++11 warn_on
 
 #DEFINES += SCINTILLA
 #CONFIG += CONF_MEMORY_SANITIZER

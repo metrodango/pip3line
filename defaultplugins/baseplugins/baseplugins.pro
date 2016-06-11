@@ -11,14 +11,13 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = baseplugins
 TEMPLATE = lib
-CONFIG += plugin debug c++11
+CONFIG += plugin debug c++11 warn_on
 
 unix {
     LIBS += -L"../../bin/" -ltransform
 }
 
 win32 {
-    QMAKE_LFLAGS_WINDOWS += /FS
     LIBS += -L"../../lib/" -ltransform
 }
 

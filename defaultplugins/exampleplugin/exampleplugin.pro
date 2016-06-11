@@ -10,14 +10,13 @@ QT       += svg gui
 
 TARGET = exampleplugin
 TEMPLATE = lib
-CONFIG += plugin release c++11
+CONFIG += plugin release c++11 warn_on
 
 unix {
     LIBS += -L"../../bin/" -ltransform
 }
 
 win32 {
-    QMAKE_LFLAGS_WINDOWS += /FS
     LIBS += -L"../../lib/" -ltransform
 }
 

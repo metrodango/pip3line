@@ -33,8 +33,8 @@ Other modules can be activated individually.
 
 > -DWITH_QT5=ON
 
-Configure and compile the binary for QT5. (default)
-This is now the default configuration, if you want to compile against Qt4 set this option to OFF
+Configure and compile the binary for QT5 (default = ON)
+If you want to compile against Qt4 set this option to OFF
 
 ## Linux build & Install
 
@@ -85,33 +85,27 @@ libssl-dev
 libdistorm3-dev
 
 ## Windows specific
-First brace yourself, the build process on a Windows platform can be quite tricky.
+Brace yourself, the build process on a Windows platform can be quite tricky.
 
-Use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment.
+First use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment. Additionaly this guide only covers building with Visual Studio (2013 and onwards)
 
-Additionally on windows you need to specify a generator for CMake.
+On windows you need to specify the nmake generator for CMake.
 
-If you are using the MinGW version of the QT5 binaries
+If you are using the Visual Studio version, you need use nmake instead, and you have to run the script vsvars.bat located in the Visual Studio directory first.
 
-> C:\path> cmake -G  "MinGW Makefiles" [path_to_sources_root + options]
+For an x64 compilation with VS 2015:
 
-> C:\path> mingw32-make -j8
+> C:\path> "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 
-If you are using the Visual Studio 2010/2012 version, you need use nmake instead, and you have to run the script vsvars.bat located in the Visual Studio directory first.
+For an x86 compilation with VS 2015:
 
-For an x64 compilation with VS 2013:
-
-> C:\path> "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64
-
-For an x86 compilation with VS 2013:
-
-> C:\path> "c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x86
+> C:\path> "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 
 Then simply:
 > C:\path> cmake -G  "NMake Makefiles" ..\ [ + options]
 
 for example:
-> C:\path> cmake -G  "NMake Makefiles" ..\  -DALL=ON -DWITH_QT5=ON
+> C:\path> cmake -G  "NMake Makefiles" ..\  -DALL=ON
 
 Following with the compilation phase
 > C:\path> nmake
@@ -120,7 +114,15 @@ A list of supported generators is given with:
 
 > shell$ cmake -h
 
+### notes
+
+You are goind to see lots of warnings during the compilation, they should pertain to the Qt library only and out of scope of the Pip3line code.
+
 On windows you need to copy the relevant dll into the program/system folder, otherwise you end up with some missing libraries errors. There is an old-school DOS script file win_package.bat that might help you (or maybe not ..)
+
+```
+win_package.bat 2014_64
+```
 
 **Beware**: whenever developing on Windows platforms do not to mix debug and release binaries (for example the debug version of the gui using the release version of libtransform), this will lead to random memory corruptions and crashes.
 
@@ -144,9 +146,9 @@ The OpenSSL plugin has been disabled on this platform though.
 
 > -DWITH_OPENSSL=ON
 
-Defaults path for the libraries and headers have been hardcoded in the cmake configuration file for easier use. (i.e. C:\OpenSSL-Win32 and C:\OpenSSL-Win64)
+Defaults path for the libraries and headers have been hardcoded in the cmake configuration file on Windows  for easier use. (i.e. C:\OpenSSL-Win32 and C:\OpenSSL-Win64)
 
-Note: the OpenSSL plugin is less relevant with QT5, as built-in QT5 hashes replace most of the hashes offered by OpenSSL.
+Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes can replace most of the hashes offered by OpenSSL.
 
 ## Python27 and Python3 plugins
 
@@ -154,9 +156,9 @@ Note: the OpenSSL plugin is less relevant with QT5, as built-in QT5 hashes repla
 
 The cmake configuration does not check for the presence of the different libraries files needed, as it  get confused when there is a dual installation  (Python 2.7 and Python 3.x).
 
-Defaults libraries path locations are hardcoded to make things easier for the default installation environment (i.e. C:\Python27\ and C:\Python34\).
+Defaults libraries path locations are hardcoded to make things easier for the default installation environment on Windows (i.e. C:\Python27\ and C:\Python34\).
 
-One can specify the path by adding the following options for cmake:
+Alternatively one can specify the path by adding the following options for cmake:
 
 Python 3 plugin
 > -DPYTHON3_INCLUDE_DIRS=[PATH] -DPYTHON3_LIBRARIES=[PATH]
@@ -168,10 +170,8 @@ For Windows download Python installation packages from:
 
 https://www.python.org/downloads/
 
-Be aware that you cannot mix x86 and x64 executables and DLLs, therefore be sure to choose the right architecture.
-Unfortunately the official Python page is not clear on what version you are downloading (32bits). If you are not sure, you are probably downloading the x86 version, as the x64 version is clearly indicate in the name (amd64).
-
-**Beware**: see bug https://github.com/metrodango/pip3line/issues/4
+Be aware that you cannot mix 32bits and 64bits executables and DLLs, therefore be sure to choose the right architecture.
+Unfortunately the official Python download page is not clear on what version you are downloading (32bits). If you are not sure, you are probably downloading the 32bits version, as the 64bits version is clearly indicated in the name (-amd64).
 
 ## Distorm plugin
 

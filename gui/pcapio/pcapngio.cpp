@@ -126,9 +126,9 @@ QList<AbstractPcapNGPacket *> PcapNgIO::getPacketList()
     return list;
 }
 
-void PcapNgIO::appendPacket(AbstractPcapNGPacket */* packet */)
+void PcapNgIO::appendPacket(AbstractPcapNGPacket *packet)
 {
-
+    Q_UNUSED(packet) // for now
 }
 
 GeneralBlock *PcapNgIO::readNextBlock()

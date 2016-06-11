@@ -38,8 +38,15 @@ TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort,
     connect(this, SIGNAL(sslChanged(bool)), this, SLOT(onTLSUpdated(bool)));
     setTlsEnable(true);
 
-    sslConfiguration->setLocalCert(QDir::homePath().append( "/servercert.pem"));
-    sslConfiguration->setLocalKey(QDir::homePath().append( "/servercert.pem"));
+    QString defaultCertPath = QDir::homePath()
+            .append(QDir::separator())
+            .append(Pip3lineConst::USER_DIRECTORY)
+            .append(QDir::separator())
+            .append("cert")
+            .append(QDir::separator())
+            .append("servercert.pem");
+    sslConfiguration->setLocalCert(defaultCertPath);
+    sslConfiguration->setLocalKey(defaultCertPath);
 
     moveToThread(&serverThread);
     serverThread.start();
@@ -73,7 +80,8 @@ void TLSServerListener::sendBlock(Block *block)
     bool dataSend = false;
     while (i.hasNext()) {
         i.next();
-        if (i.value() == block->getSourceid()) {
+        if (i.value() == block->getSourceid()) {    sslConfiguration->setLocalCert(QDir::homePath().append( "/servercert.pem"));
+            sslConfiguration->setLocalKey(QDir::homePath().append( "/servercert.pem"));
             QByteArray data = applyOutboundTransform(block->getData());
             if (isB64Blocks()) {
                 data = data.toBase64().append(b64BlocksSeparator);

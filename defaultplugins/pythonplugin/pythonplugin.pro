@@ -9,10 +9,10 @@
 QT       += gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TEMPLATE = lib
-CONFIG += plugin debug no_keywords c++11
+CONFIG += plugin debug no_keywords c++11 warn_on
 
 # Comment this out if you want to compile the 2.7 version
-CONFIG += CONF_PYTHON_3
+DEFINES += CONF_PYTHON_3
 
 CONF_PYTHON_3 {
     DEFINES += BUILD_PYTHON_3
@@ -23,7 +23,6 @@ CONF_PYTHON_3 {
     }
 
     win32 {
-        QMAKE_LFLAGS_WINDOWS += /FS
         INCLUDEPATH +="C:\\Python34\\include\\"
         LIBS += -L"C:\\Python34\\libs\\" -lpython34
     }
@@ -35,7 +34,6 @@ CONF_PYTHON_3 {
     }
 
     win32 {
-    	QMAKE_LFLAGS_WINDOWS += /FS
         INCLUDEPATH +="C:\\Python27\\include\\"
         LIBS += -L"C:\\Python27\\libs\\" -lpython27
     }
@@ -53,7 +51,6 @@ INCLUDEPATH += ../../libtransform/
 DESTDIR = ../../bin/plugins
 
 DEFINES += PYTHONPLUGIN_LIBRARY
-DEFINES += CONF_PYTHON_3
 
 SOURCES += pythonplugin.cpp \
     pythontransform.cpp \

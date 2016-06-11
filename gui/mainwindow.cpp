@@ -159,6 +159,14 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
 
     QStringList supportedPythonVersion;
     supportedPythonVersion << "2.7" << "3.4" << "3.5";
+
+    // yet another Windows Python mess
+#ifdef _WIN64
+    supportedPythonVersion << "2.7-64" << "3.5-64";
+#else
+    supportedPythonVersion << "2.7-32" << "3.5-32";
+#endif
+
     QStringList pythonRegistry;
     pythonRegistry << QString("HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\");
     pythonRegistry << QString("HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\");
