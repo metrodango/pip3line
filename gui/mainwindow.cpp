@@ -276,9 +276,8 @@ MainWindow::~MainWindow()
     delete trayIcon;
     delete settings;
     delete guiHelper;
-    delete transformFactory;
     delete settingsDialog;
-
+    delete transformFactory;
     delete ui;
 }
 
