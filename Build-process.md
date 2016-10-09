@@ -81,11 +81,11 @@ libdistorm3-dev
 ## Windows specific
 Brace yourself, the build process on a Windows platform can be quite tricky.
 
-First use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment. Additionaly this guide only covers building with Visual Studio (2013 and onwards)
+First, use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment. Additionaly this guide only covers building with Visual Studio (2013 and onwards)
 
 On windows you need to specify the nmake generator for CMake.
 
-If you are using the Visual Studio version, you need use nmake instead, and you have to run the script vsvars.bat located in the Visual Studio directory first.
+You also have to run the script vsvars.bat located in the Visual Studio directory first.
 
 For an x64 compilation with VS 2015:
 
