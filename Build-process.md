@@ -30,13 +30,6 @@ Configure and compile only the bare necessary parts:
 * The command line tool
 * The default transformations plugin
 
-Other modules can be activated individually.
-
-> -DWITH_QT5=ON
-
-Configure and compile the binary for QT5 (default = ON)
-If you want to compile against Qt4 set this option to OFF
-
 ## Linux build & Install
 
 The Linux build and installation process is pretty much painless
