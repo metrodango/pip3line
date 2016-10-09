@@ -5,7 +5,7 @@
 
 class PacketStyledItemDelegate : public QStyledItemDelegate
 {
-
+    Q_OBJECT
     public:
         explicit PacketStyledItemDelegate(QObject * parent = nullptr);
         ~PacketStyledItemDelegate();

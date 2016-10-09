@@ -292,6 +292,7 @@ bool LargeFile::tryMoveDown(int sizeToMove)
 
 bool LargeFile::tryMoveView(int sizeToMove)
 {
+    // qDebug() << "[LargeFile::tryMoveView]" << sizeToMove;
     quint64 newOffset;
 
     if (sizeToMove < 0) {
@@ -320,6 +321,9 @@ bool LargeFile::tryMoveView(int sizeToMove)
     if (!readData(newOffset,temp,readsize)) {
         return false;
     }
+  //  qDebug() << tr("[LargeFile::tryMoveView] size to move: %1 Current offset: %2 new offset: %3")
+   //             .arg(sizeToMove).arg(currentStartingOffset,16, 16, QChar('0')).arg(newOffset,16, 16, QChar('0'));
+
     currentStartingOffset = newOffset;
     //qDebug() << "tryMoveView currentStartingOffset" << newOffset;
     dataChunk = temp;

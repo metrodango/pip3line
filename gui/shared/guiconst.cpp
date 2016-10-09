@@ -70,8 +70,8 @@ namespace GuiConst
     const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET = "CurrentStartingOffset";
     const QString STATE_CHUNK_SIZE = "ChunkSize";
     const QString STATE_LARGE_FILE_NAME = "LargeFileName";
-    const QString STATE_SEARCH_WIDGET = "SearchData";
-    const QString STATE_GOTOOFFSET_WIDGET = "GotoOffsetData";
+    const QString STATE_SEARCH_DATA = "SearchData";
+    const QString STATE_GOTOOFFSET_DATA = "GotoOffsetData";
     const QString STATE_MESSAGE_PANEL = "Messages";
     const QString STATE_MESSAGE_PANEL_VISIBLE = "MessPanelVisible";
     const QString STATE_SIZE = "Size";
@@ -137,6 +137,7 @@ namespace GuiConst
     const QString STATE_MODEL_INDEX = "ModelIndex";
     const QString STATE_IS_HIDDEN = "IsHidden";
     const QString STATE_VIEW_INDEX = "ViewIndex";
+    const QString STATE_WIDTH = "Width";
     const QString STATE_PACKET_LIST = "PacketsList";
     const QString STATE_PACKET = "Packet";
     const QString STATE_ORCHESTRATOR = "Orchestrator";
@@ -144,6 +145,8 @@ namespace GuiConst
     const QString STATE_INBOUNDTRANSFORM = "InboundTransform";
     const QString STATE_OUTBOUNDTRANSFORM = "OutboundTransform";
     const QString STATE_INJECTED_PACKET = "Injected";
+    const QString STATE_TRACK_PACKETS = "TrackLast";
+    const QString STATE_AUTO_MERGE = "AutoMerge";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;

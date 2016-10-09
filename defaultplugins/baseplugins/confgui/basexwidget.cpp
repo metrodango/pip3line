@@ -15,7 +15,7 @@ BaseXWidget::BaseXWidget(BaseX *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::BaseXWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::BaseXWidget X{");
     }
     transform = ntransform;

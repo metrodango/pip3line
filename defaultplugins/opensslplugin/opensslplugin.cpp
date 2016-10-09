@@ -58,7 +58,7 @@ OpensslPlugin::OpensslPlugin()
         EVP_MD_do_all_sorted(list_md_fn_OpenSSLHashes, 0);
     }
     hashListLocker.unlock();
-    gui = NULL;
+    gui = nullptr;
 }
 
 OpensslPlugin::~OpensslPlugin()
@@ -79,11 +79,11 @@ QString OpensslPlugin::pluginName() const
 
 TransformAbstract *OpensslPlugin::getTransform(QString name)
 {
-    TransformAbstract *ta = NULL;
+    TransformAbstract *ta = nullptr;
 
     if (OpenSSLHashes::hashList.contains(name)) {
         ta = new(std::nothrow) OpenSSLHashes(name);
-        if (ta == NULL) {
+        if (ta == nullptr) {
            qFatal("Cannot allocate memory for OpenSSLHashes (openssl 1) X{");
         }
     }
@@ -107,7 +107,7 @@ const QStringList OpensslPlugin::getTypesList()
 
 QWidget *OpensslPlugin::getConfGui(QWidget * /* parent */)
 {
-    if (gui == NULL) {
+    if (gui == nullptr) {
         QString info;
         info.append(QString("<p>Plugin compiled against %1<br>").arg(OPENSSL_VERSION_TEXT));
         info.append("Plugin currently running with: <ul>");
@@ -118,9 +118,9 @@ QWidget *OpensslPlugin::getConfGui(QWidget * /* parent */)
 
         info.append("</ul></p>");
         QLabel * label = new(std::nothrow) QLabel(info);
-        if (label == NULL) {
+        if (label == nullptr) {
             qFatal("Cannot allocate memory for QLabel (openssl gui) X{");
-            return NULL;
+            return nullptr;
         }
         label->setWordWrap(true);
         gui = label;
@@ -146,7 +146,7 @@ QString OpensslPlugin::pluginVersion() const
 
 void OpensslPlugin::onGuiDelete()
 {
-    gui = NULL;
+    gui = nullptr;
 }
 
 QT_BEGIN_NAMESPACE

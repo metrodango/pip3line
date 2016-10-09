@@ -144,7 +144,7 @@ bool Split::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Split::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) SplitWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for SplitWidget X{");
     }
     return widget;

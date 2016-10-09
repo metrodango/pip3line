@@ -21,7 +21,7 @@ const QString ModulesManagement::SETTINGS_USER_MODULES_LIST = "UserModulesList";
 
 ModulesManagement::ModulesManagement(const QString &nlangName, const QString &extension, const QString & baseDir, Pip3lineCallback *ncallback)
 {
-    gui = NULL;
+    gui = nullptr;
     langName = nlangName;
     callback = ncallback;
     baseModulesDirName = baseDir;
@@ -215,9 +215,9 @@ QString ModulesManagement::getModuleNameFromFile(QString fileName)
 
 QWidget *ModulesManagement::getGui(QWidget *parent)
 {
-    if (gui == NULL) {
+    if (gui == nullptr) {
         gui = new(std::nothrow) ModulesManagementWidget(this, parent);
-        if (gui == NULL) {
+        if (gui == nullptr) {
             qFatal("Cannot allocate memory for ModulesManagementWidget X{");
         }
 
@@ -282,5 +282,5 @@ void ModulesManagement::savePersistentModules()
 
 void ModulesManagement::onGuiDelete()
 {
-    gui = NULL;
+    gui = nullptr;
 }

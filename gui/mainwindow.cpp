@@ -55,6 +55,7 @@ Released under AGPL see LICENSE for more information
 #include "state/closingstate.h"
 #include "state/statedialog.h"
 #include "state/statestatuswidget.h"
+#include "sources/blocksources/connectiondetails.h"
 
 #ifdef Q_OS_LINUX
 #include <QSocketNotifier>
@@ -124,6 +125,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     qRegisterMetaType<QHostAddress>("QHostAddress");
     qRegisterMetaType<BytesRangeList>("BytesRangeList");
     qRegisterMetaType<QSslSocket::SslMode>("QSslSocket::SslMode");
+    qRegisterMetaType<ConnectionDetails>("ConnectionDetails");
 
 #if QT_VERSION >= 0x050000
     qRegisterMetaType<qintptr>("qintptr");
@@ -145,7 +147,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     QApplication::setPalette(palette);
 
     // special stylesheet for the hexadecimal editor cells
-    qApp->setStyleSheet("TextCell {background: white}");
+//    qApp->setStyleSheet("TextCell {background: white}");
 
     logger = new(std::nothrow) LoggerWidget();
     if (logger == nullptr) {

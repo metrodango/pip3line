@@ -96,7 +96,7 @@ bool BaseX::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *BaseX::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) BaseXWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for BaseXWidget X{");
     }
     return widget;

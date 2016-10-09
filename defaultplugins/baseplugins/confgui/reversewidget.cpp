@@ -15,7 +15,7 @@ ReverseWidget::ReverseWidget(Reverse *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ReverseWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ReverseWidget X{");
     }
     transform = ntransform;

@@ -194,7 +194,7 @@ bool RegularExp::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *RegularExp::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) RegularExpWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for RegularExpWidget X{");
     }
     return widget;

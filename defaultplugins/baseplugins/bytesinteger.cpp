@@ -297,7 +297,7 @@ QString BytesInteger::outboundString() const
 QWidget *BytesInteger::requestGui(QWidget * parent )
 {
     QWidget * widget = new(std::nothrow) ByteIntegerWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for ByteIntegerWidget X{");
     }
     return widget;

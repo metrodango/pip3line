@@ -84,7 +84,7 @@ bool Hieroglyphy::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Hieroglyphy::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) HieroglyphyWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for HieroglyphyWidget X{");
     }
     return widget;

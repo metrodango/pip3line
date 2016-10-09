@@ -66,7 +66,7 @@ bool HexEncode::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *HexEncode::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) HexEncodeWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for HexEncodeWidget X{");
     }
     return widget;

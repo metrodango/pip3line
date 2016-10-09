@@ -26,8 +26,6 @@ else(WITH_QT5)
 	include ( ${QT_USE_FILE} )
 endif(WITH_QT5)
 
-set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin )
-
 set ( transform_HDRS
 	transformfactoryplugininterface.h
 	commonstrings.h

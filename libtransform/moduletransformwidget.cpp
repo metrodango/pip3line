@@ -27,11 +27,11 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ModuleTransformWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ModuleTransformWidget X{");
     }
     transform = ntransform;
-    tableMenu = NULL;
+    tableMenu = nullptr;
     reloadingParams = false;
     ui->setupUi(this);
 
@@ -47,7 +47,7 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
     connect(ui->parameterstableView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
 
     model  = new(std::nothrow) ParametersItemModel();
-    if (model == NULL) {
+    if (model == nullptr) {
         qFatal("Cannot allocate memory for ParametersItemModel X{");
     }
     QAbstractItemModel * oldModel = ui->parameterstableView->model();
@@ -126,7 +126,7 @@ void ModuleTransformWidget::customMenuRequested(QPoint pos)
 {
     QModelIndex index= ui->parameterstableView->indexAt(pos);
     if (index.isValid()) {
-        if (tableMenu == NULL) {
+        if (tableMenu == nullptr) {
         tableMenu = new QMenu(this);
         tableMenu->addAction(new QAction(MENU_DELETE, tableMenu));
         connect(tableMenu, SIGNAL(triggered(QAction*)), SLOT(onMenuAction(QAction*)));
@@ -234,7 +234,7 @@ bool ParametersItemModel::setData(const QModelIndex &index, const QVariant &valu
     if (role == Qt::EditRole) {
         if (index.column() == 0) {
             if (parametersNames.contains(value.toString())) {
-                QMessageBox::critical(NULL,tr("Error"), tr("Parameter name already exists"),QMessageBox::Ok);
+                QMessageBox::critical(nullptr,tr("Error"), tr("Parameter name already exists"),QMessageBox::Ok);
                 return false;
             }
             if (parametersNames.at(index.row()) != value.toString()) {
@@ -258,7 +258,7 @@ void ParametersItemModel::addBlankRow()
 {
     QString empty;
     if (parametersNames.contains(empty)) {
-        QMessageBox::critical(NULL,tr("Error"), tr("Empty parameter is available, use this one first"),QMessageBox::Ok);
+        QMessageBox::critical(nullptr,tr("Error"), tr("Empty parameter is available, use this one first"),QMessageBox::Ok);
         return;
     }
     beginResetModel();

@@ -195,7 +195,6 @@ SearchLine::SearchLine(ByteSourceAbstract *source, QWidget *parent) :
     setMaxLength(MAX_TEXT_SIZE);
     setBytesource(source);
     setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
-
 }
 
 SearchLine::~SearchLine()
@@ -254,12 +253,12 @@ void SearchLine::paintEvent(QPaintEvent *event)
 {
     if (progress > 0 && progress < 1) {
         QPainter p(this);
-        QStyleOptionFrameV2 panel;
+        QStyleOptionFrame panel;
         initStyleOption(&panel);
         style()->drawPrimitive(QStyle::PE_PanelLineEdit, &panel, &p, this);
 
         QPainter painter(this);
-        QStyleOptionFrameV2 lenap;
+        QStyleOptionFrame lenap;
         initStyleOption(&lenap);
         QRect backgroundRect = style()->subElementRect(QStyle::SE_LineEditContents, &lenap, this);
 

@@ -15,7 +15,7 @@ HieroglyphyWidget::HieroglyphyWidget(Hieroglyphy * ntransform, QWidget *parent) 
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::HieroglyphyWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::HieroglyphyWidget X{");
     }
     transform = ntransform;

@@ -19,7 +19,7 @@ HMACTransformWidget::HMACTransformWidget(HMACTransform *ntranform, QWidget *pare
     transform(ntranform)
 {
     ui = new(std::nothrow) Ui::HMACTransformWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::HMACTransformWidget X{");
     }
     ui->setupUi(this);

@@ -3,7 +3,9 @@
 
 #include "ipblockssources.h"
 #include <QHash>
+#include <QReadWriteLock>
 #include <QSslSocket>
+#include "connectiondetails.h"
 
 class TLSClientListener : public IPBlocksSources
 {
@@ -19,7 +21,8 @@ class TLSClientListener : public IPBlocksSources
         void sendBlock(Block *block);
         bool startListening();
         void stopListening();
-        QList<Target<BlocksSource *> > getAvailableConnections();
+        void setSpecificConnection(int sourceId, ConnectionDetails cd);
+        void onConnectionClosed(int cid);
     private slots:
         void dataReceived();
         void onSslErrors(const QList<QSslError> & errors);
@@ -30,6 +33,7 @@ class TLSClientListener : public IPBlocksSources
         void onPlainStarted();
         void onTLSUpdated(bool enabled);
     private:
+        void internalUpdateConnectionsInfo();
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;
         QHash<QSslSocket *, int> sockets;
@@ -37,6 +41,7 @@ class TLSClientListener : public IPBlocksSources
         QThread workerThread;
         bool running;
         QString actualID;
+        QHash<int, ConnectionDetails > specificConnectionsData;
 };
 
 #endif // TLSCLIENTLISTENER_H

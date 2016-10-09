@@ -23,7 +23,6 @@ SingleSourceOrchestrator::SingleSourceOrchestrator(BlocksSource *source, QObject
         connect(source, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
         connect(source, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
         connect(source, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(source, SIGNAL(connectionClosed(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
     }
 }
 

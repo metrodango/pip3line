@@ -11,8 +11,10 @@ QT       += core gui xml network concurrent
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug WITH_THREAD c++11 warn_on
 
-#DEFINES += SCINTILLA
+#CONFIG += CONF_SCINTILLA
+CONFIG += CONF_ADDR_SANITIZER
 #CONFIG += CONF_MEMORY_SANITIZER
+#CONFIG += CONF_THREAD_SANITIZER
 
 TARGET = pip3line
 TEMPLATE = app
@@ -21,13 +23,19 @@ INCLUDEPATH +="../libtransform"
 
 unix {
    LIBS += -L"../bin" -ltransform
-    SCINTILLA {
+    CONF_SCINTILLA {
+        DEFINES += SCINTILLA
         LIBS += -lqscintilla2
     }
 
-    CONF_MEMORY_SANITIZER {
+    CONF_ADDR_SANITIZER {
         QMAKE_CXXFLAGS += -fsanitize=address
         LIBS += -lasan
+    }
+
+    CONF_THREAD_SANITIZER {
+        QMAKE_CXXFLAGS += -fsanitize=thread
+        LIBS += -ltsan
     }
 }
 
@@ -126,7 +134,6 @@ SOURCES += main.cpp\
     shared/ssloptionswidget.cpp \
     sources/blocksources/connectionsinfoswidget.cpp \
     sources/blocksources/udpserverlistener.cpp \
-    sources/blocksources/udpclient.cpp \
     sources/blocksources/ipnetworkserverwidget.cpp \
     sources/blocksources/connectionswidget.cpp \
     tabs/packetanalyser/orchestratorchooser.cpp \
@@ -140,7 +147,10 @@ SOURCES += main.cpp\
     sources/blocksources/ipnetworkclientwidget.cpp \
     sources/blocksources/baseblocksourcewidget.cpp \
     tabs/packetanalyser/externalproxyorchestrator.cpp \
-    shared/transformselectorwidget.cpp
+    shared/transformselectorwidget.cpp \
+    sources/blocksources/socksproxyhelper.cpp \
+    sources/blocksources/connectiondetails.cpp \
+    tabs/packetanalyser/socksorchestrator.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -231,7 +241,6 @@ HEADERS  += mainwindow.h \
     shared/ssloptionswidget.h \
     sources/blocksources/connectionsinfoswidget.h \
     sources/blocksources/udpserverlistener.h \
-    sources/blocksources/udpclient.h \
     sources/blocksources/ipnetworkserverwidget.h \
     sources/blocksources/connectionswidget.h \
     tabs/packetanalyser/orchestratorchooser.h \
@@ -246,7 +255,10 @@ HEADERS  += mainwindow.h \
     sources/blocksources/ipnetworkclientwidget.h \
     sources/blocksources/baseblocksourcewidget.h \
     tabs/packetanalyser/externalproxyorchestrator.h \
-    shared/transformselectorwidget.h
+    shared/transformselectorwidget.h \
+    sources/blocksources/socksproxyhelper.h \
+    sources/blocksources/connectiondetails.h \
+    tabs/packetanalyser/socksorchestrator.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \

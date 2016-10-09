@@ -15,7 +15,7 @@ CutWidget::CutWidget(Cut *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::CutWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::CutWidget X{");
     }
     transform = ntransform;

@@ -96,7 +96,7 @@ bool Rotx::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Rotx::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) RotXWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for RotXWidget X{");
     }
     return widget;

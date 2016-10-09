@@ -5,7 +5,7 @@
 #include <QUdpSocket>
 #include <QList>
 #include <QTimer>
-#include "udpclient.h"
+#include "connectiondetails.h"
 
 class QWidget;
 class QThread;
@@ -24,17 +24,17 @@ class UdpServerListener : public IPBlocksSources
         void sendBlock(Block *block);
         bool startListening();
         void stopListening();
-        QList<Target<BlocksSource *> > getAvailableConnections();
     private slots:
         void packetReceived();
         void checkTimeouts();
     private:
+        void internalUpdateConnectionsInfo();
         static const int MAX_DATAGRAM_SIZE;
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;
         QUdpSocket *udpSocket;
         QThread serverThread;
-        QList<UDPClient> clients;
+        QList<ConnectionDetails> clients;
         QTimer connectionsTimer;
 };
 

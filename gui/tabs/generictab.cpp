@@ -482,8 +482,8 @@ void GenericTabStateObj::run()
     GenericTab * gTab = dynamic_cast<GenericTab *> (tab);
     TabStateObj::run();
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
-        writer->writeAttribute(GuiConst::STATE_SEARCH_WIDGET, write(gTab->getSearchWidget()->text(),true));
-        writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_WIDGET, write(gTab->getGotoWidget()->text()));
+        writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(gTab->getSearchWidget()->text(),true));
+        writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(gTab->getGotoWidget()->text()));
         writer->writeAttribute(GuiConst::STATE_MESSAGE_PANEL, write(gTab->getMessagePanel()->toHTML(),true));
         writer->writeAttribute(GuiConst::STATE_MESSAGE_PANEL_VISIBLE, write(gTab->getMessagePanel()->isVisible()));
         writer->writeAttribute(GuiConst::STATE_SCROLL_INDEX, write(gTab->hexView->getHexTableView()->verticalScrollBar()->value()));
@@ -511,12 +511,12 @@ void GenericTabStateObj::run()
         writer->writeEndElement(); // STATE_TABVIEWLIST
     } else {
         QXmlStreamAttributes attrList = reader->attributes();
-        if (attrList.hasAttribute(GuiConst::STATE_SEARCH_WIDGET)) {
-            gTab->getSearchWidget()->setText(readString(attrList.value(GuiConst::STATE_SEARCH_WIDGET)));
+        if (attrList.hasAttribute(GuiConst::STATE_SEARCH_DATA)) {
+            gTab->getSearchWidget()->setText(readString(attrList.value(GuiConst::STATE_SEARCH_DATA)));
         }
 
-        if (attrList.hasAttribute(GuiConst::STATE_GOTOOFFSET_WIDGET)) {
-            gTab->getGotoWidget()->setText(readString(attrList.value(GuiConst::STATE_GOTOOFFSET_WIDGET)));
+        if (attrList.hasAttribute(GuiConst::STATE_GOTOOFFSET_DATA)) {
+            gTab->getGotoWidget()->setText(readString(attrList.value(GuiConst::STATE_GOTOOFFSET_DATA)));
         }
 
         if (attrList.hasAttribute(GuiConst::STATE_MESSAGE_PANEL)) {

@@ -38,7 +38,5 @@ class OpenSSLHashes : public TransformAbstract
     private:
         Q_DISABLE_COPY(OpenSSLHashes)
         QString hashName;
-        EVP_MD_CTX *mdctx;
-        const EVP_MD *md;
 };
 #endif // OPENSSLHASHES_H

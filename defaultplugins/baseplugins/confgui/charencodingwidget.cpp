@@ -16,7 +16,7 @@ CharEncodingWidget::CharEncodingWidget(CharEncoding *ntransform, QWidget *parent
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::CharEncodingWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::CharEncodingWidget X{");
     }
     transform = ntransform;

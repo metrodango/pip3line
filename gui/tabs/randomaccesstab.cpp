@@ -291,18 +291,18 @@ void RandomAccessStateObj::run()
     TabStateObj::run();
 
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
-        writer->writeAttribute(GuiConst::STATE_SEARCH_WIDGET, write(rTab->getSearchWidget()->text(),true));
-        writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_WIDGET, write(rTab->getGotoWidget()->text()));
+        writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(rTab->getSearchWidget()->text(),true));
+        writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(rTab->getGotoWidget()->text()));
         writer->writeAttribute(GuiConst::STATE_SCROLL_INDEX, write(rTab->hexView->getHexTableView()->verticalScrollBar()->value()));
 
     } else {
         QXmlStreamAttributes attrList = reader->attributes();
-        if (attrList.hasAttribute(GuiConst::STATE_SEARCH_WIDGET)) {
-            rTab->getSearchWidget()->setText(readString(attrList.value(GuiConst::STATE_SEARCH_WIDGET)));
+        if (attrList.hasAttribute(GuiConst::STATE_SEARCH_DATA)) {
+            rTab->getSearchWidget()->setText(readString(attrList.value(GuiConst::STATE_SEARCH_DATA)));
         }
 
-        if (attrList.hasAttribute(GuiConst::STATE_GOTOOFFSET_WIDGET)) {
-            rTab->getGotoWidget()->setText(readString(attrList.value(GuiConst::STATE_GOTOOFFSET_WIDGET)));
+        if (attrList.hasAttribute(GuiConst::STATE_GOTOOFFSET_DATA)) {
+            rTab->getGotoWidget()->setText(readString(attrList.value(GuiConst::STATE_GOTOOFFSET_DATA)));
         }
 
         bool ok = false;

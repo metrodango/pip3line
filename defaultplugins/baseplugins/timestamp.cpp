@@ -102,7 +102,7 @@ bool TimeStamp::isTwoWays()
 QWidget *TimeStamp::requestGui(QWidget * parent)
 {
     QWidget * widget = new(std::nothrow) TimestampWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for TimestampWidget X{");
     }
     return widget;

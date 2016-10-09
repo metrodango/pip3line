@@ -15,7 +15,7 @@ HexEncodeWidget::HexEncodeWidget(HexEncode *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::HexEncodeWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::HexEncodeWidget X{");
     }
     transform = ntransform;

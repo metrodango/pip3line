@@ -254,14 +254,19 @@ void SearchAbstract::processStats(quint64 val)
     if (stopped) // ignoring if the search has already ended
         return;
 
-    SearchWorker *sob = static_cast<SearchWorker *>(sender());
-    if (totalSearchSize > 0 && workers.contains(sob)) {
-        workers.insert(sob,val);
-        quint64 aggregatestats = oldStats;
-        foreach (quint64 value, workers)
-            aggregatestats += value;
-        double newstats = (double)aggregatestats / (double)totalSearchSize;
-        emit progressStatus(newstats);
+    QObject *s = sender();
+    if (s != nullptr) {
+        SearchWorker *sob = static_cast<SearchWorker *>(s);
+        if (totalSearchSize > 0 && workers.contains(sob)) {
+            workers.insert(sob,val);
+            quint64 aggregatestats = oldStats;
+            foreach (quint64 value, workers)
+                aggregatestats += value;
+            double newstats = (double)aggregatestats / (double)totalSearchSize;
+            emit progressStatus(newstats);
+        }
+    } else {
+        qCritical() << tr("[SearchAbstract::processStats] sender is NULL");
     }
 }
 bool SearchAbstract::getJumpToNext() const

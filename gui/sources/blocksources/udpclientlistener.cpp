@@ -18,6 +18,7 @@ UdpClientListener::UdpClientListener(QHostAddress hostAddress, quint16 hostPort,
     connect(&connectionsTimer, SIGNAL(timeout()), this, SLOT(checkTimeouts()));
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&workerThread);
+    updateTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
     workerThread.start();
 }
@@ -63,7 +64,7 @@ void UdpClientListener::sendBlock(Block *block)
         int bid = block->getSourceid();
         bool foundSource = false;
 
-        QHashIterator<QUdpSocket *, UDPClient> i(udpSockets);
+        QHashIterator<QUdpSocket *, ConnectionDetails> i(udpSockets);
         while (i.hasNext()) {
             i.next();
             int suid = i.value().getSid();
@@ -85,9 +86,10 @@ void UdpClientListener::sendBlock(Block *block)
             }
             connect(socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
             sid = BlocksSource::newSourceID(this);
-            UDPClient uc(hostAddress, hostPort);
+            ConnectionDetails uc(hostAddress, hostPort);
             uc.setSid(sid);
             udpSockets.insert(socket,uc);
+
             if (udpSockets.size() > 1000000)
                 emit log(tr("The number of UDP client \"connections\" as reached 1 Millions. Dude for real ?"),ID, Pip3lineConst::LERROR);
             mapExtSourcesToLocal.insert(bid, sid);
@@ -97,7 +99,7 @@ void UdpClientListener::sendBlock(Block *block)
                 emit log(tr("The UDP packet was not send entirely '-_-"),ID,Pip3lineConst::LWARNING);
             }
 
-            emit updated();
+            updateConnectionsInfo();
         }
     } else {
         emit log(tr("The UDP client is not started, cannot send the packet"),ID,Pip3lineConst::LERROR);
@@ -111,11 +113,12 @@ bool UdpClientListener::startListening()
 {
     qDebug() << tr("[UdpClientListener::startListening]");
     if (!running) {
+
         connectionsTimer.start();
         // really basic
         running = true;
         emit started();
-        emit updated();
+        updateConnectionsInfo();
     }
 
     return true;
@@ -127,7 +130,7 @@ void UdpClientListener::stopListening()
     if (running) {
         running = false;
         qDebug() << tr("[UdpClientListener::stopListening]");
-        QHashIterator<QUdpSocket *, UDPClient> i(udpSockets);
+        QHashIterator<QUdpSocket *, ConnectionDetails> i(udpSockets);
         while (i.hasNext()) {
             i.next();
             BlocksSource::releaseID(i.value().getSid());
@@ -136,51 +139,19 @@ void UdpClientListener::stopListening()
 
         udpSockets.clear();
         mapExtSourcesToLocal.clear();
+
         emit stopped();
-        emit updated();
+        triggerUpdate();
     }
 
-}
-
-QList<Target<BlocksSource *> > UdpClientListener::getAvailableConnections()
-{
-    QList<Target<BlocksSource *> > list;
-
-    if (running) { // accepting new connections
-        Target<BlocksSource *> tac;
-        tac.setConnectionID(Block::INVALID_ID);
-        QString desc;
-        desc.append(QString("[%1]:%2:%3/udp")
-                    .arg(BlocksSource::NEW_CONNECTION_STRING)
-                    .arg(hostAddress.toString())
-                    .arg(hostPort));
-        tac.setDescription(desc);
-        tac.setSource(this);
-        list.append(tac);
-
-        QHashIterator<QUdpSocket *, UDPClient> i(udpSockets);
-        while (i.hasNext()) {
-            i.next();
-            QString desc;
-            desc.append(QString("[%1]:%2:%3/udp")
-                     .arg(i.value().getSid())
-                     .arg(hostAddress.toString())
-                     .arg(hostPort));
-            Target<BlocksSource *> tac;
-            tac.setDescription(desc);
-            tac.setConnectionID(i.value().getSid());
-            tac.setSource(this);
-            list.append(tac);
-        }
-    }
-
-    return list;
 }
 
 void UdpClientListener::dataReceived()
 {
-    QUdpSocket * socket = static_cast<QUdpSocket *>(sender());
-    if (socket != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        QUdpSocket * socket = static_cast<QUdpSocket *>(s);
         if (!udpSockets.contains(socket)) {
             qCritical() << tr("[UdpClientListener::dataReceived] Unknown client T_T");
             return;
@@ -204,10 +175,11 @@ void UdpClientListener::dataReceived()
             return;
         }
 
-        Block * datab = new(std::nothrow) Block(data,udpSockets.value(socket).getSid());
+        int sid = udpSockets.value(socket).getSid();
+        Block * datab = new(std::nothrow) Block(data,sid);
         if (datab == nullptr) qFatal("Cannot allocate Block for UdpServerListener X{");
 
-        int sid = udpSockets.value(socket).getSid();
+
         QHashIterator<int, int> i(mapExtSourcesToLocal);
         while (i.hasNext()) {
             i.next();
@@ -217,7 +189,7 @@ void UdpClientListener::dataReceived()
 
         emit blockReceived(datab);
     } else {
-        qCritical() << tr("[UdpClientListener::dataReceived] cast failed");
+        qCritical() << tr("[UdpClientListener::dataReceived] sender is nullptr");
     }
 }
 
@@ -229,7 +201,7 @@ void UdpClientListener::checkTimeouts()
     QList <QUdpSocket *> list = udpSockets.keys();
     for (int i = 0; i < list.size(); i++) {
         QUdpSocket * socket = list.at(i);
-        UDPClient uc = udpSockets.value(list.at(i));
+        ConnectionDetails uc = udpSockets.value(list.at(i));
         if (uc.getPort() == 0) {
             qCritical() << tr("[UdpClientListener::checkTimeouts] null UDPClient returned T_T");
         }
@@ -243,6 +215,38 @@ void UdpClientListener::checkTimeouts()
     }
 
     if (listUpdated)
-        emit updated();
+        updateConnectionsInfo();
+}
+
+void UdpClientListener::internalUpdateConnectionsInfo()
+{
+    connectionsInfo.clear();
+    if (running) { // accepting new connections
+        Target<BlocksSource *> tac;
+        tac.setConnectionID(Block::INVALID_ID);
+        QString desc;
+        desc.append(QString("[%1]:%2:%3/udp")
+                    .arg(BlocksSource::NEW_CONNECTION_STRING)
+                    .arg(hostAddress.toString())
+                    .arg(hostPort));
+        tac.setDescription(desc);
+        tac.setSource(this);
+        connectionsInfo.append(tac);
+
+        QHashIterator<QUdpSocket *, ConnectionDetails> i(udpSockets);
+        while (i.hasNext()) {
+            i.next();
+            QString desc;
+            desc.append(QString("[%1]:%2:%3/udp")
+                     .arg(i.value().getSid())
+                     .arg(hostAddress.toString())
+                     .arg(hostPort));
+            Target<BlocksSource *> tac;
+            tac.setDescription(desc);
+            tac.setConnectionID(i.value().getSid());
+            tac.setSource(this);
+            connectionsInfo.append(tac);
+        }
+    }
 }
 

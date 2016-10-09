@@ -23,6 +23,7 @@ Block::Block(QByteArray data, int sourceid):
     data(data),
     sourceid(sourceid)
 {
+
 }
 
 Block::~Block()
@@ -65,6 +66,10 @@ BlocksSource::BlocksSource(QObject *parent) :
     outboundTranform(nullptr),
     gui(nullptr)
 {
+    updateTimer.setInterval(500);
+    updateTimer.setSingleShot(true);
+    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(triggerUpdate()), Qt::QueuedConnection);
+
     b64MaxBlockLength = DEFAULT_B64_BLOCK_MAX_SIZE;
     b64BlocksSeparator = '\x0a';
     type = INVALID_TYPE;
@@ -109,34 +114,49 @@ QWidget *BlocksSource::requestGui(QWidget * parent)
     return controlGui;
 }
 
-void BlocksSource::processIncomingB64Block(QByteArray data)
+void BlocksSource::processIncomingB64Block(QByteArray data, int rsid)
 {
+
     if (data.size() > 0) {
+        QByteArray b64BlockTempData;
+        if (b64BlockTempDataList.contains(rsid)) {
+            b64BlockTempData = b64BlockTempDataList.value(rsid);
+        }
+
         int count = data.count(b64BlocksSeparator);
 
         if (count > 0) {
             QList<QByteArray> dataList = data.split(b64BlocksSeparator);
-            b64BlockTempData.append(dataList.takeFirst());
-            b64DecodeAndEmit(b64BlockTempData);
-            b64BlockTempData.clear();
-            count--;
-
-            for (int i = 0 ; i < count ; i++) {
-                b64DecodeAndEmit(dataList.at(i));
+            // checking if the last block is empty , because split can returns empty blocks
+            if (dataList.last().isEmpty()) {
+               dataList.takeLast();
+               // we can remove the block, as the last is complete
+               b64BlockTempDataList.remove(rsid);
+            } else {
+                // keeping the last one in that case (no ending with sep)
+                if (dataList.size() > 0) {
+                     b64BlockTempDataList.insert(rsid, dataList.takeLast());
+                }
             }
 
-            if (count < dataList.size())
-                b64BlockTempData = dataList.last();
-            else
+            // and sending the rest of them
+            while (!dataList.isEmpty()) {
+                // without forgetting the heading data
+                b64BlockTempData.append(dataList.takeFirst());
+                b64DecodeAndEmit(b64BlockTempData, rsid);
                 b64BlockTempData.clear();
+            }
 
         } else {
+            // appending the data
             b64BlockTempData.append(data);
             if (b64BlockTempData.size() > b64MaxBlockLength) {
                 b64BlockTempData.resize(b64MaxBlockLength);
                 emit log(tr("Base64 block received is too large, it will be truncated"),metaObject()->className(), Pip3lineConst::LWARNING);
-                b64DecodeAndEmit(b64BlockTempData);
-                b64BlockTempData.clear();
+                b64DecodeAndEmit(b64BlockTempData, rsid);
+                b64BlockTempDataList.remove(rsid);
+            } else {
+                b64BlockTempDataList.insert(rsid, b64BlockTempData);
             }
         }
     }
@@ -159,6 +179,21 @@ QByteArray BlocksSource::applyOutboundTransform(QByteArray data)
 
     return data;
 }
+
+void BlocksSource::updateConnectionsInfo()
+{
+    if (!initialTime.isValid()) {
+        initialTime = QTime::currentTime();
+        updateTimer.start();
+    } else {
+        if (initialTime.msecsTo(QTime::currentTime()) < 1000) {
+            updateTimer.start();
+        } else {
+            triggerUpdate();
+        }
+    }
+}
+
 TransformAbstract *BlocksSource::getOutboundTranform() const
 {
     return outboundTranform;
@@ -166,8 +201,6 @@ TransformAbstract *BlocksSource::getOutboundTranform() const
 
 void BlocksSource::setOutboundTranform(TransformAbstract *transform)
 {
-    qDebug() << tr("updating outbound transform") << transform;
-
     if (outboundTranform != nullptr) {
         delete outboundTranform;
         outboundTranform = nullptr;
@@ -184,7 +217,6 @@ TransformAbstract *BlocksSource::getInboundTranform() const
 
 void BlocksSource::setInboundTranform(TransformAbstract *transform)
 {
-    qDebug() << tr("updating inbound transform") << transform;
 
     if (inboundTranform != nullptr) {
         delete inboundTranform;
@@ -229,7 +261,8 @@ BlocksSource::BSOURCETYPE BlocksSource::getType() const
 
 QList<Target<BlocksSource *> > BlocksSource::getAvailableConnections()
 {
-    return QList<Target<BlocksSource *> >() ;
+    QReadLocker lock(&infoLocker);
+    return connectionsInfo;
 }
 
 bool BlocksSource::isReflexive() const
@@ -271,6 +304,11 @@ void BlocksSource::setB64BlocksSeparator(char value)
     b64BlocksSeparator = value;
 }
 
+void BlocksSource::onConnectionClosed(int cid)
+{
+    Q_UNUSED(cid); // does nothing by default
+}
+
 void BlocksSource::postBlockForSending(Block *block)
 {
     emit blockToBeSend(block);
@@ -302,7 +340,17 @@ void BlocksSource::onGuiDestroyed()
     gui = nullptr;
 }
 
-void BlocksSource::b64DecodeAndEmit(QByteArray data)
+void BlocksSource::triggerUpdate()
+{
+    infoLocker.lockForRead();
+    internalUpdateConnectionsInfo();
+    infoLocker.unlock();
+    initialTime = QTime();
+    updateTimer.stop();
+    emit updated();
+}
+
+void BlocksSource::b64DecodeAndEmit(QByteArray data, int rsid)
 {
     data = QByteArray::fromBase64(data);
     if (data.isEmpty()){
@@ -313,7 +361,7 @@ void BlocksSource::b64DecodeAndEmit(QByteArray data)
 
     data = applyInboundTransform(data);
 
-    Block * datab = new(std::nothrow) Block(data,sid);
+    Block * datab = new(std::nothrow) Block(data,rsid);
     if (datab == nullptr) qFatal("Cannot allocate Block for TCPListener X{");
 
     emit blockReceived(datab);

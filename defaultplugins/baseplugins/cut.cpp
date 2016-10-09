@@ -126,7 +126,7 @@ bool Cut::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Cut::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) CutWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for CutWidget X{");
     }
     return widget;

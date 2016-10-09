@@ -41,8 +41,6 @@ link_directories (
 	${PROJECT_SOURCE_DIR}/../lib
 	)
 
-set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin )
-
 set ( EXTERN_LIBS transform)
 
 set ( pip3linecmd_HDRS

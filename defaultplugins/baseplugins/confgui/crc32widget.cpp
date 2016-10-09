@@ -15,7 +15,7 @@ Crc32Widget::Crc32Widget(Crc32 *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::Crc32Widget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::Crc32Widget X{");
     }
     transform = ntransform;

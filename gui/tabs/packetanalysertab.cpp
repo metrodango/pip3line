@@ -179,7 +179,7 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
         qFatal("Cannot allocate memory for OrchestratorChooser X{");
     }
 
-    ui->toolBarLayout->insertWidget(ui->toolBarLayout->indexOf(ui->optionsPushButton), orchCombo);
+    ui->toolBarLayout->insertWidget(ui->toolBarLayout->indexOf(ui->optionsPushButton) + 2, orchCombo);
 
     ui->trackPushButton->setChecked(trackingLast);
 
@@ -220,6 +220,7 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     connect(ui->addViewPushButton, SIGNAL(clicked(bool)), this, SLOT(onNewTabRequested()));
 
     connect(ui->packetTableView->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), this, SLOT(onScrollBarChanged(int, int)));
+    connect(ui->packetTableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onItemClicked(QModelIndex)));
     connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 
     connect(ui->interceptPushButton, SIGNAL(clicked(bool)), this, SLOT(onInterceptClicked()));
@@ -452,7 +453,7 @@ void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
         currentPacket = packetModel->getPacket(index);
         if (currentPacket != nullptr) {
             bytesource->setData(currentPacket->getData());
-            connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdated(quintptr)));
+            connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdated(quintptr)), Qt::UniqueConnection);
             sortFilterProxyModel->setSelectedPacket(index);
 
             checkIfOriginalTabNeeded();
@@ -515,7 +516,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
 
         ui->forwardPushButton->setEnabled(true);
 
-        connect(orchestrator, SIGNAL(forwardingChanged(bool)), this, SLOT(orchestratorForwardingChanged(bool)));
+        connect(orchestrator, SIGNAL(forwardingChanged(bool)), this, SLOT(setForwarding(bool)));
         connect(orchestrator, SIGNAL(newPacket(Packet*)), this, SLOT(receiveNewPacket(Packet*)));
         connect(orchestrator, SIGNAL(connectionsChanged()), this, SLOT(onOrchestratorConnectionsChanged()));
         connect(orchestrator, SIGNAL(packetInjected(Packet*)), packetModel, SLOT(addPacket(Packet*)));
@@ -571,11 +572,6 @@ void PacketAnalyserTab::receiveNewPacket(Packet *packet)
             orchestrator->postPacket(packet);
         }
     }
-}
-
-void PacketAnalyserTab::orchestratorForwardingChanged(bool val)
-{
-    setForwarding(val);
 }
 
 void PacketAnalyserTab::onForwardPressed()
@@ -687,7 +683,8 @@ bool PacketAnalyserTab::eventFilter(QObject *receiver, QEvent *event)
             if (me == nullptr) {
                 qCritical() << "[MainTabs::eventFilter] nullptr MouseEvent";
                 return true; // not supposed to happen anyway ..
-            } else if (me->buttons() == Qt::RightButton){ // only in the tabbar area
+            } else if (me->buttons() == Qt::RightButton){
+                // only in the tabbar area
                 QRect clickable = tabBarRef->geometry();
                 clickable.setRight(geometry().right());
                 if (clickable.contains(me->pos())) {
@@ -698,8 +695,20 @@ bool PacketAnalyserTab::eventFilter(QObject *receiver, QEvent *event)
         }
     }
 #endif
+
     return result;
 }
+
+bool PacketAnalyserTab::isTrackingLast() const
+{
+    return trackingLast;
+}
+
+void PacketAnalyserTab::setAutoMerge(bool value)
+{
+    ui->actionAuto_merge_packets->setChecked(value);
+}
+
 bool PacketAnalyserTab::getIntercepting() const
 {
     return intercepting;
@@ -828,9 +837,18 @@ void PacketAnalyserTab::buildContextMenu()
 
     connect(globalContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onContextMenuAction(QAction*)), Qt::UniqueConnection);
 }
+
 void PacketAnalyserTab::setTrackingLast(bool value)
 {
-    trackingLast = value;
+    if (trackingLast != value) {
+        trackingLast = value;
+        ui->trackPushButton->blockSignals(true);
+        ui->trackPushButton->setChecked(trackingLast);
+        ui->trackPushButton->blockSignals(false);
+        if (trackingLast) {
+            ui->packetTableView->selectRow(packetModel->rowCount() - 1);
+        }
+    }
 }
 
 void PacketAnalyserTab::onSendToTriggered(QAction *action)
@@ -906,8 +924,9 @@ void PacketAnalyserTab::onMergeRequested()
 
 void PacketAnalyserTab::onInboundTransformRequested()
 {
-    BlocksSource * bs = static_cast<BlocksSource *>(sender());
-    if (bs != nullptr) {
+    QObject *s = sender();
+    if (s != nullptr) {
+        BlocksSource * bs = static_cast<BlocksSource *>(s);
         QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
         if (itemConfig == nullptr) {
             qFatal("Cannot allocate memory for QuickViewItemConfig X{");
@@ -925,14 +944,16 @@ void PacketAnalyserTab::onInboundTransformRequested()
 
         delete itemConfig;
     } else {
-        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] cast is null pointer T_T");
+        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] sender is NULL T_T");
     }
 }
 
 void PacketAnalyserTab::onOutboundTransformRequested()
 {
-    BlocksSource * bs = static_cast<BlocksSource *>(sender());
-    if (bs != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        BlocksSource * bs = static_cast<BlocksSource *>(s);
         QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
         if (itemConfig == nullptr) {
             qFatal("Cannot allocate memory for QuickViewItemConfig X{");
@@ -950,13 +971,20 @@ void PacketAnalyserTab::onOutboundTransformRequested()
 
         delete itemConfig;
     } else {
-        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] cast is null pointer T_T");
+        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] sender is NULL T_T");
     }
 }
 
 void PacketAnalyserTab::onSaveLoadFinished()
 {
     setEnabled(true);
+}
+
+void PacketAnalyserTab::onItemClicked(const QModelIndex &index)
+{
+    Q_UNUSED(index);
+
+    setTrackingLast(false);
 }
 
 void PacketAnalyserTab::logMessage(const QString &message, const QString &, LOGLEVEL level)
@@ -999,8 +1027,12 @@ void PacketAnalyserTabStateObj::run()
     QHash<QString, QString> conf;
     SourcesOrchestatorAbstract * orch = nullptr;
     BlocksSource * bs = nullptr;
+    bool ok = false;
 
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
+        // saving general tab conf
+        writer->writeAttribute(GuiConst::STATE_TRACK_PACKETS, write(gTab->trackingLast));
+        writer->writeAttribute(GuiConst::STATE_AUTO_MERGE, write(gTab->packetModel->isAutoMergeConsecutivePackets()));
         // saving orchestrator conf
         writer->writeStartElement(GuiConst::STATE_ORCHESTRATOR);
         orch = gTab->orchestrator;
@@ -1038,6 +1070,7 @@ void PacketAnalyserTabStateObj::run()
                 writer->writeAttribute(GuiConst::STATE_MODEL_INDEX, QString::number(i));
                 writer->writeAttribute(GuiConst::STATE_IS_HIDDEN, QString::number(gTab->ui->packetTableView->isColumnHidden(i) ? 1 : 0));
                 writer->writeAttribute(GuiConst::STATE_VIEW_INDEX, QString::number(gTab->ui->packetTableView->horizontalHeader()->visualIndex(i)));
+                writer->writeAttribute(GuiConst::STATE_WIDTH, QString::number(gTab->ui->packetTableView->columnWidth(i)));
                 if (gTab->packetModel->isUserColumn(i)) {
                     TransformAbstract *ta = gTab->packetModel->getTransform(i);
                     if (ta != nullptr) {
@@ -1083,8 +1116,26 @@ void PacketAnalyserTabStateObj::run()
         }
         writer->writeEndElement(); // STATE_TABVIEWLIST
 
-    } else {
+    } else { // restore
         connect(&worker, SIGNAL(newPacket(Packet*)),gTab->packetModel, SLOT(addPacket(Packet*)));
+
+        if (attributes.hasAttribute(GuiConst::STATE_TRACK_PACKETS)) {
+            QString val = attributes.value(GuiConst::STATE_TRACK_PACKETS).toString();
+            if (val == GuiConst::STATE_YES) {
+                gTab->setTrackingLast(true);
+            } else if (val == GuiConst::STATE_NO) {
+                gTab->setTrackingLast(false);
+            }
+        }
+
+        if (attributes.hasAttribute(GuiConst::STATE_AUTO_MERGE)) {
+            QString val = attributes.value(GuiConst::STATE_AUTO_MERGE).toString();
+            if (val == GuiConst::STATE_YES) {
+                gTab->setAutoMerge(true);
+            } else if (val == GuiConst::STATE_NO) {
+                gTab->setAutoMerge(false);
+            }
+        }
 
         QMap<int, int> visualindexes;
         if (reader->readNextStartElement()) {
@@ -1096,7 +1147,6 @@ void PacketAnalyserTabStateObj::run()
                 for (int i = 0; i < attributes.size(); i++) {
                     QXmlStreamAttribute attr = attributes.at(i);
                     if (attr.name() == GuiConst::STATE_TYPE) {
-                        bool ok = false;
                         int type = attr.value().toString().toInt(&ok);
                         if (!ok) {
                             qCritical() << tr("[PacketAnalyserTabStateObj] Cannot parse the type of the orchestrator: %1").arg(attr.name().toString());
@@ -1146,11 +1196,11 @@ void PacketAnalyserTabStateObj::run()
                 reader->readNext(); // read next token
             }
 
+            // columns configurations
             if (reader->name() == GuiConst::STATE_COLUMNS_CONF) {
                 while(reader->readNextStartElement()) {
                     QXmlStreamAttributes attributes = reader->attributes();
                     if (attributes.hasAttribute(GuiConst::STATE_MODEL_INDEX)) {
-                        bool ok = false;
                         int index = attributes.value(GuiConst::STATE_MODEL_INDEX).toString().toInt(&ok);
                         if (!ok) {
                             qCritical() << tr("[PacketAnalyserTabStateObj] Cannot parse the index of the column: %1").arg(attributes.value(GuiConst::STATE_MODEL_INDEX).toString());
@@ -1208,6 +1258,13 @@ void PacketAnalyserTabStateObj::run()
                                     visualindexes.insert(index, tempint);
                                 }
                             }
+
+                            if (attributes.hasAttribute(GuiConst::STATE_WIDTH)) {
+                                tempint = attributes.value(GuiConst::STATE_WIDTH).toString().toInt(&ok);
+                                if (ok) {
+                                    gTab->ui->packetTableView->setColumnWidth(index,tempint);
+                                }
+                            }
                         }
                     }
                     while (reader->readNext() != QXmlStreamReader::EndElement); // reading end element
@@ -1232,7 +1289,6 @@ void PacketAnalyserTabStateObj::run()
         if (reader->name() == GuiConst::STATE_TABVIEWLIST || readNextStart(GuiConst::STATE_TABVIEWLIST)) {
             QXmlStreamAttributes attrList = reader->attributes();
             if (attrList.hasAttribute(GuiConst::STATE_SIZE)) {
-                bool ok = false;
                 int size = readInt(attrList.value(GuiConst::STATE_SIZE),&ok);
                 if (ok) {
                     for (int i = 0; i < size ; i++) {
@@ -1289,13 +1345,6 @@ void PacketAnalyserTabStateObj::run()
         }
         readEndElement(GuiConst::STATE_TABVIEWLIST);
     }
-
-//    PacketAnalyserTabClosingStateObj *closingState = new(std::nothrow) PacketAnalyserTabClosingStateObj(gTab);
-//    if (closingState == nullptr) {
-//        qFatal("Cannot allocate memory for PacketAnalyserTabClosingStateObj X{");
-//    };
-
-//    emit addNewState(closingState);
 }
 
 

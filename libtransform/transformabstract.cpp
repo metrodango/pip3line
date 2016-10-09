@@ -16,7 +16,7 @@ Released under AGPL see LICENSE for more information
 const QByteArray TransformAbstract::HEXCHAR("abcdefABCDEF1234567890");
 
 TransformAbstract::TransformAbstract() {
-    confGui = NULL;
+    confGui = nullptr;
     wayValue = INBOUND;
     qDebug() << "Created " << this;
 }
@@ -24,7 +24,7 @@ TransformAbstract::TransformAbstract() {
 TransformAbstract::~TransformAbstract() {
 
     delete confGui;
-    confGui = NULL;
+    confGui = nullptr;
 
     qDebug() << "Destroyed " << this;
 }
@@ -53,9 +53,9 @@ bool TransformAbstract::isTwoWays()
 
 QWidget *TransformAbstract::getGui(QWidget * parent)
 {
-    if (confGui == NULL) {
+    if (confGui == nullptr) {
         confGui = requestGui(parent);
-        if (confGui != NULL) {
+        if (confGui != nullptr) {
             connect(confGui, SIGNAL(destroyed()), this, SLOT(onGuiDelete()), Qt::UniqueConnection);
         }
     }
@@ -64,12 +64,12 @@ QWidget *TransformAbstract::getGui(QWidget * parent)
 
 QWidget *TransformAbstract::requestGui(QWidget * /* parent */)
 {
-    return NULL;
+    return nullptr;
 }
 
 void TransformAbstract::onGuiDelete()
 {
-    confGui = NULL;
+    confGui = nullptr;
 }
 
 QString TransformAbstract::inboundString() const

@@ -12,14 +12,20 @@ TEMPLATE = lib
 CONFIG += plugin debug no_keywords c++11 warn_on
 
 # Comment this out if you want to compile the 2.7 version
-DEFINES += CONF_PYTHON_3
+CONFIG += CONF_PYTHON_3
+#DEFINES += CONF_PYTHON_27
 
 CONF_PYTHON_3 {
     DEFINES += BUILD_PYTHON_3
     TARGET = python3plugin
-    unix {
+    unix:!macx {
         LIBS += -lpython3.4
         INCLUDEPATH +="/usr/include/python3.4/"
+    }
+
+    macx {
+        LIBS += -L"/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/lib/" -lpython3.5
+        INCLUDEPATH +="/usr/local/Cellar/python3/3.5.1/Frameworks/Python.framework/Versions/3.5/include/python3.5m/" INCLUDEPATH
     }
 
     win32 {

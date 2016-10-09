@@ -88,7 +88,7 @@ QString NumberToChar::help() const
 QWidget *NumberToChar::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) NumberToCharWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for NumberToCharWidget X{");
     }
     return widget;

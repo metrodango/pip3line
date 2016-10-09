@@ -55,7 +55,7 @@ class UnittestsTest : public QObject
 UnittestsTest::UnittestsTest()
 {
     messlog = new QTextStream(stdout);
-    transformFactory = NULL;
+    transformFactory = nullptr;
     displayLogs = false;
 }
 
@@ -490,15 +490,12 @@ void UnittestsTest::testCharEncoding()
     connect(transf, SIGNAL(warning(QString,QString)), this, SLOT(logError(QString)));
 
     transf->setWay(TransformAbstract::INBOUND);
-    QCOMPARE(transf->transform(QByteArray("un test 123s4")), QByteArray("un test 123s4"));
-    QCOMPARE(transf->transform(QByteArray("\xc2\xa3")), QByteArray(1,'\0'));
     QCOMPARE(transf->transform(QByteArray("")), QByteArray(""));
 
     configuration = transf->getConfiguration();
     QCOMPARE(configuration.size() , charEncodingParamscount);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(configuration.value(PROP_WAY), QString::number((int)TransformAbstract::INBOUND));
-    QCOMPARE(configuration.value(XMLCODECNAME), QString("ASMO-708"));
 
     configuration.insert(PROP_WAY,QString::number((int)TransformAbstract::OUTBOUND));
     configuration.insert(XMLCODECNAME,QString("UTF-16"));

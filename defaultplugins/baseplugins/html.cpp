@@ -107,7 +107,7 @@ bool Html::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Html::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) HtmlWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for HtmlWidget X{");
     }
     return widget;

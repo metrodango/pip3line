@@ -16,7 +16,7 @@ XorWidget::XorWidget(Xor *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::XorWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::XorWidget X{");
     }
     transform = ntransform;

@@ -20,47 +20,43 @@ ConnectionsInfosWidget::ConnectionsInfosWidget(BlocksSource *listener , QWidget 
 
     if (listener->metaObject()->superClass()->className() == QString("IPBlocksSources")) {
         IPBlocksSources * ipbs = static_cast<IPBlocksSources *>(listener);
-        if (ipbs != nullptr) {
-            if (ipbs->isTLSEnable()) {
-                certTable = new(std::nothrow) QTableView();
-                if (certTable == nullptr) {
-                    qFatal("Cannot allocate QTableView");
-                }
-
-                certTable->verticalHeader()->hide();
-
-                peerCertsModel = new(std::nothrow) CertificatesModel();
-                if (peerCertsModel == nullptr) {
-                    qFatal("Cannot allocate CertificatesModel");
-                }
-
-                QAbstractItemModel * omodel = certTable->model();
-                certTable->setModel(peerCertsModel);
-                delete omodel;
-                certTable->resizeColumnsToContents();
-
-                sslCipherLabel = new(std::nothrow) QLabel();
-                if (sslCipherLabel == nullptr) {
-                    qFatal("Cannot allocate QLabel");
-                }
-
-                QVBoxLayout * layout = static_cast<QVBoxLayout *> (ui->mainLayout);
-
-                if (layout != nullptr) {
-                    layout->addWidget(sslCipherLabel);
-                    layout->addWidget(certTable);
-                }
-
-                enableSSLViews = true;
+        if (ipbs->isTLSEnable()) {
+            certTable = new(std::nothrow) QTableView();
+            if (certTable == nullptr) {
+                qFatal("Cannot allocate QTableView");
             }
-        } else {
-            qCritical() << tr("[ConnectionsInfosWidget::ConnectionsInfosWidget] Cast is nullptr T_T");
+
+            certTable->verticalHeader()->hide();
+
+            peerCertsModel = new(std::nothrow) CertificatesModel();
+            if (peerCertsModel == nullptr) {
+                qFatal("Cannot allocate CertificatesModel");
+            }
+
+            QAbstractItemModel * omodel = certTable->model();
+            certTable->setModel(peerCertsModel);
+            delete omodel;
+            certTable->resizeColumnsToContents();
+
+            sslCipherLabel = new(std::nothrow) QLabel();
+            if (sslCipherLabel == nullptr) {
+                qFatal("Cannot allocate QLabel");
+            }
+
+            QVBoxLayout * layout = static_cast<QVBoxLayout *> (ui->mainLayout);
+
+            if (layout != nullptr) {
+                layout->addWidget(sslCipherLabel);
+                layout->addWidget(certTable);
+            }
+
+            enableSSLViews = true;
         }
     }
     onConnectionUpdated();
 
     connect(listener, SIGNAL(updated()), this, SLOT(onConnectionUpdated()));
-    connect(listener, SIGNAL(connectionClosed(BlocksSource*)), this, SLOT(deleteLater()));
+    connect(listener, SIGNAL(connectionClosed(int)), this, SLOT(deleteLater()));
 }
 
 ConnectionsInfosWidget::~ConnectionsInfosWidget()
@@ -73,13 +69,9 @@ void ConnectionsInfosWidget::onConnectionUpdated()
     ui->ConnectionsInfoslabel->setText(listener->getDescription());
     if (enableSSLViews) {
         IPBlocksSources * ipbs = static_cast<IPBlocksSources *>(listener);
-        if (ipbs != nullptr) {
-            peerCertsModel->clearCertsList();
-            peerCertsModel->addCertList(ipbs->getPeerCerts());
-            certTable->resizeColumnsToContents();
-            sslCipherLabel->setText(ipbs->getCurrentCipher());
-        } else {
-            qCritical() << tr("[ConnectionsInfosWidget::onConnectionUpdated] Cast is nullptr T_T");
-        }
+        peerCertsModel->clearCertsList();
+        peerCertsModel->addCertList(ipbs->getPeerCerts());
+        certTable->resizeColumnsToContents();
+        sslCipherLabel->setText(ipbs->getCurrentCipher());
     }
 }

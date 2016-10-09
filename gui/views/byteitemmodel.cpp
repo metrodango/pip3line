@@ -14,6 +14,8 @@ Released under AGPL see LICENSE for more information
 #include <QColor>
 #include <QDebug>
 #include <QElapsedTimer>
+#include <QPalette>
+#include <QApplication>
 #include <QFile>
 
 int ByteItemModel::INVALID_POSITION = -1;
@@ -119,9 +121,9 @@ QVariant ByteItemModel::data(const QModelIndex &index, int role) const
                 if (bg.isValid()) {
                    return QVariant(bg);
                 } else if ((index.column() / 4) % 2 == 0)
-                    return QVariant(QColor(Qt::white));
+                    return QVariant(QApplication::palette().base().color());
                 else if ((index.column() / 4) % 2 == 1)
-                    return QVariant(QColor(224,222,255,255));
+                    return QVariant(QApplication::palette().base().color().darker(110));
                 else
                     return QVariant();
             }
@@ -129,9 +131,13 @@ QVariant ByteItemModel::data(const QModelIndex &index, int role) const
             break;
         case Qt::ForegroundRole:
             {
-        if (pos != INVALID_POSITION) {
-            return QVariant(byteSource->getFgViewColor(pos));
-        }
+                if (pos != INVALID_POSITION) {
+                    QColor val = byteSource->getFgViewColor(pos);
+                    if (!val.isValid()) {
+                        val = QApplication::palette().windowText().color();
+                    }
+                    return QVariant(val);
+                }
             }
             break;
         case Qt::ToolTipRole:

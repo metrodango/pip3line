@@ -95,12 +95,12 @@ void OpenSSLHashes::transform(const QByteArray &input, QByteArray &output)
     unsigned int md_len = 0;
     output.clear();
 
-    md = EVP_get_digestbyname(hashName.toUtf8().data());
+    const EVP_MD *md = EVP_get_digestbyname(hashName.toUtf8().data());
     if (!md) {
         emit error(tr("OpenSSL: Unknown hash %1").arg(hashName),id);
         return;
     }
-    mdctx = EVP_MD_CTX_create();
+    EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(mdctx, md, NULL);
     EVP_DigestUpdate(mdctx, input.data(), input.size());
     EVP_DigestFinal_ex(mdctx, md_value, &md_len);

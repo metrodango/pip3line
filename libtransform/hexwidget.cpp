@@ -37,13 +37,13 @@ HexWidget::HexWidget(QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::HexWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::HexWidget X{");
     }
     ui->setupUi(this);
 
     CharValidator *validator = new(std::nothrow) CharValidator(this);
-    if (validator == NULL) {
+    if (validator == nullptr) {
         qFatal("Cannot allocate memory for CharValidator X{");
     }
     ui->charLineEdit->setValidator(validator);

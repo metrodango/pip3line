@@ -129,7 +129,7 @@ bool BytesToFloat::isTwoWays()
 QWidget *BytesToFloat::requestGui(QWidget * parent)
 {
     QWidget *wid = new(std::nothrow) BytesToFloatWdiget(this, parent);
-    if (wid == NULL)
+    if (wid == nullptr)
         qFatal("Cannot allocate memory for BytesToFloatWdiget X{");
     return wid;
 }

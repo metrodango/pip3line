@@ -36,7 +36,9 @@ Released under AGPL see LICENSE for more information
 TextCell::TextCell(QWidget *parent, Qt::WindowFlags f) :
     QLabel(parent,f)
 {
-
+    QPalette p = palette();
+    p.setColor(QPalette::Window, QApplication::palette().base().color());
+    setPalette(p);
 }
 
 TextCell::TextCell(const QString &text, QWidget *parent, Qt::WindowFlags f) :
@@ -141,20 +143,20 @@ void HexDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewIt
 
 void HexDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
     if (index.column() == hexColumncount) {
-        QStyleOptionViewItemV4 optionV4 = option;
-        initStyleOption(&optionV4, index);
+        QStyleOptionViewItem options = option;
+        initStyleOption(&options, index);
 
 
-        QStyle *style = optionV4.widget? optionV4.widget->style() : QApplication::style();
+        QStyle *style = options.widget? options.widget->style() : QApplication::style();
 
         TextCell textData;
         textData.setTextFormat(Qt::PlainText);
-        textData.setText(optionV4.text);
+        textData.setText(options.text);
         textData.setFont(GuiStyles::GLOBAL_REGULAR_FONT);
         textData.setTextInteractionFlags(Qt::TextSelectableByKeyboard);
 
         int row = index.row();
-        int textSize = optionV4.text.size();
+        int textSize = options.text.size();
         int maxColumn = qMin(qMin(hexColumncount,ByteTableView::MAXCOL),textSize);
         // apply the selection from the hexa cells
         if (allSelected) {
@@ -186,11 +188,11 @@ void HexDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, c
             }
         }
 
-        optionV4.text = QString();
-        style->drawControl(QStyle::CE_ItemViewItem, &optionV4, painter);
+        options.text = QString();
+        style->drawControl(QStyle::CE_ItemViewItem, &options, painter);
 
 
-        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &optionV4);
+        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &options);
         painter->save();
         QPoint offset = textRect.topLeft();
         painter->translate(offset);
@@ -659,6 +661,13 @@ void ByteTableView::wheelEvent(QWheelEvent *event)
         currentSelectionModel->endIndex = currentModel->createIndex(selectionEnd + moved);
         currentSelectionModel->clear();
         currentSelectionModel->setCurrentIndex(currentSelectionModel->endIndex,QItemSelectionModel::Select);
+
+        // fixes an annoying behaviour that change the slider position when the selection changes
+        if (moved > 0) {
+            verticalScrollBar()->setSliderPosition(0);
+        } else {
+            verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
+        }
     }
 
     QTableView::wheelEvent(event);

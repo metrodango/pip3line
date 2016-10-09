@@ -2,6 +2,7 @@
 #include "shared/sslconf.h"
 #include <QDir>
 #include <QDebug>
+#include "socksproxyhelper.h"
 
 BaseTcpServer::BaseTcpServer(QObject *parent) :
     QTcpServer(parent)
@@ -30,8 +31,10 @@ const QString TLSServerListener::ID = QString("TCP/TLS server");
 
 TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort, QObject *parent) :
     IPBlocksSources(hostAddress,hostPort, parent),
-    server(nullptr)
+    server(nullptr),
+    socksProxy(false)
 {
+    tlsPorts.append(443);
     flags |= REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED;
     type = SERVER;
 
@@ -48,6 +51,7 @@ TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort,
     sslConfiguration->setLocalCert(defaultCertPath);
     sslConfiguration->setLocalKey(defaultCertPath);
 
+    updateTimer.moveToThread(&serverThread);
     moveToThread(&serverThread);
     serverThread.start();
 
@@ -80,8 +84,7 @@ void TLSServerListener::sendBlock(Block *block)
     bool dataSend = false;
     while (i.hasNext()) {
         i.next();
-        if (i.value() == block->getSourceid()) {    sslConfiguration->setLocalCert(QDir::homePath().append( "/servercert.pem"));
-            sslConfiguration->setLocalKey(QDir::homePath().append( "/servercert.pem"));
+        if (i.value() == block->getSourceid()) {
             QByteArray data = applyOutboundTransform(block->getData());
             if (isB64Blocks()) {
                 data = data.toBase64().append(b64BlocksSeparator);
@@ -92,6 +95,7 @@ void TLSServerListener::sendBlock(Block *block)
                 data = data.mid(written);
             }
             dataSend = true;
+            break;
         }
     }
 
@@ -104,6 +108,7 @@ void TLSServerListener::sendBlock(Block *block)
 
 bool TLSServerListener::startListening()
 {
+
     if (server == nullptr) {
         server = new(std::nothrow) BaseTcpServer();
         if (server == nullptr) {
@@ -135,57 +140,128 @@ bool TLSServerListener::startListening()
 void TLSServerListener::stopListening()
 {
     if (server != nullptr && server->isListening()) {
-        QHashIterator<QSslSocket *, int> i(clients);
-        while (i.hasNext()) {
-            i.next();
-            i.key()->disconnectFromHost();
-        }
-
-        clients.clear();
-
         server->close();
         emit log(tr("stopped %1:%2").arg(hostAddress.toString()).arg(hostPort), actualID, Pip3lineConst::LSTATUS);
         delete server;
         server = nullptr;
         emit stopped();
+        triggerUpdate();
     }
-}
-
-QList<Target<BlocksSource *> > TLSServerListener::getAvailableConnections()
-{
-    QList<Target<BlocksSource *>> list;
 
     QHashIterator<QSslSocket *, int> i(clients);
     while (i.hasNext()) {
         i.next();
-        QString desc = i.key()->peerAddress().toString();
-        if (isTLSEnable())
-            desc.append(QString(":%1/TLS").arg(i.key()->peerPort()));
-        else
-            desc.append(QString(":%1/TCP").arg(i.key()->peerPort()));
-        Target<BlocksSource *> tac;
-        tac.setDescription(desc);
-        tac.setConnectionID(i.value());
-        tac.setSource(this);
-        list.append(tac);
+        i.key()->disconnectFromHost();
+        delete i.key();
     }
 
-    return list;
+    clients.clear();
+
+    QHashIterator<QSslSocket *, SocksProxyHelper *> j(clientsProxyNeeded);
+    while (j.hasNext()) {
+        j.next();
+        delete j.value();
+    }
+
+    clientsProxyNeeded.clear();
+}
+
+void TLSServerListener::onConnectionClosed(int cid)
+{
+    QHashIterator<QSslSocket *, int> i(clients);
+    QSslSocket * socket = nullptr;
+    while (i.hasNext()) {
+        i.next();
+        if (i.value() == cid) {
+            socket = i.key();
+            if (clientsProxyNeeded.contains(socket))
+                delete clientsProxyNeeded.take(socket);
+
+            disconnect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()));
+            socket->disconnectFromHost();
+            break;
+        }
+    }
+
+    BlocksSource::releaseID(cid);
+
+    if (socket != nullptr) {
+        clients.remove(socket);
+        delete socket;
+        updateConnectionsInfo();
+    }
+
+
 }
 
 void TLSServerListener::dataReceived()
 {
-    qDebug() << "[TLSServerListener::packetReceived]" << sender();
+   // qDebug() << "[TLSServerListener::packetReceived]" << sender();
 
-    QSslSocket * socket = static_cast<QSslSocket *>(sender());
+    QSslSocket * socket = dynamic_cast<QSslSocket *>(sender());
     if (socket != nullptr) {
+
+        if (!clients.contains(socket)) { // that's not normal
+            qCritical() << tr("Client not found in the recorder list T_T");
+            return;
+        }
+        int clientId = clients.value(socket);
         if (socket->bytesAvailable() > 0) {
             QByteArray data  = socket->readAll();
-            if (isB64Blocks()) {
-                processIncomingB64Block(data);
+            if (clientsProxyNeeded.contains(socket)) {
+                SocksProxyHelper * proxyHelper = clientsProxyNeeded.value(socket);
+                QByteArray resp = proxyHelper->processRequest(data);
+                if (proxyHelper->getState() == SocksProxyHelper::DONE) { // all is good
+                    // create connection details
+                    bool tlscon = tlsPorts.contains(proxyHelper->getPort());
+                    ConnectionDetails cd(proxyHelper->getHost(),
+                                         proxyHelper->getPort(),
+                                         tlscon);
+                    // some cleaning first
+                    clientsProxyNeeded.remove(socket);
+                    delete proxyHelper;
+                    // send response to client
+                    socket->write(resp);
+
+                    if (tlscon) {
+                        if (!startingTLS(socket)) {
+                            socket->disconnectFromHost();
+                            int cid = clients.take(socket);
+                            BlocksSource::releaseID(cid);
+                            delete socket;
+                            updateConnectionsInfo();
+                            return;
+                        }
+                    }
+
+                    emit newConnectionData(clientId,cd);
+
+                }
+                else if (proxyHelper->getState() == SocksProxyHelper::NEED_AUTH_DATA ||
+                        proxyHelper->getState() == SocksProxyHelper::AUTHENTICATED) {
+                    // just send the SOCKS response if we are still in the middle
+                    socket->write(resp);
+                    return;
+                } else if (proxyHelper->getState() == SocksProxyHelper::REJECTED) {
+                    // some part of the process was validated, just send the reponse and close the connection
+                    socket->write(resp);
+                    socket->disconnectFromHost();
+                    socket->close();
+                    clientsProxyNeeded.remove(socket);
+                    delete proxyHelper;
+                    return;
+                } else {
+                    clientsProxyNeeded.remove(socket);
+                    delete proxyHelper;
+                    // never mind sending the data received as block
+                }
+            } else if (isB64Blocks()) {
+                processIncomingB64Block(data, clientId);
+
             } else {
-                Block * datab = new(std::nothrow) Block(data, clients.value(socket, Block::INVALID_ID));
+                Block * datab = new(std::nothrow) Block(data, clientId);
                 if (datab == nullptr) qFatal("Cannot allocate Block for TLSServerListener X{");
+
                 emit blockReceived(datab);
             }
         }
@@ -212,38 +288,35 @@ void TLSServerListener::handlingClient(int socketDescriptor)
 
     socket->setSocketDescriptor(socketDescriptor);
 
-    if (isTLSEnable()) {
-        qDebug() << tr("TLS is enabled");
-        connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)),Qt::QueuedConnection);
-        connect(socket, SIGNAL(modeChanged(QSslSocket::SslMode)),this, SLOT(onSSLModeChange(QSslSocket::SslMode)),Qt::QueuedConnection);
-        socket->setSslConfiguration(sslConfiguration->getSslConfiguration());
-        socket->startServerEncryption();
+    if (socksProxy) {
+        SocksProxyHelper * proxyHelper = new(std::nothrow)SocksProxyHelper(hostAddress,hostPort);
+        if (proxyHelper == nullptr) {
+            qFatal("Cannot allocate memory for SocksProxyHelper X{");
+        }
 
-        if (socket->waitForEncrypted()) {
-            emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::LSTATUS);
-            connect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()),Qt::QueuedConnection);
-            emit updated();
-        } else {
-            emit log(tr("Client did not send TLS Hello. Closing the connection."),actualID, Pip3lineConst::LERROR);
+        clientsProxyNeeded.insert(socket, proxyHelper);
+    } else if (isTLSEnable()) {
+        if (!startingTLS(socket)) {
+            emit log(tr("SSL/TLS handshake failed. Closing the connection."),actualID, Pip3lineConst::LERROR);
             socket->disconnectFromHost();
             delete socket;
-            socket = NULL;
+            socket = nullptr;
         }
     } else {
         qDebug() << tr("TLS is not enabled");
-        if (socket->waitForConnected()) {
-            emit log(tr(" New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::LSTATUS);
-            connect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()),Qt::QueuedConnection);
-            emit updated();
-        } else {
+        if (!socket->waitForConnected()) {
             emit log(tr("socket error: %1").arg(socket->errorString()),actualID, Pip3lineConst::LERROR);
             delete socket;
-            socket = NULL;
+            socket = nullptr;
         }
     }
 
     if (socket != nullptr) {
+        emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::LSTATUS);
+        connect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()),Qt::QueuedConnection);
+
         clients.insert(socket, BlocksSource::newSourceID(this));
+        updateConnectionsInfo();
     }
 }
 
@@ -256,24 +329,34 @@ void TLSServerListener::onSslErrors(const QList<QSslError> &errors)
 
 void TLSServerListener::onError(QAbstractSocket::SocketError error)
 {
-    qDebug() << "[TLSServerListener::onError]" << error;
-    if (error != QAbstractSocket::RemoteHostClosedError) {
-        QSslSocket * sobject = static_cast<QSslSocket *>(sender());
+
+    QSslSocket * sobject = dynamic_cast<QSslSocket *>(sender());
+    if (error == QAbstractSocket::RemoteHostClosedError) {
         if (sobject != nullptr) {
-            emit log(sobject->errorString(), actualID, Pip3lineConst::LERROR);
+            handlingDisconnect(sobject);
         } else {
-            qDebug() << "[TLSServerListener::onError] a connection was closed by the remote client";
+            qDebug() << "[TLSServerListener::onError] *a* connection was closed by the remote client";
         }
+    }  else if (error == QAbstractSocket::SslHandshakeFailedError) {
+        qDebug() << "[TLSServerListener::onError] SSL/TLS handshake failed";
+        if (sobject != nullptr) {
+            handlingDisconnect(sobject);
+        }
+    } else {
+        qDebug() << "[TLSServerListener::onError]" << error;
     }
 }
 
 void TLSServerListener::onSSLModeChange(QSslSocket::SslMode mode)
 {
-    QSslSocket * socket = static_cast<QSslSocket *>(sender());
+    QSslSocket * socket = dynamic_cast<QSslSocket *>(sender());
     if (socket != nullptr) {
-        qDebug() << "SSL Mode changed for " << socket->peerAddress() << "/" << socket->peerPort() << mode;
+        if (clients.contains(socket))
+          qDebug() << tr("[TLSServerListener] SSL Mode changed  %1 => %3").arg(clients.value(socket)).arg(SslConf::sslModeToString(mode));
+        else
+          qCritical() << tr("[TLSServerListener::onSSLModeChange] socket not found T_T");
     } else {
-        qDebug() << "[TLSServerListener::onPeerVerificationError] null casting, mode:" << mode;
+        qDebug() << "[TLSServerListener::onSSLModeChange] null object, mode:" << mode;
     }
 }
 
@@ -281,18 +364,9 @@ void TLSServerListener::onClientDeconnection()
 {
     QObject *obj = sender();
     if (obj != nullptr) {
-        QSslSocket * socket = static_cast<QSslSocket *>(obj);
+        QSslSocket * socket = dynamic_cast<QSslSocket *>(obj);
         if (socket != nullptr) {
-            emit log(tr("Disconnection for %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::LWARNING);
-            if (!b64BlockTempData.isEmpty()) { // just in case
-                b64DecodeAndEmit(b64BlockTempData);
-                b64BlockTempData.clear();
-            }
-            if (clients.contains(socket)) {
-                BlocksSource::releaseID(clients.take(socket));
-                delete socket;
-                emit updated();
-            }
+            handlingDisconnect(socket);
         } else {
             qCritical() << tr("[TLSServerListener::onClientDeconnection] sender is casted to nullptr T_T");
         }
@@ -307,6 +381,70 @@ void TLSServerListener::onTLSUpdated(bool enabled)
         actualID = tr("TLS server");
     else
         actualID = tr("TCP server");
+}
+
+void TLSServerListener::internalUpdateConnectionsInfo()
+{
+    connectionsInfo.clear();
+    QHashIterator<QSslSocket *, int> i(clients);
+    while (i.hasNext()) {
+        i.next();
+        QSslSocket * socket = i.key();
+        QString desc = socket->peerAddress().toString();
+        if (isTLSEnable())
+            desc.append(QString(":%1/TLS").arg(socket->peerPort()));
+        else
+            desc.append(QString(":%1/TCP").arg(socket->peerPort()));
+        Target<BlocksSource *> tac;
+        tac.setDescription(desc);
+        tac.setConnectionID(i.value());
+        tac.setSource(this);
+        connectionsInfo.append(tac);
+    }
+}
+
+bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
+{
+    if (sslConfiguration->getSslConfiguration().localCertificate().isNull()) {
+        emit log(tr("No server certificate loaded, failing the SSL/TLS connection"), actualID, Pip3lineConst::LERROR);
+        return false;
+    }
+
+    qDebug() << tr("Trying to start TLS for %1:%2").arg(sslsocket->peerAddress().toString()).arg(sslsocket->peerPort());
+    connect(sslsocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)),Qt::QueuedConnection);
+    connect(sslsocket, SIGNAL(modeChanged(QSslSocket::SslMode)),this, SLOT(onSSLModeChange(QSslSocket::SslMode)),Qt::QueuedConnection);
+    sslsocket->setSslConfiguration(sslConfiguration->getSslConfiguration());
+    sslsocket->startServerEncryption();
+
+    return true;
+}
+
+void TLSServerListener::handlingDisconnect(QSslSocket *socket)
+{
+    emit log(tr("Disconnection for %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::LSTATUS);
+    if (clients.contains(socket)) {
+        int rsid = clients.take(socket);
+
+        // clearing any remaining b64 data for this SID
+        if (b64BlockTempDataList.contains(rsid)) {
+            b64DecodeAndEmit(b64BlockTempDataList.take(rsid), rsid);
+        }
+        BlocksSource::releaseID(rsid);
+
+        delete socket;
+        emit connectionClosed(rsid);
+        updateConnectionsInfo();
+    }
+}
+
+bool TLSServerListener::isSocks5Proxy() const
+{
+    return socksProxy;
+}
+
+void TLSServerListener::setSocks5Proxy(bool value)
+{
+    socksProxy = value;
 }
 
 

@@ -51,14 +51,14 @@ TransformRequest::~TransformRequest()
 {
     if (deleteObject)
         delete transform;
-    transform = NULL;
+    transform = nullptr;
 
     //qDebug() << this << "deleted";
 }
 
 void TransformRequest::runRequest()
 {
-    if (transform != NULL) {
+    if (transform != nullptr) {
         if (multiProcessing) {
             for (int i = 0 ; i < inputDatas.size(); i++) {
                 outputData.clear();
@@ -157,7 +157,7 @@ void ThreadedProcessor::processRequest(TransformRequest *request)
 void ThreadedProcessor::onRequestFinished()
 {
     TransformRequest * tr = static_cast<TransformRequest *>(sender());
-    if (tr != NULL) {
+    if (tr != nullptr) {
         quintptr source = tr->getptid();
         if (currentRunning.contains(tr)) {
             QFuture<void> fut = currentRunning.take(tr);

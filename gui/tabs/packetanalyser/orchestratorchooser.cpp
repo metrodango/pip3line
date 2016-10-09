@@ -16,6 +16,7 @@
 #include "shared/defaultdialog.h"
 #include "externalproxyorchestrator.h"
 #include "proxyorchestrator.h"
+#include "socksorchestrator.h"
 
 OrchestratorChooser::OrchestratorChooser(GuiHelper *guiHelper, SourcesOrchestatorAbstract *orchestrator, QWidget *parent) :
     QComboBox(parent),
@@ -81,28 +82,11 @@ int OrchestratorChooser::showConfPanel(bool blocking)
         }
 
         confDialog->setWindowTitle(tr("Configuration"));
+        confDialog->resize(400,300);
 
         QWidget * confWidget = orchestrator->getConfGui(nullptr);
 
         if (confWidget != nullptr) {
-            QHBoxLayout * layout = static_cast<QHBoxLayout *>(confWidget->layout());
-            if (layout != nullptr) {
-                int count = orchestrator->blockSourceCount();
-                for (int i = 0; i < count; i++) {
-                    BlocksSource * bs = orchestrator->getBlockSource(i);
-                    if (bs != nullptr) {
-                        QWidget * wid = bs->getGui(this);
-                        if (wid != nullptr) {
-                            layout->addWidget(wid);
-                        }
-                    } else {
-                        qCritical() << tr("[OrchestratorChooser::setupOrchestrator] BlockSource is nullptr T_T");
-                    }
-                }
-            } else {
-                qCritical() << tr("[OrchestratorChooser::setupOrchestrator] layout cannot be cast to QHBoxLayout T_T");
-            }
-
             confDialog->setMainWidget(confWidget);
         }
         if (blocking)
@@ -158,7 +142,11 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                     qFatal("Cannot allocate memory for RawTcpListener X{");
                 }
 
-                bs->setFlags(BlocksSource::REFLEXION_OPTIONS | BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED | BlocksSource::B64BLOCKS_OPTIONS);
+                bs->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                             BlocksSource::TLS_OPTIONS |
+                             BlocksSource::TLS_ENABLED |
+                             BlocksSource::B64BLOCKS_OPTIONS |
+                             BlocksSource::IP_OPTIONS);
 
                 SingleSourceOrchestrator *ci = nullptr;
                 ci = new(std::nothrow) SingleSourceOrchestrator(bs);
@@ -168,8 +156,6 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
                 ci->setType(SourcesOrchestatorAbstract::TCP_CLIENT);
                 orch = ci;
-
-
             }
             break;
         case SourcesOrchestatorAbstract::UDP_CLIENT:
@@ -180,7 +166,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 qFatal("Cannot allocate memory for UdpClientListener X{");
             }
 
-            bs->setFlags(BlocksSource::REFLEXION_OPTIONS);
+            bs->setFlags(BlocksSource::REFLEXION_OPTIONS | BlocksSource::IP_OPTIONS);
 
             SingleSourceOrchestrator *ci = nullptr;
             ci = new(std::nothrow) SingleSourceOrchestrator(bs);
@@ -220,7 +206,10 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                     qFatal("Cannot allocate memory for UdpServerListener X{");
                 }
 
-                bs->setFlags(BlocksSource::REFLEXION_OPTIONS | BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED | BlocksSource::B64BLOCKS_OPTIONS);
+                bs->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                             BlocksSource::TLS_OPTIONS |
+                             BlocksSource::TLS_ENABLED |
+                             BlocksSource::B64BLOCKS_OPTIONS);
 
                 SingleSourceOrchestrator *ci = nullptr;
                 ci = new(std::nothrow) SingleSourceOrchestrator(bs);
@@ -234,20 +223,22 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
         case SourcesOrchestatorAbstract::TCP_PROXY:
             qDebug() << "TCP proxy choosen";
             {
-                BlocksSource * server = new(std::nothrow) TLSServerListener();
+                TLSServerListener * server = new(std::nothrow) TLSServerListener();
                 if (server == nullptr) {
                     qFatal("Cannot allocate memory for TcpServerListener X{");
                 }
 
                 server->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
 
-                BlocksSource *client = nullptr;
+                TLSClientListener *client = nullptr;
                 client = new(std::nothrow) TLSClientListener();
                 if (client == nullptr) {
                     qFatal("Cannot allocate memory for TLSClientListener X{");
                 }
 
-                client->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
+                client->setFlags(BlocksSource::TLS_OPTIONS |
+                                 BlocksSource::TLS_ENABLED |
+                                 BlocksSource::IP_OPTIONS);
 
                 ProxyOrchestrator *ci = nullptr;
                 ci = new(std::nothrow) ProxyOrchestrator(server,client);
@@ -275,7 +266,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 qFatal("Cannot allocate memory for UdpClientListener X{");
             }
 
-            udpClient->setFlags(0);
+            udpClient->setFlags(BlocksSource::IP_OPTIONS);
 
             ProxyOrchestrator *ci = nullptr;
             ci = new(std::nothrow) ProxyOrchestrator(udpServer,udpClient);
@@ -293,13 +284,15 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             if (bs1 == nullptr) {
                 qFatal("Cannot allocate memory for UdpServerListener X{");
             }
-            bs1->setFlags(BlocksSource::REFLEXION_ENABLED);
+            bs1->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                          BlocksSource::REFLEXION_ENABLED );
 
             BlocksSource * bs2 = new(std::nothrow) UdpServerListener(QHostAddress::LocalHost, 3001);
             if (bs2 == nullptr) {
                 qFatal("Cannot allocate memory for UdpServerListener X{");
             }
-            bs2->setFlags(BlocksSource::REFLEXION_ENABLED);
+            bs2->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                          BlocksSource::REFLEXION_ENABLED );
 
             ExternalProxyOrchestrator *epu = nullptr;
             epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
@@ -317,13 +310,21 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             if (bs1 == nullptr) {
                 qFatal("Cannot allocate memory for TLSServerListener X{");
             }
-            bs1->setFlags(BlocksSource::REFLEXION_ENABLED);
+            bs1->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                          BlocksSource::REFLEXION_ENABLED |
+                          BlocksSource::TLS_OPTIONS |
+                          BlocksSource::B64BLOCKS_OPTIONS |
+                          BlocksSource::B64BLOCKS_ENABLED);
 
             BlocksSource * bs2 = new(std::nothrow) TLSServerListener(QHostAddress::LocalHost, 3001);
             if (bs2 == nullptr) {
                 qFatal("Cannot allocate memory for TLSServerListener X{");
             }
-            bs2->setFlags(BlocksSource::REFLEXION_ENABLED);
+            bs2->setFlags(BlocksSource::REFLEXION_OPTIONS |
+                          BlocksSource::REFLEXION_ENABLED |
+                          BlocksSource::TLS_OPTIONS |
+                          BlocksSource::B64BLOCKS_OPTIONS |
+                          BlocksSource::B64BLOCKS_ENABLED);
 
             ExternalProxyOrchestrator *epu = nullptr;
             epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
@@ -334,6 +335,40 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             orch = epu;
             break;
         }
+
+        case SourcesOrchestatorAbstract::SOCKS5_PROXY:
+            qDebug() << "SOCK5 proxy choosen";
+            {
+                TLSServerListener * server = new(std::nothrow) TLSServerListener();
+                if (server == nullptr) {
+                    qFatal("Cannot allocate memory for TcpServerListener X{");
+                }
+
+                server->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
+                server->setSocks5Proxy(true);
+
+
+                TLSClientListener *client = nullptr;
+                client = new(std::nothrow) TLSClientListener();
+                if (client == nullptr) {
+                    qFatal("Cannot allocate memory for TLSClientListener X{");
+                }
+
+                client->setFlags(BlocksSource::TLS_OPTIONS |
+                                 BlocksSource::TLS_ENABLED);
+
+                connect(server, SIGNAL(newConnectionData(int,ConnectionDetails)),
+                        client, SLOT(setSpecificConnection(int,ConnectionDetails))) ;
+
+                SocksOrchestrator *ci = nullptr;
+                ci = new(std::nothrow) SocksOrchestrator(server,client);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SocksOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::SOCKS5_PROXY);
+                orch = ci;
+            }
+            break;
         default:
             qCritical() << tr("[OrchestratorChooser::createOrchestratorFromType] Unmanaged type: %1").arg(type);
     }

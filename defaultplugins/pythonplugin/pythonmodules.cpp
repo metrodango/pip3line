@@ -9,6 +9,7 @@ Released under AGPL see LICENSE for more information
 **/
 
 #include <Python.h>
+#include <QFileInfo>
 
 #include "pythonmodules.h"
 #include "../../version.h"
@@ -129,7 +130,6 @@ PythonModules::~PythonModules()
     unloadModules();
 
     PyEval_RestoreThread(pymainstate);
-
 
     cleaningPyObjs();
 
@@ -532,10 +532,13 @@ bool PythonModules::checkModuleNameAndPath(QString modulePath, QString moduleNam
                     PyObject * loadedModulePath = PyObject_GetAttrString(loadedModule, MODULE_FILE_PATH_STR); // new ref
                     if (loadedModulePath != NULL) {
                         QString modPathString = pyStringToQtString(loadedModulePath);
+                        QFileInfo fi;
+                        fi.setFile(modPathString);
+                        modPathString = fi.absoluteFilePath();
                         if (modPathString == modulePath) {
                             ret = true;
                         } else {
-                            QString message = tr("Another module with the same name (%1) has been loaded from %2").arg(moduleName).arg(modPathString);
+                            QString message = tr("Another module with the same name (%1) has been loaded from %2").arg(modulePath).arg(modPathString);
                             callback->logError(message);
                         }
                         Py_XDECREF(loadedModulePath);

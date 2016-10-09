@@ -15,7 +15,7 @@ Base64Widget::Base64Widget(Base64 *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::Base64Widget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::Base64Widget X{");
     }
     transform = ntransform;

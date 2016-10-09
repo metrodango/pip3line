@@ -125,7 +125,7 @@ bool Binary::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Binary::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) BinaryWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for BinaryWidget X{");
     }
     return widget;

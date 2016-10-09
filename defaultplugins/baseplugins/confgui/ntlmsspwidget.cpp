@@ -15,7 +15,7 @@ NtlmsspWidget::NtlmsspWidget(Ntlmssp *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::NtlmsspWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::NtlmsspWidget X{");
     }
     transform = ntransform;

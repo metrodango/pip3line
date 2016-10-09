@@ -16,7 +16,7 @@ NumberToCharWidget::NumberToCharWidget(NumberToChar *ntransform, QWidget *parent
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::NumberToCharWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::NumberToCharWidget X{");
     }
     transform = ntransform;

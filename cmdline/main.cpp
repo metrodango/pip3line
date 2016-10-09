@@ -153,10 +153,10 @@ int main(int argc, char *argv[])
         args.removeAt(index);
     }
 
-    MasterThread *pt = NULL;
+    MasterThread *pt = nullptr;
 
     pt = new(std::nothrow) MasterThread(binaryInput, noError, verbose);
-    if (pt == NULL) {
+    if (pt == nullptr) {
         qFatal("Cannot allocate memory for MasterThread X{");
     }
     if (fileName.isEmpty()) {

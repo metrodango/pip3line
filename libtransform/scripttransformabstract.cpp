@@ -124,7 +124,7 @@ QWidget *ScriptTransformAbstract::requestGui(QWidget *parent)
 {
 
     ModuleTransformWidget * widget = new(std::nothrow) ModuleTransformWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for ModuleTransformWidget X{");
     }
     if (loadModule()) { // need the module to be loaded in order to get the configuration

@@ -15,7 +15,7 @@ XmlQueryWidget::XmlQueryWidget(XmlQuery *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::XmlQueryWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::XmlQueryWidget X{");
     }
     transform = ntransform;

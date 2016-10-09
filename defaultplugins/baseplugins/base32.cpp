@@ -191,7 +191,7 @@ bool Base32::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Base32::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) Base32Widget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for Base32Widget X{");
     }
     return widget;

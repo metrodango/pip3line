@@ -26,7 +26,7 @@ class SearchResultsWidget : public QWidget
     signals:
         void jumpTo(quint64 start, quint64 end);
     private slots:
-        void onDoubleClick(QModelIndex index);
+        void onSelectionChanged(QModelIndex index);
         void onModelUpdated();
         void onRightClick(QPoint pos);
         void contextMenuAction(QAction * action);

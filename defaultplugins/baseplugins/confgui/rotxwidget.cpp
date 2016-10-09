@@ -15,7 +15,7 @@ RotXWidget::RotXWidget(Rotx *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::RotXWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::RotXWidget X{");
     }
     transform = ntransform;

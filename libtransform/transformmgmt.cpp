@@ -46,7 +46,7 @@ using namespace Pip3lineConst;
 TransformMgmt::TransformMgmt() :
 	id(tr("TransformMgmt"))
 {
-    settings = NULL;
+    settings = nullptr;
     cycleSem.release(MAX_NESTING);
     if (globalInstance == nullptr)
         globalInstance = this;
@@ -58,7 +58,7 @@ TransformMgmt::~TransformMgmt()
 {
     unloadTransforms();
     unloadPlugins();
-    if (settings != NULL)
+    if (settings != nullptr)
         delete settings;
 
     if (transformInstances.isEmpty()) {
@@ -207,7 +207,7 @@ bool TransformMgmt::loadTransforms(bool verbose) {
 
 void TransformMgmt::saveInstance(TransformAbstract *ta)
 {
-    if (ta == NULL)
+    if (ta == nullptr)
         return;
 
     deletedLock.lock();
@@ -227,7 +227,7 @@ void TransformMgmt::saveInstance(TransformAbstract *ta)
 void TransformMgmt::OnTransformDelete()
 {
     TransformAbstract* src = static_cast<TransformAbstract* > (sender());
-    if (src != NULL) {
+    if (src != nullptr) {
         deletedLock.lock();
         if (transformInstances.contains(src)) {
             transformInstances.remove(src);
@@ -246,7 +246,7 @@ bool TransformMgmt::loadPlugins()
     // loading static plugins first
     foreach (QObject *plugin, QPluginLoader::staticInstances()) {
         TransformFactoryPluginInterface *tro = qobject_cast<TransformFactoryPluginInterface *>(plugin);
-        if (tro != NULL) {
+        if (tro != nullptr) {
            registerPlugin(tro);
            emit status(tr("Loaded static plugin: \"%1\" version %2 (compiled with Qt %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
         } else {
@@ -263,6 +263,9 @@ bool TransformMgmt::loadPlugins()
 
 #if defined(Q_OS_UNIX)
         filters << "*.so";
+#if defined(Q_OS_MAC)
+        filters << "*.dylib";
+#endif
 #elif defined(Q_OS_WIN)
         filters << "*.dll";
 #endif
@@ -273,14 +276,14 @@ bool TransformMgmt::loadPlugins()
             QString absName = pluginsDir.absoluteFilePath(fileName);
 
              QPluginLoader *loader = new(std::nothrow) QPluginLoader(absName);
-             if (loader == NULL) {
+             if (loader == nullptr) {
                  qFatal("Cannot allocate memory for QPluginLoader X{");
                  return false;
              }
              QObject *plugin = loader->instance();
              if (plugin) {
                  TransformFactoryPluginInterface *tro = qobject_cast<TransformFactoryPluginInterface *>(plugin);
-                 if (tro != NULL) {
+                 if (tro != nullptr) {
                     if (tro->getLibTransformVersion() == LIB_TRANSFORM_VERSION) {
                         if (!pluginsList.contains(tro->pluginName())) {
                             registerPlugin(tro);
@@ -348,7 +351,7 @@ void TransformMgmt::unloadTransforms() {
 
 TransformAbstract * TransformMgmt::getTransform(QString name) {
 //    qDebug() << "Trying to load" << name;
-    TransformAbstract * ta = NULL;
+    TransformAbstract * ta = nullptr;
     listLocker.lock();
     if (!cycleSem.tryAcquire()) {
         listLocker.unlock();
@@ -361,7 +364,7 @@ TransformAbstract * TransformMgmt::getTransform(QString name) {
         listLocker.unlock();
         ta = plugin->getTransform(name);
 
-        if (ta == NULL)
+        if (ta == nullptr)
             emit error(tr("The plugin could not instanciate the transformation object named \"%1\" v_v").arg(name),id);
     } else if (savedConf.contains(name)) {
         listLocker.unlock();
@@ -369,7 +372,7 @@ TransformAbstract * TransformMgmt::getTransform(QString name) {
         TransformChain chain = loadChainFromSaved(name);
         if (!chain.isEmpty()) {
             ta = new(std::nothrow) ComposedTransform(chain);
-            if (ta == NULL) {
+            if (ta == nullptr) {
                 qFatal("Cannot allocate memory for ComposedTransform 1 X{");
             }
         }
@@ -409,24 +412,25 @@ bool TransformMgmt::saveConfToXML(const TransformChain &chain, QXmlStreamWriter 
     stream->writeAttribute(XMLOUTPUTTYPE, QString::number(chain.getPreferredOutputType()));
 
     for (int i = 0 ; i < chain.size(); i++) {
+        if (chain.at(i) != nullptr) {
+            properties = chain.at(i)->getConfiguration();
+            properties.insert(PROP_NAME, chain.at(i)->name());
+            properties.insert(PROP_WAY, QString::number((int)chain.at(i)->way()));
+            properties.insert(XMLORDER, QString::number(i));
 
-        properties = chain.at(i)->getConfiguration();
-        properties.insert(PROP_NAME, chain.at(i)->name());
-        properties.insert(PROP_WAY, QString::number((int)chain.at(i)->way()));
-        properties.insert(XMLORDER, QString::number(i));
+            stream->writeStartElement(XMLTRANSFORM);
 
-        stream->writeStartElement(XMLTRANSFORM);
-
-        QHashIterator<QString, QString> j(properties);
-         while (j.hasNext()) {
-             j.next();
-             if (isValidAttributeName(j.key())) {
-                stream->writeAttribute(j.key(), j.value());
-             } else {
-                 emit error(tr("Ignoring property \"%1\": Properties names need to match this regexp \"%2\"").arg(j.key()).arg(TAG_NAME_REGEXP.pattern()),id);
+            QHashIterator<QString, QString> j(properties);
+             while (j.hasNext()) {
+                 j.next();
+                 if (isValidAttributeName(j.key())) {
+                    stream->writeAttribute(j.key(), j.value());
+                 } else {
+                     emit error(tr("Ignoring property \"%1\": Properties names need to match this regexp \"%2\"").arg(j.key()).arg(TAG_NAME_REGEXP.pattern()),id);
+                 }
              }
-         }
-        stream->writeEndElement();
+            stream->writeEndElement();
+        }
     }
 
     stream->writeEndElement(); // pip3line
@@ -478,7 +482,7 @@ TransformChain TransformMgmt::loadConfFromXML(QXmlStreamReader *stream)
     }
 
     int order = 0;
-    TransformAbstract * ntw = NULL;
+    TransformAbstract * ntw = nullptr;
     QHash<QString, QString> properties;
 
     while (!stream->atEnd()) {
@@ -491,7 +495,7 @@ TransformChain TransformMgmt::loadConfFromXML(QXmlStreamReader *stream)
 
         if (ok) {
           ntw = getTransform(name);
-          if (ntw != NULL) {
+          if (ntw != nullptr) {
               connect(ntw,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
               connect(ntw,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
 
@@ -573,10 +577,10 @@ bool TransformMgmt::saveConfToFile(const QString &fileName, const TransformChain
 
 TransformAbstract *TransformMgmt::loadTransformFromConf(const QHash<QString, QString> confEle)
 {
-    TransformAbstract *transf = NULL;
+    TransformAbstract *transf = nullptr;
     if (confEle.contains(PROP_NAME)) {
         transf = getTransform(confEle.value(PROP_NAME));
-        if (transf != NULL) {
+        if (transf != nullptr) {
             connect(transf,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
             connect(transf,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
             transf->setConfiguration(confEle);
@@ -712,12 +716,12 @@ void TransformMgmt::setPersistance(const QString &name, bool persistent)
 
 TransformAbstract *TransformMgmt::loadComposedTransformFromXML(QXmlStreamReader *streamReader)
 {
-    TransformAbstract *ta = NULL;
+    TransformAbstract *ta = nullptr;
     TransformChain chain = loadConfFromXML(streamReader);
 
     if (!chain.isEmpty()) {
         ta = new(std::nothrow) ComposedTransform(chain);
-        if (ta == NULL) {
+        if (ta == nullptr) {
             qFatal("Cannot allocate memory for ComposedTransform 2 X{");
         } else {
             saveInstance(ta);
@@ -790,7 +794,7 @@ void TransformMgmt::registerPlugin(TransformFactoryPluginInterface *plugin)
 {
     pluginsList.insert(plugin->pluginName(),plugin);
     Pip3lineCallback * callback = new(std::nothrow) Pip3lineCallback(this, fileConf, plugin->pluginName());
-    if (callback == NULL) {
+    if (callback == nullptr) {
         qFatal("Cannot allocate memory for Pip3lineCallback X{");
         return;
     }
@@ -809,7 +813,7 @@ QSettings *TransformMgmt::getSettingsObj()
 {
     fileConf = getHomeDirectory().append(QDir::separator()).append(CONF_FILE);
     QSettings * settings = new(std::nothrow) QSettings(fileConf,QSettings::IniFormat);
-    if (settings == NULL) {
+    if (settings == nullptr) {
         qFatal("Cannot allocate memory for QSettings (lib) X{");
     }
     return settings;

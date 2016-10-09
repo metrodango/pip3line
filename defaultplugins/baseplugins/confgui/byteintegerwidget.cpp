@@ -15,7 +15,7 @@ ByteIntegerWidget::ByteIntegerWidget(BytesInteger *ntransform, QWidget *parent) 
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ByteIntegerWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ByteIntegerWidget X{");
     }
     transform = ntransform;

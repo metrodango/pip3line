@@ -15,7 +15,7 @@ HtmlWidget::HtmlWidget(Html *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::HtmlWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::HtmlWidget X{");
     }
     transform = ntransform;

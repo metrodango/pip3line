@@ -39,9 +39,13 @@ if (NOT APPLE)
     ${PROJECT_SOURCE_DIR}/../lib
     /usr/lib64/qt4/
   )
+else()
+	message( STATUS "-- Enabling MAC OSX specifics --" )
+	set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.perso.pip3line")
+	set(APP_TYPE MACOSX_BUNDLE)
 endif()
 
-set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin )
+#set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin )
 
 set ( EXTERN_LIBS transform )
 
@@ -100,7 +104,7 @@ set ( pip3line_HDRS
 	sources/blocksources/blockssource.h
 	sources/blocksources/ipblockssources.h
 	sources/blocksources/connectionsinfoswidget.h
-	sources/blocksources/udpclient.h
+	sources/blocksources/connectiondetails.h
 	sources/blocksources/connectionswidget.h
 	sources/blocksources/target.h
 	sources/blocksources/udpclientlistener.h
@@ -110,6 +114,7 @@ set ( pip3line_HDRS
 	sources/blocksources/baseblocksourcewidget.h
 	sources/blocksources/ipnetworkclientwidget.h
 	sources/blocksources/tlsclientlistener.h
+	sources/blocksources/socksproxyhelper.h
 	views/hexview.h
 	views/textview.h
 	views/bytetableview.h
@@ -135,6 +140,7 @@ set ( pip3line_HDRS
 	tabs/packetanalyser/orchestratorchooser.h
 	tabs/packetanalyser/externalproxyorchestrator.h
 	tabs/packetanalyser/proxyorchestrator.h
+	tabs/packetanalyser/socksorchestrator.h
 	shared/offsetgotowidget.h
 	shared/searchwidget.h
 	shared/readonlybutton.h
@@ -211,7 +217,7 @@ set ( pip3line_SRCS
 	sources/blocksources/blockssource.cpp
 	sources/blocksources/ipblockssources.cpp
 	sources/blocksources/connectionsinfoswidget.cpp
-	sources/blocksources/udpclient.cpp
+	sources/blocksources/connectiondetails.cpp
 	sources/blocksources/connectionswidget.cpp
 	sources/blocksources/udpclientlistener.cpp
 	sources/blocksources/ipnetworkserverwidget.cpp
@@ -220,6 +226,7 @@ set ( pip3line_SRCS
 	sources/blocksources/baseblocksourcewidget.cpp
 	sources/blocksources/ipnetworkclientwidget.cpp
 	sources/blocksources/tlsclientlistener.cpp
+	sources/blocksources/socksproxyhelper.cpp
 	views/hexview.cpp
 	views/bytetableview.cpp
 	views/byteitemmodel.cpp
@@ -246,6 +253,7 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/orchestratorchooser.cpp
 	tabs/packetanalyser/externalproxyorchestrator.cpp
 	tabs/packetanalyser/proxyorchestrator.cpp
+	tabs/packetanalyser/socksorchestrator.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp
@@ -336,7 +344,7 @@ else(WITH_QT5)
 	QT4_ADD_RESOURCES(RSCS ${pip3line_RSCS})
 endif(WITH_QT5)
 
-add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS} )
+add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
 
 if(WITH_QT5)
         qt5_use_modules(pip3line Widgets Svg Network Concurrent)

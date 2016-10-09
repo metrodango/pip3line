@@ -17,6 +17,7 @@ Released under AGPL see LICENSE for more information
 
 class BasicSourceReader : public SourceReader
 {
+        Q_OBJECT
     public:
         explicit BasicSourceReader(QByteArray *source);
         ~BasicSourceReader();

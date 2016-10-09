@@ -33,6 +33,8 @@ class DISTORMSHARED_EXPORT DistormPlugin : public QObject, public TransformFacto
         const QStringList getTypesList();
         int getLibTransformVersion() const;
         QString pluginVersion() const;
+    private slots:
+        void onGuiDelete();
     private:
         QWidget * gui;
         Pip3lineCallback *callback;

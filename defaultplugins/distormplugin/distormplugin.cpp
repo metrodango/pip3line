@@ -12,12 +12,13 @@ Released under AGPL see LICENSE for more information
 #include "../../version.h"
 #include "distormtransf.h"
 #include <pip3linecallback.h>
+#include <distorm.h>
 #include <QLabel>
 
 DistormPlugin::DistormPlugin()
 {
-    gui = NULL;
-    callback = NULL;
+    gui = nullptr;
+    callback = nullptr;
 }
 
 DistormPlugin::~DistormPlugin()
@@ -41,11 +42,11 @@ QString DistormPlugin::compiledWithQTversion() const
 
 TransformAbstract *DistormPlugin::getTransform(QString name)
 {
-    TransformAbstract *ta = NULL;
+    TransformAbstract *ta = nullptr;
 
     if (DistormTransf::id == name) {
         ta = new(std::nothrow) DistormTransf();
-        if (ta == NULL)
+        if (ta == nullptr)
             qFatal("Cannot allocate memory for DistormTransf X{");
     }
 
@@ -64,7 +65,26 @@ const QStringList DistormPlugin::getTransformList(QString typeName)
 
 QWidget *DistormPlugin::getConfGui(QWidget *)
 {
-    return NULL;
+    if (gui == nullptr) {
+        QString info;
+        quint32 version = distorm_version();
+        info.append(QString("<p>Plugin using DiStorm %1.%2.%3<br>")
+                    .arg((version << 8 ) >> 24)
+                    .arg((version << 16) >> 24)
+                    .arg((version << 24) >> 24));
+
+        info.append("</p>");
+        QLabel * label = new(std::nothrow) QLabel(info);
+        if (label == nullptr) {
+            qFatal("Cannot allocate memory for QLabel (diStorm gui) X{");
+            return nullptr;
+        }
+        label->setWordWrap(true);
+        label->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
+        gui = label;
+        connect(gui,SIGNAL(destroyed()), SLOT(onGuiDelete()));
+    }
+    return gui;
 }
 
 const QStringList DistormPlugin::getTypesList()
@@ -80,6 +100,11 @@ int DistormPlugin::getLibTransformVersion() const
 QString DistormPlugin::pluginVersion() const
 {
     return VERSION_STRING;
+}
+
+void DistormPlugin::onGuiDelete()
+{
+    gui = nullptr;
 }
 
 #if QT_VERSION < 0x050000

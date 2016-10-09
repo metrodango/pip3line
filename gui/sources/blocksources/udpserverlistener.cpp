@@ -19,6 +19,7 @@ UdpServerListener::UdpServerListener(QHostAddress hostAddress, quint16 hostPort,
     connect(&connectionsTimer, SIGNAL(timeout()), this, SLOT(checkTimeouts()));
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&serverThread);
+    updateTimer.moveToThread(&serverThread);
     moveToThread(&serverThread);
     serverThread.start();
 
@@ -29,9 +30,6 @@ UdpServerListener::~UdpServerListener()
     serverThread.quit();
     serverThread.wait();
 
-    for (int i = 0 ; i < clients.size(); i++) {
-        BlocksSource::releaseID(clients.at(i).getSid());
-    }
 }
 
 QString UdpServerListener::getName()
@@ -61,7 +59,7 @@ void UdpServerListener::sendBlock(Block *block)
 
         bool foundSource = false;
         for (int i = 0; i < clients.size(); i++) {
-            UDPClient client = clients.at(i);
+            ConnectionDetails client = clients.at(i);
             if (block->getSourceid() ==  client.getSid()) {
                 qint64 bwritten = udpSocket->writeDatagram(data,client.getAdress(),client.getPort());
                 if (bwritten != data.size()) {
@@ -83,6 +81,7 @@ void UdpServerListener::sendBlock(Block *block)
 
 bool UdpServerListener::startListening()
 {
+
     connectionsTimer.start();
     qWarning() << this->metaObject()->className() << "startListening";
     if (udpSocket != nullptr) { // already listening
@@ -123,27 +122,11 @@ void UdpServerListener::stopListening()
         }
         clients.clear();
 
+
         emit stopped();
-        emit updated();
+        triggerUpdate();
     }
     connectionsTimer.stop();
-}
-
-QList<Target<BlocksSource *> > UdpServerListener::getAvailableConnections()
-{
-    QList<Target<BlocksSource *>> list;
-
-    for (int i = 0 ; i < clients.size(); i++) {
-        UDPClient client = clients.at(i);
-        QString desc = client.getAdress().toString();
-        desc.append(QString(":%1/udp").arg(client.getPort()));
-        Target<BlocksSource *> tac;
-        tac.setDescription(desc);
-        tac.setConnectionID(client.getSid());
-        tac.setSource(this);
-        list.append(tac);
-    }
-    return list;
 }
 
 void UdpServerListener::packetReceived()
@@ -162,7 +145,7 @@ void UdpServerListener::packetReceived()
         qCritical() << tr("[UdpClientListener::dataReceived] not all the data was read T_T");
     }
 
-    UDPClient client(sender,senderPort);
+    ConnectionDetails client(sender,senderPort);
 
     if (data.isEmpty()){
         emit log(tr("Received data block is empty, ignoring."),ID, Pip3lineConst::LERROR);
@@ -179,7 +162,7 @@ void UdpServerListener::packetReceived()
         sid = newSourceID(this);
         client.setSid(sid);
         clients.append(client);
-        emit updated();
+        updateConnectionsInfo();
     }
 
     Block * datab = new(std::nothrow) Block(data,sid);
@@ -190,11 +173,11 @@ void UdpServerListener::packetReceived()
 
 void UdpServerListener::checkTimeouts()
 {
-    QList<UDPClient> list = clients; // copying we don't want to interfer with the original yet
+    QList<ConnectionDetails> list = clients; // copying we don't want to interfer with the original yet
     bool listUpdated = false;
     qint64 current = QDateTime::currentMSecsSinceEpoch();
     for (int i = 0 ; i < list.size(); i++) {
-        UDPClient uc = list.at(i);
+        ConnectionDetails uc = list.at(i);
         if ((current - uc.getCreationTimeStamp().toMSecsSinceEpoch()) > GuiConst::DEFAULT_UDP_TIMEOUT_MS) {
             qDebug() << tr("UDP Client timeout [%2:%1]").arg(uc.getAdress().toString()).arg(uc.getPort());
             BlocksSource::releaseID(uc.getSid());
@@ -204,6 +187,21 @@ void UdpServerListener::checkTimeouts()
     }
 
     if (listUpdated)
-        emit updated();
+        updateConnectionsInfo();
+}
+
+void UdpServerListener::internalUpdateConnectionsInfo()
+{
+    connectionsInfo.clear();
+    for (int i = 0 ; i < clients.size(); i++) {
+        ConnectionDetails client = clients.at(i);
+        QString desc = client.getAdress().toString();
+        desc.append(QString(":%1/udp").arg(client.getPort()));
+        Target<BlocksSource *> tac;
+        tac.setDescription(desc);
+        tac.setConnectionID(client.getSid());
+        tac.setSource(this);
+        connectionsInfo.append(tac);
+    }
 }
 

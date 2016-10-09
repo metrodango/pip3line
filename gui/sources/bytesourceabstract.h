@@ -48,7 +48,6 @@ class BytesRange
         BytesRange(const BytesRange& other);
         BytesRange &operator=(const BytesRange &other);
 
-
         virtual ~BytesRange();
         bool isInRange(int value);
         bool isInRange(quint64 value);

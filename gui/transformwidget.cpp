@@ -658,6 +658,8 @@ void TransformWidgetStateObj::run()
         writer->writeAttribute(GuiConst::STATE_CURRENT_INDEX, write(tw->ui->tabWidget->currentIndex()));
         writer->writeAttribute(GuiConst::STATE_SCROLL_INDEX, write(tw->hexView->getHexTableView()->verticalScrollBar()->value()));
         writer->writeAttribute(GuiConst::STATE_IS_FOLDED, write(tw->isFolded()));
+        writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(tw->searchWidget->text(),true)); // searchWidget is never null (well, should never be)
+        writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(tw->gotoWidget->text()));
         writer->writeEndElement();
     } else {
         bool gotIt = false;
@@ -694,6 +696,20 @@ void TransformWidgetStateObj::run()
                         qFatal("Cannot allocate memory for TransformWidgetFoldingObj X{");
                     }
                     emit addNewState(state);
+                }
+            }
+
+            if (attrList.hasAttribute(GuiConst::STATE_SEARCH_DATA)) {
+                QString text = readString(attrList.value(GuiConst::STATE_SEARCH_DATA));
+                if (!text.isEmpty()) {
+                    tw->searchWidget->setText(text);
+                }
+            }
+
+            if (attrList.hasAttribute(GuiConst::STATE_GOTOOFFSET_DATA)) {
+                QString text = readString(attrList.value(GuiConst::STATE_GOTOOFFSET_DATA));
+                if (!text.isEmpty()) {
+                    tw->gotoWidget->setText(text);
                 }
             }
 

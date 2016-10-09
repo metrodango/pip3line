@@ -15,7 +15,7 @@ UrlEncodeWidget::UrlEncodeWidget(UrlEncode *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::UrlEncodeWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::UrlEncodeWidget X{");
     }
     transform = ntransform;

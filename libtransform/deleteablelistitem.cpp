@@ -16,7 +16,7 @@ DeleteableListItem::DeleteableListItem(const QString &text, const QPixmap &im, Q
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::DeleteableListItem();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::DeleteableListItem X{");
     }
     ui->setupUi(this);

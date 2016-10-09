@@ -71,7 +71,7 @@ bool Reverse::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Reverse::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) ReverseWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for ReverseWidget X{");
     }
     return widget;

@@ -67,6 +67,20 @@ QWidget *SourcesOrchestatorAbstract::requestConfGui(QWidget * parent)
     if (layout == nullptr) {
         qFatal("Cannot allocate memory for QHBoxLayout X{");
     }
+
+    int count = blockSourceCount();
+    for (int i = 0; i < count; i++) {
+        BlocksSource * bs = getBlockSource(i);
+        if (bs != nullptr) {
+            QWidget * wid = bs->getGui();
+            if (wid != nullptr) {
+                layout->addWidget(wid);
+            }
+        } else {
+            qCritical() << tr("[OrchestratorChooser::setupOrchestrator] BlockSource is nullptr T_T");
+        }
+    }
+
     wid->setLayout(layout);
 
     return wid;
@@ -169,6 +183,7 @@ void SourcesOrchestatorAbstract::onBlockReceived(Block *block)
 
     pac->setDirection(Packet::RIGHTLEFT);
 
+
     delete block;
     emit newPacket(pac);
 }
@@ -189,7 +204,8 @@ QStringList SourcesOrchestatorAbstract::initSourcesStrings()
          << "TCP proxy"
          << "UDP proxy"
          << "External Proxy (TCP)"
-         << "External Proxy (UDP)";
+         << "External Proxy (UDP)"
+         << "SOCKS 5 Proxy";
 
     return list;
 }

@@ -16,7 +16,7 @@ ByteRotWidget::ByteRotWidget(ByteRot * transf, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ByteRotWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ByteRotWidget X{");
     }
 

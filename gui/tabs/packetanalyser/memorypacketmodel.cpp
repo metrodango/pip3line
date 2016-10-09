@@ -23,7 +23,7 @@ qint64 MemoryPacketModel::addPacket(Packet *packet)
     if (packet != nullptr) {
         if (autoMergeConsecutivePackets && packetsList.size() > 0) {
             Packet * last = packetsList.last();
-            if (last->getDirection() == packet->getDirection() && last->getDirection() != Packet::NODIRECTION) {
+            if (arePacketsMergeable(last,packet)) {
                 QByteArray data = last->getOriginalData();
                 data.append(packet->getOriginalData());
                 last->setData(data,true);
@@ -60,22 +60,24 @@ qint64 MemoryPacketModel::addPackets(QList<Packet *> packets)
         int first = packetsList.size();
         int last = first < INT_MAX - packets.size() ? first + packets.size() : INT_MAX;
         int count = last - first;
-        beginInsertRows(QModelIndex(), first, last);
-        for (int i = 0 ; i < count ; i++) {
-            packetsList.append(packets.at(i));
-            QHash<QString, QString> f = packets.at(i)->getAdditionalFields();
-            QHashIterator<QString, QString> j(f);
-             while (j.hasNext()) {
-                 j.next();
-                 if (!columnNames.contains(j.key())) {
-                     addUserColumn(j.key(),nullptr,Pip3lineConst::TEXTFORMAT);
+        if (count > 0) {
+            beginInsertRows(QModelIndex(), first, last);
+            for (int i = 0 ; i < count ; i++) {
+                packetsList.append(packets.at(i));
+                QHash<QString, QString> f = packets.at(i)->getAdditionalFields();
+                QHashIterator<QString, QString> j(f);
+                 while (j.hasNext()) {
+                     j.next();
+                     if (!columnNames.contains(j.key())) {
+                         addUserColumn(j.key(),nullptr,Pip3lineConst::TEXTFORMAT);
+                     }
                  }
-             }
-        }
-        endInsertRows();
+            }
+            endInsertRows();
 
-        ret = packetsList.size() > 0 ? packetsList.size() - 1 : PacketModelAbstract::INVALID_POS;
-        emit updated();
+            ret = packetsList.size() > 0 ? packetsList.size() - 1 : PacketModelAbstract::INVALID_POS;
+            emit updated();
+        }
     }
 
     return ret;
@@ -317,6 +319,14 @@ void MemoryPacketModel::internalAddUserColumn(const QString &name, TransformAbst
     launchUpdate(transform, 0,column);
 }
 
+bool MemoryPacketModel::arePacketsMergeable(Packet * pone, Packet * ptwo)
+{
+    return (pone->getDirection() == ptwo->getDirection() &&  // if they have the same direction
+            pone->getDirection() != Packet::NODIRECTION &&   // and if this direction is an actual one
+            pone->getSourceid() == ptwo->getSourceid() &&    // and if they have the same source id
+            pone->getSourceid() != Block::INVALID_ID ) ;     // and if this source ID is valid
+}
+
 QVariant MemoryPacketModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
@@ -406,10 +416,7 @@ void MemoryPacketModel::mergeConsecutivePackets()
         QByteArray data = previous->getData();
         for (int i = 1; i < packetsList.size(); i++) {
             Packet * current = packetsList.at(i);
-            if (previous->getDirection() == current->getDirection() &&  // if they have the same direction
-                   previous->getDirection() != Packet::NODIRECTION &&   // and if this direction is an actual one
-                   previous->getSourceid() == current->getSourceid() && // and if they have the same source id
-                   previous->getSourceid() != Block::INVALID_ID ) {     // and if this source ID is valid
+            if (arePacketsMergeable(previous,current)) {  // checking mergeability
                 data.append(current->getData());
                 delete packetsList.takeAt(i);
                 i--; // removed a packet so need to reduce i

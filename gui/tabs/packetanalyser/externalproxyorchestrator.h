@@ -19,6 +19,7 @@ class ExternalProxyOrchestrator : public SourcesOrchestatorAbstract
         void onBlockReceived(Block *block);
         void onInboundBlockSourceDestroyed();
         void onOutboundBlockSourceDestroyed();
+        void checkForwarder();
     private:
         Target<SourcesOrchestatorAbstract *> toOrchestratorTarget(Target<BlocksSource *> bst);
         BlocksSource * inboundSource{nullptr};

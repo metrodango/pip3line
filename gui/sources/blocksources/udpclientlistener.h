@@ -4,7 +4,7 @@
 #include "ipblockssources.h"
 #include <QTimer>
 #include <QUdpSocket>
-#include "udpclient.h"
+#include "connectiondetails.h"
 
 class UdpClientListener : public IPBlocksSources
 {
@@ -20,16 +20,16 @@ class UdpClientListener : public IPBlocksSources
         void sendBlock(Block *block);
         bool startListening();
         void stopListening();
-        QList<Target<BlocksSource *> > getAvailableConnections();
     private slots:
         void dataReceived();
         void checkTimeouts();
     private:
+        void internalUpdateConnectionsInfo();
         static const int MAX_UDP_DATAGRAM_SIZE_HARD;
         static const int MAX_UDP_DATAGRAM_SIZE_SOFT;
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;
-        QHash<QUdpSocket *, UDPClient> udpSockets;
+        QHash<QUdpSocket *, ConnectionDetails> udpSockets;
         QHash<int,int> mapExtSourcesToLocal;
         QThread workerThread;
         bool running;

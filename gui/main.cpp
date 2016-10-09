@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
 #endif
 
-    a.setStyleSheet("QWidget{ selection-background-color: blue}");
+ //   a.setStyleSheet("QWidget{ selection-background-color: blue}");
     qDebug() << "App started";
 
     // Clearing the PATH to avoid library corruption whenever loading plugins (mostly a Windows issue, but it does not hurt the other platforms)

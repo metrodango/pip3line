@@ -22,7 +22,7 @@ const QString XmlQuery::id = "XML XPath/XQuery";
 XmlQuery::XmlQuery()
 {
     messHandler = new(std::nothrow) XmlMessageHandler(this);
-    if (messHandler == NULL) {
+    if (messHandler == nullptr) {
         qFatal("Cannot allocate memory for XmlMessageHandler X{");
     }
 }
@@ -106,7 +106,7 @@ bool XmlQuery::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *XmlQuery::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) XmlQueryWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for XmlQueryWidget X{");
     }
     return widget;

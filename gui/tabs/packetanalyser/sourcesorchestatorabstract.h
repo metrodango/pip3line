@@ -23,7 +23,8 @@ class SourcesOrchestatorAbstract : public QObject
             TCP_PROXY = 5,
             UDP_PROXY = 6,
             BLOCKS_EXTERNAL_PROXY_TCP = 7,
-            BLOCKS_EXTERNAL_PROXY_UDP = 8
+            BLOCKS_EXTERNAL_PROXY_UDP = 8,
+            SOCKS5_PROXY = 9
         };
 
         explicit SourcesOrchestatorAbstract(QObject *parent = 0);
@@ -38,8 +39,8 @@ class SourcesOrchestatorAbstract : public QObject
         void setType(const OrchestratorType &value);
         virtual BlocksSource * getBlockSource(int index) = 0;
         virtual int blockSourceCount() const = 0;
-        QWidget * getControlGui(QWidget *parent);
-        QWidget * getConfGui(QWidget *parent);
+        QWidget * getControlGui(QWidget *parent = nullptr);
+        QWidget * getConfGui(QWidget *parent = nullptr);
         bool getHasDirection() const;
         virtual QHash<QString, QString> getConfiguration();
         virtual void setConfiguration(QHash<QString, QString> conf);

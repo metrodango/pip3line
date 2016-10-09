@@ -91,7 +91,7 @@ bool Padding::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Padding::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) PaddingWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for PaddingWidget X{");
     }
     return widget;

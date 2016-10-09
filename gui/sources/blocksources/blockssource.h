@@ -19,6 +19,8 @@ Released under AGPL see LICENSE for more information
 #include <QDateTime>
 #include <transformabstract.h>
 #include "target.h"
+#include <QReadWriteLock>
+#include <QTimer>
 #include <commonstrings.h>
 
 class QWidget;
@@ -52,7 +54,8 @@ class BlocksSource : public QObject
             REFLEXION_ENABLED   = 0x40,
             READ_ONLY           = 0x80,
             B64BLOCKS_OPTIONS   = 0x100,
-            B64BLOCKS_ENABLED   = 0x200
+            B64BLOCKS_ENABLED   = 0x200,
+            IP_OPTIONS          = 0x400
         };
 
         static const QString NEW_CONNECTION_STRING;
@@ -64,7 +67,7 @@ class BlocksSource : public QObject
 
         explicit BlocksSource(QObject *parent = 0);
         virtual ~BlocksSource();
-        QWidget *getGui(QWidget * parent = 0);
+        QWidget *getGui(QWidget * parent = nullptr);
         bool isReadWrite();
         virtual void postBlockForSending(Block *block);
         bool isB64Blocks() const;
@@ -98,7 +101,7 @@ class BlocksSource : public QObject
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
         void updated();
         void newConnection(BlocksSource *);
-        void connectionClosed(BlocksSource *);
+        void connectionClosed(int cid);
         void inboundTransformModfied();
         void outboundTranformModfied();
         void inboundTranformSelectionRequested();
@@ -113,12 +116,18 @@ class BlocksSource : public QObject
         void setB64Blocks(bool enabled);
         void setB64MaxBlockLength(int value);
         void setB64BlocksSeparator(char value);
+        virtual void onConnectionClosed(int cid);
     protected:
-        void b64DecodeAndEmit(QByteArray data);
+        void b64DecodeAndEmit(QByteArray data, int rsid);
         virtual QWidget *requestGui(QWidget * parent);
-        void processIncomingB64Block(QByteArray data);
+        void processIncomingB64Block(QByteArray data, int rsid);
         QByteArray applyInboundTransform(QByteArray data);
         QByteArray applyOutboundTransform(QByteArray data);
+
+        void updateConnectionsInfo();
+        virtual void internalUpdateConnectionsInfo() = 0;
+        QList<Target<BlocksSource *>> connectionsInfo;
+        QTimer updateTimer;
 
         char b64BlocksSeparator;
         int b64MaxBlockLength;
@@ -127,15 +136,19 @@ class BlocksSource : public QObject
         TransformAbstract * outboundTranform;
         BSOURCETYPE type; // should not need to save that
         int sid; // don't save that, that's a transient number
-        QByteArray b64BlockTempData; // don't save that, temp data
-
+        QHash<int,QByteArray> b64BlockTempDataList; // don't save that, temp data
+    protected slots:
+        void triggerUpdate();
     private slots:
         void onGuiDestroyed();
     private:
+        QReadWriteLock infoLocker;
         QWidget * gui;
         static int currentid;
         static QHash<int,BlocksSource *> idSourceTable;
         static QMutex idlock;
+        QTime initialTime;
+
 };
 
 #endif // BLOCKSSOURCE_H

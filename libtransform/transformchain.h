@@ -38,7 +38,6 @@ class LIBTRANSFORMSHARED_EXPORT TransformChain : public QList<TransformAbstract 
         Pip3lineConst::OutputType getPreferredOutputType() const;
         void clearTransforms();
 private:
-
         QString name;
         QString description;
         QString help;

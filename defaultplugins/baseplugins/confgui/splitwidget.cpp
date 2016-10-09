@@ -15,7 +15,7 @@ SplitWidget::SplitWidget(Split *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::SplitWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::SplitWidget X{");
     }
     transform = ntransform;

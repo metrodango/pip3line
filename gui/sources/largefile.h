@@ -19,6 +19,7 @@ Released under AGPL see LICENSE for more information
 
 class FileSourceReader : public SourceReader
 {
+        Q_OBJECT
     public:
         explicit FileSourceReader(QString filename);
         ~FileSourceReader();

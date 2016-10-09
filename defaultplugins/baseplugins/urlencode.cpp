@@ -69,7 +69,7 @@ bool UrlEncode::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *UrlEncode::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) UrlEncodeWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for UrlEncodeWidget X{");
     }
     return widget;

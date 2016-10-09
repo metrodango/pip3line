@@ -37,6 +37,7 @@ class SslConf : public QObject
         QSslSocket::PeerVerifyMode getSslVerificationMode() const;
         QString getSslPeerNameSNI() const;
         bool isUsingSNI() const;
+        static QString sslModeToString(int mode);
     signals:
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     public slots:

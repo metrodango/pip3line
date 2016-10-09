@@ -18,6 +18,7 @@ class Packet;
 
 class MemoryPacketModel : public PacketModelAbstract
 {
+        Q_OBJECT
     public:
         explicit MemoryPacketModel(TransformMgmt *transformFactory, QObject *parent = nullptr);
         ~MemoryPacketModel();
@@ -44,6 +45,7 @@ class MemoryPacketModel : public PacketModelAbstract
     private:
         void launchUpdate(TransformAbstract * transform, int row, int column,int length = -1);
         void internalAddUserColumn(const QString &name, TransformAbstract * transform);
+        bool arePacketsMergeable(Packet * pone, Packet * ptwo);
         QList<Packet *> packetsList;
 };
 

@@ -15,7 +15,7 @@ RegularExpWidget::RegularExpWidget(RegularExp *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::RegularExpWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::RegularExpWidget X{");
     }
     transform = ntransform;

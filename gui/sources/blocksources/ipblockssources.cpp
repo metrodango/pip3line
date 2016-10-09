@@ -58,13 +58,15 @@ QWidget *IPBlocksSources::requestGui(QWidget *parent)
         base->setTLSWidget(sslConfiguration->getGui());
 
     if (type == BlocksSource::CLIENT) {
-        IPNetworkClientWidget * widget = new(std::nothrow) IPNetworkClientWidget(this, parent);
-        if (widget == nullptr) {
-            qFatal("Cannot allocate memory for NetworkClientWidget X{");
+        if (flags & IP_OPTIONS) { // SOCKS5 does not need the IP configuration
+            IPNetworkClientWidget * widget = new(std::nothrow) IPNetworkClientWidget(this, parent);
+            if (widget == nullptr) {
+                qFatal("Cannot allocate memory for NetworkClientWidget X{");
+            }
+            connect(widget, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+            connect(base, SIGNAL(tlsEnabled(bool)), widget, SLOT(onTlsToggled(bool)));
+            base->insertWidgetInGeneric(0,widget);
         }
-        connect(widget, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
-        connect(base, SIGNAL(tlsEnabled(bool)), widget, SLOT(onTlsToggled(bool)));
-        base->insertWidgetInGeneric(0,widget);
     } else if (type == BlocksSource::SERVER) {
         IPNetworkServerWidget * widget = new(std::nothrow) IPNetworkServerWidget(this, parent);
         if (widget == nullptr) {

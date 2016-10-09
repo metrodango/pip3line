@@ -8,7 +8,7 @@ class ProxyOrchestrator : public SourcesOrchestatorAbstract
         Q_OBJECT
     public:
         explicit ProxyOrchestrator(BlocksSource *serverSource, BlocksSource *clientSource, QObject *parent = 0);
-        ~ProxyOrchestrator();
+        virtual ~ProxyOrchestrator();
         QList<Target<SourcesOrchestatorAbstract *> > getAvailableConnections();
         BlocksSource * getBlockSource(int index);
         int blockSourceCount() const;

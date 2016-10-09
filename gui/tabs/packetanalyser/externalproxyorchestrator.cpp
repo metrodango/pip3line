@@ -9,11 +9,7 @@ ExternalProxyOrchestrator::ExternalProxyOrchestrator(BlocksSource *inboundSource
 {
     hasDirection = true;
     if (inboundSource != nullptr && outboundSource != nullptr) {
-        if (inboundSource->isReflexive() && outboundSource->isReflexive()) {
-        forwarder = true;
-        } else {
-            forwarder = false;
-        }
+        checkForwarder();
 
         connect(this, SIGNAL(startChildren()), inboundSource, SLOT(startListening()), Qt::QueuedConnection);
         connect(this, SIGNAL(stopChildren()), inboundSource, SLOT(stopListening()), Qt::QueuedConnection);
@@ -25,7 +21,7 @@ ExternalProxyOrchestrator::ExternalProxyOrchestrator(BlocksSource *inboundSource
         connect(inboundSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
         connect(inboundSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
         connect(inboundSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(inboundSource, SIGNAL(connectionClosed(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
+        connect(inboundSource, SIGNAL(reflexionChanged(bool)), this, SLOT(checkForwarder()), Qt::QueuedConnection);
 
         connect(this, SIGNAL(startChildren()), outboundSource, SLOT(startListening()), Qt::QueuedConnection);
         connect(this, SIGNAL(stopChildren()), outboundSource, SLOT(stopListening()), Qt::QueuedConnection);
@@ -37,7 +33,7 @@ ExternalProxyOrchestrator::ExternalProxyOrchestrator(BlocksSource *inboundSource
         connect(outboundSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
         connect(outboundSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
         connect(outboundSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(outboundSource, SIGNAL(connectionClosed(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
+        connect(outboundSource, SIGNAL(reflexionChanged(bool)), this, SLOT(checkForwarder()), Qt::QueuedConnection);
     } else {
         if (inboundSource == nullptr) {
             qCritical() << tr("[ExternalProxyUDPOrchestrator::ExternalProxyUDPOrchestrator] inbound source is null T_T");
@@ -149,6 +145,21 @@ void ExternalProxyOrchestrator::onInboundBlockSourceDestroyed()
 void ExternalProxyOrchestrator::onOutboundBlockSourceDestroyed()
 {
     outboundSource = nullptr;
+}
+
+void ExternalProxyOrchestrator::checkForwarder()
+{
+    if (inboundSource != nullptr && outboundSource != nullptr) {
+        bool temp = false;
+        if (inboundSource->isReflexive() && outboundSource->isReflexive()) {
+            temp = true;
+        }
+
+        if (forwarder != temp) {
+            forwarder = temp;
+            emit forwardingChanged(forwarder);
+        }
+    }
 }
 
 Target<SourcesOrchestatorAbstract *> ExternalProxyOrchestrator::toOrchestratorTarget(Target<BlocksSource *> bst)

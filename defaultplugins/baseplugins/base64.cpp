@@ -113,7 +113,7 @@ bool Base64::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Base64::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) Base64Widget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for Base64Widget X{");
     }
     return widget;

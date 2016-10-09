@@ -20,7 +20,7 @@ ModulesManagementWidget::ModulesManagementWidget(ModulesManagement *nmodulesMgmt
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ModulesManagementWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ModulesManagementWidget X{");
     }
     modulesMgmt = nmodulesMgmt;
@@ -58,7 +58,7 @@ void ModulesManagementWidget::loadModules()
     QStringList list = modulesMgmt->getModulesList();
     for (int i = 0; i < list.size(); i++) {
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(list.at(i));
-        if (itemWid == NULL) {
+        if (itemWid == nullptr) {
             qFatal("Cannot allocate memory for DeleteableListItem X{");
         } else {
             if (modulesMgmt->getModuleType(list.at(i)) == ModulesManagement::AUTO) {
@@ -69,7 +69,7 @@ void ModulesManagementWidget::loadModules()
 
             connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(unload(QString)));
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
-            if (item == NULL) {
+            if (item == nullptr) {
                 qFatal("Cannot allocate memory for QListWidgetItem X{");
             } else {
                 ui->modulesListWidget->addItem(item);

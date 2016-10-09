@@ -166,14 +166,18 @@ QList<TabAbstract *> GuiHelper::getTabs()
 
 void GuiHelper::onTabDestroyed()
 {
-    TabAbstract * tg = static_cast<TabAbstract *>(sender());
-    if (tg == nullptr) {
-        logger->logError(tr("nullptr Deleted Tab"), LOGID);
-    } else if (!tabs.remove(tg)) {
-        logger->logError(tr("Deleted Tab not found"), LOGID);
+    qDebug() << "tab destroyed";
+    QObject * s = sender();
+    if (s == nullptr) {
+        qCritical() << tr("[GuiHelper::onTabDestroyed] nullptr sender");
     } else {
-        updateSortedTabs();
-        emit tabsUpdated();
+        TabAbstract * tg = static_cast<TabAbstract *>(s); // we only want the address, the pointer is never dereferenced
+        if (!tabs.remove(tg)) {
+            qCritical() << tr("[GuiHelper::onTabDestroyed] Deleted Tab not found");
+        } else {
+            updateSortedTabs();
+            emit tabsUpdated();
+        }
     }
 }
 
@@ -689,6 +693,9 @@ QString GuiHelper::getAutoSaveFileName() const
 void GuiHelper::setAutoSaveFileName(const QString &value)
 {
     autoSaveFileName = value;
+    QFileInfo fi;
+    fi.setFile(autoSaveFileName);
+    autoSaveFileName = fi.absoluteFilePath();
     settings->setValue(GuiConst::SETTINGS_AUTO_SAVE_SINGLE_FILENAME, autoSaveFileName);
 }
 
@@ -924,7 +931,9 @@ void GuiHelper::refreshAll()
         defaultStateFlags = GuiConst::STATE_LOADSAVE_SAVE_ALL;
 
     autoSaveState = settings->value(GuiConst::SETTINGS_AUTO_SAVE_ENABLE, GuiConst::DEFAULT_AUTO_SAVE_ENABLED).toBool();
-    autoSaveFileName = settings->value(GuiConst::SETTINGS_AUTO_SAVE_SINGLE_FILENAME,  transformFactory->getHomeDirectory().append(QDir::separator()).append(GuiConst::SETTINGS_AUTO_SAVE_FILENAME)).toString();
+    QFileInfo fi;
+    fi.setFile(transformFactory->getHomeDirectory().append(QDir::separator()).append(GuiConst::SETTINGS_AUTO_SAVE_FILENAME));
+    autoSaveFileName = settings->value(GuiConst::SETTINGS_AUTO_SAVE_SINGLE_FILENAME, fi.absoluteFilePath()).toString();
     autoSaveOnExit = settings->value(GuiConst::SETTINGS_AUTO_SAVE_ON_EXIT, GuiConst::DEFAULT_AUTO_SAVE_ON_EXIT).toBool();
     autoSaveTimerEnable = settings->value(GuiConst::SETTINGS_AUTO_SAVE_TIMER_ENABLE, GuiConst::DEFAULT_AUTO_SAVE_TIMER_ENABLE).toBool();
     autoSaveTimerInterval = settings->value(GuiConst::SETTINGS_AUTO_SAVE_TIMER_INTERVAL, GuiConst::DEFAULT_AUTO_SAVE_TIMER_INTERVAL).toInt(&ok);

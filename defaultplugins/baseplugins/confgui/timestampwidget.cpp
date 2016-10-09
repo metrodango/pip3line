@@ -15,7 +15,7 @@ TimestampWidget::TimestampWidget(TimeStamp *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::TimestampWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::TimestampWidget X{");
     }
     transform = ntransform;

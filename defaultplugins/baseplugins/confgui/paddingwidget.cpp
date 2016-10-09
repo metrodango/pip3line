@@ -16,7 +16,7 @@ PaddingWidget::PaddingWidget(Padding *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::PaddingWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::PaddingWidget X{");
     }
     transform = ntransform;

@@ -2,12 +2,13 @@
 
 ## Requirements
 
- * A working Qt4 >= 4.8  or QT5 dev environment (need to specify WITH_QT5=OFF in cmake arguments for Qt4)
+ * A working QT5 dev environment
  * A working cmake environment
  * OpenSSL development libraries and headers (optional)
  * Python 2.7 or 3 (or both) dev environment (optional)
  * Distorm development libraries and headers (optional)
 
+Qt4 is not supported anymore, too many changes have occurred , and Pip3line is now using Qt5 new APIs.
 
 This project is based on the Qt library which is multi-platform, so the building process should roughly be the same once you have a working dev environment.
 
@@ -116,12 +117,12 @@ A list of supported generators is given with:
 
 ### notes
 
-You are goind to see lots of warnings during the compilation, they should pertain to the Qt library only and out of scope of the Pip3line code.
+You are going to see lots of warnings during the compilation, they should only pertain to the Qt library and not the Pip3line code.
 
 On windows you need to copy the relevant dll into the program/system folder, otherwise you end up with some missing libraries errors. There is an old-school DOS script file win_package.bat that might help you (or maybe not ..)
 
 ```
-win_package.bat 2014_64
+win_package.bat 2015_64
 ```
 
 **Beware**: whenever developing on Windows platforms do not to mix debug and release binaries (for example the debug version of the gui using the release version of libtransform), this will lead to random memory corruptions and crashes.
@@ -140,7 +141,9 @@ for example
 
 Then the rest is exactly the same as on Linux platform. 
 
-The OpenSSL plugin has been disabled on this platform though.
+The **OpenSSL plugin** has been disabled on this platform though.
+
+**Python plugins** crash (well the python 3 one does) when both plugins are loaded at the same time, so you can only use one at time on OSX. It may be because I am compiling against the stock Python2.7, but who knows ...
 
 ## OpenSSL plugin
 

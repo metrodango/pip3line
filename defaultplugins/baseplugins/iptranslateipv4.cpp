@@ -118,7 +118,7 @@ bool IPTranslateIPv4::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *IPTranslateIPv4::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) IPTranslateIPv4Widget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for IPTranslateIPv4Widget X{");
     }
     return widget;

@@ -87,8 +87,8 @@ namespace GuiConst
     extern const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET;
     extern const QString STATE_CHUNK_SIZE;
     extern const QString STATE_LARGE_FILE_NAME;
-    extern const QString STATE_SEARCH_WIDGET;
-    extern const QString STATE_GOTOOFFSET_WIDGET;
+    extern const QString STATE_SEARCH_DATA;
+    extern const QString STATE_GOTOOFFSET_DATA;
     extern const QString STATE_MESSAGE_PANEL;
     extern const QString STATE_MESSAGE_PANEL_VISIBLE;
     extern const QString STATE_SIZE;
@@ -154,6 +154,7 @@ namespace GuiConst
     extern const QString STATE_MODEL_INDEX;
     extern const QString STATE_IS_HIDDEN;
     extern const QString STATE_VIEW_INDEX;
+    extern const QString STATE_WIDTH;
     extern const QString STATE_PACKET_LIST;
     extern const QString STATE_PACKET;
     extern const QString STATE_ORCHESTRATOR;
@@ -161,6 +162,8 @@ namespace GuiConst
     extern const QString STATE_INBOUNDTRANSFORM;
     extern const QString STATE_OUTBOUNDTRANSFORM;
     extern const QString STATE_INJECTED_PACKET;
+    extern const QString STATE_TRACK_PACKETS;
+    extern const QString STATE_AUTO_MERGE;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;

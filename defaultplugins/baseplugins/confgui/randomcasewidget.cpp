@@ -16,7 +16,7 @@ RandomCaseWidget::RandomCaseWidget(RandomCase *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::RandomCaseWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::RandomCaseWidget X{");
     }
     transform = ntransform;

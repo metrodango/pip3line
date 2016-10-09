@@ -17,7 +17,7 @@ DistormWidget::DistormWidget(DistormTransf *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::DistormWidget();
-    if (ui == NULL)
+    if (ui == nullptr)
         qFatal("Cannot allocate memory for Ui::DistormWidget X{");
 
     transform = ntransform;

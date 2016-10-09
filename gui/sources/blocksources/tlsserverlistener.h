@@ -6,9 +6,12 @@
 #include <QHash>
 #include <QTcpServer>
 #include <QMutex>
+#include <QReadWriteLock>
+#include "connectiondetails.h"
 
 class QWidget;
 class QThread;
+class SocksProxyHelper;
 
 class BaseTcpServer : public QTcpServer
 {
@@ -40,11 +43,16 @@ class TLSServerListener : public IPBlocksSources
         QString getName();
         QString getDescription();
         bool isStarted();
+        bool isSocks5Proxy() const;
+        void setSocks5Proxy(bool value);
+
     public slots:
         void sendBlock(Block *block);
         bool startListening();
         void stopListening();
-        QList<Target<BlocksSource *> > getAvailableConnections();
+        void onConnectionClosed(int cid);
+    signals:
+        void newConnectionData(int sourceId, ConnectionDetails cd);
     private slots:
         void dataReceived();
 #if QT_VERSION >= 0x050000
@@ -58,13 +66,20 @@ class TLSServerListener : public IPBlocksSources
         void onClientDeconnection();
         void onTLSUpdated(bool enabled);
     private:
+        void internalUpdateConnectionsInfo();
+        bool startingTLS(QSslSocket *socket);
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;
+        void handlingDisconnect(QSslSocket *socket);
         QSslSocket *serverSocket;
         BaseTcpServer *server;
         QThread serverThread;
+
         QHash<QSslSocket *, int> clients;
+        QHash<QSslSocket *, SocksProxyHelper *> clientsProxyNeeded;
         QString actualID;
+        bool socksProxy;
+        QList<quint16> tlsPorts;
 };
 
 #endif // TLSSERVERLISTENER_H

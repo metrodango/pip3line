@@ -15,7 +15,7 @@ BinaryWidget::BinaryWidget(Binary *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::BinaryWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::BinaryWidget X{");
     }
     transform = ntransform;

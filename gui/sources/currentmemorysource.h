@@ -89,18 +89,6 @@ class MemSearch : public SearchAbstract {
         QList<MemRange *> ranges;
 };
 
-class MemSourceReader : public SourceReader
-{
-    public:
-        explicit MemSourceReader(QString filename);
-        ~MemSourceReader();
-        bool seek(quint64 pos);
-        int read(char * buffer, int maxLen);
-        bool isReadable();
-    private:
-        QList<MemRange *> allocatedRanges;
-};
-
 class CurrentMemorysource : public LargeRandomAccessSource
 {
         Q_OBJECT

@@ -16,7 +16,7 @@ IPTranslateIPv4Widget::IPTranslateIPv4Widget(IPTranslateIPv4 *ntransform, QWidge
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::IPTranslateIPv4Widget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::IPTranslateIPv4Widget X{");
     }
     transform = ntransform;

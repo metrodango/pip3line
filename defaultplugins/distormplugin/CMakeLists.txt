@@ -35,7 +35,7 @@ include_directories (
 link_directories (
 	${DISTORM3_LIB_PATH}
 	${PROJECT_SOURCE_DIR}/../../lib
-	../../../distorm/build/lib/distorm3
+	#	../../../distorm/build/lib/distorm3
 	)
 
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
@@ -53,7 +53,7 @@ if (WIN32)
 elseif(APPLE)
 	link_directories ( ../../../distorm/make/mac )
 elseif(UNIX)
-	link_directories ( ../../../distorm/make/linux )
+	#link_directories ( ../../../distorm/make/linux )
 endif ()
 
 set ( EXTERN_LIBS transform distorm3 )

@@ -16,7 +16,7 @@ Base32Widget::Base32Widget(Base32 *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::Base32Widget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::Base32Widget X{");
     }
     transform = ntransform;

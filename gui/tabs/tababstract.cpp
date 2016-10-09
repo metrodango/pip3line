@@ -37,7 +37,7 @@ TabAbstract::~TabAbstract()
 
 void TabAbstract::setName(const QString &nname)
 {
-    if (nname != name) {
+    if (!nname.isEmpty() && nname != name) {
         name = nname;
         QWidget * parent = parentWidget();
         if (parent != nullptr && QString(parent->metaObject()->className()) == "FloatingDialog")
@@ -116,10 +116,10 @@ void TabStateObj::run()
         if (reader->name() == GuiConst::STATE_PIP3LINE_DOC) {
             reader->readNext();
         }
-        qDebug() << tr("reading tab conf") << reader->name();
-        QXmlStreamAttributes attrList = reader->attributes();
-        if (attrList.hasAttribute(GuiConst::STATE_TAB_NAME)) {
-            QString name = attrList.value(GuiConst::STATE_TAB_NAME).toString();
+       // qDebug() << tr("reading tab conf") << reader->name();
+        attributes = reader->attributes();
+        if (attributes.hasAttribute(GuiConst::STATE_TAB_NAME)) {
+            QString name = attributes.value(GuiConst::STATE_TAB_NAME).toString();
             if (!name.isEmpty()) {
                 tab->setName(name);
             }

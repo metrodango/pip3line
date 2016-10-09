@@ -110,13 +110,13 @@ SearchResultsWidget::SearchResultsWidget(FoundOffsetsModel * offsetModel, GuiHel
     ui->copyPushButton->setMenu(saveToClipboardMenu);
 
     connect(ui->listView,SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRightClick(QPoint)));
-    connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)), SLOT(onDoubleClick(QModelIndex)));
-    connect(ui->listView, SIGNAL(pressed(QModelIndex)), SLOT(onDoubleClick(QModelIndex)));
+    connect(ui->listView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), SLOT(onSelectionChanged(QModelIndex)));
     connect(globalContextMenu, SIGNAL(triggered(QAction*)), SLOT(contextMenuAction(QAction*)));
     connect(itemModel, SIGNAL(updated()), SLOT(onModelUpdated()));
     connect(ui->clearResultsPushButton, SIGNAL(clicked()), SLOT(onClear()));
     connect(saveListToFileAsHexadecimal, SIGNAL(triggered()), SLOT(onSaveToFileHexAction()));
     connect(saveListToFileAsDecimal, SIGNAL(triggered()), SLOT(onSaveToFileDecAction()));
+    connect(saveToClipboardMenu, SIGNAL(triggered(QAction*)), this,  SLOT(contextMenuAction(QAction*)));
 
     // if there is a last item selected
 
@@ -136,7 +136,7 @@ void SearchResultsWidget::clearResults()
     itemModel->clear();
 }
 
-void SearchResultsWidget::onDoubleClick(QModelIndex index)
+void SearchResultsWidget::onSelectionChanged(QModelIndex index)
 {
     emit jumpTo(itemModel->getStartingOffset(index), itemModel->getEndOffset(index));
 }
@@ -188,6 +188,8 @@ void SearchResultsWidget::contextMenuAction(QAction *action)
         }
         text.chop(1);
         clipboard->setText(text);
+    } else {
+        qCritical() << "[SearchResultsWidget::contextMenuAction] QAction object not found" << action;
     }
 }
 
@@ -252,6 +254,8 @@ bool SearchResultsWidget::eventFilter(QObject *obj, QEvent *event)
             QModelIndex index = ui->listView->currentIndex();
             if (index.isValid()) {
                 emit jumpTo(itemModel->getStartingOffset(index), itemModel->getEndOffset(index));
+            } else {
+                qCritical() << "[SearchResultsWidget::eventFilter] index is not valid";
             }
             return true;
         }

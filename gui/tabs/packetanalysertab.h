@@ -55,6 +55,9 @@ class PacketAnalyserTab : public TabAbstract
         bool canReceiveData();
         bool getForwarding() const;
         bool getIntercepting() const;
+        bool isTrackingLast() const;
+        void setAutoMerge(bool value);
+
     private slots:
         void onAddNewColumn();
         void onImport();
@@ -70,7 +73,6 @@ class PacketAnalyserTab : public TabAbstract
         void onOptionDialogClosed();
         void setOrchestrator(SourcesOrchestatorAbstract *orch);
         void receiveNewPacket(Packet * packet);
-        void orchestratorForwardingChanged(bool val);
         void onForwardPressed();
         void onInterceptClicked();
         void onOrchestratorConnectionsChanged();
@@ -89,6 +91,7 @@ class PacketAnalyserTab : public TabAbstract
         void onInboundTransformRequested();
         void onOutboundTransformRequested();
         void onSaveLoadFinished();
+        void onItemClicked(const QModelIndex &index);
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
     private:
         static const int TIMESTAMP_COLUMN_WIDTH;

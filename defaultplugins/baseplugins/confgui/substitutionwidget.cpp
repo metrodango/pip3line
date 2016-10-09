@@ -23,7 +23,7 @@ SubstitutionWidget::SubstitutionWidget(Substitution *ntransform, QWidget *parent
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::SubstitutionWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::SubstitutionWidget X{");
     }
     transform = ntransform;

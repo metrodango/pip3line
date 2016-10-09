@@ -13,6 +13,7 @@ Released under AGPL see LICENSE for more information
 #include <QMutexLocker>
 #include <QTime>
 #include <QDebug>
+#include <QApplication>
 
 using namespace Pip3lineConst;
 
@@ -91,7 +92,7 @@ void LoggerWidget::addMessage(const QString &message, const QString &source, LOG
             qWarning() << fmess;
             break;
         default:
-            color = Qt::black;
+            color = QApplication::palette().windowText().color();
 #if QT_VERSION >= 0x050500
             qInfo() << fmess;
 #else

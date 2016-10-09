@@ -50,7 +50,7 @@ bool ByteRot::isTwoWays()
 QWidget *ByteRot::requestGui(QWidget *parent)
 {
     QWidget * ret = new(std::nothrow) ByteRotWidget(this, parent);
-    if (ret == NULL) {
+    if (ret == nullptr) {
         qFatal("Cannot allocate memory for ByteRotWidget X{");
     }
     return ret;

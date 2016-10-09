@@ -75,7 +75,7 @@ bool Xor::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Xor::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) XorWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for XorWidget X{");
     }
     return widget;

@@ -15,7 +15,7 @@ BytesToFloatWdiget::BytesToFloatWdiget(BytesToFloat *ntransform, QWidget *parent
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::BytesToFloatWdiget();
-    if (ui == NULL)
+    if (ui == nullptr)
         qFatal("Cannot allocate memory for Ui::BytesToFloatWdiget X{");
 
     transform = ntransform;

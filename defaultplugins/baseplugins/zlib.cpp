@@ -85,7 +85,7 @@ bool Zlib::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *Zlib::requestGui(QWidget * parent)
 {
     QWidget * widget = new(std::nothrow) ZlibWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for ZlibWidget X{");
     }
     return widget;

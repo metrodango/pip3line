@@ -15,7 +15,7 @@ MicrosoftTimestampWidget::MicrosoftTimestampWidget(MicrosoftTimestamp *ntransfor
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::MicrosoftTimestampWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::MicrosoftTimestampWidget X{");
     }
     transform = ntransform;

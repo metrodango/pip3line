@@ -82,7 +82,7 @@ bool CharEncoding::setConfiguration(QHash<QString, QString> propertiesList)
 QWidget *CharEncoding::requestGui(QWidget *parent)
 {
     QWidget * widget = new(std::nothrow) CharEncodingWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for CharEncodingWidget X{");
     }
     return widget;
@@ -104,7 +104,7 @@ bool CharEncoding::setCodecName(QByteArray val)
 {
     if (val != codecName) {
         QTextCodec *codec = QTextCodec::codecForName(val);
-        if (codec == NULL) {
+        if (codec == nullptr) {
             emit error(tr("No codec named: %1").arg(QString(val)),id);
             return false;
         } else {
@@ -143,7 +143,7 @@ void CharEncoding::transform(const QByteArray &input, QByteArray &output) {
     output.clear();
 
     QTextCodec *codec = QTextCodec::codecForName(codecName);
-    if (codec == NULL) {
+    if (codec == nullptr) {
         emit error("Unknown codec",id);
         return;
     }

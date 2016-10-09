@@ -9,7 +9,7 @@ IF "%GOTVERSION%"=="false" GOTO Usage
 
 SET VSVERSION=%1
 REM Default Qt dir
-SET "BASE_DIR_QT=C:\Qt\5.6"
+SET "BASE_DIR_QT=C:\Qt\5.7"
 
 IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 IF "%VSVERSION%"=="2015_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2015_64"
@@ -68,6 +68,10 @@ echo [5] Copying OpenSSL lib (if present)
 IF NOT EXIST %OPENSSL_PATH% GOTO NonexistentOpenssl
 copy %OPENSSL_PATH%"\bin\ssleay32.dll"
 copy %OPENSSL_PATH%"\bin\libeay32.dll"
+
+REM For OpenSSL 1.1.0 "NG"
+REM copy %OPENSSL_PATH%"\bin\libcrypto-1_1-x64.dll"
+REM copy %OPENSSL_PATH%"\bin\libssl-1_1-x64.dll"
 
 REM if you are using the ANGLE version of the Qt windows binaries
 REM you need to copy a couple of more files

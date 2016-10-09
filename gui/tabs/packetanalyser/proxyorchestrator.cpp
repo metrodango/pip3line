@@ -21,7 +21,7 @@ ProxyOrchestrator::ProxyOrchestrator(BlocksSource *serverSource, BlocksSource *c
         connect(serverSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
         connect(serverSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
         connect(serverSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(serverSource, SIGNAL(connectionClosed(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
+        connect(serverSource, SIGNAL(connectionClosed(int)), clientSource, SLOT(onConnectionClosed(int)), Qt::QueuedConnection);
     } else {
         qCritical() << tr("[ProxyOrchestrator::ProxyOrchestrator] server source is null T_T");
     }
@@ -38,7 +38,7 @@ ProxyOrchestrator::ProxyOrchestrator(BlocksSource *serverSource, BlocksSource *c
         connect(clientSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
         connect(clientSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
         connect(clientSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(clientSource, SIGNAL(connectionClosed(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
+        connect(clientSource, SIGNAL(connectionClosed(int)), serverSource, SLOT(onConnectionClosed(int)), Qt::QueuedConnection);
     } else {
         qCritical() << tr("[ProxyOrchestrator::ProxyOrchestrator] client source is null T_T");
     }

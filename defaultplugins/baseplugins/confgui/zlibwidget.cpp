@@ -16,7 +16,7 @@ ZlibWidget::ZlibWidget(Zlib *ntransform, QWidget *parent) :
     QWidget(parent)
 {
     ui = new(std::nothrow) Ui::ZlibWidget();
-    if (ui == NULL) {
+    if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ZlibWidget X{");
     }
     transform = ntransform;

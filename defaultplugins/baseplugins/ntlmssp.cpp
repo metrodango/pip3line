@@ -237,7 +237,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
 
         temp2 = initial.mid(offset,length);
         if (temp2.isEmpty())
-            str = "NULL";
+            str = "nullptr";
         else {
             str = extractTargetInfo(temp2);
             str.prepend("\n");
@@ -326,7 +326,7 @@ bool Ntlmssp::isTwoWays()
 QWidget *Ntlmssp::requestGui(QWidget * parent)
 {
     QWidget * widget = new(std::nothrow) NtlmsspWidget(this, parent);
-    if (widget == NULL) {
+    if (widget == nullptr) {
         qFatal("Cannot allocate memory for NtlmsspWidget X{");
     }
     return widget;
@@ -578,7 +578,7 @@ QByteArray Ntlmssp::getString(const QByteArray &data)
     }
 
     if (str.isEmpty())
-        str = "NULL";
+        str = "nullptr";
 
     return str;
 }

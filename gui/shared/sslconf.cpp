@@ -139,7 +139,6 @@ QString SslConf::concat(const QStringList &list)
     return temp;
 }
 
-
 QSslSocket::PeerVerifyMode SslConf::getSslVerificationMode() const
 {
     return sslVerificationMode;
@@ -399,6 +398,26 @@ void SslConf::setLocalKey(const QString filename)
     } else {
         emit log(tr("Cannot open the local key file: %1").arg(keyFile.fileName()), metaObject()->className(), Pip3lineConst::LERROR);
     }
+}
+
+QString SslConf::sslModeToString(int mode)
+{
+    QString ret;
+    switch (mode) {
+        case 0:
+            ret = QString("UnencryptedMode");
+            break;
+        case 1:
+            ret = QString("SslClientMode");
+            break;
+        case 2:
+            ret = QString("SslServerMode");
+            break;
+        default:
+            ret = QString("Unknown mode: %1").arg(mode);
+    }
+
+    return ret;
 }
 
 

@@ -153,7 +153,7 @@ TransformChain TransformsGui::getCurrentTransformChain()
 
     TransformChain list;
     for (int i = 0; i < transformWidgetList.size() - 1; i++) {
-        if (transformWidgetList.at(i)->getTransform() != 0 )
+        if (transformWidgetList.at(i)->getTransform() != nullptr )
             list.append(transformWidgetList.at(i)->getTransform());
     }
     list.setName(name);
@@ -252,8 +252,10 @@ BaseStateAbstract *TransformsGui::getStateMngtObj()
 
 void TransformsGui::processNewTransformation()
 {
-    TransformWidget *transformWidget = static_cast<TransformWidget *>(sender());
-    if (transformWidget != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        TransformWidget *transformWidget = static_cast<TransformWidget *>(s);
         int pos;
         pos = transformWidgetList.indexOf(transformWidget);
         if (pos < 0) {
@@ -270,15 +272,17 @@ void TransformsGui::processNewTransformation()
             addWidget(ntw);
         }
     } else {
-        qCritical() << tr("[TransformsGui::processNewTransformation] null pointer cast T_T");
+        qCritical() << tr("[TransformsGui::processNewTransformation] sender is NULL T_T");
     }
 
 }
 
 void TransformsGui::processDeletionRequest()
 {
-    TransformWidget *transformWidget = static_cast<TransformWidget *>(sender());
-    if (transformWidget != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        TransformWidget *transformWidget = static_cast<TransformWidget *>(s);
         if (transformWidgetList.size() < 2) {
             firstTransformWidget->reset();
             return;
@@ -306,7 +310,7 @@ void TransformsGui::processDeletionRequest()
         emit entriesChanged();
         emit chainChanged(getCurrentChainConf());
     } else {
-        qCritical() << tr("[TransformsGui::processDeletionRequest] null pointer cast T_T");
+        qCritical() << tr("[TransformsGui::processDeletionRequest] sender is NULL T_T");
     }
 }
 
@@ -514,44 +518,48 @@ void TransformsGui::onAutoCopychanged(bool val)
 
 void TransformsGui::onFoldRequest()
 {
-    TransformWidget * requester = static_cast<TransformWidget *>(sender());
-    if (requester == nullptr) {
-        qFatal("Cannot cast sender() to TransformWidget X{");
-    }
+    QObject *s = sender();
+    if (s != nullptr) {
+        TransformWidget * requester = static_cast<TransformWidget *>(s);
 
-    int index = ui->mainLayout->indexOf(requester);
-    if (index == -1) {
-        logger->logError(tr("Invalid index when folding T_T"), metaObject()->className());
+        int index = ui->mainLayout->indexOf(requester);
+        if (index == -1) {
+            logger->logError(tr("Invalid index when folding T_T"), metaObject()->className());
+        } else {
+            ui->mainLayout->removeWidget(requester);
+            requester->hide();
+            requester->setFolded(true);
+            FoldedView *fv = new(std::nothrow) FoldedView(requester,this);
+            if (fv == nullptr) {
+                qFatal("Cannot allocate memory for FoldedWidget X{");
+            }
+
+            fv->enableDelete(transformWidgetList.last() != requester);
+
+            connect(fv, SIGNAL(unfoldRequested()), this, SLOT(onUnfoldRequest()));
+
+            ui->mainLayout->insertWidget(index,fv,0, Qt::AlignTop);
+            bool allFolded = true;
+            for (int i = 0; i < transformWidgetList.size(); i++) {
+                allFolded = allFolded && transformWidgetList.at(i)->isFolded();
+            }
+
+            if (allFolded && !spacerIsUsed) {
+                ui->mainLayout->addSpacerItem(spacer);
+                spacerIsUsed = true;
+            }
+        }
     } else {
-        ui->mainLayout->removeWidget(requester);
-        requester->hide();
-        requester->setFolded(true);
-        FoldedView *fv = new(std::nothrow) FoldedView(requester,this);
-        if (fv == nullptr) {
-            qFatal("Cannot allocate memory for FoldedWidget X{");
-        }
-
-        fv->enableDelete(transformWidgetList.last() != requester);
-
-        connect(fv, SIGNAL(unfoldRequested()), this, SLOT(onUnfoldRequest()));
-
-        ui->mainLayout->insertWidget(index,fv,0, Qt::AlignTop);
-        bool allFolded = true;
-        for (int i = 0; i < transformWidgetList.size(); i++) {
-            allFolded = allFolded && transformWidgetList.at(i)->isFolded();
-        }
-
-        if (allFolded && !spacerIsUsed) {
-            ui->mainLayout->addSpacerItem(spacer);
-            spacerIsUsed = true;
-        }
+        qCritical() << tr("[TransformsGui::onFoldRequest] sender is NULL T_T");
     }
 }
 
 void TransformsGui::onUnfoldRequest()
 {
-    FoldedView *fv = static_cast<FoldedView *>(sender());
-    if (fv != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        FoldedView *fv = static_cast<FoldedView *>(s);
         int index = ui->mainLayout->indexOf(fv);
         if (index == -1) {
             logger->logError(tr("Invalid index when unfolding T_T"), metaObject()->className());
@@ -566,14 +574,16 @@ void TransformsGui::onUnfoldRequest()
             tw->show();
         }
     } else {
-        qCritical() << tr("[TransformsGui::onUnfoldRequest] null pointer cast T_T");
+        qCritical() << tr("[TransformsGui::onUnfoldRequest] sender is NULL T_T");
     }
 }
 
 void TransformsGui::onInsertRequest()
 {
-    TransformWidget * requester = static_cast<TransformWidget *>(sender());
-    if (requester != nullptr) {
+    QObject *s = sender();
+
+    if (s != nullptr) {
+        TransformWidget * requester = static_cast<TransformWidget *>(s);
         int index = transformWidgetList.indexOf(requester);
         if (index == -1) {
             qCritical() << tr("[TransformsGui::onInsertRequest] Invalid index when inserting T_T");
@@ -589,7 +599,7 @@ void TransformsGui::onInsertRequest()
             transformWidgetList.insert(index,newtw); // updating the list
 
             // Adding the widget to the gui
-            QVBoxLayout * layout = static_cast<QVBoxLayout *>(ui->scrollAreaWidgetContents->layout());
+            QVBoxLayout * layout = dynamic_cast<QVBoxLayout *>(ui->scrollAreaWidgetContents->layout());
             if (layout != nullptr)
                 layout->insertWidget(index, newtw);
             else
@@ -615,7 +625,7 @@ void TransformsGui::onInsertRequest()
             emit chainChanged(getCurrentChainConf());
         }
     } else {
-        qCritical() << tr("[TransformsGui::onInsertRequest] null pointer cast T_T");
+        qCritical() << tr("[TransformsGui::onInsertRequest] sender is NULL T_T");
     }
 }
 
@@ -659,19 +669,32 @@ void TransformGuiStateObj::run()
 
         writer->writeAttribute(GuiConst::STATE_TRANSFORM_CONF, write(conf,true));
         size = tgtab->getBlockCount();
+        int finalSize = size;
 
+        QList<BaseStateAbstract *> sourcesState;
+        TransformWidget * tw = nullptr;
         // first saving the transformWidget states so that they are saved last.
         for (int i = size - 1  ; i > -1; i--) { // need to reverse the order due to the stack behaviour
-            BaseStateAbstract *state = tgtab->transformWidgetList.at(i)->getStateMngtObj();
-            emit addNewState(state);
+            tw = tgtab->transformWidgetList.at(i);
+            tw->getSource();
+            // if there is no Transform configured, removing the tab (it does not do anything anyway)
+            // unless this is the last one
+            if (tw->getTransform() != nullptr || i == size - 1) {
+                BaseStateAbstract *state = tw->getStateMngtObj();
+                sourcesState.append(tgtab->getSource(i)->getStateMngtObj());
+                emit addNewState(state);
+            } else {
+                // and reducing the actual size of the list
+                finalSize--;
+            }
         }
 
-        writer->writeAttribute(GuiConst::STATE_SIZE, write(size));
-        for (int i = size - 1  ; i > -1; i--) { // need to reverse the order due to the stack behaviour
-            BaseStateAbstract *state = tgtab->getSource(i)->getStateMngtObj();
-            emit addNewState(state);
+        // now pushing the ByteSources states
+        writer->writeAttribute(GuiConst::STATE_SIZE, write(finalSize));
+        for (int i = 0; i < sourcesState.size(); i++) {
+            emit addNewState(sourcesState.at(i));
         }
-
+        sourcesState.clear(); // not really useful, but one never now ...
 
     } else {
         QXmlStreamAttributes attrList = reader->attributes();

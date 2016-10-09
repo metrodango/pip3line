@@ -39,6 +39,7 @@ Released under AGPL see LICENSE for more information
 #include <Qsci/qscilexerjavascript.h>
 #include <Qsci/qscilexeryaml.h>
 #include <Qsci/qscilexerxml.h>
+#include <Qsci/qscilexerproperties.h>
 #else
 #include <QTextCursor>
 #endif
@@ -86,7 +87,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     scintEditor->installEventFilter(this);
     connect(scintEditor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
     connect(scintEditor,SIGNAL(selectionChanged()), this, SLOT(updateStats()));
-    scintEditor->setFont(GuiStyles::DEFAULT_REGULAR_FONT);
+    scintEditor->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
     scintEditor->setReadOnly(byteSource->isReadonly());
     scintEditor->setWrapMode(QsciScintilla::WrapCharacter);
 
@@ -100,11 +101,13 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
                                 << QString("HTML")
                                 << QString("JavaScript")
                                 << QString("YAML")
-                                <<   QString("XML");
+                                << QString("XML")
+                                << QString("Properties");
     lexerCombobox->addItems(lexersStrings);
     lexerCombobox->setFrame(false);
     ui->statusLayout->insertWidget(ui->statusLayout->indexOf(ui->codecsComboBox), lexerCombobox);
     connect(lexerCombobox, SIGNAL(currentIndexChanged(int)), SLOT(onLexerChanged(int)));
+    connect(scintEditor, SIGNAL(cursorPositionChanged(int,int)),&updateTimer, SLOT(start()));
 
 #else
     plainTextEdit = new(std::nothrow) QPlainTextEdit();
@@ -118,6 +121,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     connect(plainTextEdit,SIGNAL(selectionChanged()), &updateTimer, SLOT(start()));
     plainTextEdit->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
     plainTextEdit->setReadOnly(byteSource->isReadonly());
+    connect(plainTextEdit, SIGNAL(cursorPositionChanged()),&updateTimer, SLOT(start()));
 #endif
 
     connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(updateImportExportMenu()));
@@ -133,7 +137,6 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     ui->codecsComboBox->setMaximumWidth(200);
     ui->codecsComboBox->installEventFilter(guiHelper);
     connect(ui->codecsComboBox,SIGNAL(currentIndexChanged(QString)), this, SLOT(onCodecChange(QString)));
-    connect(plainTextEdit, SIGNAL(cursorPositionChanged()),&updateTimer, SLOT(start()));
 
     onCodecChange(DEFAULT_CODEC);
     buildContextMenu();
@@ -355,12 +358,23 @@ void TextView::onLexerChanged(int index)
         case 4:
             newLexer = new(std::nothrow) QsciLexerXML();
             break;
+        case 5:
+            newLexer = new(std::nothrow) QsciLexerProperties();
+            break;
         default:
             logger->logError(tr("Unknown Lexer index: %1 T_T").arg(index));
 
     }
+    if (newLexer != nullptr) {
+        newLexer->setDefaultFont(GuiStyles::GLOBAL_REGULAR_FONT);
+        newLexer->setDefaultColor(QApplication::palette().text().color());
+    }
     scintEditor->setLexer(newLexer);
     delete prevLexer;
+
+    if (newLexer == nullptr) {
+        scintEditor->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+    }
 }
 #endif
 
@@ -571,7 +585,7 @@ void TextView::updateStats()
     plainText = scintEditor->text();
     selection = scintEditor->selectedText();
     selectedSize = selection.size();
-    scintEditor->getCursorPosition(currentLine,currentcolumn);
+    scintEditor->getCursorPosition(&currentLine,&currentcolumn);
 #else
     if (plainTextEdit->isEnabled()) {
         plainText = plainTextEdit->toPlainText();
