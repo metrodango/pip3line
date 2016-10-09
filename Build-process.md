@@ -136,7 +136,7 @@ Then the rest is exactly the same as on Linux platform.
 
 The **OpenSSL plugin** has been disabled on this platform though.
 
-**Python plugins** crash (well the python 3 one does) when both plugins are loaded at the same time, so you can only use one at time on OSX. It may be because I am compiling against the stock Python2.7, but who knows ...
+**Python plugins** make Pip3line crash (well the Python 3 one does) when both plugins (2.7 & 3) are loaded at the same time, so you can only use one at time on OSX/MacOS. It may be because I am compiling against the stock Python2.7 and the Brew version of Python 3, but who knows, when it comes to Python everything is possible.
 
 ## OpenSSL plugin
 
@@ -144,7 +144,7 @@ The **OpenSSL plugin** has been disabled on this platform though.
 
 Defaults path for the libraries and headers have been hardcoded in the cmake configuration file on Windows  for easier use. (i.e. C:\OpenSSL-Win32 and C:\OpenSSL-Win64)
 
-Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes can replace most of the hashes offered by OpenSSL.
+Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes can replace the most common hashes offered by OpenSSL.
 
 ## Python27 and Python3 plugins
 
