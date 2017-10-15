@@ -12,6 +12,7 @@ Released under AGPL see LICENSE for more information
 #define SINGLEVIEWABSTRACT_H
 
 #include <QBitArray>
+#include <QPushButton>
 #include <QWidget>
 #include <commonstrings.h>
 
@@ -27,6 +28,10 @@ class SingleViewAbstract : public QWidget
         explicit SingleViewAbstract(ByteSourceAbstract *dataModel, GuiHelper *guiHelper, QWidget *parent = 0, bool takeByteSourceOwnership = false);
         virtual ~SingleViewAbstract();
         ByteSourceAbstract *getByteSource() const;
+        QPushButton *getConfigButton() const;
+        void setConfigButton(QPushButton *value);
+        virtual QHash<QString, QString> getConfiguration();
+        virtual void setConfiguration(QHash<QString, QString> conf);
     public slots:
         virtual void search(QByteArray item, QBitArray mask) = 0;
         virtual void searchAgain();
@@ -41,7 +46,7 @@ class SingleViewAbstract : public QWidget
         QByteArray previousSearch;
         QBitArray previousMask;
         bool hasSourceOwnership;
-        
+        QPushButton * configButton;
 };
 
 #endif // SINGLEVIEWABSTRACT_H

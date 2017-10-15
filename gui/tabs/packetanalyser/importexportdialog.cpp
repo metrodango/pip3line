@@ -30,12 +30,17 @@ ImportExportDialog::ImportExportDialog(GuiConst::FileOperations type, bool hasSe
         setWindowTitle("Importing");
         ui->optionsStackedWidget->setVisible(false);
         ui->packetsOptionsGroupBox->setVisible(false);
+        if (ui->pcapRadioButton->isChecked()) {
+            ui->compressCheckBox->setVisible(false);
+        }
     }
 
+    ui->compressCheckBox->setChecked(true);
     connect(ui->fileNamePushButton, SIGNAL(clicked(bool)), SLOT(onChooseFileName()));
     connect(ui->buttonBox, SIGNAL(accepted()), SLOT(onAccept()));
 
     connect(ui->opPacketRadioButton, SIGNAL(toggled(bool)),this, SLOT(onOpTypeToggled(bool)));
+    connect(ui->pcapRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPcapToggled(bool)));
 }
 
 ImportExportDialog::~ImportExportDialog()
@@ -67,15 +72,22 @@ bool ImportExportDialog::getSelectionOnly() const
     return ui->selectionOnlyRadioButton->isChecked();
 }
 
+bool ImportExportDialog::getEnableCompression() const
+{
+    return ui->compressCheckBox->isChecked();
+}
+
 void ImportExportDialog::onChooseFileName()
 {
     QString fileName;
     if (type == GuiConst::EXPORT_OPERATION) {
-        fileName = QFileDialog::getSaveFileName(this,tr("Choose file to save to"),QDir::home().absolutePath(), tr("all (*)"));
+        fileName = QFileDialog::getSaveFileName(this,tr("Choose file to save to"),GuiConst::GLOBAL_LAST_PATH, tr("all (*)"));
     } else {
-        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"),QDir::home().absolutePath(), tr("all (*)"));
+        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"),GuiConst::GLOBAL_LAST_PATH, tr("all (*)"));
     }
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         ui->filenameLineEdit->setText(fileName);
     }
 }
@@ -93,4 +105,13 @@ void ImportExportDialog::onOpTypeToggled(bool enable)
 {
     ui->formatGroupBox->setEnabled(enable);
     ui->packetsOptionsGroupBox->setEnabled(enable);
+}
+
+void ImportExportDialog::onPcapToggled(bool enable)
+{
+    if (enable) {
+        ui->compressCheckBox->setVisible(false);
+    } else {
+        ui->compressCheckBox->setVisible(true);
+    }
 }

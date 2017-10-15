@@ -13,6 +13,7 @@ Released under AGPL see LICENSE for more information
 
 #include <QBitArray>
 #include <QHash>
+#include <QJsonObject>
 #include <QTimer>
 #include "singleviewabstract.h"
 #include "../sources/blocksources/blockssource.h"
@@ -41,11 +42,13 @@ class HexView : public SingleViewAbstract
         void addCustomMenuActions(QAction * action);
         ByteTableView *getHexTableView();
         quint64 getLowPos();
+        QJsonObject createFuzzingTemplate(ByteSourceAbstract *bs);
     public slots:
         void onClearAllMArkings();
         bool goTo(quint64 offset, bool absolute,bool negative, bool select = false);
         void gotoSearch(quint64 soffset, quint64 eoffset);
         void search(QByteArray item, QBitArray mask);
+        void optionGuiRequested();
     private slots:
         void updateStats();
         void onRightClick(QPoint pos);
@@ -64,6 +67,7 @@ class HexView : public SingleViewAbstract
         void onCopyCurrentOffset(QAction *action);
         void onClearSelectionMarkings();
         void onLoadFile();
+        void onExportForFuzzing();
         void onSaveToFile(QAction *action);
         void onSelectAll();
         void onKeepOnlySelection();
@@ -90,6 +94,7 @@ class HexView : public SingleViewAbstract
         QMenu * saveToFileMenu;
         SendToMenu * sendToMenu;
         QAction * newMarkingAction;
+        QAction * fuzzingExportAction;
         ByteItemModel * dataModel;
         ByteTableView * hexTableView;
         qint64 selectedSize;

@@ -110,8 +110,10 @@ void AnalyseDialog::onCharsetAnalysis()
 
 void AnalyseDialog::on_actionImportFile_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"));
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"),GuiConst::GLOBAL_LAST_PATH);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly)) {
             QMessageBox::critical(this,tr("Error"),tr("Error while opening the file:\n %1").arg(file.errorString()),QMessageBox::Ok);

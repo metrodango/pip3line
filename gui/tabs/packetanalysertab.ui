@@ -199,6 +199,26 @@
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="filterPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../gui_res.qrc">
+          <normaloff>:/Images/icons/view-filter.png</normaloff>:/Images/icons/view-filter.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="mergePacketsPushButton">
         <property name="maximumSize">
          <size>

@@ -16,7 +16,7 @@ class SendToMenu : public QMenu
         Q_OBJECT
     public:
         explicit SendToMenu(GuiHelper *guiHelper, QString title = QString(), QWidget *parent = nullptr);
-        ~SendToMenu(){}
+        ~SendToMenu();
     public slots:
         void update();
         void processingAction(QAction *action, const QByteArray &data);
@@ -30,6 +30,7 @@ class SendToMenu : public QMenu
         QHash<QAction *, Target<BlocksSource *> > sendToBlockSourceMapping;
         QHash<QAction *, Target<SourcesOrchestatorAbstract *> > sendToOrchestratorMapping;
         QAction * sendToNewTabAction;
+        QList<QMenu *> subMenus;
 };
 
 #endif // SENDTOMENU_H

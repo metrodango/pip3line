@@ -26,12 +26,16 @@ class PythonModules : public ModulesManagement
     public:
         static const QString PYTHON_TYPE;
         static const char * MAIN_FUNCTION_NAME;
+        static const char * ISTWOWAY_ATTR_NAME;
+        static const char * INBOUND_ATTR_NAME;
+        static const char * PARAMS_ATTR_NAME;
+        static const char * PARAMS_NAMES_ATTR_NAME;
         explicit PythonModules(QString name, Pip3lineCallback *callback);
         ~PythonModules();
         bool initialize();
         bool checkPyError();
         QString getLastError();
-        PyObject * loadModule(QString modulePath, bool reload = false, bool *firstLoad = NULL);
+        PyObject * loadModule(QString modulePath, bool reload = false, bool *firstLoad = nullptr);
         bool unloadModules(QString modulePath);
         void unloadModules();
         QString getInfos();

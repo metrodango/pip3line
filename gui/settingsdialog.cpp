@@ -84,7 +84,7 @@ SettingsDialog::SettingsDialog(GuiHelper *nhelper, QWidget *parent) :
     connect(ui->comparisonCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
     connect(ui->guiPosCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
     connect(ui->globalConfCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateDeletedTabsList()));
+    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateDeletedTabsList()),Qt::QueuedConnection);
     connect(ui->clearAllTabsPushButton, SIGNAL(clicked()), guiHelper, SLOT(clearDeletedTabs()));
     connect(ui->deletedTabsListWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onDeletedTabsDoubleClicked(QModelIndex)));
     connect(ui->fileSavePushButton, SIGNAL(clicked()), this , SLOT(onAutoSaveFileButtonclicked()));
@@ -125,7 +125,11 @@ void SettingsDialog::initializeConf()
     ui->autoRestoreCheckBox->setChecked(guiHelper->getAutoRestoreOnStartup());
     QFont font = guiHelper->getRegularFont();
     ui->customFontName->setFont(font);
-    ui->customFontName->setText(font.family());
+    ui->customFontName->setText(QString("%1, %2px").arg(font.family()).arg(font.pointSize()));
+
+    ui->hexadecimalTableRowsHeightSpinBox->setDisabled(true);
+    ui->hexadecimalTableTextWidthSpinBox->setDisabled(true);
+    ui->hexadecimalTableWidthSpinBox->setDisabled(true);
 
     int val = ui->offsetBaseComboBox->findText(QString::number(guiHelper->getDefaultOffsetBase()));
     if (val != -1) {
@@ -316,6 +320,7 @@ void SettingsDialog::updateFilter()
 
     for (int i = 0; i < typesList.size(); ++i)
     {
+        // as per Qt documentation the model is supposed to take owership of the item ... ASAN seems to disagree with that
         QStandardItem* item = new(std::nothrow) QStandardItem(typesList.at(i));
         if (item != nullptr) {
             item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
@@ -626,6 +631,8 @@ void SettingsDialog::onAutoSaveFileButtonclicked()
     QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"),
                                                     QDir::homePath().append(QDir::separator()).append(GuiConst::DEFAULT_STATE_FILE));
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         ui->fileSaveLineEdit->setText(fileName);
     }
 }
@@ -663,7 +670,17 @@ void SettingsDialog::onCustomFontClicked()
                  &ok, guiHelper->getRegularFont(), this);
     if (ok) {
         guiHelper->setRegularFont(selectedFont);
-        ui->customFontName->setText(selectedFont.family());
+        ui->customFontName->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+        ui->customFontName->setText(QString("%1, %2px").arg(selectedFont.family()).arg(selectedFont.pointSize()));
+        ui->hexadecimalTableWidthSpinBox->blockSignals(true);
+        ui->hexadecimalTableWidthSpinBox->setValue(GlobalsValues::HEXCOLUMNWIDTH);
+        ui->hexadecimalTableWidthSpinBox->blockSignals(false);
+        ui->hexadecimalTableTextWidthSpinBox->blockSignals(true);
+        ui->hexadecimalTableTextWidthSpinBox->setValue(GlobalsValues::TEXTCOLUMNWIDTH);
+        ui->hexadecimalTableTextWidthSpinBox->blockSignals(false);
+        ui->hexadecimalTableRowsHeightSpinBox->blockSignals(true);
+        ui->hexadecimalTableRowsHeightSpinBox->setValue(GlobalsValues::ROWSHEIGHT);
+        ui->hexadecimalTableRowsHeightSpinBox->blockSignals(false);
     }
 }
 
@@ -671,6 +688,13 @@ void SettingsDialog::onSaveNowClicked()
 {
     hide();
     emit forceAutoSave();
+}
+
+void SettingsDialog::onHexSizesValuesChanged()
+{
+    GlobalsValues::HEXCOLUMNWIDTH = ui->hexadecimalTableWidthSpinBox->value();
+    GlobalsValues::TEXTCOLUMNWIDTH = ui->hexadecimalTableTextWidthSpinBox->value();
+    GlobalsValues::ROWSHEIGHT = ui->hexadecimalTableRowsHeightSpinBox->value();
 }
 
 void SettingsDialog::connectUpdateSignals()
@@ -696,6 +720,9 @@ void SettingsDialog::connectUpdateSignals()
     connect(ui->timerSaveSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onAutoSaveTimerIntervalChanged(int)));
     connect(ui->slByteDataCheckBox, SIGNAL(toggled(bool)), this , SLOT(onDataSaveToggled(bool)));
     connect(ui->autoRestoreCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoRestoreToggled(bool)));
+    connect(ui->hexadecimalTableRowsHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    connect(ui->hexadecimalTableTextWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    connect(ui->hexadecimalTableWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
 }
 
 void SettingsDialog::disconnectUpdateSignals()
@@ -720,5 +747,8 @@ void SettingsDialog::disconnectUpdateSignals()
     disconnect(ui->timerSaveCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveTimerEnableToggled(bool)));
     disconnect(ui->timerSaveSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onAutoSaveTimerIntervalChanged(int)));
     disconnect(ui->autoRestoreCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoRestoreToggled(bool)));
+    disconnect(ui->hexadecimalTableRowsHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    disconnect(ui->hexadecimalTableTextWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    disconnect(ui->hexadecimalTableWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
 }
 

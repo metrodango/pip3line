@@ -81,6 +81,7 @@ class SettingsDialog : public AppDialog
         void onAutoRestoreToggled(bool checked);
         void onCustomFontClicked();
         void onSaveNowClicked();
+        void onHexSizesValuesChanged();
     private:
         Q_DISABLE_COPY(SettingsDialog)
         void connectUpdateSignals();

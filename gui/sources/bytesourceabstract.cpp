@@ -285,8 +285,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, quint64 start, quint64 end,
         end = temp;
     }
 
-    BytesRange *newRange = nullptr;
-    newRange = new(std::nothrow)BytesRange(start,end);
+    BytesRange *newRange = new(std::nothrow)BytesRange(start,end);
     if (newRange == nullptr) {
         qFatal("Cannot allocate memory for OffsetsRange X{");
     }
@@ -761,6 +760,11 @@ void ByteSourceAbstract::clearAllMarkingsNoUpdate()
         delete userMarkingsRanges;
         userMarkingsRanges = nullptr;
     }
+}
+
+BytesRangeList *ByteSourceAbstract::getUserMarkingsRanges() const
+{
+    return userMarkingsRanges;
 }
 bool ByteSourceAbstract::hasStaticMarking() const
 {

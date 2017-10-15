@@ -16,7 +16,7 @@
     <x>0</x>
     <y>0</y>
     <width>723</width>
-    <height>536</height>
+    <height>576</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -121,7 +121,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>10</number>
         </property>
         <widget class="QWidget" name="GeneralPage">
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1297,6 +1297,60 @@
              <item>
               <widget class="QWidget" name="predefinedFontWidget" native="true">
                <layout class="QVBoxLayout" name="verticalLayout_21"/>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="sizesFontWidget" native="true">
+               <layout class="QFormLayout" name="formLayout_6">
+                <property name="labelAlignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="hexadecimalTableWidthLabel">
+                  <property name="text">
+                   <string>Hexadecimal table cell width</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="hexadecimalTableWidthSpinBox">
+                  <property name="minimum">
+                   <number>20</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSpinBox" name="hexadecimalTableTextWidthSpinBox">
+                  <property name="minimum">
+                   <number>10</number>
+                  </property>
+                  <property name="maximum">
+                   <number>200</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="hexadecimalTableTextWidthLabel">
+                  <property name="text">
+                   <string>Hexadecimal table text width</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="hexadecimalTableRowsHeightLabel">
+                  <property name="text">
+                   <string>Hexadecimal table row height</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QSpinBox" name="hexadecimalTableRowsHeightSpinBox">
+                  <property name="minimum">
+                   <number>20</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>

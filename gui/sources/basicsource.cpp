@@ -89,9 +89,8 @@ void BasicSearch::internalStart()
 
     int i = 0;
     for (i = 0; i < numBlock; i++) {
-        BasicSourceReader * buffer = nullptr;
         SearchWorker * sw = nullptr;
-        buffer = new(std::nothrow)BasicSourceReader(sdata);
+        BasicSourceReader * buffer = new(std::nothrow)BasicSourceReader(sdata);
         if (buffer == nullptr) {
             qFatal("Cannot allocate memory for QBuffer X{");
         }

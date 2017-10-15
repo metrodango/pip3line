@@ -77,7 +77,6 @@ class GuiHelper : public QObject
         void addNewMarkingColor(const QString &name, const QColor &color);
         void removeMarkingColor(const QString &name);
 
-
         QStringList getImportExportFunctions();
         TransformAbstract * getImportExportFunction(const QString &name);
         void resetImportExportFuncs();
@@ -168,6 +167,9 @@ class GuiHelper : public QObject
         QFont getRegularFont() const;
         void setRegularFont(const QFont &value);
 
+        void saveEqualityPacketColors();
+        void loadEqualityPacketColors();
+
         void registerBlockSource(BlocksSource * bs);
         void unregisterBlockSource(BlocksSource * bs);
         QList<BlocksSource *> getRegisteredBlockSources();
@@ -181,6 +183,12 @@ class GuiHelper : public QObject
         QMenu *getNewTabMenu() const;
         void setNewTabMenu(QMenu *value);
 
+        quint64 getMaxSizeForFuzzingExport() const;
+        void setMaxSizeForFuzzingExport(const quint64 &value);
+
+        QJsonDocument::JsonFormat getFuzzingExportFormat() const;
+        void setFuzzingExportFormat(const QJsonDocument::JsonFormat &value);
+
     public slots:
         void refreshAll();
         void raisePip3lineWindow();
@@ -191,6 +199,7 @@ class GuiHelper : public QObject
         void logWarning(const QString &message,const QString &source = QString());
         void logStatus(const QString &message,const QString &source = QString());
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
+        void calculatingHexTableSizes();
     signals:
         void newSelection(QByteArray selection);
         void newTabRequested(QByteArray initialValue);
@@ -207,6 +216,7 @@ class GuiHelper : public QObject
         void requestSaveState();
         void registeredBlockSourcesUpdated();
         void registeredOrchestratorsUpdated();
+        void hexTableSizesUpdated();
     private slots:
         void onFilterChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
         void onTabDestroyed();
@@ -258,6 +268,8 @@ class GuiHelper : public QObject
         int autoSaveTimerInterval;
         bool autoRestoreOnStartup;
         QFont regularFont;
+        quint64 maxSizeForFuzzingExport;
+        QJsonDocument::JsonFormat fuzzingExportFormat;
         BlocksSource * incomingBlockListener;
         QList<BlocksSource *> registeredBlockSources;
         QList<SourcesOrchestatorAbstract *> registeredOrchestators;

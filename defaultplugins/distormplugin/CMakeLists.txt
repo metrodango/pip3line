@@ -30,6 +30,7 @@ include_directories (
 	${DISTORM3_INCLUDE_PATH}
 	../../libtransform
 	../../../distorm/include
+	/usr/include/distorm3
 	)
 
 link_directories (

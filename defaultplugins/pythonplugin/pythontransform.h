@@ -36,10 +36,6 @@ class PythonTransform : public ScriptTransformAbstract
     private:
         Q_DISABLE_COPY(PythonTransform)
         bool loadModuleAttributes();
-        static const char * ISTWOWAY_ATTR_NAME;
-        static const char * INBOUND_ATTR_NAME;
-        static const char * PARAMS_ATTR_NAME;
-        static const char * PARAMS_NAMES_ATTR_NAME;
         PyObject * pModule;
         bool twoWays;
         PythonModules * pythonmgm;

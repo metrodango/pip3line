@@ -226,15 +226,22 @@ void TransformMgmt::saveInstance(TransformAbstract *ta)
 
 void TransformMgmt::OnTransformDelete()
 {
-    TransformAbstract* src = static_cast<TransformAbstract* > (sender());
-    if (src != nullptr) {
-        deletedLock.lock();
-        if (transformInstances.contains(src)) {
-            transformInstances.remove(src);
+    QObject * sobj = sender();
+    if (sobj != nullptr) {
+        TransformAbstract* src = static_cast<TransformAbstract* > (sobj);
+        if (src != nullptr) {
+            deletedLock.lock();
+            if (transformInstances.contains(src)) {
+                transformInstances.remove(src);
+            } else {
+                qDebug() << "Could not find " << src << " in the instance list";
+            }
+            deletedLock.unlock();
         } else {
-            qDebug() << "Could not find " << src << " in the instance list";
+            qWarning() << tr("[TransformMgmt::OnTransformDelete] sender could not be casted to TransformAbstract T_T") << sobj;
         }
-        deletedLock.unlock();
+    } else {
+        qWarning() << tr("[TransformMgmt::OnTransformDelete] sender is nullptr T_T");
     }
 }
 
@@ -381,8 +388,9 @@ TransformAbstract * TransformMgmt::getTransform(QString name) {
         listLocker.unlock();
         emit error(tr("No transformation named \"%1\" was found in the current plugins and the persistent storage").arg(name),id);
     }
-
+#ifdef QT_DEBUG
     saveInstance(ta);
+#endif
     cycleSem.release();
     return ta;
 }
@@ -724,7 +732,9 @@ TransformAbstract *TransformMgmt::loadComposedTransformFromXML(QXmlStreamReader 
         if (ta == nullptr) {
             qFatal("Cannot allocate memory for ComposedTransform 2 X{");
         } else {
+#ifdef QT_DEBUG
             saveInstance(ta);
+#endif
         }
     }
 

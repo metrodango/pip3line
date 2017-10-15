@@ -18,6 +18,7 @@ Released under AGPL see LICENSE for more information
 #include <QThread>
 #include <commonstrings.h>
 #include <QTimer>
+#include <QComboBox>
 #include "singleviewabstract.h"
 
 class QTextCodec;
@@ -46,6 +47,12 @@ class TextView : public SingleViewAbstract
         void search(QByteArray item, QBitArray mask = QBitArray());
         void copyToClipboard();
         bool isAutoCopyToClipboard() const;
+#ifdef SCINTILLA
+        QString getCurrentSyntax();
+        void setCurrentSyntax(QString syntaxName);
+#endif
+        QHash<QString, QString> getConfiguration();
+        void setConfiguration(QHash<QString, QString> conf);
     public slots:
         void setAutoCopyToClipboard(bool value);
 
@@ -67,6 +74,7 @@ class TextView : public SingleViewAbstract
         void onCodecChange(QString codecName);
         void onReadOnlyChanged(bool viewIsReadonly);
         void onSaveToFile(QAction* action);
+        void onFontUpdated();
 #ifdef SCINTILLA
         void onLexerChanged(int index);
 #endif
@@ -92,6 +100,7 @@ class TextView : public SingleViewAbstract
         Ui::TextView *ui;
 #ifdef SCINTILLA
         QsciScintilla * scintEditor;
+        QComboBox * lexerCombobox;
 #else
         QPlainTextEdit * plainTextEdit;
 #endif

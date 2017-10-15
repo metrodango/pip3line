@@ -8,8 +8,129 @@
 #include <QModelIndexList>
 #include <deleteablelistitem.h>
 #include <QStandardItem>
+#include <QColorDialog>
 #include "quickviewitemconfig.h"
 #include "guihelper.h"
+#include "tabs/packetanalysertab.h"
+
+const QStringList ColumnModel::colNames =  QStringList () << "Name"
+                                        << "Hidden"
+                                        << "Equality"
+                                        << "   ";
+
+ColumnModel::ColumnModel(GuiHelper *guiHelper,
+                         PacketModelAbstract *mainModel,
+                         PacketSortFilterProxyModel *proxyModel,
+                         QTableView *tableView,
+                         QObject *parent) :
+    QAbstractTableModel(parent),
+    guiHelper(guiHelper),
+    mainModel(mainModel),
+    proxyModel(proxyModel),
+    tableView(tableView)
+{
+
+}
+
+ColumnModel::~ColumnModel()
+{
+
+}
+
+int ColumnModel::columnCount(const QModelIndex &) const
+{
+    return colNames.size();
+}
+
+int ColumnModel::rowCount(const QModelIndex &) const
+{
+    return mainModel->columnCount();
+}
+
+QVariant ColumnModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    int i = index.row();
+    int col = index.column();
+    if (role == Qt::DisplayRole) {
+        if (col == COLUMN_NAME) {
+            return QVariant(mainModel->getColumnName(i));
+        }
+    } else if (role == Qt::CheckStateRole) {
+        if (col == COLUMN_HIDDEN)
+            return (tableView->isColumnHidden(i) ? Qt::Checked : Qt::Unchecked);
+        else if (col == COLUMN_EQUALITY) {
+            return (proxyModel->isColumnEqualityenabled(i) ? Qt::Checked : Qt::Unchecked);
+        }
+    } else if (role == Qt::DecorationRole &&
+               col == COLUMN_DELETE &&
+               mainModel->isUserColumn(i)) {
+        return QVariant(QIcon(":/Images/icons/dialog-cancel-3.png"));
+    }
+
+    return QVariant();
+}
+
+QVariant ColumnModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        if (orientation == Qt::Horizontal) {
+            return colNames.at(section);
+        }
+    }
+    return QVariant();
+}
+
+bool ColumnModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    bool ret = false;
+    if (index.isValid() && role == Qt::CheckStateRole) {
+        bool val = value.toBool();
+        int i = index.row();
+        int col = index.column();
+
+        if (col == COLUMN_HIDDEN) {
+            tableView->setColumnHidden(i,val);
+            if (!val && tableView->columnWidth(i) == 0)
+                tableView->setColumnWidth(i, mainModel->getDefaultWidthForColumn(col)); // need to do that otherwise the column stays hidden
+            ret = true;
+        } else if (col == COLUMN_EQUALITY) {
+            proxyModel->setEqualitycolumn(i,val);
+            ret = true;
+        }
+    }
+
+    return ret;
+}
+
+Qt::ItemFlags ColumnModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    int col = index.column();
+    if (col == COLUMN_HIDDEN || col == COLUMN_EQUALITY) {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+    }
+
+    return QAbstractItemModel::flags(index);
+}
+
+int ColumnModel::getDefaultColumnwidth(int column)
+{
+    if (column >= 0 && column < colNames.size())
+        return GuiConst::calculateStringWidthWithGlobalFont(colNames.at(column));
+
+    return 0;
+}
+
+void ColumnModel::onColumnsUpdated()
+{
+    beginResetModel();
+    endResetModel();
+}
 
 PacketAnalyserOptionsDialog::PacketAnalyserOptionsDialog(GuiHelper *guiHelper,
                                                          PacketModelAbstract *mainModel,
@@ -34,29 +155,58 @@ PacketAnalyserOptionsDialog::PacketAnalyserOptionsDialog(GuiHelper *guiHelper,
 
     currentGui = nullptr;
 
-    ui->colListWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->colListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    addItems(mainModel->getColumnNames());
-    connect(ui->colListWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onItemSelected(QItemSelection)));
-    connect(ui->equalitycheckBox, SIGNAL(toggled(bool)), SLOT(onEqualityToggled(bool)));
-    connect(ui->hiddenCheckBox, SIGNAL(toggled(bool)), SLOT(onHiddenToggled(bool)));
+    colModel = new(std::nothrow) ColumnModel(guiHelper, mainModel, proxyModel, tableView);
+    if (colModel == nullptr) {
+        qFatal("Cannot allocate memory for ColumnModel X{");
+    }
+
+    QAbstractItemModel * old = ui->columnsTableView->model();
+    ui->columnsTableView->setModel(colModel);
+    delete old;
+
+    ui->columnsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->columnsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->columnsTableView->setMinimumHeight(200);
+    ui->columnsTableView->setMinimumWidth(300);
+
+    ui->columnsTableView->resizeColumnToContents(ColumnModel::COLUMN_NAME);
+    ui->columnsTableView->setColumnWidth(ColumnModel::COLUMN_HIDDEN, colModel->getDefaultColumnwidth(ColumnModel::COLUMN_HIDDEN));
+    ui->columnsTableView->setColumnWidth(ColumnModel::COLUMN_EQUALITY, colModel->getDefaultColumnwidth(ColumnModel::COLUMN_EQUALITY));
+    ui->columnsTableView->setColumnWidth(ColumnModel::COLUMN_DELETE, colModel->getDefaultColumnwidth(ColumnModel::COLUMN_DELETE));
+
+    ui->maxPayloadSizeSpinBox->setMinimum(PacketModelAbstract::MAX_PAYLOAD_DISPLAY_SIZE_MIN_VAL);
+    ui->maxPayloadSizeSpinBox->setMaximum(PacketModelAbstract::MAX_PAYLOAD_DISPLAY_SIZE_MAX_VAL);
+    ui->maxPayloadSizeSpinBox->setValue(mainModel->getMaxPayloadDisplaySize());
+
+    QPalette example_palette;
+    example_palette.setColor(QPalette::Window, GlobalsValues::EqualsPacketsBackground);
+    example_palette.setColor(QPalette::WindowText, GlobalsValues::EqualsPacketsForeground);
+    ui->equalityExampleLabel->setAutoFillBackground(true);
+    ui->equalityExampleLabel->setPalette(example_palette);
+
+    connect(ui->columnsTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onItemSelected(QItemSelection)));
     connect(uiTransform->inboundRadioButton, SIGNAL(toggled(bool)), SLOT(onInboundButtonToggled(bool)));
     connect(uiTransform->infoPushButton, SIGNAL(clicked()), this, SLOT(onInfoClicked()));
     connect(uiTransform->textRadioButton, SIGNAL(toggled(bool)), this, SLOT(onTextFormatToggled(bool)));
     connect(ui->textRadioButton, SIGNAL(toggled(bool)), this, SLOT(onTextFormatToggled(bool)));
+    connect(ui->maxPayloadSizeSpinBox, SIGNAL(valueChanged(int)), mainModel, SLOT(setMaxPayloadDisplaySize(int)));
+    connect(ui->columnsTableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onIndexClicked(QModelIndex)));
+    connect(mainModel, SIGNAL(columnsUpdated()), this , SLOT(onColumnsUpdated()));
+
+    connect(ui->equalityBackgroundPushButton, SIGNAL(clicked(bool)), this, SLOT(onEqualityBackgroundClicked()));
+    connect(ui->equalityTextPushButton, SIGNAL(clicked(bool)), this, SLOT(onEqualityForegroundClicked()));
 
     uiTransform->wayGroupBox->setVisible(true);
     uiTransform->formatGroupBox->setVisible(true);
     uiTransform->typeGroupBox->setVisible(false);
     uiTransform->nameWidget->setVisible(false);
+    ui->maxPayloadSizeWidget->setVisible(false);
 
     connect(this, SIGNAL(rejected()), SLOT(deleteLater()));
 
     connect(ui->addPushButton, SIGNAL(clicked(bool)), SLOT(onAddNewColumn()));
 
     onItemSelected(0);
-
-    resize(600, 500);
 }
 
 PacketAnalyserOptionsDialog::~PacketAnalyserOptionsDialog()
@@ -64,55 +214,32 @@ PacketAnalyserOptionsDialog::~PacketAnalyserOptionsDialog()
     delete currentGui;
     currentGui = nullptr;
     delete ui;
-}
-
-void PacketAnalyserOptionsDialog::onHiddenToggled(bool checked)
-{
-    QModelIndexList cols = ui->colListWidget->selectionModel()->selectedRows();
-    if (cols.size() == 0) {
-        return;
-    } else {
-        tableView->setColumnHidden(cols.at(0).row(),checked);
-    }
-}
-
-void PacketAnalyserOptionsDialog::onEqualityToggled(bool checked)
-{
-    QModelIndexList cols = ui->colListWidget->selectionModel()->selectedRows();
-    if (cols.size() == 0) {
-        return;
-    } else {
-        proxyModel->setEqualitycolumn(cols.at(0).row(),checked);
-    }
+    delete uiTransform;
 }
 
 void PacketAnalyserOptionsDialog::onItemSelected(QItemSelection index)
 {
     QModelIndexList list =  index.indexes();
     if (list.isEmpty()) {
-        ui->colOptionsWidget->setEnabled(false);
+        ui->columnOptionsWidget->setEnabled(false);
+        ui->columnOptionsWidget->setVisible(false);
     } else {
         onItemSelected(list.at(0).row());
-        ui->colOptionsWidget->setEnabled(true);
+        ui->columnOptionsWidget->setVisible(true);
+        ui->columnOptionsWidget->setEnabled(true);
     }
 }
 
  void PacketAnalyserOptionsDialog::onItemSelected(int index) {
 
-   //  qDebug() << tr("Column %1 selected, hidden: %2").arg(index).arg(tableView->isColumnHidden(index));
-     ui->hiddenCheckBox->blockSignals(true);
-     ui->hiddenCheckBox->setChecked(tableView->isColumnHidden(index));
-     ui->hiddenCheckBox->blockSignals(false);
-     ui->equalitycheckBox->blockSignals(true);
-     ui->equalitycheckBox->setChecked(proxyModel->isColumnEqualityenabled(index));
-     ui->equalitycheckBox->blockSignals(false);
+     ui->maxPayloadSizeWidget->setVisible(false);
+
      //cleaning previous Transform Gui
      if (currentGui != nullptr) {
          delete currentGui;
          currentGui = nullptr;
      }
      if (mainModel->isUserColumn(index)) {
-
          currentGui = mainModel->getGuiForUserColumn(index);
          if (currentGui != nullptr) {
              uiTransform->mainLayout->addWidget(currentGui);
@@ -157,6 +284,7 @@ void PacketAnalyserOptionsDialog::onItemSelected(QItemSelection index)
          ui->confWidget->setVisible(false);
          if (index == PacketModelAbstract::COLUMN_PAYLOAD) {
              setFormatVisible(true, mainModel->getColumnFormat(index));
+             ui->maxPayloadSizeWidget->setVisible(true);
          } else {
              setFormatVisible(false);
          }
@@ -179,10 +307,10 @@ void PacketAnalyserOptionsDialog::onAddNewColumn()
         if (ta != nullptr) {
             mainModel->addUserColumn(itemConfig->getName(), ta, itemConfig->getFormat());
 
-            int newIndex = addItem(itemConfig->getName());
+//            int newIndex = addGeneralItem(itemConfig->getName());
 
-            ui->colListWidget->item(newIndex)->setSelected(true);
-            currentGui = ta->getGui(ui->colOptionsWidget);
+//            ui->columnsTableView->item(newIndex)->setSelected(true);
+            currentGui = ta->getGui(ui->columnOptionsWidget);
             if (currentGui != nullptr) {
                 uiTransform->mainLayout->addWidget(currentGui);
             }
@@ -192,27 +320,9 @@ void PacketAnalyserOptionsDialog::onAddNewColumn()
     delete itemConfig;
 }
 
-void PacketAnalyserOptionsDialog::onDeleteColumn(const QString &name)
-{
-    int index = mainModel->getColumnIndex(name);
-    if (index != PacketModelAbstract::COLUMN_INVALID) {
-        mainModel->removeUserColumn(name);
-        QListWidgetItem * item = itemsWidgets.value(dynamic_cast<QWidget *>(sender()),nullptr);
-        if (item != nullptr) {
-            ui->colListWidget->removeItemWidget(item); // need to remove the widget manually .. for some reasons
-            ui->colListWidget->takeItem(ui->colListWidget->row(item));
-            delete item;
-        } else {
-            qCritical() << "[PacketAnalyserOptionsDialog::onDeleteColumn] Cnnot find the associated item T_T";
-        }
-
-        ui->colListWidget->selectionModel()->clearSelection();
-    }
-}
-
 void PacketAnalyserOptionsDialog::onInboundButtonToggled(bool checked)
 {
-    QModelIndexList cols = ui->colListWidget->selectionModel()->selectedRows();
+    QModelIndexList cols = ui->columnsTableView->selectionModel()->selectedRows();
     if (cols.size() == 0) {
         return;
     } else {
@@ -225,7 +335,7 @@ void PacketAnalyserOptionsDialog::onInboundButtonToggled(bool checked)
 
 void PacketAnalyserOptionsDialog::onTextFormatToggled(bool checked)
 {
-    QModelIndexList cols = ui->colListWidget->selectionModel()->selectedRows();
+    QModelIndexList cols = ui->columnsTableView->selectionModel()->selectedRows();
     if (cols.size() == 0) {
         return;
     } else { // there should be only one column, so only considering the first in the list
@@ -235,7 +345,7 @@ void PacketAnalyserOptionsDialog::onTextFormatToggled(bool checked)
 
 void PacketAnalyserOptionsDialog::onInfoClicked()
 {
-    QModelIndexList cols = ui->colListWidget->selectionModel()->selectedRows();
+    QModelIndexList cols = ui->columnsTableView->selectionModel()->selectedRows();
     if (cols.size() == 0) {
         return;
     } else {
@@ -244,6 +354,50 @@ void PacketAnalyserOptionsDialog::onInfoClicked()
             ta->description();
         }
     }
+}
+
+void PacketAnalyserOptionsDialog::onEqualityBackgroundClicked()
+{
+    QColor choosenColor = QColorDialog::getColor(GlobalsValues::EqualsPacketsBackground, this);
+    if (choosenColor.isValid()) {
+        QPalette example_palette;
+        GlobalsValues::EqualsPacketsBackground = choosenColor;
+        example_palette.setColor(QPalette::Window, GlobalsValues::EqualsPacketsBackground);
+        example_palette.setColor(QPalette::WindowText, GlobalsValues::EqualsPacketsForeground);
+        ui->equalityExampleLabel->setPalette(example_palette);
+        guiHelper->saveEqualityPacketColors();
+    }
+}
+
+void PacketAnalyserOptionsDialog::onEqualityForegroundClicked()
+{
+    QColor choosenColor = QColorDialog::getColor(GlobalsValues::EqualsPacketsForeground, this);
+    if (choosenColor.isValid()) {
+        QPalette example_palette;
+        GlobalsValues::EqualsPacketsForeground = choosenColor;
+        example_palette.setColor(QPalette::Window, GlobalsValues::EqualsPacketsBackground);
+        example_palette.setColor(QPalette::WindowText, GlobalsValues::EqualsPacketsForeground);
+        ui->equalityExampleLabel->setPalette(example_palette);
+        guiHelper->saveEqualityPacketColors();
+    }
+}
+
+void PacketAnalyserOptionsDialog::onIndexClicked(const QModelIndex &index)
+{
+    if (index.column() == ColumnModel::COLUMN_DELETE) {
+        int row = index.row();
+        if (mainModel->isUserColumn(row))
+            mainModel->removeUserColumn(row);
+
+        currentGui = nullptr;
+        ui->confWidget->setVisible(false);
+    }
+}
+
+void PacketAnalyserOptionsDialog::onColumnsUpdated()
+{
+    colModel->onColumnsUpdated();
+    ui->columnsTableView->resizeColumnToContents(ColumnModel::COLUMN_NAME);
 }
 
 void PacketAnalyserOptionsDialog::setFormatVisible(bool visible, OutputFormat format)
@@ -262,43 +416,5 @@ void PacketAnalyserOptionsDialog::setFormatVisible(bool visible, OutputFormat fo
             ui->hexaRadioButton->blockSignals(false);
         }
     }
-
-
 }
 
-int PacketAnalyserOptionsDialog::addItem(const QString &name)
-{
-    int newIndex = ui->colListWidget->count();
-    DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(name);
-
-    if (itemWid != nullptr) {
-        if (mainModel->isUserColumn(name)) {
-            itemWid->setEnableDelete(true);
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onDeleteColumn(QString)), Qt::QueuedConnection);
-        } else {
-            itemWid->setEnableDelete(false);
-        }
-        QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
-        if (item != nullptr) {
-            ui->colListWidget->addItem(item);
-            ui->colListWidget->setItemWidget(item, itemWid);
-            itemsWidgets.insert(itemWid, item);
-        } else {
-            qFatal("Cannot allocate memory for QListWidgetItem X{");
-        }
-    } else {
-        qFatal("Cannot allocate memory for DeleteableListItem X{");
-    }
-
-    return newIndex;
-}
-
-int PacketAnalyserOptionsDialog::addItems(const QStringList &names)
-{
-    int index = 0;
-    for (int i = 0; i < names.size(); i++) {
-        index = addItem(names.at(i));
-    }
-
-    return index; // return the last index
-}

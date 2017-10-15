@@ -11,11 +11,11 @@ Released under AGPL see LICENSE for more information
 #include "generictab.h"
 #include "ui_generictab.h"
 #include <QDebug>
-#include "../shared/offsetgotowidget.h"
-#include "../shared/searchwidget.h"
-#include "../sources/bytesourceabstract.h"
-#include "../views/hexview.h"
-#include "../views/textview.h"
+#include "shared/offsetgotowidget.h"
+#include "shared/searchwidget.h"
+#include "sources/bytesourceabstract.h"
+#include "views/hexview.h"
+#include "views/textview.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QApplication>
@@ -25,20 +25,23 @@ Released under AGPL see LICENSE for more information
 #include <QDropEvent>
 #include <QMenu>
 #include <QDragEnterEvent>
-#include "../quickviewitemconfig.h"
+#include "quickviewitemconfig.h"
 #include <QUrl>
-#include "../downloadmanager.h"
-#include "../loggerwidget.h"
-#include "../guihelper.h"
-#include "../shared/readonlybutton.h"
-#include "../shared/clearallmarkingsbutton.h"
-#include "../shared/bytesourceguibutton.h"
-#include "../shared/detachtabbutton.h"
-#include "../shared/messagepanelwidget.h"
-#include "../sources/intermediatesource.h"
-#include "../shared/universalreceiverbutton.h"
-#include "../shared/guiconst.h"
-#include "../views/bytetableview.h"
+#include "downloadmanager.h"
+#include "loggerwidget.h"
+#include "guihelper.h"
+#include "shared/readonlybutton.h"
+#include "shared/clearallmarkingsbutton.h"
+#include "shared/bytesourceguibutton.h"
+#include "shared/detachtabbutton.h"
+#include "shared/messagepanelwidget.h"
+#include "sources/intermediatesource.h"
+#include "shared/universalreceiverbutton.h"
+#include "shared/guiconst.h"
+#include "shared/newviewmenu.h"
+#include "shared/transformguibutton.h"
+#include "views/bytetableview.h"
+#include "views/singleviewabstract.h"
 #include <QScrollBar>
 
 using namespace GuiConst;
@@ -50,7 +53,6 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
     bytesource(nbytesource)
 {
     ableToReceiveData = false;
-    newDefaultTextViewAction = nullptr;
     setName(bytesource->name());
     connect(bytesource,SIGNAL(nameChanged(QString)), SLOT(setName(QString)));
 
@@ -144,46 +146,15 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
         ui->mainLayout->insertWidget(1,gui);
     }
 
-    //new view button
-    QMenu * newViewMenu = new(std::nothrow)QMenu(ui->addViewPushButton);
-    if (newViewMenu == nullptr) {
-        qFatal("Cannot allocate memory for QMenu X{");
+    //new view menu
+    newViewsContextMenu = new(std::nothrow) NewViewMenu(guiHelper, this);
+    if (newViewsContextMenu == nullptr) {
+        qFatal("Cannot allocate memory for NewViewMenu X{");
     }
 
-    QAction * descAction = new(std::nothrow)QAction(tr("View type"),newViewMenu);
-    if (descAction == nullptr) {
-        qFatal("Cannot allocate memory for QAction X{");
-    }
-    descAction->setDisabled(true);
-    newViewMenu->addAction(descAction);
-
-    newHexViewAction = new(std::nothrow)QAction(tr("Hexadecimal"),newViewMenu);
-    if (newHexViewAction == nullptr) {
-        qFatal("Cannot allocate memory for QAction X{");
-    }
-    newViewMenu->addAction(newHexViewAction);
-
-    newTextViewAction = new(std::nothrow)QAction(tr("Text"),newViewMenu);
-    if (newTextViewAction == nullptr) {
-        qFatal("Cannot allocate memory for QAction X{");
-    }
-    newViewMenu->addAction(newTextViewAction);
-    newViewMenu->addSeparator();
-
-    descAction = new(std::nothrow)QAction(tr("Predefined view"),newViewMenu);
-        if (descAction == nullptr) {
-            qFatal("Cannot allocate memory for QAction X{");
-        }
-    descAction->setDisabled(true);
-    newViewMenu->addAction(descAction);
-
-    newDefaultTextViewAction = new(std::nothrow)QAction(tr("Default Text view"),newViewMenu);
-        if (newDefaultTextViewAction == nullptr) {
-            qFatal("Cannot allocate memory for newDefaultTextViewAction X{");
-        }
-    newViewMenu->addAction(newDefaultTextViewAction);
-
-    ui->addViewPushButton->setMenu(newViewMenu);
+    connect(newViewsContextMenu, SIGNAL(newViewRequested()), SLOT(onNewTabRequested()));
+    ui->tabWidget->installEventFilter(this);
+    ui->addViewPushButton->setMenu(newViewsContextMenu);
 
     UniversalReceiverButton *urb = new(std::nothrow) UniversalReceiverButton(this, guiHelper);
     if (urb == nullptr) {
@@ -192,7 +163,6 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
 
     ui->mainToolBarLayout->insertWidget(ui->mainToolBarLayout->indexOf(gotoWidget) + 1,urb);
 
-    connect(newViewMenu,SIGNAL(triggered(QAction*)), SLOT(onNewViewTab(QAction*)));
     connect(hexView,SIGNAL(askForFileLoad()), SLOT(fileLoadRequest()));
     connect(ui->loadPushButton, SIGNAL(clicked()), SLOT(fileLoadRequest()));
     connect(ui->historyUndoPushButton, SIGNAL(clicked()), SLOT(onHistoryBackward()));
@@ -272,8 +242,10 @@ void GenericTab::fileLoadRequest()
 {
     QString fileName;
     if (bytesource->hasCapability(ByteSourceAbstract::CAP_LOADFILE)) {
-        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"));
+        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"),GuiConst::GLOBAL_LAST_PATH);
         if (!fileName.isEmpty()) {
+            QFileInfo fi(fileName);
+            GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
             bytesource->fromLocalFile(fileName);
             integrateByteSource();
             setName(QFileInfo(fileName).fileName());
@@ -302,44 +274,6 @@ void GenericTab::onHistoryForward()
     bytesource->historyForward();
 }
 
-void GenericTab::onNewViewTab(QAction *action)
-{
-    ViewTab vt;
-    if (action == newDefaultTextViewAction) {  // usual Text View (no input transform)
-        vt.type = DEFAULTTEXT;
-        vt.transform = nullptr;
-        vt.tabName = TEXT_TEXT;
-    } else {
-        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
-        if (itemConfig == nullptr) {
-            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
-        }
-        itemConfig->setWayBoxVisible(true);
-        itemConfig->setFormatVisible(false);
-        itemConfig->setOutputTypeVisible(false);
-        int ret = itemConfig->exec();
-        if (ret == QDialog::Accepted) {
-            TransformAbstract * ta = itemConfig->getTransform();
-            vt.transform = ta;
-            vt.tabName = itemConfig->getName();
-            if (action == newHexViewAction) {
-                vt.type = HEXVIEW;
-            } else if (action == newTextViewAction) {
-                vt.type = TEXTVIEW;
-            } else {
-                qWarning("New View Action not managed T_T");
-                vt.type = UNDEFINED;
-            }
-
-            delete itemConfig;
-        } else { // action cancelled
-            delete itemConfig;
-            return;
-        }
-    }
-    addViewTab(vt);
-}
-
 void GenericTab::onDeleteTab(int index)
 {
     if (ui->tabWidget->indexOf(hexView) == index) {
@@ -359,12 +293,26 @@ void GenericTab::onDeleteTab(int index)
     }
 }
 
+void GenericTab::onNewTabRequested()
+{
+    SingleViewAbstract * sva = newViewsContextMenu->getView(bytesource,ui->tabWidget);
+    if (sva != nullptr) {
+        ViewTab data = newViewsContextMenu->getTabData();
+        int index = ui->tabWidget->addTab(sva,data.tabName);
+        QPushButton * configButton = sva->getConfigButton();
+        if (configButton != nullptr) {
+            ui->tabWidget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
+        }
+        tabData.append(data);
+    }
+}
+
 void GenericTab::onSearch(QByteArray item, QBitArray mask, bool)
 {
     hexView->search(item, mask);
 }
 
-bool GenericTab::eventFilter(QObject *obj, QEvent *event)
+bool GenericTab::eventFilter(QObject *receiver, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
@@ -381,7 +329,25 @@ bool GenericTab::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
-    return QObject::eventFilter(obj, event);
+    bool ret = QObject::eventFilter(receiver, event);
+    if (receiver == ui->tabWidget) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent* me = dynamic_cast<QMouseEvent*>(event);
+            if (me == nullptr) {
+                qCritical() << "[GenericTab::eventFilter] nullptr MouseEvent";
+                return true; // not supposed to happen anyway ..
+            } else if (me->buttons() == Qt::RightButton){
+                // only in the tabbar area
+                QRect clickable = ui->tabWidget->tabBar()->geometry();
+                clickable.setRight(geometry().right());
+                if (clickable.contains(me->pos())) {
+                    newViewsContextMenu->exec(ui->tabWidget->mapToGlobal(me->pos()));
+                    return true;
+                }
+            }
+        }
+    }
+    return ret;
 }
 
 void GenericTab::dragEnterEvent(QDragEnterEvent *event)
@@ -408,6 +374,8 @@ void GenericTab::addViewTab(GenericTab::ViewTab data)
 {
     SingleViewAbstract * newView = nullptr;
     QTabWidget * thetabwiget = ui->tabWidget;
+    QPushButton * configButton = nullptr;
+
     switch (data.type) {
         case (GenericTab::HEXVIEW) : {
                 IntermediateSource * is = new(std::nothrow) IntermediateSource(guiHelper,bytesource,data.transform);
@@ -418,6 +386,10 @@ void GenericTab::addViewTab(GenericTab::ViewTab data)
                 newView = new(std::nothrow) HexView(is,guiHelper,thetabwiget,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for HexView X{");
+                }
+                configButton = new(std::nothrow) TransformGuiButton(data.transform);
+                if (configButton == nullptr) {
+                    qFatal("Cannot allocate memory for TransformGuiButton X{");
                 }
             }
             break;
@@ -430,6 +402,10 @@ void GenericTab::addViewTab(GenericTab::ViewTab data)
                 newView = new(std::nothrow) TextView(is,guiHelper,thetabwiget,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for TextView X{");
+                }
+                configButton = new(std::nothrow) TransformGuiButton(data.transform);
+                if (configButton == nullptr) {
+                    qFatal("Cannot allocate memory for TransformGuiButton X{");
                 }
             }
             break;
@@ -446,9 +422,35 @@ void GenericTab::addViewTab(GenericTab::ViewTab data)
     }
 
     if (newView != nullptr) {
-        thetabwiget->addTab(newView,data.tabName);
+        newView->setConfiguration(data.options);
+        int index = thetabwiget->addTab(newView,data.tabName);
+        if (configButton != nullptr) {
+            thetabwiget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
+        }
+
         tabData.append(data);
     }
+}
+
+QList<TabAbstract::ViewTab> GenericTab::getTabData()
+{
+    QList<ViewTab> ret;
+    // updating the options, in case they have changed (very likely)
+    for (int i = 0; i < tabData.size();i++) {
+        ViewTab vt = tabData.at(i);
+        QWidget *wview = ui->tabWidget->widget(i+1);
+        if (wview != nullptr) {
+            SingleViewAbstract * sva = static_cast<SingleViewAbstract *>(wview);
+            vt.options = sva->getConfiguration();
+
+        } else {
+            qCritical() << tr("[GenericTab::getTabData] Invalid index");
+        }
+
+        ret.append(vt);
+    }
+
+    return ret;
 }
 
 MessagePanelWidget *GenericTab::getMessagePanel() const
@@ -481,6 +483,7 @@ void GenericTabStateObj::run()
 {
     GenericTab * gTab = dynamic_cast<GenericTab *> (tab);
     TabStateObj::run();
+    QHash<QString, QString> options;
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(gTab->getSearchWidget()->text(),true));
         writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(gTab->getGotoWidget()->text()));
@@ -488,23 +491,31 @@ void GenericTabStateObj::run()
         writer->writeAttribute(GuiConst::STATE_MESSAGE_PANEL_VISIBLE, write(gTab->getMessagePanel()->isVisible()));
         writer->writeAttribute(GuiConst::STATE_SCROLL_INDEX, write(gTab->hexView->getHexTableView()->verticalScrollBar()->value()));
         writer->writeAttribute(GuiConst::STATE_CURRENT_INDEX, write(gTab->ui->tabWidget->currentIndex()));
-        QList<GenericTab::ViewTab> tabs = gTab->tabData;
+        QList<TabAbstract::ViewTab> tabs = gTab->getTabData();
         int size = tabs.size();
         writer->writeStartElement(GuiConst::STATE_TABVIEWLIST);
         writer->writeAttribute(GuiConst::STATE_SIZE, write(tabs.size()));
         for (int i = 0; i < size ; i++) {
             writer->writeStartElement(GuiConst::STATE_TABVIEW);
-            writer->writeAttribute(GuiConst::STATE_TYPE, write((int)tabs.at(i).type));
+            TabAbstract::ViewTab vt = tabs.at(i);
+            writer->writeAttribute(GuiConst::STATE_TYPE, write((int)vt.type));
             // saving configuration
             QString conf;
             TransformChain list;
-            if (tabs.at(i).transform != nullptr) {
-                list.append(tabs.at(i).transform);
+            if (vt.transform != nullptr) {
+                list.append(vt.transform);
             }
-            list.setName(tabs.at(i).tabName);
+            list.setName(vt.tabName);
             QXmlStreamWriter streamin(&conf);
             tab->getHelper()->getTransformFactory()->saveConfToXML(list, &streamin);
             writer->writeAttribute(GuiConst::STATE_CONF, write(conf));
+            options = vt.options;
+            QHashIterator<QString, QString> it(options);
+            while (it.hasNext()) {
+                it.next();
+                if (it.key() != GuiConst::STATE_CONF && it.key() != GuiConst::STATE_TYPE)
+                    writer->writeAttribute(it.key(), it.value());
+            }
             writer->writeEndElement();
             list.clear(); // the transforms are not own by us, don't delete them
         }
@@ -572,7 +583,9 @@ void GenericTabStateObj::run()
                             readEndElement(GuiConst::STATE_TABVIEW); // closing now, because there is no child defined anyway
                             if (attrList.hasAttribute(GuiConst::STATE_TYPE)) {
                                 int type = readInt(attrList.value(GuiConst::STATE_TYPE),&ok);
-                                if (ok && (type == 0 || type == 1 || type == 2 || type == 3)) {
+                                if (ok && (type == GenericTab::HEXVIEW ||
+                                           type == GenericTab::TEXTVIEW ||
+                                           type == GenericTab::DEFAULTTEXT)) {
                                     vt.type = (GenericTab::ViewType) type;
                                 } else {
                                     qWarning() << "Invalid state type for this view, skipping";
@@ -582,6 +595,7 @@ void GenericTabStateObj::run()
                                 qWarning() << "no state type for this view, skipping";
                                 continue;
                             }
+
                             if (vt.type != GenericTab::DEFAULTTEXT) {
                                 if (attrList.hasAttribute(GuiConst::STATE_CONF)) {
                                     QString conf = readString(attrList.value(GuiConst::STATE_CONF));
@@ -605,6 +619,15 @@ void GenericTabStateObj::run()
                             } else {
                                 vt.tabName = GenericTab::TEXT_TEXT;
                             }
+                            options.clear();
+                            for (int i = 0; i < attrList.size(); i++) {
+                                QXmlStreamAttribute attr = attrList.at(i);
+                                if (attr.name() != GuiConst::STATE_CONF && attr.name() != GuiConst::STATE_TYPE)
+                                    options.insert(attr.name().toString(), attr.value().toString());
+                            }
+
+                            vt.options = options;
+
                             gTab->addViewTab(vt);
                             // no deleting vt.transform here, the pointer is now owned by the tab.
                         }

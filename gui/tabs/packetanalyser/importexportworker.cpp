@@ -11,12 +11,18 @@
 #include "shared/guiconst.h"
 #include "state/basestateabstract.h"
 
-ImportExportWorker::ImportExportWorker(PacketModelAbstract *model, QString filename, GuiConst::FileOperations ops, GuiConst::FileFormat format, QObject *parent) :
+ImportExportWorker::ImportExportWorker(PacketModelAbstract *model,
+                                       QString filename,
+                                       GuiConst::FileOperations ops,
+                                       GuiConst::FileFormat format,
+                                       bool enableCompression,
+                                       QObject *parent) :
     QObject(parent),
     ops(ops),
     format(format),
     filename(filename),
-    model(model)
+    model(model),
+    enableCompression(enableCompression)
 {
     pcapLinkType = PcapDef::LINKTYPE_ETHERNET; // ethernet
     exportFormattedXML = true;
@@ -27,9 +33,6 @@ ImportExportWorker::ImportExportWorker(PacketModelAbstract *model, QString filen
         this->ops = GuiConst::UNKNOWN_OPERATION;
         this->format = GuiConst::INVALID_FORMAT;
     }
-
-    if (this->ops == GuiConst::IMPORT_OPERATION)
-        connect(this, SIGNAL(newPacket(Packet*)), model, SLOT(addPacket(Packet*)),Qt::QueuedConnection);
 
     connect(this, SIGNAL(finished()), SLOT(deleteLater()), Qt::QueuedConnection);
 }
@@ -68,6 +71,7 @@ void ImportExportWorker::run()
             }
         }
     } else if (ops == GuiConst::IMPORT_OPERATION) {
+        loadedPackets.clear();
         if (target.open(QIODevice::ReadOnly)) {
             switch (format) {
                 case GuiConst::PCAP_FORMAT:
@@ -87,11 +91,15 @@ void ImportExportWorker::run()
                     qCritical() << tr("[ImportExportWorker::run] Unmanaged format for reading: %1 T_T").arg(format);
                     break;
             }
+            qDebug() << "loaded packets:" << loadedPackets.size();
+            model->addPackets(loadedPackets);
         }
     }
 
     if (target.isOpen())
         target.close();
+
+
     emit finished();
 }
 
@@ -121,12 +129,13 @@ void ImportExportWorker::toPcap(QIODevice *file)
 
         pfile->close();
     } else {
-        qCritical("Cannot open the pcap file");
+        emit log("Cannot open the pcap destination file ", "Pcap export",Pip3lineConst::LERROR);
     }
 }
 
 void ImportExportWorker::loadFromPcap(QIODevice *file)
 {
+    qDebug() << "perf 1: " << timer.restart();
     PcapIO *pfile = new(std::nothrow) PcapIO(file);
     if (pfile == nullptr)
         qFatal("Cannot allocate memory for PcapIO X{");
@@ -146,14 +155,15 @@ void ImportExportWorker::loadFromPcap(QIODevice *file)
             pac->setTimestamp(ppacket->getTimestamp());
             pac->setMicrosec(ppacket->getMicrosec() % 1000);
 
-            emit newPacket(pac);
+            loadedPackets.append(pac);
 
             delete ppacket;
             ppacket = pfile->nextPacket();
         }
     } else {
-        qCritical() << tr("Cannot open the pcap file");
+        emit log(tr("Cannot open the pcap source file: %1").arg(pfile->getErrorString()), "Pcap import",Pip3lineConst::LERROR);
     }
+    qDebug() << "perf 10: " << timer.restart();
 }
 
 void ImportExportWorker::toXML(QXmlStreamWriter *stream)
@@ -179,9 +189,10 @@ void ImportExportWorker::toXML(QXmlStreamWriter *stream)
         if (pac->isInjected())
             stream->writeAttribute(GuiConst::STATE_INJECTED_PACKET, QString::number(1));
 
-        stream->writeTextElement(GuiConst::STATE_DATA, BaseStateAbstract::byteArrayToString(pac->getData()));
+        stream->writeAttribute(GuiConst::STATE_SOURCEID, QString::number(pac->getSourceid()));
+        stream->writeTextElement(GuiConst::STATE_DATA, BaseStateAbstract::byteArrayToString(pac->getData(),enableCompression));
         if (pac->hasBeenModified())
-            stream->writeTextElement(GuiConst::STATE_ORIGINAL_DATA, BaseStateAbstract::byteArrayToString(pac->getOriginalData()));
+            stream->writeTextElement(GuiConst::STATE_ORIGINAL_DATA, BaseStateAbstract::byteArrayToString(pac->getOriginalData(),enableCompression));
         QHash<QString, QString> fields = pac->getAdditionalFields();
         if (fields.size() > 0) {
             stream->writeStartElement(GuiConst::STATE_ADDITIONAL_FIELDS_LIST);
@@ -203,7 +214,9 @@ void ImportExportWorker::toXMLFile(QIODevice *file)
 {
     QXmlStreamWriter stream(file);
     stream.setAutoFormatting(exportFormattedXML);
+    stream.writeStartDocument();
     toXML(&stream);
+    stream.writeEndDocument();
 }
 
 void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
@@ -275,15 +288,23 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
                         }
                     }
 
+                    if (attributes.hasAttribute(GuiConst::STATE_SOURCEID)) {
+                        bool ok = false;
+                        int val = attributes.value(GuiConst::STATE_SOURCEID).toString().toInt(&ok);
+                        if (ok) {
+                            pac->setSourceid(val);
+                        }
+                    }
+
                     QByteArray data;
                     QByteArray originalData;
                     while (stream->readNextStartElement()) { // should be some data here
                         QString name = stream->name().toString();
 
                         if (name == GuiConst::STATE_DATA) {
-                            data = BaseStateAbstract::stringToByteArray(stream->readElementText(QXmlStreamReader::SkipChildElements));
+                            data = BaseStateAbstract::stringToByteArray(stream->readElementText(QXmlStreamReader::SkipChildElements),enableCompression);
                         } else if (name == GuiConst::STATE_ORIGINAL_DATA) {
-                            originalData = BaseStateAbstract::stringToByteArray(stream->readElementText(QXmlStreamReader::SkipChildElements));
+                            originalData = BaseStateAbstract::stringToByteArray(stream->readElementText(QXmlStreamReader::SkipChildElements),enableCompression);
                         } else if (name == GuiConst::STATE_ADDITIONAL_FIELDS_LIST) {
                             QHash<QString, QString> fields;
                             while (stream->readNextStartElement()) { // ok reading the list now
@@ -312,7 +333,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
 
                     // packet should be formed now
                     if (gotData)
-                        emit newPacket(pac);
+                        loadedPackets.append(pac);
                     else
                         delete pac;
 
@@ -331,10 +352,13 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
 void ImportExportWorker::loadFromXMLFile(QIODevice *file)
 {
     QXmlStreamReader stream(file);
+    if (stream.readNext() != QXmlStreamReader::StartDocument) {
+        qCritical() << tr("not XML document starter .. skipping");
+        return;
+    }
     loadFromXML(&stream);
 }
 
-#if QT_VERSION >= 0x050000
 void ImportExportWorker::toJSon(QJsonDocument *jdoc)
 {
     Packet *pac = nextPacket();
@@ -359,6 +383,7 @@ void ImportExportWorker::toJSon(QJsonDocument *jdoc)
         if (pac->hasBeenModified())
             jsonobj[GuiConst::STATE_ORIGINAL_DATA] = QString::fromUtf8(pac->getOriginalData().toBase64());
 
+        jsonobj[GuiConst::STATE_SOURCEID] = QString::number(pac->getSourceid());
         QHash<QString, QString> fields = pac->getAdditionalFields();
         if (fields.size() > 0) {
             QJsonObject fieldsobj;
@@ -451,6 +476,13 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
             if (jsonpac.contains(GuiConst::STATE_BACKGROUNG_COLOR)) {
                 pac->setForeground(BaseStateAbstract::stringToColor(jsonpac.value(GuiConst::STATE_BACKGROUNG_COLOR).toString()));
             }
+
+            if (jsonpac.contains(GuiConst::STATE_SOURCEID)) {
+                int value = jsonpac.value(GuiConst::STATE_SOURCEID).toString().toInt(&ok);
+                if (ok)
+                    pac->setSourceid(value);
+            }
+
             QByteArray data;
             QByteArray originalData;
 
@@ -496,7 +528,7 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
 
             // packet should be formed now
             if (gotData)
-                emit newPacket(pac);
+                loadedPackets.append(pac);
             else
                 delete pac;
         }
@@ -516,7 +548,6 @@ void ImportExportWorker::loadFromJsonFile(QIODevice *file)
         qCritical() << tr("[ImportExportWorker::run] Json Parsing error:").arg(error.errorString());
     }
 }
-#endif
 
 Packet *ImportExportWorker::nextPacket()
 {
@@ -538,6 +569,11 @@ Packet *ImportExportWorker::nextPacket()
     noMore = true;
 
     return nullptr;
+}
+
+QList<Packet *> ImportExportWorker::getLoadedPackets() const
+{
+    return loadedPackets;
 }
 bool ImportExportWorker::getExportFormattedJson() const
 {

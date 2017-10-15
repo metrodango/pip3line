@@ -153,9 +153,7 @@ int main(int argc, char *argv[])
         args.removeAt(index);
     }
 
-    MasterThread *pt = nullptr;
-
-    pt = new(std::nothrow) MasterThread(binaryInput, noError, verbose);
+    MasterThread * pt = new(std::nothrow) MasterThread(binaryInput, noError, verbose);
     if (pt == nullptr) {
         qFatal("Cannot allocate memory for MasterThread X{");
     }

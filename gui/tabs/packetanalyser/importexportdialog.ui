@@ -16,7 +16,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>467</height>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,6 +109,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="compressCheckBox">
+     <property name="text">
+      <string>Use qCompress on data</string>
+     </property>
     </widget>
    </item>
    <item>

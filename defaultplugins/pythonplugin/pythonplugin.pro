@@ -20,7 +20,7 @@ CONF_PYTHON_3 {
     TARGET = python3plugin
     unix:!macx {
         LIBS += -lpython3.4
-        INCLUDEPATH +="/usr/include/python3.4/"
+        INCLUDEPATH +="/usr/include/python3.4m/"
     }
 
     macx {

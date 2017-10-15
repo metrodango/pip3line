@@ -138,14 +138,12 @@ class ByteTableView : public QTableView
         void search(QByteArray item, QBitArray mask);
         static const int MAXCOL;
         static const int MINCOL;
-        static const int TEXTCOLUMNWIDTH;
-        static const int HEXCOLUMNWIDTH;
-        static const int DEFAULTROWSHEIGHT;
     public slots:
         void setColumnCount(int val);
         void gotoSearch(quint64 soffset, quint64 eoffset);
         bool goTo(quint64 offset, bool absolute,bool negative, bool select = false);
         void selectBytes(int pos, int length);
+        void updateTableSizes();
     signals:
         void newSelection();
         void error(QString mess, QString source);

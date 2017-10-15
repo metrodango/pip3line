@@ -56,6 +56,7 @@ void myMessageOutput(QtMsgType type, const char *localMsg)
         fprintf(stderr, "%s Warning: %s\n",currentTime, localMsg);
         if (_logFile != nullptr)
             fprintf(_logFile, "%s Warning: %s\n",currentTime, localMsg);
+        // abort(); // for debugging only
     } else if (type == QtCriticalMsg) {
         fprintf(stderr, "%s Critical: %s\n",currentTime, localMsg);
         if (_logFile != nullptr)

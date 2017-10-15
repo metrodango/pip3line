@@ -47,7 +47,7 @@ bool TLSClientListener::isStarted()
 void TLSClientListener::sendBlock(Block *block)
 {
     if (running) {
-        qDebug() << "Sending block";
+       // qDebug() << "Sending block";
         QByteArray data = applyOutboundTransform(block->getData());
         qint64 size = data.size();
         qint64 bwritten = 0;
@@ -76,9 +76,7 @@ void TLSClientListener::sendBlock(Block *block)
         if (!foundSource) { // or we open a new connection
             sid = BlocksSource::newSourceID(this);
 
-            QSslSocket * socket = nullptr;
-
-            socket = new(std::nothrow) QSslSocket();
+            QSslSocket * socket = new(std::nothrow) QSslSocket();
             if (socket == nullptr) {
                 qFatal("Cannot allocate memory for QSslSocket X{");
             }

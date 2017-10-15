@@ -26,9 +26,9 @@ Released under AGPL see LICENSE for more information
 
 PythonPlugin::PythonPlugin()
 {
-    callback = NULL;
-    gui = NULL;
-    modules = NULL;
+    callback = nullptr;
+    gui = nullptr;
+    modules = nullptr;
 
     qDebug() << "Created " << this;
 }
@@ -46,7 +46,7 @@ void PythonPlugin::setCallBack(Pip3lineCallback *ncallback)
 
     modules = new(std::nothrow) PythonModules(PythonTransform::id, callback);
 
-    if (modules == NULL) {
+    if (modules == nullptr) {
        qFatal("Cannot allocate memory for ModulesManagement (PythonPlugin) X{");
        return;
     }
@@ -66,17 +66,17 @@ QString PythonPlugin::compiledWithQTversion() const
 
 TransformAbstract *PythonPlugin::getTransform(QString name)
 {
-    PythonTransform *ta = NULL;
+    PythonTransform *ta = nullptr;
 
     if (name == PythonTransform::id) {
         ta = new(std::nothrow) PythonTransform(modules);
-        if (ta == NULL) {
+        if (ta == nullptr) {
            qFatal("Cannot allocate memory for Python (PythonPlugin 1) X{");
         }
     }
     else if (modules->isRegistered(name)) {
         ta = new(std::nothrow) PythonTransform(modules, name);
-        if (ta == NULL) {
+        if (ta == nullptr) {
            qFatal("Cannot allocate memory for Python (PythonPlugin 2) X{");
         }
     }

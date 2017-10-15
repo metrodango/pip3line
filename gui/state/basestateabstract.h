@@ -48,10 +48,10 @@ class BaseStateAbstract : public QObject
         bool readEndAndNext(QString expected);
 
         QString write(QByteArray data);
-        static QString byteArrayToString(QByteArray data);
+        static QString byteArrayToString(QByteArray data, bool compress = true);
         QByteArray readByteArray(QStringRef data);
         QByteArray readByteArray(QString data);
-        static QByteArray stringToByteArray(QString data);
+        static QByteArray stringToByteArray(QString data, bool uncompress = true);
 
         QString write(bool value);
         bool readBool(QStringRef val);

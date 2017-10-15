@@ -18,6 +18,7 @@ Released under AGPL see LICENSE for more information
 #include <QSysInfo>
 #include <pip3linecallback.h>
 
+
 #ifdef BUILD_PYTHON_3
 const QString PythonModules::BASE_SCRIPTS_DIR = "python3";
 const QString PythonModules::PYTHON_TYPE = "Python 3";
@@ -31,6 +32,10 @@ char PythonModules::PROG_NAME[] = APPNAME;
 const QString PythonModules::PYTHON_EXTENSION = ".py";
 
 const char * PythonModules::MAIN_FUNCTION_NAME = "pip3line_transform";
+const char * PythonModules::ISTWOWAY_ATTR_NAME = "Pip3line_is_two_ways";
+const char * PythonModules::INBOUND_ATTR_NAME = "Pip3line_INBOUND";
+const char * PythonModules::PARAMS_ATTR_NAME = "Pip3line_params";
+const char * PythonModules::PARAMS_NAMES_ATTR_NAME = "Pip3line_params_names";
 const char * PythonModules::MODULE_FILE_PATH_STR = "__file__";
 
 // some mandatory initialization on Windows platform (thank you Python dev)
@@ -98,10 +103,10 @@ PythonModules::PythonModules(QString name, Pip3lineCallback *callback) :
     ModulesManagement(name, PYTHON_EXTENSION, BASE_SCRIPTS_DIR, callback)
 {
 
-    pyGetValFunc = NULL;
-    pyStringIO = NULL;
-    pyTruncateFunc = NULL;
-    pySeekFunc = NULL;
+    pyGetValFunc = nullptr;
+    pyStringIO = nullptr;
+    pyTruncateFunc = nullptr;
+    pySeekFunc = nullptr;
 
     Py_SetProgramName(PROG_NAME);
     Py_DontWriteBytecodeFlag++;
@@ -186,7 +191,7 @@ bool PythonModules::initialize()
 
 PyObject *PythonModules::loadModule(QString modulePath, bool reload, bool *firstLoad)
 {
-    PyObject *pModule = NULL;
+    PyObject *pModule = nullptr;
     if (modulePath.isEmpty()) { // should have been checked earlier already, but who knows ...
         callback->logError(tr("Empty module path name, nothing to load..."));
         return pModule;
@@ -205,11 +210,11 @@ PyObject *PythonModules::loadModule(QString modulePath, bool reload, bool *first
         pModule = PyImport_ImportModule(moduleName.toUtf8().data()); // new reference
         if (!checkPyError()) {
             callback->logError(tr("Module \"%1\" could not be loaded:\n %2").arg(modulePath).arg(errorMessage));
-            pModule = NULL;
+            pModule = nullptr;
         } else {
             if (!checkModuleNameAndPath(modulePath, moduleName)) { // checking if the module loaded comes from the file that was supplied
                 Py_XDECREF(pModule);
-                pModule = NULL;
+                pModule = nullptr;
                 PyGILState_Release(lgstate);
                 return pModule;
             }
@@ -217,12 +222,12 @@ PyObject *PythonModules::loadModule(QString modulePath, bool reload, bool *first
             if (PyObject_HasAttrString(pModule, MAIN_FUNCTION_NAME) != 1) {
                 callback->logError(tr("The python module %2 does not have the %1 method").arg(QString::fromUtf8(MAIN_FUNCTION_NAME)).arg(moduleName));
                 Py_XDECREF(pModule);
-                pModule = NULL;
+                pModule = nullptr;
                 PyGILState_Release(lgstate);
                 return pModule;
             } else {
                 modulesPath.insert(modulePath,pModule);
-                if (firstLoad != NULL)
+                if (firstLoad != nullptr)
                     *firstLoad = true;
             }
         }
@@ -230,6 +235,21 @@ PyObject *PythonModules::loadModule(QString modulePath, bool reload, bool *first
     } else if (reload) {
         qDebug() << "Reloading module" << modulePath;
         PyObject *oldModule = modulesPath.take(modulePath); // the module object is either going to be replaced or cleared
+        // clearing global objects (we don't care about any error message here)
+        PyObject * attr = PyObject_GetAttrString(oldModule,INBOUND_ATTR_NAME);
+        PyErr_Clear();
+        Py_XDECREF(attr);
+        attr = PyObject_GetAttrString(oldModule,ISTWOWAY_ATTR_NAME);
+        PyErr_Clear();
+        Py_XDECREF(attr);
+        attr = PyObject_GetAttrString(oldModule,PARAMS_ATTR_NAME);
+        PyErr_Clear();
+        Py_XDECREF(attr);
+        attr = PyObject_GetAttrString(oldModule,PARAMS_NAMES_ATTR_NAME);
+        PyErr_Clear();
+        Py_XDECREF(attr);
+
+        // reloading
         pModule = PyImport_ReloadModule(oldModule); // new ref ??
         if (pModule != oldModule) {
             Py_XDECREF(oldModule); // clearing the old module object if the new ref is different
@@ -237,7 +257,7 @@ PyObject *PythonModules::loadModule(QString modulePath, bool reload, bool *first
 
         if (!checkPyError()) {
             callback->logError(tr("Error(s) while reloading the module %1, removing it from the the registered modules.\n%2").arg(modulePath).arg(errorMessage));
-            pModule = NULL;
+            pModule = nullptr;
         } else {
             modulesPath.insert(modulePath,pModule);
         }
@@ -271,7 +291,7 @@ void PythonModules::unloadModules()
 {
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
-    PyObject * module = NULL;
+    PyObject * module = nullptr;
     Q_FOREACH (module, modulesPath) {
         Py_XDECREF(module);
     }
@@ -335,15 +355,13 @@ void PythonModules::settingUpStderr()
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
 
-    PyObject *modStringIO = NULL;
-    PyObject *obFuncStringIO = NULL;
     char stderrString[] = "stderr";
 
     // Import cStringIO module
 #ifdef BUILD_PYTHON_3
-    modStringIO = PyImport_ImportModule("io");
+    PyObject *modStringIO = PyImport_ImportModule("io");
 #else
-    modStringIO = PyImport_ImportModule("cStringIO");
+    PyObject *modStringIO = PyImport_ImportModule("cStringIO");
 #endif
     if (!checkPyObject(modStringIO)){
 #ifdef BUILD_PYTHON_3
@@ -356,7 +374,7 @@ void PythonModules::settingUpStderr()
         return;
     }
     // get StringIO constructor
-    obFuncStringIO = PyObject_GetAttrString(modStringIO, "StringIO");
+    PyObject *obFuncStringIO = PyObject_GetAttrString(modStringIO, "StringIO");
     if (!checkPyObject(obFuncStringIO)){
         callback->logError("[stderr init] can't find io.StringIO");
         Py_XDECREF(modStringIO);
@@ -365,7 +383,7 @@ void PythonModules::settingUpStderr()
         return;
     }
     // Construct cStringIO object
-    pyStringIO = PyObject_CallObject(obFuncStringIO, NULL);
+    pyStringIO = PyObject_CallObject(obFuncStringIO, nullptr);
     if (!checkPyObject(pyStringIO)) {
         callback->logError("[stderr init] StringIO() failed");
         Py_XDECREF(modStringIO);
@@ -420,10 +438,9 @@ void PythonModules::disablingSIGINT()
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
 
-    PyObject *modSignals = NULL;
     // Import signal module
 
-    modSignals = PyImport_ImportModule("signal");
+    PyObject *modSignals = PyImport_ImportModule("signal");
 
     if (!checkPyObject(modSignals)){
         callback->logError("[disablingSIGINT] Importing signal failed, Python SIGINT handler is NOT disabled");
@@ -527,10 +544,10 @@ bool PythonModules::checkModuleNameAndPath(QString modulePath, QString moduleNam
             qCritical() << tr("Error while creating Python current module key string T_T :\n%1").arg(getLastError());
         } else if (PyDict_Contains(pymodules, moduleChecked)  == 1) {
             PyObject * loadedModule = PyDict_GetItem(pymodules, moduleChecked); //borrowed
-            if (loadedModule != NULL) {
+            if (loadedModule != nullptr) {
                 if (PyObject_HasAttrString(loadedModule, MODULE_FILE_PATH_STR) == 1) {
                     PyObject * loadedModulePath = PyObject_GetAttrString(loadedModule, MODULE_FILE_PATH_STR); // new ref
-                    if (loadedModulePath != NULL) {
+                    if (loadedModulePath != nullptr) {
                         QString modPathString = pyStringToQtString(loadedModulePath);
                         QFileInfo fi;
                         fi.setFile(modPathString);
@@ -583,22 +600,22 @@ QString PythonModules::retrievePythonErrors()
 {
     QString message;
     QString messageStr;
-    PyObject* pArgs = NULL;
-    PyObject* inputPy = NULL;
+    PyObject* pArgs = nullptr;
+    PyObject* inputPy = nullptr;
     QString final = "[Script error]";
-    PyObject *obResult = NULL;
+    PyObject *obResult = nullptr;
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
 
     PyErr_Print(); // Dump the error message(s) in the buffer
-    if (pyGetValFunc == NULL || pyTruncateFunc == NULL || pySeekFunc ==NULL || pyStringIO == NULL) {
+    if (pyGetValFunc == nullptr || pyTruncateFunc == nullptr || pySeekFunc == nullptr || pyStringIO == nullptr) {
         callback->logError(tr("The error catching mecanism was not properly initialized, ignoring Python error request."));
         goto leaving;
     }
 
     // call getvalue() method in StringIO instance
 
-    obResult = PyObject_CallObject(pyGetValFunc, NULL); // new ref or NULL
+    obResult = PyObject_CallObject(pyGetValFunc, nullptr); // new ref or NULL
     if (!checkPyObject(obResult)){
         callback->logError("[stderr read] getvalue() failed");
         Py_XDECREF(obResult);
@@ -616,7 +633,7 @@ QString PythonModules::retrievePythonErrors()
     message = final;
 
     Py_XDECREF(obResult);
-    obResult = NULL;
+    obResult = nullptr;
 
     // Cleaning the StringIO object
     pArgs = PyTuple_New(1); // new ref
@@ -648,7 +665,7 @@ QString PythonModules::retrievePythonErrors()
     } else {
         Py_XDECREF(obResult);
     }
-    obResult = NULL;
+    obResult = nullptr;
     Py_XDECREF(pArgs);
 
     // seek(0)
@@ -694,13 +711,13 @@ void PythonModules::cleaningPyObjs()
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
     Py_XDECREF(pyTruncateFunc);
-    pyTruncateFunc = NULL;
+    pyTruncateFunc = nullptr;
     Py_XDECREF(pyGetValFunc);
-    pyGetValFunc = NULL;
+    pyGetValFunc = nullptr;
     Py_XDECREF(pySeekFunc);
-    pySeekFunc = NULL;
+    pySeekFunc = nullptr;
     Py_XDECREF(pyStringIO);
-    pyStringIO = NULL;
+    pyStringIO = nullptr;
     PyGILState_Release(lgstate);
 }
 
@@ -710,10 +727,9 @@ QString PythonModules::getRuntimeVersion()
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
 
-    PyObject *modSys = NULL;
     // Import signal module
 
-    modSys = PyImport_ImportModule("sys");
+    PyObject *modSys = PyImport_ImportModule("sys");
 
     if (!checkPyObject(modSys)){
         qCritical() << tr("[PythonModules::getRuntimeVersion] Importing sys failed");
@@ -744,12 +760,12 @@ QString PythonModules::pyStringToQtString(PyObject *strPyObj)
 #ifdef BUILD_PYTHON_3
     if (PyUnicode_Check(strPyObj)) {
         wchar_t *wstring = PyUnicode_AsWideCharString(strPyObj, &size); // new object, need to be cleaned
-        if (wstring != NULL) {
+        if (wstring != nullptr) {
             ret = QString::fromWCharArray(wstring,size);
             PyMem_Free(wstring);
 #else
     if (PyString_Check(strPyObj)) {
-        char * buf = NULL;
+        char * buf = nullptr;
         if (PyString_AsStringAndSize(strPyObj, &buf, &size) != -1) { // do not touch buf after the call
             ret = QString::fromUtf8(QByteArray(buf, size));
 #endif
@@ -764,5 +780,5 @@ QString PythonModules::pyStringToQtString(PyObject *strPyObj)
 
 bool PythonModules::checkPyObject(PyObject *obj)
 {
-    return !(PyErr_Occurred() || obj == NULL);
+    return !(PyErr_Occurred() || obj == nullptr);
 }

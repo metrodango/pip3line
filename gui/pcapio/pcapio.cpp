@@ -110,6 +110,7 @@ PcapIO::~PcapIO()
 
 bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
 {
+    errorString.clear();
     if (!filename.isEmpty()) {
         file = new(std::nothrow) QFile(filename);
         if (file == nullptr) {
@@ -117,7 +118,8 @@ bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
         }
 
         if (!file->open(mode)) {
-            qCritical() << "[PcapIO::openExistingFile] Cannot open file:" << file->errorString();
+            errorString = tr("Cannot open pcap file: %1").append(file->errorString());
+            qCritical() << "[PcapIO::openExistingFile]" << errorString;
             return false;
         }
 
@@ -136,7 +138,8 @@ bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
             return false;
         }
     } else {
-        qCritical() << "[PcapIO::openExistingFile] Cannot read file";
+        errorString = tr("Cannot read pcap file");
+        qCritical() << "[PcapIO::openExistingFile]" << errorString;
         return false;
     }
 
@@ -153,13 +156,15 @@ bool PcapIO::createAndOpenFile()
         }
 
         if (!file->open(QIODevice::ReadWrite)) {
-            qCritical() << "[PcapIO::createAndOpenNewFile] Cannot open file:" << file->errorString();
+            errorString = tr("Cannot open pcap file: %1").arg(file->errorString());
+            qCritical() << "[PcapIO::createAndOpenFile]" << errorString;
             return false;
         }
     }
 
     if (!file->isWritable()) {
-        qCritical() << "[PcapIO::createAndOpenNewFile] Cannot write to file";
+        errorString = tr("Cannot write to pcap file: %1").arg(filename);
+        qCritical() << "[PcapIO::createAndOpenFile]" << errorString;
         return false;
     }
 
@@ -169,7 +174,8 @@ bool PcapIO::createAndOpenFile()
         currentPos = file->pos();
         packetsStart = currentPos;
     } else {
-        qCritical() << "[PcapIO::createAndOpenNewFile] whhaaa ? the generated pcap header is empty T_T";
+        errorString = tr("whhaaa ? the generated pcap header is empty T_T");
+        qCritical() << "[PcapIO::createAndOpenFile]" << errorString;
         return false;
     }
 
@@ -211,7 +217,8 @@ quint64 PcapIO::numberOfPackets()
                 ret++;
             }
         } else {
-            qCritical() << "[PcapIO::numberOfPackets] Cannot seek the file to the start of the packets";
+            errorString = tr("Cannot seek the file to the start of the packets");
+            qCritical() << "[PcapIO::numberOfPackets]" << errorString;
         }
     }
 
@@ -223,10 +230,8 @@ PcapPacket *PcapIO::nextPacket()
 {
     PcapPacket * ret = new(std::nothrow) PcapPacket();
     if (ret == nullptr) {
-        qFatal("[PcapIO::nextPacket] Cannot allocate memory for PcapPacket");
+        qFatal("[PcapIO::nextPacket] Cannot allocate memory for PcapPacket X{");
     }
-
-
 
     if (file->seek(currentPos)) {
         if (file->atEnd()) {
@@ -279,7 +284,8 @@ PcapPacket *PcapIO::nextPacket()
         currentPos = file->pos();
 
     } else {
-        qCritical() << "[PcapIO::nextPacket] Cannot seek the file to the current packet";
+        errorString = tr("Cannot seek the pcap file to the current packet");
+        qCritical() << "[PcapIO::nextPacket]" << errorString;
         goto error;
     }
 
@@ -298,7 +304,8 @@ void PcapIO::appendPacket(PcapPacket *packet)
 
         file->write(packetToBytes(packet));
     } else {
-        qCritical() << "[PcapIO::appendPacket] File is nullptr or not writeable";
+        errorString = tr("File is nullptr or not writeable");
+        qCritical() << "[PcapIO::appendPacket]" << errorString;
     }
 }
 
@@ -313,7 +320,8 @@ void PcapIO::appendPacketList(QList<PcapPacket *> list)
         }
 
     } else {
-        qCritical() << "[PcapIO::appendPacketList] File is nullptr or not writeable";
+        errorString = tr("File is nullptr or not writeable");
+        qCritical() << "[PcapIO::appendPacketList]" << errorString;
     }
 
 }
@@ -332,10 +340,12 @@ QList<PcapPacket *> PcapIO::getPacketList()
                 packet = nextPacket();
             }
         } else {
-            qCritical() << "[PcapIO::getPacketList] Cannot seek the file to the start of the packets";
+            errorString = tr("Cannot seek the file to the start of the packets");
+            qCritical() << "[PcapIO::getPacketList]" << errorString;
         }
     } else {
-        qCritical() << "[PcapIO::getPacketList] File is nullptr or not readable";
+        errorString = tr("File is nullptr or not readable");
+        qCritical() << "[PcapIO::getPacketList]" << errorString;
     }
 
     currentPos = currentPostTemp;
@@ -369,7 +379,8 @@ bool PcapIO::readUInt32(quint32 *temp, QString field)
     QByteArray fourBytes(sizeof(quint32), '\0');
     qint64 read = file->read(fourBytes.data(), sizeof(quint32));
     if (read != sizeof(quint32)) {
-        qWarning() << "[PcapIO::readUInt32] Invalid pcap file:" << field;
+        errorString = tr("Invalid pcap file, uint32: %1").arg(field);
+        qCritical() << "[PcapIO::readUInt32]" << errorString;
         return false;
     }
 
@@ -386,7 +397,8 @@ bool PcapIO::readUInt16(quint16 *temp, QString field)
     QByteArray twoBytes(sizeof(quint16), '\0');
     qint64 read = file->read(twoBytes.data(), sizeof(quint16));
     if (read != sizeof(quint16)) {
-        qWarning() << "[PcapIO::readUInt16] Invalid pcap file:" << field;
+        errorString = tr("Invalid pcap file, uint16: %1").arg(field);
+        qCritical() << "[PcapIO::readUInt16]" << errorString;
         return false;
     }
 
@@ -409,7 +421,8 @@ bool PcapIO::readByteArray(QByteArray *temp, qint64 length, QString field)
 
     qint64 read = file->read(temp->data(), length);
     if (read != length) {
-        qWarning() << "[PcapIO::readUInt16] Invalid pcap file, bytearray:" << field;
+        errorString = tr("Invalid pcap file, bytearray: %1").arg(field);
+        qCritical() << "[PcapIO::readByteArray]" << errorString;
         return false;
     }
 
@@ -493,7 +506,8 @@ bool PcapIO::readExistingFile()
     // first is the magic number
     read = file->read(fourBytes.data(), 4);
     if (read != 4) {
-        qWarning() << "[PcapIO::open] Invalid pcap file (too short: magic)";
+        errorString = tr("Invalid pcap file (too short: magic)");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -514,7 +528,8 @@ bool PcapIO::readExistingFile()
 #endif
         qDebug() << "Big Endian Magic";
     } else {
-        qWarning() << "[PcapIO::open] Invalid magic number";
+        errorString = tr("Invalid pcap magic number, this is not a pcap file.");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -523,12 +538,16 @@ bool PcapIO::readExistingFile()
     // then the version Major
 
     if (!readUInt16(&versionMajor, QString("Version Major"))) {
+        errorString = tr("Cannot read pcap Version Major");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
     // then the version Minor
 
     if (!readUInt16(&versionMinor, QString("Version Minor"))) {
+        errorString = tr("Cannot read pcap Version Minor");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -537,6 +556,8 @@ bool PcapIO::readExistingFile()
     // then the timestamp
 
     if (!readUInt32(&timezoneshift, QString("timestamp"))) {
+        errorString = tr("Cannot read pcap timestamp");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -545,6 +566,8 @@ bool PcapIO::readExistingFile()
     // precision
 
     if (!readUInt32(&precision, QString("precision"))) {
+        errorString = tr("Cannot read pcap precision");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -553,6 +576,8 @@ bool PcapIO::readExistingFile()
     // maxSnapshotlenght
 
     if (!readUInt32(&maxSnapshotlenght, QString("maxSnapshotlenght"))) {
+        errorString = tr("Cannot read pcap maxSnapshotlenght");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -562,11 +587,14 @@ bool PcapIO::readExistingFile()
 
     quint32 temp = 0;
     if (!readUInt32(&temp, QString("linkLayerType"))) {
+        errorString = tr("Cannot read pcap linkLayerType");
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
     if (!PcapDef::LINK_TYPES.contains(temp)) {
-        qWarning() << "[PcapIO::readExistingFile] Unknown layer type:" << temp;
+        errorString = tr("Unknown pcap layer type: %1").arg(temp);
+        qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
@@ -578,6 +606,11 @@ bool PcapIO::readExistingFile()
     currentPos = packetsStart;
 
     return true;
+}
+
+QString PcapIO::getErrorString() const
+{
+    return errorString;
 }
 
 

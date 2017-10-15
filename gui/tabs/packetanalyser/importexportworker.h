@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #endif
 #include <QIODevice>
+#include <QTime>
 #include "shared/guiconst.h"
 #include "pcapio/pcapdef.h"
 #include "packetmodelabstract.h"
@@ -22,6 +23,7 @@ class ImportExportWorker : public QObject
                                     QString filename = QString(),
                                     GuiConst::FileOperations ops = GuiConst::UNKNOWN_OPERATION,
                                     GuiConst::FileFormat format = GuiConst::INVALID_FORMAT,
+                                    bool enableCompression = true,
                                     QObject *parent = 0);
         ~ImportExportWorker();
         quint32 getPcapLinkType() const;
@@ -40,17 +42,17 @@ class ImportExportWorker : public QObject
         void toXMLFile(QIODevice *file);
         void loadFromXML(QXmlStreamReader *stream);
         void loadFromXMLFile(QIODevice *file);
-#if QT_VERSION >= 0x050000
         void toJSon(QJsonDocument *jdoc);
         void toJSonFile(QIODevice *file);
         void loadFromJson(QJsonDocument *jdoc);
         void loadFromJsonFile(QIODevice *file);
-#endif
+        QList<Packet *> getLoadedPackets() const;
+
     public slots:
         void run();
     signals:
-        void newPacket(Packet * packet);
         void finished();
+        void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     private:
         Packet *nextPacket();
         GuiConst::FileOperations ops;
@@ -64,6 +66,9 @@ class ImportExportWorker : public QObject
         bool noMore;
         bool exportFormattedXML;
         bool exportFormattedJson;
+        bool enableCompression;
+        QTime timer;
+        QList<Packet *> loadedPackets;
 };
 
 #endif // IMPORTEXPORTWORKER_H

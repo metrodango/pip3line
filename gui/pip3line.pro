@@ -11,8 +11,8 @@ QT       += core gui xml network concurrent
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += debug WITH_THREAD c++11 warn_on
 
-#CONFIG += CONF_SCINTILLA
-CONFIG += CONF_ADDR_SANITIZER
+CONFIG += CONF_SCINTILLA
+#CONFIG += CONF_ADDR_SANITIZER
 #CONFIG += CONF_MEMORY_SANITIZER
 #CONFIG += CONF_THREAD_SANITIZER
 
@@ -22,7 +22,7 @@ TEMPLATE = app
 INCLUDEPATH +="../libtransform"
 
 unix {
-   LIBS += -L"../bin" -ltransform
+
     CONF_SCINTILLA {
         DEFINES += SCINTILLA
         LIBS += -lqscintilla2
@@ -30,6 +30,7 @@ unix {
 
     CONF_ADDR_SANITIZER {
         QMAKE_CXXFLAGS += -fsanitize=address
+        QMAKE_LDFLAGS += -fsanitize=address
         LIBS += -lasan
     }
 
@@ -37,6 +38,7 @@ unix {
         QMAKE_CXXFLAGS += -fsanitize=thread
         LIBS += -ltsan
     }
+    LIBS += -L"../bin" -ltransform
 }
 
 win32 {
@@ -150,7 +152,10 @@ SOURCES += main.cpp\
     shared/transformselectorwidget.cpp \
     sources/blocksources/socksproxyhelper.cpp \
     sources/blocksources/connectiondetails.cpp \
-    tabs/packetanalyser/socksorchestrator.cpp
+    tabs/packetanalyser/socksorchestrator.cpp \
+    tabs/packetanalyser/filterdialog.cpp \
+    tabs/packetanalyser/filteritem.cpp \
+    shared/transformguibutton.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -258,7 +263,10 @@ HEADERS  += mainwindow.h \
     shared/transformselectorwidget.h \
     sources/blocksources/socksproxyhelper.h \
     sources/blocksources/connectiondetails.h \
-    tabs/packetanalyser/socksorchestrator.h
+    tabs/packetanalyser/socksorchestrator.h \
+    tabs/packetanalyser/filterdialog.h \
+    tabs/packetanalyser/filteritem.h \
+    shared/transformguibutton.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \
@@ -303,7 +311,8 @@ FORMS    += mainwindow.ui \
     shared/defaultdialog.ui \
     sources/blocksources/ipnetworkclientwidget.ui \
     sources/blocksources/baseblocksourcewidget.ui \
-    shared/transformselectorwidget.ui
+    shared/transformselectorwidget.ui \
+    tabs/packetanalyser/filterdialog.ui
 
 OTHER_FILES += icons/pip3line.png \
     win.rc \

@@ -16,6 +16,9 @@ Released under AGPL see LICENSE for more information
 #include <QAction>
 #include <QDebug>
 #include <QTextEncoder>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include "textinputdialog.h"
 #include "newbytedialog.h"
 #include "hexview.h"
@@ -65,6 +68,7 @@ HexView::HexView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget
     if (hexTableView == nullptr) {
         qFatal("Cannot allocate memory for ByteTableView X{");
     }
+    connect(guiHelper, SIGNAL(hexTableSizesUpdated()), hexTableView, SLOT(updateTableSizes()));
     connect(hexTableView, SIGNAL(error(QString,QString)), logger, SLOT(logError(QString,QString)));
     connect(hexTableView, SIGNAL(warning(QString,QString)), logger, SLOT(logWarning(QString,QString)));
 
@@ -102,7 +106,8 @@ HexView::~HexView()
     delete hexTableView;
     dataModel = nullptr; //no need to delete it, the TableView should take care of it
     // byteSource = nullptr; parent does that already
-    delete globalContextMenu;
+    // QActions should already be taken care of by the Qmenu they belong to
+    delete fuzzingExportAction;
     delete sendToMenu;
     delete markMenu;
     delete copyMenu;
@@ -113,6 +118,9 @@ HexView::~HexView()
     delete replaceMenu;
     delete selectFromSizeMenu;
     delete copyCurrentOffsetMenu;
+    delete gotoFromOffsetMenu;
+    delete saveToFileMenu;
+    delete globalContextMenu;
     delete ui;
     logger = nullptr;
     guiHelper = nullptr;
@@ -146,10 +154,10 @@ void HexView::updateStats()
         ret.append("Size: ");
         // Updating Hex info
         ret.append(QString::number(size)).append("|x").append(QString::number(size,16)).append(" bytes");
-        if (size >= 1000 && size < 1000000)
-            ret.append(QString(" (%1").arg((double)size/(double)1000,0,'f',2)).append(" KiB)");
-        else if (size >= 1000000 && size < 1000000000)
-            ret.append(QString(" (%1").arg((double)size/(double)1000000,0,'f',2)).append(" MiB)");
+
+        if (size >= 1000) {
+            ret.append(QString(" (%1)").arg(GuiConst::convertSizetoBytesString(size)));
+        }
     }
 
 
@@ -250,7 +258,6 @@ void HexView::updateMarkMenu()
 
 void HexView::updateImportExportMenus()
 {
-    QAction * action = nullptr;
 
     guiHelper->updateCopyContextMenu(copyMenu);
     guiHelper->updateLoadContextMenu(loadMenu);
@@ -258,7 +265,7 @@ void HexView::updateImportExportMenus()
     QStringList list = guiHelper->getImportExportFunctions();
 
     replaceMenu->clear();
-    action = new(std::nothrow) QAction(NEW_BYTE_ACTION, replaceMenu);
+    QAction * action = new(std::nothrow) QAction(NEW_BYTE_ACTION, replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu new byte X{");
         return;
@@ -624,15 +631,87 @@ void HexView::search(QByteArray item, QBitArray mask)
     hexTableView->search(item, mask);
 }
 
+void HexView::optionGuiRequested()
+{
+
+}
+
 void HexView::onLoadFile()
 {
     emit askForFileLoad();
 }
 
+QJsonObject HexView::createFuzzingTemplate(ByteSourceAbstract *bs)
+{
+    QJsonObject fuzzConfiguration;
+    if (bs->size() < 1024 * 1024) {
+        if (bs->hasMarking()) {
+            BytesRangeList * brl = bs->getUserMarkingsRanges();
+            QJsonValue jsData = QString::fromUtf8(bs->getRawData().toBase64());
+            fuzzConfiguration.insert(GuiConst::STATE_DATA,jsData);
+            QJsonArray injectionPoints;
+            for (int i = 0 ; i < brl->size(); i++) {
+                QJsonObject injp;
+                BytesRange *br = brl->at(i);
+                injp.insert(GuiConst::STATE_TYPE, br->getDescription());
+                injp.insert(GuiConst::START_STR,QJsonValue((qint64)br->getLowerVal())); // size should be reasonable, so it should not matter
+                injp.insert(GuiConst::STATE_SIZE, QJsonValue((qint64)br->getSize()));
+                injectionPoints.append(injp);
+            }
+            fuzzConfiguration.insert("injectionsPoints", injectionPoints);
+        } else {
+            QString mess = tr("No markings set, ignoring action.");
+            logger->logError(mess);
+            QMessageBox::warning(this, tr("No markings"), mess, QMessageBox::Ok);
+        }
+    } else {
+        QString mess = tr("Data size is too big, if you want to process something bigger, change the max value in the settings, and try to be realistic.");
+        logger->logError(mess);
+        QMessageBox::warning(this, tr("Too large"), mess, QMessageBox::Ok);
+    }
+
+    return fuzzConfiguration;
+}
+
+void HexView::onExportForFuzzing()
+{
+    QJsonDocument::JsonFormat format = QJsonDocument::Indented;
+    ByteSourceAbstract *bs = dataModel->getSource();
+    QJsonObject finalObj = createFuzzingTemplate(bs);
+    if (!finalObj.isEmpty()) {
+        QJsonDocument jdoc;
+        jdoc.setObject(finalObj);
+        QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"), GuiConst::GLOBAL_LAST_PATH);
+        if (!fileName.isEmpty()) {
+            QFileInfo fi(fileName);
+            GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
+            QFile file(fileName);
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                QString mess = tr("Failed to open %1:\n %2").arg(fileName).arg(file.errorString());
+                logger->logError(mess);
+                QMessageBox::warning(this, tr("File error"), mess, QMessageBox::Ok);
+            } else {
+                QByteArray data = jdoc.toJson(format);
+                qint64 written = 0;
+                while ((written = file.write(data)) > 0) {
+                    if (written == data.length())
+                        break;
+                    else
+                        data = data.mid(written - 1);
+                };
+
+                file.close();
+            }
+        }
+    }
+}
+
 void HexView::onSaveToFile(QAction *action)
 {
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"), GuiConst::GLOBAL_LAST_PATH);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         if (action == ui->saveSelectedToFileAction) {
             byteSource->saveToFile(fileName,byteSource->getRealOffset(hexTableView->getLowerSelected()), byteSource->getRealOffset(hexTableView->getHigherSelected()));
         }
@@ -735,8 +814,7 @@ void HexView::buildContextMenus()
     }
     connect(selectFromSizeMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSelectFromSizeMenu(QAction*)), Qt::UniqueConnection);
 
-    QAction * action = nullptr;
-    action = new(std::nothrow) QAction(LITTLE_ENDIAN_STRING, selectFromSizeMenu);
+    QAction * action = new(std::nothrow) QAction(LITTLE_ENDIAN_STRING, selectFromSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_LE_ACTION X{");
         return;
@@ -850,6 +928,14 @@ void HexView::buildContextMenus()
     saveToFileMenu->addAction(ui->saveToFileAction);
     saveToFileMenu->addAction(ui->saveSelectedToFileAction);
 
+    fuzzingExportAction = new(std::nothrow) QAction("Export Fuzzing config", globalContextMenu);
+    if (fuzzingExportAction == nullptr) {
+        qFatal("Cannot allocate memory for SIZE_HEXADECIMAL_ACTION X{");
+        return;
+    }
+
+    connect(fuzzingExportAction, SIGNAL(triggered(bool)), this, SLOT(onExportForFuzzing()), Qt::UniqueConnection);
+
     globalContextMenu = new(std::nothrow) QMenu();
     if (globalContextMenu == nullptr) {
         qFatal("Cannot allocate memory for globalContextMenu X{");
@@ -885,5 +971,7 @@ void HexView::buildContextMenus()
     globalContextMenu->addMenu(copyCurrentOffsetMenu);
     globalContextMenu->addSeparator();
     globalContextMenu->addAction(ui->deleteSelectionAction);
+    globalContextMenu->addSeparator();
+    globalContextMenu->addAction(fuzzingExportAction);
     connect(ui->deleteSelectionAction, SIGNAL(triggered()), this, SLOT(onDeleteSelection()));
 }

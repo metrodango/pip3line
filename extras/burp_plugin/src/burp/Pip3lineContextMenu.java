@@ -152,11 +152,12 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 	        	}
 	        	
 	        	selection = contextMenu.getSelectionBounds();
-	        	if (selection[0] != selection[1]) {
-	        		data = Arrays.copyOfRange(data,selection[0], selection[1]);
+	        	if (selection != null) {
+		        	if (selection[0] != selection[1]) {
+		        		data = Arrays.copyOfRange(data,selection[0], selection[1]);
+		        	}
+		        	data = helpers.base64Encode(data).getBytes();
 	        	}
-
-	        	data = helpers.base64Encode(data).getBytes();
 	        }
 	    }
 	    public void actionPerformed(ActionEvent e) {
@@ -168,49 +169,53 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 	    }
 	    
 	    private void sendOverUDP() {
-	    	DatagramSocket clientSocket;
-			try {
-				clientSocket = new DatagramSocket();
-		        
-	        	if (data.length > udpSizeLimit) { // UDP limit
-	        		BurpExtender.error("SendToPip3line: packet too large for UDP, truncating");
-	        		data = Arrays.copyOfRange(data,0,udpSizeLimit);
-	        	}
-
-		        DatagramPacket sendPacket = new DatagramPacket(data, data.length, host, port);
-		        clientSocket.send(sendPacket);
-			} catch (SocketException e1) {
-				BurpExtender.error(e1.getMessage());
-			} catch (IOException e1) {
-				BurpExtender.error("Error while sending packet to pip3line".concat(e1.getMessage()));
-			}
+	    	if (data != null && data.length > 0) { // no point doing that if there is nothing to send
+		    	DatagramSocket clientSocket;
+				try {
+					clientSocket = new DatagramSocket();
+			        
+		        	if (data.length > udpSizeLimit) { // UDP limit
+		        		BurpExtender.error("SendToPip3line: packet too large for UDP, truncating");
+		        		data = Arrays.copyOfRange(data,0,udpSizeLimit);
+		        	}
+	
+			        DatagramPacket sendPacket = new DatagramPacket(data, data.length, host, port);
+			        clientSocket.send(sendPacket);
+				} catch (SocketException e1) {
+					BurpExtender.error(e1.getMessage());
+				} catch (IOException e1) {
+					BurpExtender.error("Error while sending packet to pip3line".concat(e1.getMessage()));
+				}
+	    	}
 	    }
 	    
 	    private void sendOverTCP() {
-			try {
-				Socket socket = new Socket();
-				socket.connect(new InetSocketAddress(host, port), 1000);
-		
-				OutputStream pipeOut = socket.getOutputStream();
-
+	    	if (data != null && data.length > 0) { // no point doing that if there is nothing to send
 				try {
-					pipeOut.write(data);
-					pipeOut.write(separator);
+					Socket socket = new Socket();
+					socket.connect(new InetSocketAddress(host, port), 1000);
+			
+					OutputStream pipeOut = socket.getOutputStream();
+	
+					try {
+						pipeOut.write(data);
+						pipeOut.write(separator);
+						
+					} catch (IOException e) {
+						BurpExtender.error("Error while sending packet to pip3line: ".concat(e.getMessage()));
+					} finally {
+						socket.close();
+					}
+					try {
+						pipeOut.close();
+					} catch (IOException e) {
+						BurpExtender.error("Pipe closing error: ".concat(e.getMessage()));
+					}
 					
 				} catch (IOException e) {
-					BurpExtender.error("Error while sending packet to pip3line: ".concat(e.getMessage()));
-				} finally {
-					socket.close();
+					BurpExtender.error("Socket opening error: ".concat(e.getMessage()));
 				}
-				try {
-					pipeOut.close();
-				} catch (IOException e) {
-					BurpExtender.error("Pipe closing error: ".concat(e.getMessage()));
-				}
-				
-			} catch (IOException e) {
-				BurpExtender.error("Socket opening error: ".concat(e.getMessage()));
-			}
+	    	}
 	    }
 	}
 

@@ -108,6 +108,7 @@ ConnectionsWidget::ConnectionsWidget(BlocksSource * source, QWidget *parent) :
 
 ConnectionsWidget::~ConnectionsWidget()
 {
+    delete model; // the view is supposed to take care of that ...
     delete ui;
 }
 

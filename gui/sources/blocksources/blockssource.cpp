@@ -194,6 +194,11 @@ void BlocksSource::updateConnectionsInfo()
     }
 }
 
+void BlocksSource::internalUpdateConnectionsInfo()
+{
+
+}
+
 TransformAbstract *BlocksSource::getOutboundTranform() const
 {
     return outboundTranform;
@@ -471,7 +476,9 @@ int BlocksSource::newSourceID(BlocksSource *source)
         currentid = 0;
     }
 
-    while (idSourceTable.contains(currentid++));
+    while (idSourceTable.contains(currentid)) {
+        currentid++;
+    }
 
     idSourceTable.insert(currentid, source);
     return currentid;

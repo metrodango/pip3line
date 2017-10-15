@@ -22,15 +22,11 @@ const QString PythonTransform::id = "Python 3 script";
 #else
 const QString PythonTransform::id = "Python 2.7 script";
 #endif
-const char * PythonTransform::ISTWOWAY_ATTR_NAME = "Pip3line_is_two_ways";
-const char * PythonTransform::INBOUND_ATTR_NAME = "Pip3line_INBOUND";
-const char * PythonTransform::PARAMS_ATTR_NAME = "Pip3line_params";
-const char * PythonTransform::PARAMS_NAMES_ATTR_NAME = "Pip3line_params_names";
 
 PythonTransform::PythonTransform(PythonModules * mmanagement, const QString &name) :
     ScriptTransformAbstract(mmanagement, name)
 {
-    pModule = NULL;
+    pModule = nullptr;
     twoWays = false;
     pythonmgm = mmanagement;
 }
@@ -53,13 +49,13 @@ void PythonTransform::transform(const QByteArray &input, QByteArray &output)
     PyGILState_STATE lgstate;
     lgstate = PyGILState_Ensure();
     if (loadModule()) {
-        PyObject * pyInbound = Py_False; // need reference count management
+        PyObject * pyInbound = Py_False; // needs reference count management
 
         if (twoWays)
             pyInbound = (wayValue == INBOUND ? Py_True : Py_False );
         Py_INCREF(pyInbound);
 
-        if (PyModule_AddObject(pModule, INBOUND_ATTR_NAME, pyInbound) == -1) { // steal reference
+        if (PyModule_AddObject(pModule, PythonModules::INBOUND_ATTR_NAME, pyInbound) == -1) { // steal reference
             pythonmgm->checkPyError();
             logError(tr("T_T Could not set the direction value properly:\n%1").arg(pythonmgm->getLastError()),id);
             Py_XDECREF(pyInbound);
@@ -97,7 +93,7 @@ void PythonTransform::transform(const QByteArray &input, QByteArray &output)
                     return;
                 }
 
-                if (PyDict_SetItem(paramsdict,paramKey,paramValue) == -1) { // stealing reference
+                if (PyDict_SetItem(paramsdict,paramKey,paramValue) == -1) { // not stealing reference
                     pythonmgm->checkPyError(); // we already know there was an error
                     logError(tr("T_T Error while setting Python parameter pair:\n%1").arg(pythonmgm->getLastError()), id);
                     Py_XDECREF(paramsdict);
@@ -108,13 +104,14 @@ void PythonTransform::transform(const QByteArray &input, QByteArray &output)
                 }
 
                 // Cleaning the values (references not stolen)
+
                 Py_XDECREF(paramKey);
                 Py_XDECREF(paramValue);
             }
         }
 
         // setting the dictionary in any case, even if it is empty
-        if (PyModule_AddObject(pModule,PARAMS_ATTR_NAME , paramsdict) == -1) { // stolen paramsdict reference
+        if (PyModule_AddObject(pModule,PythonModules::PARAMS_ATTR_NAME , paramsdict) == -1) { // stolen paramsdict reference
             pythonmgm->checkPyError();
             logError(tr("T_T Could not set the Pip3line_params value properly:\n%1").arg(pythonmgm->getLastError()),id);
         }
@@ -215,7 +212,7 @@ bool PythonTransform::setModuleFile(const QString &fileName)
         PyGILState_STATE lgstate;
         lgstate = PyGILState_Ensure();
         Py_XDECREF(pModule);
-        pModule = NULL;
+        pModule = nullptr;
         moduleName = val;
         moduleFileName = fileName;
 
@@ -242,7 +239,7 @@ QString PythonTransform::outboundString() const
 
 bool PythonTransform::loadModuleAttributes()
 {
-    if (pModule == NULL) {
+    if (pModule == nullptr) {
         Q_EMIT error(tr("The module object is NULL for %1, could not (re)load the configuration").arg(moduleFileName),id);
         return false;
     }
@@ -257,7 +254,7 @@ bool PythonTransform::loadModuleAttributes()
     lgstate = PyGILState_Ensure();
 
     // checking if the two ways attribute is there
-    PyObject * twoWayAttr = PyUnicode_FromString(ISTWOWAY_ATTR_NAME); // New ref
+    PyObject * twoWayAttr = PyUnicode_FromString(PythonModules::ISTWOWAY_ATTR_NAME); // New ref
     if (pythonmgm->checkPyError()) {
         if (PyObject_HasAttr(pModule,twoWayAttr) == 1) {  // does the module has the attribute?
             PyObject * pyTwoWay = PyObject_GetAttr(pModule,twoWayAttr); // New ref
@@ -268,7 +265,7 @@ bool PythonTransform::loadModuleAttributes()
             }
             Py_XDECREF(pyTwoWay);
         } else {
-            qDebug() << moduleFileName << "has no attribute" << ISTWOWAY_ATTR_NAME;
+            qDebug() << moduleFileName << "has no attribute" << PythonModules::ISTWOWAY_ATTR_NAME;
         }
     } else {
         logError(tr("T_T Error while converting to Unicode string:\n%1").arg(pythonmgm->getLastError()),id);
@@ -277,7 +274,7 @@ bool PythonTransform::loadModuleAttributes()
 
     bool parametersChanged = false;
     // checking if some default parameters names were defined
-    PyObject * paramsNamesAttr = PyUnicode_FromString(PARAMS_NAMES_ATTR_NAME); // New ref
+    PyObject * paramsNamesAttr = PyUnicode_FromString(PythonModules::PARAMS_NAMES_ATTR_NAME); // New ref
     if (pythonmgm->checkPyError()) {
         if (PyObject_HasAttr(pModule,paramsNamesAttr) == 1) { // does the module has the attribute?
             PyObject * pyNamesList = PyObject_GetAttr(pModule,paramsNamesAttr); // New ref
@@ -292,7 +289,7 @@ bool PythonTransform::loadModuleAttributes()
 #ifdef BUILD_PYTHON_3
                                 if (PyUnicode_Check(pyName)) { // is this a unicode string?
                                     PyObject * nameutf8 = PyUnicode_AsUTF8String(pyName); // new ref
-                                    if (pythonmgm->checkPyError() && nameutf8 != NULL) {
+                                    if (pythonmgm->checkPyError() && nameutf8 != nullptr) {
                                         val = QByteArray(PyBytes_AsString(nameutf8), PyBytes_Size(nameutf8));
                                     } else {
                                         logError(tr("Error while encoding a parameter to UTF-8:%1").arg(pythonmgm->getLastError()),id);
@@ -303,32 +300,32 @@ bool PythonTransform::loadModuleAttributes()
                                     val = QByteArray(PyString_AsString(pyName), PyString_Size(pyName));
 #endif
                                     if (val.isEmpty()) { // if the parameter name is empty, we skip
-                                        logWarning(tr("The Python object %1[%2] is an empty string, ignoring.").arg(PARAMS_NAMES_ATTR_NAME).arg(i),id);
+                                        logWarning(tr("The Python object %1[%2] is an empty string, ignoring.").arg(PythonModules::PARAMS_NAMES_ATTR_NAME).arg(i),id);
                                     } else if (!parameters.contains(val)) { // we don't want to erase any pre-existing configuration
                                         parameters.insert(val, QByteArray());
                                         parametersChanged = true;
                                     }
                                 } else {
-                                    logWarning(tr("The Python object %1[%2] is not a string, ignoring.").arg(PARAMS_NAMES_ATTR_NAME).arg(i),id);
+                                    logWarning(tr("The Python object %1[%2] is not a string, ignoring.").arg(PythonModules::PARAMS_NAMES_ATTR_NAME).arg(i),id);
                                 }
                             } else {
                                 logError(tr("T_T Error while getting the item from attribute list:\n%1").arg(pythonmgm->getLastError()),id);
                             }
                         }
                     } else {
-                        logWarning(tr("The Python object for attribute names (%1) is empty, ignoring.").arg(PARAMS_NAMES_ATTR_NAME),id);
+                        logWarning(tr("The Python object for attribute names (%1) is empty, ignoring.").arg(PythonModules::PARAMS_NAMES_ATTR_NAME),id);
                     }
                 } else {
-                    logWarning(tr("The Python object for attribute names (%1) is not a list, ignoring.").arg(PARAMS_NAMES_ATTR_NAME),id);
+                    logWarning(tr("The Python object for attribute names (%1) is not a list, ignoring.").arg(PythonModules::PARAMS_NAMES_ATTR_NAME),id);
                 }
 
             } else {
-                logError(tr("T_T Error while getting the attribute %1:\n%2").arg(PARAMS_NAMES_ATTR_NAME).arg(pythonmgm->getLastError()),id);
+                logError(tr("T_T Error while getting the attribute %1:\n%2").arg(PythonModules::PARAMS_NAMES_ATTR_NAME).arg(pythonmgm->getLastError()),id);
             }
             Py_XDECREF(pyNamesList);
-            pyNamesList = NULL;
+            pyNamesList = nullptr;
         } else {
-            qDebug() << moduleFileName << " does not have attribute" << PARAMS_NAMES_ATTR_NAME;
+            qDebug() << moduleFileName << " does not have attribute" << PythonModules::PARAMS_NAMES_ATTR_NAME;
         }
     } else {
         logError(tr("T_T Error while converting to Unicode string:\n%1").arg(pythonmgm->getLastError()),id);
@@ -355,7 +352,7 @@ bool PythonTransform::loadModule()
     bool firstLoad = false;
     pModule = pythonManager->loadModule(moduleFileName,autoReload, &firstLoad);
 
-    if (pModule != NULL) {
+    if (pModule != nullptr) {
         if (autoReload || firstLoad) {
             loadModuleAttributes();
         }
@@ -363,6 +360,6 @@ bool PythonTransform::loadModule()
         qDebug() << "pModule is NULL";
     }
 
-    return pModule != NULL; // Was there an error during loading
+    return pModule != nullptr; // Was there an error during loading
 }
 

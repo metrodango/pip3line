@@ -33,10 +33,12 @@ class IntermediateSource : public BasicSource
         void remove(quint64 offset, int length, quintptr source = INVALID_SOURCE);
         void clear(quintptr source = INVALID_SOURCE);
         void fromLocalFile(QString fileName);
+    public slots:
+        void optionGuiRequested();
     signals:
         void sendRequest(TransformRequest *);
     private slots:
-        void onOriginalUpdated(quintptr source);
+        void onOriginalUpdated(quintptr source = 0);
         void onCurrentUpdated();
         void inboundProcessingFinished(QByteArray data, Messages messages);
         void outboundProcessingFinished(QByteArray data, Messages messages);

@@ -1,4 +1,4 @@
-/**
+﻿/**
 Released as open source by Gabriel Caudrelier
 
 Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -17,6 +17,8 @@ Released under AGPL see LICENSE for more information
 #include <QStringList>
 #include <QFontDatabase>
 #include <QHostAddress>
+#include <QJsonDocument>
+#include <QBitArray>
 
 namespace GuiConst
 {
@@ -52,6 +54,10 @@ namespace GuiConst
     extern const QString SETTINGS_AUTO_SAVE_TIMER_INTERVAL;
     extern const QString SETTINGS_AUTO_RESTORE_ON_STARTUP;
     extern const QString SETTINGS_REGULAR_FONT;
+    extern const QString SETTINGS_FUZZING_EXPORT_MAX_SIZE;
+    extern const QString SETTINGS_FUZZING_EXPORT_FORMAT;
+    extern const QString SETTINGS_EQUALITY_PACKETS_BACKGROUND;
+    extern const QString SETTINGS_EQUALITY_PACKETS_FOREGROUND;
 
     extern const QString DEFAULT_STATE_FILE;
     extern const QString STATE_PIP3LINE_DOC;
@@ -84,6 +90,7 @@ namespace GuiConst
     extern const QString STATE_CURRENT_INDEX;
     extern const QString STATE_IS_FOLDED;
     extern const QString STATE_SCROLL_INDEX;
+    extern const QString STATE_SYNTAX;
     extern const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET;
     extern const QString STATE_CHUNK_SIZE;
     extern const QString STATE_LARGE_FILE_NAME;
@@ -96,6 +103,7 @@ namespace GuiConst
     extern const QString STATE_WINDOWED_TABS_ARRAY;
     extern const QString STATE_WINDOWED ;
     extern const QString STATE_TYPE;
+    extern const QString STATE_ENCODING;
     extern const QString STATE_TRANSFORMGUI_ARRAY;
     extern const QString STATE_TAB_NAME;
     extern const QString STATE_DATA;
@@ -164,6 +172,21 @@ namespace GuiConst
     extern const QString STATE_INJECTED_PACKET;
     extern const QString STATE_TRACK_PACKETS;
     extern const QString STATE_AUTO_MERGE;
+    extern const QString STATE_SOURCEID;
+    extern const QString STATE_MAX_PAYLOAD_DISPLAY_SIZE;
+    extern const QString STATE_PACKET_PROXY_FILTERS_ENABLE;
+    extern const QString STATE_PACKET_PROXY_FILTERS_LIST;
+    extern const QString STATE_PACKET_PROXY_EQUALITY_ENABLE;
+    extern const QString STATE_PACKET_PROXY_EQUALITY_TARGET_COLUMNS;
+    extern const QString STATE_PACKET_PROXY_SORTING_TARGET_COLUMN;
+    extern const QString STATE_PACKET_PROXY_SORTING_ORDER;
+    extern const QString STATE_FIELD_SEPARATOR;
+    extern const QString STATE_FILTER_SORT;
+    extern const QString STATE_FILTER_ITEMS;
+    extern const QString STATE_FILTER_ITEM;
+    extern const QString STATE_OFFSET;
+    extern const QString STATE_REVERSE_SELECTION;
+    extern const QString STATE_MASK;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;
@@ -264,6 +287,29 @@ namespace GuiConst
     extern const QString SSL_DER_EXT_STRING;
 
     extern const int DEFAULT_UDP_TIMEOUT_MS;
+
+    extern const quint64 DEFAULT_FUZZING_EXPORT_MAX_SIZE;
+    extern const QJsonDocument::JsonFormat DEFAULT_FUZZING_EXPORT_FORMAT;
+
+    extern const QString HEXCHAR;
+    extern const QString WILDCARD_HEXCHAR;
+    QByteArray extractSearchHexa(QString searchRequest, QBitArray &mask);
+    extern QString GLOBAL_LAST_PATH;
+    QString convertSizetoBytesString(quint64 size);
+    int calculateStringWidthWithGlobalFont(QString value);
+
+    extern const int DEFAULT_HEXVIEW_TEXTCOLUMN_WIDTH;
+    extern const int DEFAULT_HEXVIEW_HEXCOLUMN_WIDTH;
+    extern const int DEFAULT_HEXVIEW_ROWS_HEIGHT;
+}
+
+namespace GlobalsValues {
+    extern int TEXTCOLUMNWIDTH;
+    extern int HEXCOLUMNWIDTH;
+    extern int ROWSHEIGHT;
+    extern QFont GLOBAL_REGULAR_FONT;
+    extern QColor EqualsPacketsBackground;
+    extern QColor EqualsPacketsForeground;
 }
 
 namespace GuiStyles {
@@ -272,13 +318,13 @@ namespace GuiStyles {
     extern const QString PushButtonReadonly;
     extern const QString LineEditWarning;
     extern const QString LineEditMessage;
-    extern const QColor EqualPackets;
+    extern const QColor DEFAULT_EQUAL_PACKETS_BACKGROUND;
+    extern const QColor DEFAULT_EQUAL_PACKETS_FOREGROUND;
     extern const QColor DEFAULT_MARKING_COLOR;
     extern const QColor DEFAULT_MARKING_COLOR_DATA;
     extern const QColor DEFAULT_MARKING_COLOR_SIZE;
     extern const QColor DEFAULT_MARKING_COLOR_TYPE;
     extern const QFont DEFAULT_REGULAR_FONT;
-    extern QFont GLOBAL_REGULAR_FONT;
 }
 
 #endif // GUICONST_H

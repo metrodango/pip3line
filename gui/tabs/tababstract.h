@@ -29,15 +29,7 @@ class TabAbstract : public QWidget
 {
         Q_OBJECT
     public:
-        enum ViewType {UNDEFINED = 0, HEXVIEW = 1, TEXTVIEW = 2, DEFAULTTEXT = 3};
-        struct ViewTab {
-                ViewTab() : transform(nullptr), type(UNDEFINED),tabName(GuiConst::UNDEFINED_TEXT) {}
-                TransformAbstract * transform;
-                ViewType type;
-                QString tabName;
-        };
-        static const int WINDOWED_TAB;
-        explicit TabAbstract(GuiHelper *guiHelper , QWidget *parent = 0);
+        explicit TabAbstract(GuiHelper *guiHelper , QWidget *parent = nullptr);
         virtual ~TabAbstract();
         virtual QString getName() const ;
         virtual void bringFront();
@@ -51,7 +43,15 @@ class TabAbstract : public QWidget
         void setPreTabType(const GuiConst::AVAILABLE_PRETABS &value);
         virtual BaseStateAbstract *getStateMngtObj() = 0;
         GuiHelper * getHelper();
-
+        enum ViewType {UNDEFINED = 0, HEXVIEW = 1, TEXTVIEW = 2, DEFAULTTEXT = 3};
+        struct ViewTab {
+                ViewTab() : transform(nullptr), type(UNDEFINED),tabName(GuiConst::UNDEFINED_TEXT) {}
+                TransformAbstract * transform;
+                ViewType type;
+                QString tabName;
+                QHash<QString, QString> options;
+        };
+        static const int WINDOWED_TAB;
     public slots:
         virtual void setName(const QString & name);
     protected slots:

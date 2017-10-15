@@ -112,7 +112,7 @@ QHash<QString, QString> IPBlocksSources::getConfiguration()
     if (!hostName.isEmpty())
         ret.insert(GuiConst::STATE_NAME, hostName);
 
-    // todo TLS X{
+    ret.unite(sslConfiguration->getConfiguration());
 
     return ret;
 }
@@ -144,7 +144,7 @@ void IPBlocksSources::setConfiguration(QHash<QString, QString> conf)
         }
     }
 
-    // todo TLS conf X{
+    sslConfiguration->setConfiguration(conf);
 }
 
 QString IPBlocksSources::getHostname() const

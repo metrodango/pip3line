@@ -152,6 +152,11 @@ QVariant ByteItemModel::data(const QModelIndex &index, int role) const
             return Qt::AlignCenter;
         }
         break;
+        case Qt::FontRole:
+        {
+            return GlobalsValues::GLOBAL_REGULAR_FONT;
+        }
+        break;
     }
     return QVariant();
 }

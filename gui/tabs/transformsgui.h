@@ -27,11 +27,12 @@ class TransformWidget;
 class ByteSourceAbstract;
 class DetachTabButton;
 class ByteTableView;
+class UniversalReceiverButton;
 
 class TransformsGui : public TabAbstract
 {
         Q_OBJECT
-        friend class TransformGuiStateObj;
+
     public:
         explicit TransformsGui(GuiHelper *guiHelper , QWidget *parent = 0);
         ~TransformsGui();
@@ -75,7 +76,10 @@ class TransformsGui : public TabAbstract
         QList<TransformWidget *> transformWidgetList;
         DetachTabButton *detachButton;
         QSpacerItem *spacer;
+        UniversalReceiverButton *urb;
         bool spacerIsUsed;
+
+        friend class TransformGuiStateObj;
 };
 
 class TransformGuiStateObj : public TabStateObj

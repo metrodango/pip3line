@@ -17,14 +17,22 @@ class PacketModelAbstract : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        static const int COLUMN_TIMESPTAMP;
-        static const int COLUMN_DIRECTION;
-        static const int COLUMN_PAYLOAD;
-        static const int COLUMN_COMMENT;
-        static const int COLUMN_CID;
+
+        enum HARDCODED_COLUMN_INDEXES {
+            COLUMN_DIRECTION = 0,
+            COLUMN_TIMESPTAMP = 1,
+            COLUMN_PAYLOAD = 2,
+            COLUMN_COMMENT = 3,
+            COLUMN_CID = 4,
+            COLUMN_LENGTH = 5,
+            COLUMN_INVALID = -1
+        };
+
+        static const int DEFAULT_MAX_PAYLOAD_DISPLAY_SIZE;
+        static const int MAX_PAYLOAD_DISPLAY_SIZE_MIN_VAL;
+        static const int MAX_PAYLOAD_DISPLAY_SIZE_MAX_VAL;
 
         static const qint64 INVALID_POS;
-        static const int COLUMN_INVALID;
         PacketModelAbstract(TransformMgmt *transformFactory, QObject *parent = nullptr);
         virtual ~PacketModelAbstract();
 
@@ -67,6 +75,8 @@ class PacketModelAbstract : public QAbstractTableModel
         int getColumnIndex(const QString &name);
         virtual void clearAdditionalField(const QString &name) = 0;
         bool isAutoMergeConsecutivePackets() const;
+        int getMaxPayloadDisplaySize() const;
+        int getDefaultWidthForColumn(const int &col);
     signals:
         void updated();
         void columnsUpdated();
@@ -80,6 +90,7 @@ class PacketModelAbstract : public QAbstractTableModel
         virtual void clear() = 0;
         virtual void refreshAllColumn();
         void setAutoMergeConsecutivePackets(bool value);
+        void setMaxPayloadDisplaySize(int value);
     protected slots:
         virtual void transformRequestFinished(QList<QByteArray> dataList, Messages messages) = 0;
         virtual void transformUpdated() = 0;
@@ -92,6 +103,14 @@ class PacketModelAbstract : public QAbstractTableModel
                 OutputFormat format;
         };
 
+        enum DEFAULT_COLUMN_WIDTH {
+            TIMESTAMP_COLUMN_WIDTH = 150,
+            DIRECTION_COLUMN_WIDTH = 25,
+            LENGTH_COLUMN_WIDTH = 40,
+            CID_COLUMN_WIDTH = 50,
+            RAWDATA_COLUMN_WIDTH = 200
+        };
+
         virtual void internalAddUserColumn(const QString &name, TransformAbstract * transform) = 0;
         virtual void launchUpdate(TransformAbstract * transform, int row, int column,int length = -1) = 0;
 
@@ -101,6 +120,8 @@ class PacketModelAbstract : public QAbstractTableModel
         static const QString COLUMN_PAYLOAD_STR;
         static const QString COLUMN_COMMENT_STR;
         static const QString COLUMN_CID_STR;
+        static const QString COLUMN_LENGTH_STR;
+        static const QString TRUNCATED_STR;
         QStringList columnNames;
         static const QString DEFAULT_DATETIME_FORMAT;
         QString dateTimeFormat;
@@ -109,6 +130,7 @@ class PacketModelAbstract : public QAbstractTableModel
         TransformMgmt *transformFactory;
         bool autoMergeConsecutivePackets;
         int lastPredefinedColumn;
+        int maxPayloadDisplaySize;
 };
 
 #endif // PACKETMODELABSTRACT_H

@@ -55,13 +55,14 @@ qint64 MemoryPacketModel::addPacket(Packet *packet)
 
 qint64 MemoryPacketModel::addPackets(QList<Packet *> packets)
 {
+    qDebug() << QString("added size:")<< packets.size();
     quint64 ret = PacketModelAbstract::INVALID_POS;
     if (packets.size() > 0) {
         int first = packetsList.size();
         int last = first < INT_MAX - packets.size() ? first + packets.size() : INT_MAX;
         int count = last - first;
         if (count > 0) {
-            beginInsertRows(QModelIndex(), first, last);
+            beginInsertRows(QModelIndex(), first, last - 1);
             for (int i = 0 ; i < count ; i++) {
                 packetsList.append(packets.at(i));
                 QHash<QString, QString> f = packets.at(i)->getAdditionalFields();

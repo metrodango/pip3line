@@ -20,6 +20,42 @@ class GuiHelper;
 class QListWidgetItem;
 class SourcesOrchestatorAbstract;
 
+
+class ColumnModel : public QAbstractTableModel
+{
+        Q_OBJECT
+    public:
+        enum COLUMN_INDEXES {
+            COLUMN_NAME = 0,
+            COLUMN_HIDDEN = 1,
+            COLUMN_EQUALITY = 2,
+            COLUMN_DELETE = 3
+        };
+        explicit ColumnModel(GuiHelper *guiHelper,
+                             PacketModelAbstract *mainModel,
+                             PacketSortFilterProxyModel *proxyModel,
+                             QTableView *tableView,
+                             QObject *parent = 0);
+        ~ColumnModel();
+        int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
+        int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
+        QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
+        QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+        bool setData(const QModelIndex &index, const QVariant &value, int role);
+        Qt::ItemFlags flags(const QModelIndex &index) const;
+        int getDefaultColumnwidth(int column);
+    public slots:
+        void onColumnsUpdated();
+    private:
+
+        static const QStringList colNames;
+        GuiHelper *guiHelper;
+        PacketModelAbstract *mainModel;
+        PacketSortFilterProxyModel *proxyModel;
+        QTableView *tableView;
+
+};
+
 class PacketAnalyserOptionsDialog : public QDialog
 {
         Q_OBJECT
@@ -31,22 +67,21 @@ class PacketAnalyserOptionsDialog : public QDialog
                                              QWidget *parent = 0);
         ~PacketAnalyserOptionsDialog();
     private slots:
-        void onHiddenToggled(bool checked);
-        void onEqualityToggled(bool checked);
         void onItemSelected(QItemSelection index);
         void onItemSelected(int index);
         void onAddNewColumn();
-        void onDeleteColumn(const QString &name);
         void onInboundButtonToggled(bool checked);
         void onTextFormatToggled(bool checked);
         void onInfoClicked();
+        void onEqualityBackgroundClicked();
+        void onEqualityForegroundClicked();
+        void onIndexClicked(const QModelIndex &index);
+        void onColumnsUpdated();
     signals:
-        void hideColumn(int index, bool hide);
         void setEqualityColumn(int index, bool equalityOps);
     private:
         void setFormatVisible(bool visible, Pip3lineConst::OutputFormat format = Pip3lineConst::TEXTFORMAT);
-        int addItem(const QString &name);
-        int addItems(const QStringList &names);
+
         PacketModelAbstract *mainModel;
         PacketSortFilterProxyModel *proxyModel;
         QTableView *tableView;
@@ -55,6 +90,7 @@ class PacketAnalyserOptionsDialog : public QDialog
         Ui::TransformDisplayConf *uiTransform;
         QWidget *currentGui;
         QHash<QWidget *, QListWidgetItem *> itemsWidgets;
+        ColumnModel * colModel;
 };
 
 #endif // PACKETANALYSEROPTIONSDIALOG_H

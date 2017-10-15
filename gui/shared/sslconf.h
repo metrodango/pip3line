@@ -16,40 +16,56 @@ class SslConf : public QObject
 {
         Q_OBJECT
     public:
+        static const QString CONF_SSL_IS_USING_SYSTEM_CAS;
+        static const QString CONF_SSL_DISABLE_EMPTY_FRAGMENT;
+        static const QString CONF_SSL_DISABLE_SESSION_TICKETS;
+        static const QString CONF_SSL_DISABLE_COMPRESSION;
+        static const QString CONF_SSL_ENABLE_SERVER_NAME_INDICATION;
+        static const QString CONF_SSL_DISABLE_LEGACY_RENEGOTIATION;
+        static const QString CONF_SSL_DISABLE_SESSION_SHARING;
+        static const QString CONF_SSL_DISABLE_SESSION_PERSISTENCE;
+        static const QString CONF_SSL_SNI_VALUE;
+        static const QString CONF_SSL_OTHER_CAS;
+        static const QString CONF_SSL_CIPHERS;
+        static const QString CONF_SSL_LOCAL_PRIVATE_KEY;
+        static const QString CONF_SSL_LOCAL_CERTIFICATE;
+        static const QString CONF_SSL_ALLOWED_NEXT_PROTOCOLS;
+        static const QString CONF_SSL_ELLIPTICS_CURVES;
+
         explicit SslConf(QObject *parent = 0);
         ~SslConf();
         QList<QSslCipher> getSslCiphers() const;
         QSslKey getLocalKey() const;
         QSslCertificate getLocalCert() const;
         QList<QSslCertificate> getOtherCAs() const;
-        QSslConfiguration getSslConfiguration();
+
         bool isUsingSystemCAs() const;
         bool getDisableEmptyFragments() const;
         bool getDisableSessionTickets() const;
         bool getDisableCompression() const;
-        bool getDisableServerNameIndication() const;
         bool getDisableLegacyRenegotiation() const;
-#if QT_VERSION >= 0x050000
         bool getDisableSessionSharing() const;
         bool getDisableSessionPersistence() const;
-#endif
         QWidget *getGui(QWidget *parent = 0);
         QSslSocket::PeerVerifyMode getSslVerificationMode() const;
         QString getSslPeerNameSNI() const;
         bool isUsingSNI() const;
+        QSslConfiguration getSslConfiguration();
+        virtual QHash<QString, QString> getConfiguration();
+        virtual void setConfiguration(QHash<QString, QString> conf);
         static QString sslModeToString(int mode);
+        QList<QByteArray> getAllowedNextProtocols() const;
+        QVector<QSslEllipticCurve> getEllipticCurves() const;
+
     signals:
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     public slots:
         void setDisableEmptyFragments(bool value);
         void setDisableSessionTickets(bool value);
         void setDisableCompression(bool value);
-        void setDisableServerNameIndication(bool value);
         void setDisableLegacyRenegotiation(bool value);
-#if QT_VERSION >= 0x050000
         void setDisableSessionSharing(bool value);
         void setDisableSessionPersistence(bool value);
-#endif
         void setUseSystemCAs(bool value);
         void setOtherCAs(const QList<QSslCertificate> &value);
         void setLocalCert(const QSslCertificate &value);
@@ -62,20 +78,20 @@ class SslConf : public QObject
         void clearOtherCAs();
         void setSslPeerNameSNI(const QString &value);
         void setUseSNI(bool value);
+        void setAllowedNextProtocols(const QList<QByteArray> &value);
+        void setEllipticCurves(const QVector<QSslEllipticCurve> &value);
     private slots:
         void onGuiDeleted();
     private:
         static const QList<QSsl::KeyAlgorithm> keyAlgos;
+        static const QString CONF_SSL_CIPHER_SEPARATOR;
         QString concat(const QStringList &list);
         bool disableEmptyFragments;
         bool disableSessionTickets;
         bool disableCompression;
-        bool disableServerNameIndication;
         bool disableLegacyRenegotiation;
-#if QT_VERSION >= 0x050000
         bool disableSessionSharing;
         bool disableSessionPersistence;
-#endif
         QSslSocket::PeerVerifyMode sslVerificationMode;
         bool usesSystemCAs;
         QSslConfiguration sslConfiguration;
@@ -86,6 +102,8 @@ class SslConf : public QObject
         SSLOptionsWidget *guiConf;
         QString sslPeerNameSNI;
         bool useSNI;
+        QList<QByteArray> allowedNextProtocols;
+        QVector<QSslEllipticCurve> ellipticCurves;
 };
 
 #endif // SSLCONF_H

@@ -33,6 +33,7 @@ class QDragEnterEvent;
 class QDropEvent;
 class DownloadManager;
 class TransformAbstract;
+class NewViewMenu;
 
 class GenericTab : public TabAbstract
 {
@@ -59,17 +60,17 @@ class GenericTab : public TabAbstract
         void onGotoOffset(quint64 offset, bool absolute,bool negative, bool select);
         void onHistoryBackward();
         void onHistoryForward();
-        void onNewViewTab(QAction * action);
         void onDeleteTab(int index);
+        void onNewTabRequested();
 
     private:
         Q_DISABLE_COPY(GenericTab)
-        bool eventFilter(QObject *obj, QEvent *event);
+        bool eventFilter(QObject *receiver, QEvent *event);
         void dragEnterEvent ( QDragEnterEvent * event );
         void dropEvent(QDropEvent *event);
         void integrateByteSource();
         void addViewTab(ViewTab data);
-
+        QList<ViewTab> getTabData();
         static const QString TEXT_TEXT;
         Ui::GenericTab *ui;
         ByteSourceAbstract *bytesource;
@@ -81,9 +82,7 @@ class GenericTab : public TabAbstract
         ByteSourceGuiButton * guiButton;
         DetachTabButton *detachButton;
         MessagePanelWidget * messagePanel;
-        QAction * newHexViewAction;
-        QAction * newTextViewAction;
-        QAction * newDefaultTextViewAction;
+        NewViewMenu * newViewsContextMenu;
         bool ableToReceiveData;
         QList<ViewTab> tabData;
 

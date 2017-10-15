@@ -183,6 +183,7 @@ class ByteSourceAbstract : public QObject
         virtual int textOffsetSize();
 
         void markNoUpdate(quint64 start, quint64 end, const QColor &bgcolor,const QColor &fgColor = QColor(), QString toolTip = QString());
+        BytesRangeList *getUserMarkingsRanges() const;
 
         virtual BaseStateAbstract *getStateMngtObj() = 0;
 

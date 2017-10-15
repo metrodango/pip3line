@@ -2,6 +2,7 @@
 #include <threadedprocessor.h>
 #include "guihelper.h"
 #include <transformmgmt.h>
+#include "../quickviewitemconfig.h"
 
 IntermediateSource::IntermediateSource(GuiHelper *guiHelper,
                                        ByteSourceAbstract *originalSource,
@@ -29,6 +30,7 @@ IntermediateSource::IntermediateSource(GuiHelper *guiHelper,
         _readonly == wrapperTransform->isTwoWays() || original->isReadonly();
         originalWay = wrapperTransform->way();
         connect(original, SIGNAL(readOnlyChanged(bool)), SLOT(onOriginalReadOnlyChanged(bool)));
+        connect(wrapperTransform, SIGNAL(confUpdated()), this, SLOT(onOriginalUpdated()));
     }
 
     capabilities = originalSource->getCapabilities() & !(CAP_TRANSFORM | CAP_LOADFILE) ;
@@ -96,6 +98,27 @@ void IntermediateSource::fromLocalFile(QString )
     emit log(tr("Load file not implemented"),metaObject()->className(),Pip3lineConst::LERROR);
 }
 
+void IntermediateSource::optionGuiRequested()
+{
+    QuickViewItemConfig * guiConfig= new(std::nothrow) QuickViewItemConfig(guiHelper);
+
+    if (guiConfig == nullptr) {
+        qFatal("Cannot allocate memory for guiConfig X{");
+    }
+
+    guiConfig->setTransform(wrapperTransform);
+    guiConfig->adjustSize();
+
+    int ret = guiConfig->exec();
+    if (ret == QDialog::Accepted) {
+        delete wrapperTransform;
+        wrapperTransform = guiConfig->getTransform();
+        if (wrapperTransform != nullptr) {
+            onCurrentUpdated();
+        }
+    }
+}
+
 void IntermediateSource::onOriginalUpdated(quintptr source)
 {
     if (source == (quintptr) this)
@@ -127,21 +150,25 @@ void IntermediateSource::onCurrentUpdated()
 {
     if (wrapperTransform != nullptr) {
         TransformAbstract * ta = guiHelper->getTransformFactory()->cloneTransform(wrapperTransform);
-        if (originalWay == TransformAbstract::INBOUND)
-            ta->setWay(TransformAbstract::OUTBOUND);
-        else
-            ta->setWay(TransformAbstract::INBOUND);
-        TransformRequest *tr = new(std::nothrow) TransformRequest(
-                    ta,
-                    rawData,
-                    (quintptr) this);
+        if (ta != nullptr) {
+            if (originalWay == TransformAbstract::INBOUND)
+                ta->setWay(TransformAbstract::OUTBOUND);
+            else
+                ta->setWay(TransformAbstract::INBOUND);
+            TransformRequest *tr = new(std::nothrow) TransformRequest(
+                        ta,
+                        rawData,
+                        (quintptr) this);
 
-        if (tr == nullptr) {
-            qFatal("Cannot allocate memory for TransformRequest X{");
+            if (tr == nullptr) {
+                qFatal("Cannot allocate memory for TransformRequest X{");
+            }
+
+            connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(outboundProcessingFinished(QByteArray,Messages)));
+            emit sendRequest(tr);
+        } else {
+            qCritical() << tr("[IntermediateSource::onCurrentUpdated] Cloning failed T_T");
         }
-
-        connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(outboundProcessingFinished(QByteArray,Messages)));
-        emit sendRequest(tr);
     } else {
         original->replace(startOffset,length,rawData,(quintptr)this);
     }

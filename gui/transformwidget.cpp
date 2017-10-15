@@ -569,8 +569,10 @@ void TransformWidget::fromLocalFile(QString fileName)
 void TransformWidget::onFileLoadRequest()
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"));
+    fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"), GuiConst::GLOBAL_LAST_PATH);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         fromLocalFile(fileName);
     }
 }
@@ -653,10 +655,17 @@ TransformWidgetStateObj::~TransformWidgetStateObj()
 
 void TransformWidgetStateObj::run()
 {
+    QHash<QString, QString> confOptions;
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         writer->writeStartElement(tw->metaObject()->className());
         writer->writeAttribute(GuiConst::STATE_CURRENT_INDEX, write(tw->ui->tabWidget->currentIndex()));
         writer->writeAttribute(GuiConst::STATE_SCROLL_INDEX, write(tw->hexView->getHexTableView()->verticalScrollBar()->value()));
+        confOptions = tw->textView->getConfiguration();
+        QHashIterator<QString, QString> it(confOptions);
+        while (it.hasNext()) {
+            it.next();
+            writer->writeAttribute(it.key(), it.value());
+        }
         writer->writeAttribute(GuiConst::STATE_IS_FOLDED, write(tw->isFolded()));
         writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(tw->searchWidget->text(),true)); // searchWidget is never null (well, should never be)
         writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(tw->gotoWidget->text()));
@@ -712,6 +721,19 @@ void TransformWidgetStateObj::run()
                     tw->gotoWidget->setText(text);
                 }
             }
+
+            confOptions.clear();
+            for (int i = 0; i < attrList.size(); i++) {
+                QXmlStreamAttribute attr = attrList.at(i);
+                if (attr.name() != GuiConst::STATE_CURRENT_INDEX &&
+                        attr.name() != GuiConst::STATE_SCROLL_INDEX &&
+                        attr.name() != GuiConst::STATE_IS_FOLDED &&
+                        attr.name() != GuiConst::STATE_SEARCH_DATA &&
+                        attr.name() != GuiConst::STATE_GOTOOFFSET_DATA)
+                    confOptions.insert(attr.name().toString(), attr.value().toString());
+            }
+
+            tw->textView->setConfiguration(confOptions);
 
             readEndElement(tw->metaObject()->className());// reading closing tag classname
         }

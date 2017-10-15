@@ -101,7 +101,11 @@ int HexDelegate::colFlags[] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
                                  0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000};
 int HexDelegate::COMPLETE_LINE = 0x8001;
 
-HexDelegate::HexDelegate(int nhexColumncount, QObject *parent) : QStyledItemDelegate (parent), normalCellSize(24,20),  previewCellSize(130,20){
+HexDelegate::HexDelegate(int nhexColumncount, QObject *parent) :
+    QStyledItemDelegate (parent),
+    normalCellSize(24,GlobalsValues::ROWSHEIGHT),
+    previewCellSize(130,GlobalsValues::ROWSHEIGHT)
+{
     hexColumncount = nhexColumncount;
     allSelected = false;
     //qDebug() << "Created: " << this;
@@ -152,7 +156,7 @@ void HexDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, c
         TextCell textData;
         textData.setTextFormat(Qt::PlainText);
         textData.setText(options.text);
-        textData.setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+        textData.setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
         textData.setTextInteractionFlags(Qt::TextSelectableByKeyboard);
 
         int row = index.row();
@@ -267,9 +271,11 @@ void HexSelectionModel::setDelegate(HexDelegate *ndelegate)
 
 void HexSelectionModel::select(const QModelIndex &index, QItemSelectionModel::SelectionFlags command)
 {
-    delegate->clearSelected();
-    delegate->selectedLines.insert(index.row(),HexDelegate::colFlags[index.column()]);
-    QItemSelectionModel::select(index,command);
+    if (index.isValid()) {
+        delegate->clearSelected();
+        delegate->selectedLines.insert(index.row(),HexDelegate::colFlags[index.column()]);
+        QItemSelectionModel::select(index,command);
+    }
 }
 
 void HexSelectionModel::select(const QItemSelection & , QItemSelectionModel::SelectionFlags command)
@@ -349,9 +355,6 @@ void HexSelectionModel::setColumnCount(int val)
 
 const int ByteTableView::MAXCOL = 32;
 const int ByteTableView::MINCOL = 16;
-const int ByteTableView::TEXTCOLUMNWIDTH = 131; // arbitratry number, dont' ask
-const int ByteTableView::HEXCOLUMNWIDTH = 28; // arbitratry number, dont' ask
-const int ByteTableView::DEFAULTROWSHEIGHT = 20; // arbitratry number, dont' ask
 const QString ByteTableView::LOGID = "ByteTableView";
 
 ByteTableView::ByteTableView(QWidget *parent) :
@@ -378,8 +381,8 @@ ByteTableView::ByteTableView(QWidget *parent) :
     verticalHeader()->setResizeMode(QHeaderView::Fixed);
     horizontalHeader()->setResizeMode(QHeaderView::Fixed);
 #endif
-    verticalHeader()->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
-    horizontalHeader()->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+    verticalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+    horizontalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     currentSelectionModel = nullptr;
     currentModel = nullptr;
     searchObject = nullptr;
@@ -414,10 +417,7 @@ void ByteTableView::setModel(ByteItemModel *nmodel)
     }
 
     currentModel->setHexColumnCount(hexColumncount);
-    for (int i = 0; i < hexColumncount; i++)
-        setColumnWidth(i,HEXCOLUMNWIDTH);
-    setColumnWidth(hexColumncount,TEXTCOLUMNWIDTH);
-    verticalHeader()->setDefaultSectionSize(DEFAULTROWSHEIGHT);
+    updateTableSizes();
 
     currentSelectionModel = new(std::nothrow) HexSelectionModel(hexColumncount, nmodel, this);
     if (currentSelectionModel == nullptr) {
@@ -778,6 +778,17 @@ void ByteTableView::selectBytes(int pos, int length)
     currentSelectionModel->endIndex = currentModel->createIndex(pos + length - 1);
     currentSelectionModel->select(QItemSelection(), QItemSelectionModel::Select);
     setCurrentIndex(currentSelectionModel->startIndex);
+}
+
+void ByteTableView::updateTableSizes()
+{
+    verticalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+    horizontalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+    for (int i = 0; i < hexColumncount; i++)
+        setColumnWidth(i,GlobalsValues::HEXCOLUMNWIDTH);
+    setColumnWidth(hexColumncount,GlobalsValues::TEXTCOLUMNWIDTH);
+    verticalHeader()->setDefaultSectionSize(GlobalsValues::ROWSHEIGHT);
+    repaint();
 }
 
 void ByteTableView::selectAllBytes()

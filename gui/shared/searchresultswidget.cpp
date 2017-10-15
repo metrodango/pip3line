@@ -201,8 +201,10 @@ void SearchResultsWidget::onClear()
 
 void SearchResultsWidget::savetoFile(QString format, int base)
 {
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose a file to save to"), GuiConst::GLOBAL_LAST_PATH);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         BytesRangeList * list = itemModel->getRanges();
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {

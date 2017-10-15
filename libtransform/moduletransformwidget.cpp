@@ -85,6 +85,7 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
 
 ModuleTransformWidget::~ModuleTransformWidget()
 {
+    delete model;
     delete tableMenu;
     delete ui;
 }

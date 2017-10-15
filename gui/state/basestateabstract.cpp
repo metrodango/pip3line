@@ -283,10 +283,13 @@ QString BaseStateAbstract::write(QByteArray data)
     return byteArrayToString(data);
 }
 
-QString BaseStateAbstract::byteArrayToString(QByteArray data)
+QString BaseStateAbstract::byteArrayToString(QByteArray data, bool compress)
 {
     QString ret;
-    data = qCompress(data,9).toBase64();
+    if (compress)
+        data = qCompress(data,9).toBase64();
+    else
+        data = data.toBase64();
     ret = QString::fromUtf8(data.constData(), data.size());
     return ret;
 }
@@ -304,12 +307,15 @@ QByteArray BaseStateAbstract::readByteArray(QString data)
     return stringToByteArray(data);
 }
 
-QByteArray BaseStateAbstract::stringToByteArray(QString data)
+QByteArray BaseStateAbstract::stringToByteArray(QString data, bool uncompress)
 {
     QByteArray ret;
     if (data.isEmpty())
         return ret;
-    ret = qUncompress(QByteArray::fromBase64(data.toUtf8()));
+    if (uncompress)
+        ret = qUncompress(QByteArray::fromBase64(data.toUtf8()));
+    else
+        ret = QByteArray::fromBase64(data.toUtf8());
     return ret;
 }
 

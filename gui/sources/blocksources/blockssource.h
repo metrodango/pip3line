@@ -125,7 +125,7 @@ class BlocksSource : public QObject
         QByteArray applyOutboundTransform(QByteArray data);
 
         void updateConnectionsInfo();
-        virtual void internalUpdateConnectionsInfo() = 0;
+        virtual void internalUpdateConnectionsInfo();
         QList<Target<BlocksSource *>> connectionsInfo;
         QTimer updateTimer;
 

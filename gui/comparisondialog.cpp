@@ -330,7 +330,7 @@ ComparisonDialog::ComparisonDialog(GuiHelper *nguiHelper, QWidget *parent) :
 
     ui->advancedWidget->hide();
 
-    connect(guiHelper, SIGNAL(tabsUpdated()), SLOT(loadTabs()));
+    connect(guiHelper, SIGNAL(tabsUpdated()), SLOT(loadTabs()), Qt::QueuedConnection);
     connect(ui->tabAComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onTabSelection(int)));
     connect(ui->tabBComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onTabSelection(int)));
     connect(ui->entryAComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onEntrySelected(int)));
@@ -626,14 +626,12 @@ void ComparisonDialog::checkIfComparable()
 
     TabAbstract *tabA = tabs.at(ui->tabAComboBox->currentIndex());
     TabAbstract *tabB = tabs.at(ui->tabBComboBox->currentIndex());
-    ByteSourceAbstract * sourceA = nullptr;
-    ByteSourceAbstract * sourceB = nullptr;
 
     indexA = ui->entryAComboBox->currentIndex();
     indexB = ui->entryBComboBox->currentIndex();
 
-    sourceA = tabA->getSource(indexA);
-    sourceB = tabB->getSource(indexB);
+    ByteSourceAbstract * sourceA = tabA->getSource(indexA);
+    ByteSourceAbstract * sourceB = tabB->getSource(indexB);
 
     if (sourceA == nullptr) {
         ui->acceptPushButton->setEnabled(false);

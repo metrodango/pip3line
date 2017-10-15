@@ -33,7 +33,6 @@ class ByteTableView;
 class RandomAccessTab : public TabAbstract
 {
         Q_OBJECT
-        
     public:
         explicit RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QWidget *parent = 0);
         ~RandomAccessTab();

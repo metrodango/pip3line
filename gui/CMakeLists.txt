@@ -16,8 +16,20 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (WITH_SCINTILLA)
-	message ( STATUS "-- Enabling QScintilla support --" )
-        add_definitions ( -DSCINTILLA )
+    message ( STATUS "-- Enabling QScintilla support --" )
+    add_definitions ( -DSCINTILLA )
+    include_directories (
+        ..\\..\\QScintilla\\Qt4Qt5
+    )
+    if (WIN32)
+        link_directories (
+             ..\\..\\QScintilla\\Qt4Qt5\\release
+        )
+    else()
+        link_directories (
+             ..\\..\\QScintilla\\Qt4Qt5
+        )
+    endif()
 endif(WITH_SCINTILLA)
 
 if(WITH_QT5)
@@ -50,7 +62,11 @@ endif()
 set ( EXTERN_LIBS transform )
 
 if (WITH_SCINTILLA)
-        set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2)
+	if ((WIN32) OR (APPLE))
+            set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
+	else()
+	    set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2)
+	endif()
 endif(WITH_SCINTILLA)
 
 if (UNIX)
@@ -141,6 +157,8 @@ set ( pip3line_HDRS
 	tabs/packetanalyser/externalproxyorchestrator.h
 	tabs/packetanalyser/proxyorchestrator.h
 	tabs/packetanalyser/socksorchestrator.h
+	tabs/packetanalyser/filterdialog.h
+	tabs/packetanalyser/filteritem.h
 	shared/offsetgotowidget.h
 	shared/searchwidget.h
 	shared/readonlybutton.h
@@ -158,6 +176,7 @@ set ( pip3line_HDRS
 	shared/defaultcontrolgui.h
 	shared/defaultdialog.h
 	shared/sendtomenu.h
+	shared/transformguibutton.h
 	shared/transformselectorwidget.h
 	state/basestateabstract.h
 	state/stateorchestrator.h
@@ -254,6 +273,8 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/externalproxyorchestrator.cpp
 	tabs/packetanalyser/proxyorchestrator.cpp
 	tabs/packetanalyser/socksorchestrator.cpp
+	tabs/packetanalyser/filterdialog.cpp
+	tabs/packetanalyser/filteritem.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp
@@ -272,6 +293,7 @@ set ( pip3line_SRCS
 	shared/defaultdialog.cpp
 	shared/sendtomenu.cpp
 	shared/transformselectorwidget.cpp
+	shared/transformguibutton.cpp
 	state/basestateabstract.cpp
 	state/stateorchestrator.cpp
 	state/closingstate.cpp
@@ -305,6 +327,7 @@ set ( pip3line_UIS
 	tabs/packetanalysertab.ui
 	tabs/packetanalyser/importexportdialog.ui
 	tabs/packetanalyser/packetanalyseroptionsdialog.ui
+	tabs/packetanalyser/filterdialog.ui
 	floatingdialog.ui
 	quickviewdialog.ui
 	quickviewitem.ui

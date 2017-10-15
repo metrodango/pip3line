@@ -9,6 +9,7 @@
 #include "views/hexview.h"
 #include "views/textview.h"
 #include "shared/guiconst.h"
+#include "shared/transformguibutton.h"
 
 NewViewMenu::NewViewMenu(GuiHelper *guiHelper, QWidget *parent) :
     QMenu(parent),
@@ -53,6 +54,7 @@ NewViewMenu::~NewViewMenu()
 SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidget * parent)
 {
     SingleViewAbstract * newView = nullptr;
+    QPushButton * configButton = nullptr;
     switch (viewData.type) {
         case (TabAbstract::HEXVIEW) :
             {
@@ -64,6 +66,10 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
                 newView = new(std::nothrow) HexView(is,guiHelper,parent,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for HexView X{");
+                }
+                configButton = new(std::nothrow) TransformGuiButton(viewData.transform);
+                if (configButton == nullptr) {
+                    qFatal("Cannot allocate memory for TransformGuiButton X{");
                 }
             }
             break;
@@ -77,6 +83,10 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
                 newView = new(std::nothrow) TextView(is,guiHelper,parent,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for TextView X{");
+                }
+                configButton = new(std::nothrow) TransformGuiButton(viewData.transform);
+                if (configButton == nullptr) {
+                    qFatal("Cannot allocate memory for TransformGuiButton X{");
                 }
             }
             break;
@@ -94,6 +104,7 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
         }
     }
 
+    newView->setConfigButton(configButton);
     return newView;
 }
 

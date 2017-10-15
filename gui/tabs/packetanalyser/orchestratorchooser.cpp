@@ -134,6 +134,9 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
     SourcesOrchestatorAbstract * orch = nullptr;
     BlocksSource *bs = nullptr;
     switch (type) {
+        case SourcesOrchestatorAbstract::INVALID_TYPE:
+            qDebug() << "invalid orchestrator type choosen";
+            break;
         case SourcesOrchestatorAbstract::TCP_CLIENT:
             {
                 qDebug() << "TCP client choosen";
@@ -148,8 +151,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                              BlocksSource::B64BLOCKS_OPTIONS |
                              BlocksSource::IP_OPTIONS);
 
-                SingleSourceOrchestrator *ci = nullptr;
-                ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
                 if (ci == nullptr) {
                     qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
                 }
@@ -168,8 +170,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
             bs->setFlags(BlocksSource::REFLEXION_OPTIONS | BlocksSource::IP_OPTIONS);
 
-            SingleSourceOrchestrator *ci = nullptr;
-            ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+            SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
             if (ci == nullptr) {
                 qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
             }
@@ -189,8 +190,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
             bs->setFlags(BlocksSource::REFLEXION_OPTIONS);
 
-            SingleSourceOrchestrator *ci = nullptr;
-            ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+            SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
             if (ci == nullptr) {
                 qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
             }
@@ -211,8 +211,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                              BlocksSource::TLS_ENABLED |
                              BlocksSource::B64BLOCKS_OPTIONS);
 
-                SingleSourceOrchestrator *ci = nullptr;
-                ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
                 if (ci == nullptr) {
                     qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
                 }
@@ -230,8 +229,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
                 server->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
 
-                TLSClientListener *client = nullptr;
-                client = new(std::nothrow) TLSClientListener();
+                TLSClientListener *client = new(std::nothrow) TLSClientListener();
                 if (client == nullptr) {
                     qFatal("Cannot allocate memory for TLSClientListener X{");
                 }
@@ -240,8 +238,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                                  BlocksSource::TLS_ENABLED |
                                  BlocksSource::IP_OPTIONS);
 
-                ProxyOrchestrator *ci = nullptr;
-                ci = new(std::nothrow) ProxyOrchestrator(server,client);
+                ProxyOrchestrator *ci = new(std::nothrow) ProxyOrchestrator(server,client);
                 if (ci == nullptr) {
                     qFatal("Cannot allocate memory for ProxyOrchestrator X{");
                 }
@@ -252,24 +249,21 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
         case SourcesOrchestatorAbstract::UDP_PROXY:
         {
             qDebug() << "UDP proxy choosen";
-            BlocksSource *udpServer = nullptr;
-            udpServer = new(std::nothrow) UdpServerListener();
+            BlocksSource *udpServer = new(std::nothrow) UdpServerListener();
             if (udpServer == nullptr) {
                 qFatal("Cannot allocate memory for UdpServerListener X{");
             }
 
             udpServer->setFlags(0);
 
-            BlocksSource *udpClient = nullptr;
-            udpClient = new(std::nothrow) UdpClientListener();
+            BlocksSource *udpClient = new(std::nothrow) UdpClientListener();
             if (udpClient == nullptr) {
                 qFatal("Cannot allocate memory for UdpClientListener X{");
             }
 
             udpClient->setFlags(BlocksSource::IP_OPTIONS);
 
-            ProxyOrchestrator *ci = nullptr;
-            ci = new(std::nothrow) ProxyOrchestrator(udpServer,udpClient);
+            ProxyOrchestrator *ci = new(std::nothrow) ProxyOrchestrator(udpServer,udpClient);
             if (ci == nullptr) {
                 qFatal("Cannot allocate memory for ProxyOrchestrator X{");
             }
@@ -294,8 +288,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             bs2->setFlags(BlocksSource::REFLEXION_OPTIONS |
                           BlocksSource::REFLEXION_ENABLED );
 
-            ExternalProxyOrchestrator *epu = nullptr;
-            epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
+            ExternalProxyOrchestrator *epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
             if (epu == nullptr) {
                 qFatal("Cannot allocate memory for ExternalProxyUDPOrchestrator X{");
             }
@@ -326,8 +319,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                           BlocksSource::B64BLOCKS_OPTIONS |
                           BlocksSource::B64BLOCKS_ENABLED);
 
-            ExternalProxyOrchestrator *epu = nullptr;
-            epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
+            ExternalProxyOrchestrator *epu = new(std::nothrow) ExternalProxyOrchestrator(bs1,bs2);
             if (epu == nullptr) {
                 qFatal("Cannot allocate memory for ExternalProxyUDPOrchestrator X{");
             }
@@ -347,9 +339,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 server->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
                 server->setSocks5Proxy(true);
 
-
-                TLSClientListener *client = nullptr;
-                client = new(std::nothrow) TLSClientListener();
+                TLSClientListener *client = new(std::nothrow) TLSClientListener();
                 if (client == nullptr) {
                     qFatal("Cannot allocate memory for TLSClientListener X{");
                 }
@@ -360,8 +350,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 connect(server, SIGNAL(newConnectionData(int,ConnectionDetails)),
                         client, SLOT(setSpecificConnection(int,ConnectionDetails))) ;
 
-                SocksOrchestrator *ci = nullptr;
-                ci = new(std::nothrow) SocksOrchestrator(server,client);
+                SocksOrchestrator *ci = new(std::nothrow) SocksOrchestrator(server,client);
                 if (ci == nullptr) {
                     qFatal("Cannot allocate memory for SocksOrchestrator X{");
                 }

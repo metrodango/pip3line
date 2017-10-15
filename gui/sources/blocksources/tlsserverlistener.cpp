@@ -410,6 +410,11 @@ bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
         return false;
     }
 
+    if (sslConfiguration->getSslConfiguration().privateKey().isNull()) {
+        emit log(tr("No private key loaded, failing the SSL/TLS connection"), actualID, Pip3lineConst::LERROR);
+        return false;
+    }
+
     qDebug() << tr("Trying to start TLS for %1:%2").arg(sslsocket->peerAddress().toString()).arg(sslsocket->peerPort());
     connect(sslsocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)),Qt::QueuedConnection);
     connect(sslsocket, SIGNAL(modeChanged(QSslSocket::SslMode)),this, SLOT(onSSLModeChange(QSslSocket::SslMode)),Qt::QueuedConnection);

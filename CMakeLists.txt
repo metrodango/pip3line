@@ -62,7 +62,8 @@ endif()
 
 if (ENABLE_ADDR_SANITIZER STREQUAL "ON")
   if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fpermissive -Wall -Wformat-security -fno-optimize-sibling-calls ")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fpermissive \
+    -Wall -Wformat-security -fno-optimize-sibling-calls -fsanitize=undefined")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
     endif()
@@ -70,7 +71,7 @@ if (ENABLE_ADDR_SANITIZER STREQUAL "ON")
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s -Wformatsecurity")
 endif()
 
 set (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

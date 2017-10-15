@@ -20,14 +20,25 @@ SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
 
     update();
 
-    connect(guiHelper, SIGNAL(tabsUpdated()), this, SLOT(update()));
+    connect(guiHelper, SIGNAL(tabsUpdated()), this, SLOT(update()),Qt::QueuedConnection);
     connect(guiHelper, SIGNAL(registeredBlockSourcesUpdated()), this, SLOT(update()),Qt::QueuedConnection);
     connect(guiHelper, SIGNAL(registeredOrchestratorsUpdated()), this, SLOT(update()), Qt::QueuedConnection);
+}
+
+SendToMenu::~SendToMenu()
+{
+    delete sendToNewTabAction;
+
 }
 
 void SendToMenu::update()
 {
     QAction * action = nullptr;
+    for (int i = 0; i < subMenus.size(); i++) {
+        delete subMenus.at(i);
+    }
+    subMenus.clear();
+
     clear(); // actions created on the fly should be automatically deleted
     // clearing mappings
     sendToTabMapping.clear();
@@ -39,14 +50,17 @@ void SendToMenu::update()
     addSeparator();
     if (list.size() > 0) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.at(i)->canReceiveData()) {
-                action = new(std::nothrow) QAction(list.at(i)->getName().trimmed(),this);
-                if (action == nullptr) {
-                    qFatal("Cannot allocate memory for action updateSendToMenu X{");
-                    return;
+            TabAbstract * tab = list.at(i);
+            if (tab->getPreTabType() != GuiConst::INVALID_PRETAB) {
+                if (tab->canReceiveData()) {
+                    action = new(std::nothrow) QAction(tab->getName().trimmed(),this);
+                    if (action == nullptr) {
+                        qFatal("Cannot allocate memory for action updateSendToMenu X{");
+                        return;
+                    }
+                    sendToTabMapping.insert(action, tab);
+                    addAction(action);
                 }
-                sendToTabMapping.insert(action, list.at(i));
-                addAction(action);
             }
         }
     }
@@ -89,7 +103,7 @@ void SendToMenu::update()
                 }
 
                 addMenu(newMenu);
-
+                subMenus.append(newMenu);
             }
         }
     }
@@ -125,6 +139,7 @@ void SendToMenu::update()
             }
 
             addMenu(newMenu);
+            subMenus.append(newMenu);
         }
     }
 }

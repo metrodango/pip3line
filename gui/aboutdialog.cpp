@@ -45,7 +45,7 @@ AboutDialog::AboutDialog(GuiHelper *guiHelper, QWidget *parent) :
     }
     info.append("</ul></p>");
 
-    info.append(tr("<p>Saved regular font: %1").arg(GuiStyles::GLOBAL_REGULAR_FONT.family()));
+    info.append(tr("<p>Saved regular font: %1").arg(GlobalsValues::GLOBAL_REGULAR_FONT.family()));
 #ifdef Q_OS_WIN
     info.append(tr("<p>Current PATH: %1").arg(QString::fromUtf8(qgetenv("PATH"))));
     QSettings setting("HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\3.5\\", QSettings::NativeFormat);

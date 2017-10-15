@@ -23,6 +23,7 @@ SingleViewAbstract::SingleViewAbstract(ByteSourceAbstract *dataModel,GuiHelper *
     byteSource = dataModel;
     guiHelper = nguiHelper;
     logger = guiHelper->getLogger();
+    configButton = nullptr;
 }
 
 SingleViewAbstract::~SingleViewAbstract()
@@ -38,6 +39,29 @@ void SingleViewAbstract::searchAgain()
 {
     return search(previousSearch,previousMask);
 }
+
+QPushButton *SingleViewAbstract::getConfigButton() const
+{
+    return configButton;
+}
+
+void SingleViewAbstract::setConfigButton(QPushButton *value)
+{
+    configButton = value;
+}
+
+QHash<QString, QString> SingleViewAbstract::getConfiguration()
+{
+    QHash<QString, QString> conf;
+    // nothing to see here
+    return conf;
+}
+
+void SingleViewAbstract::setConfiguration(QHash<QString, QString> /*conf*/)
+{
+    // nothing to restore ... yet
+}
+
 ByteSourceAbstract *SingleViewAbstract::getByteSource() const
 {
     return byteSource;

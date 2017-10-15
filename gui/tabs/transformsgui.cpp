@@ -66,7 +66,7 @@ TransformsGui::TransformsGui(GuiHelper *guiHelper, QWidget *parent) :
 
     ui->toolbarLayout->insertWidget(ui->toolbarLayout->indexOf(ui->massProcessingPushButton) + 1,detachButton);
 
-    UniversalReceiverButton *urb = new(std::nothrow) UniversalReceiverButton(this, guiHelper);
+    urb = new(std::nothrow) UniversalReceiverButton(this, guiHelper);
     if (urb == nullptr) {
         qFatal("Cannot allocate memory for UniversalReceiverButton X{");
     }
@@ -90,7 +90,8 @@ TransformsGui::~TransformsGui()
 {
  //   qDebug() << "Destroying " << this;
     delete massProcessingDialog;
-
+    delete urb;
+    delete spacer;
     while (transformWidgetList.size() > 0) {
         delete transformWidgetList.takeLast();
     }
@@ -377,11 +378,13 @@ void TransformsGui::onSaveState()
 
     TransformChain transformList = getCurrentTransformChain();
 
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose file to save"), "",tr("XML documents (*.xml);; All (*)"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Choose file to save"), GuiConst::GLOBAL_LAST_PATH,tr("XML documents (*.xml);; All (*)"));
 
     if (fileName.isEmpty())
         return;
 
+    QFileInfo fi(fileName);
+    GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
 
     transformFactory->saveConfToFile(fileName,transformList);
 
@@ -398,10 +401,13 @@ void TransformsGui::onLoadState()
     MessageDialog errorDialog(guiHelper);
     connect(transformFactory, SIGNAL(error(QString,QString)), &errorDialog, SLOT(logError(QString)));
 
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Choose state file to load from"),"",tr("XML documents (*.xml);; All (*)"));
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Choose state file to load from"),GuiConst::GLOBAL_LAST_PATH,tr("XML documents (*.xml);; All (*)"));
 
     if (fileName.isEmpty())
         return;
+
+    QFileInfo fi(fileName);
+    GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
 
     TransformChain talist = transformFactory->loadConfFromFile(fileName);
     if (talist.isEmpty())

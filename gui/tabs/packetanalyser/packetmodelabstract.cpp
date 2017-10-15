@@ -17,29 +17,34 @@ Released under AGPL see LICENSE for more information
 #include <threadedprocessor.h>
 #include "shared/guiconst.h"
 
-const int PacketModelAbstract::COLUMN_DIRECTION = 0;
-const int PacketModelAbstract::COLUMN_TIMESPTAMP = 1;
-const int PacketModelAbstract::COLUMN_PAYLOAD = 2;
-const int PacketModelAbstract::COLUMN_COMMENT = 3;
-const int PacketModelAbstract::COLUMN_CID = 4;
-const int PacketModelAbstract::COLUMN_INVALID = -1;
+
 const qint64 PacketModelAbstract::INVALID_POS = -1;
 const QString PacketModelAbstract::COLUMN_DIRECTION_STR = "D";
 const QString PacketModelAbstract::COLUMN_TIMESPTAMP_STR = "Timestamp";
 const QString PacketModelAbstract::COLUMN_PAYLOAD_STR = "Payload";
 const QString PacketModelAbstract::COLUMN_COMMENT_STR = "Comment";
 const QString PacketModelAbstract::COLUMN_CID_STR = "CID";
+const QString PacketModelAbstract::COLUMN_LENGTH_STR = "Length";
 const QString PacketModelAbstract::DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy hh:mm:ss.zzz";
+const int PacketModelAbstract::DEFAULT_MAX_PAYLOAD_DISPLAY_SIZE = 20;
+const int PacketModelAbstract::MAX_PAYLOAD_DISPLAY_SIZE_MIN_VAL = 10;
+const int PacketModelAbstract::MAX_PAYLOAD_DISPLAY_SIZE_MAX_VAL = 100;
+const QString PacketModelAbstract::TRUNCATED_STR = QByteArray("[...]");
 
 PacketModelAbstract::PacketModelAbstract(TransformMgmt *transformFactory, QObject *parent) :
     QAbstractTableModel(parent),
     transformFactory(transformFactory)
 {
     autoMergeConsecutivePackets = false;
-    columnNames << COLUMN_DIRECTION_STR << COLUMN_TIMESPTAMP_STR << COLUMN_PAYLOAD_STR << COLUMN_COMMENT_STR << COLUMN_CID_STR;
+    columnNames << COLUMN_DIRECTION_STR
+                << COLUMN_TIMESPTAMP_STR
+                << COLUMN_PAYLOAD_STR
+                << COLUMN_COMMENT_STR
+                << COLUMN_CID_STR
+                << COLUMN_LENGTH_STR;
     lastPredefinedColumn = columnNames.size() - 1 ;
     dateTimeFormat = DEFAULT_DATETIME_FORMAT;
-
+    maxPayloadDisplaySize = DEFAULT_MAX_PAYLOAD_DISPLAY_SIZE;
     Usercolumn uc;
     uc.format = Pip3lineConst::HEXAFORMAT;
     userColumnsDef.insert(COLUMN_PAYLOAD_STR, uc);
@@ -56,9 +61,42 @@ void PacketModelAbstract::resetColumnNames()
 {
     if (columnNames.size() > lastPredefinedColumn + 1) { // difference between index and size
         columnNames.clear();
-        columnNames << COLUMN_DIRECTION_STR << COLUMN_TIMESPTAMP_STR << COLUMN_PAYLOAD_STR << COLUMN_COMMENT_STR;
+        columnNames << COLUMN_DIRECTION_STR
+                    << COLUMN_TIMESPTAMP_STR
+                    << COLUMN_PAYLOAD_STR
+                    << COLUMN_COMMENT_STR
+                    << COLUMN_CID_STR
+                    << COLUMN_LENGTH_STR;
     }
 }
+
+int PacketModelAbstract::getMaxPayloadDisplaySize() const
+{
+    return maxPayloadDisplaySize;
+}
+
+int PacketModelAbstract::getDefaultWidthForColumn(const int &col)
+{
+    switch(col) {
+        case (PacketModelAbstract::COLUMN_DIRECTION):
+            return DIRECTION_COLUMN_WIDTH;
+        case (PacketModelAbstract::COLUMN_TIMESPTAMP):
+            return GuiConst::calculateStringWidthWithGlobalFont(dateTimeFormat);
+        case (PacketModelAbstract::COLUMN_CID):
+            return GuiConst::calculateStringWidthWithGlobalFont(COLUMN_CID_STR);
+        case (PacketModelAbstract::COLUMN_LENGTH):
+            return GuiConst::calculateStringWidthWithGlobalFont(COLUMN_LENGTH_STR);
+        default:
+            return RAWDATA_COLUMN_WIDTH;
+    }
+}
+
+void PacketModelAbstract::setMaxPayloadDisplaySize(int value)
+{
+    maxPayloadDisplaySize = value;
+    emit dataChanged(createIndex(0, COLUMN_PAYLOAD), createIndex(size() - 1, COLUMN_PAYLOAD));
+}
+
 bool PacketModelAbstract::isAutoMergeConsecutivePackets() const
 {
     return autoMergeConsecutivePackets;
@@ -117,12 +155,25 @@ QVariant PacketModelAbstract::payloadData(const Packet * packet, int column, int
         }
         else if (column == COLUMN_PAYLOAD) {
             OutputFormat of = userColumnsDef.value(COLUMN_PAYLOAD_STR,Usercolumn()).format;
-            return QVariant(of == Pip3lineConst::TEXTFORMAT ? QString::fromUtf8(packet->getData()): QString::fromUtf8(packet->getData().toHex()));
+            QByteArray extract = packet->getData();
+            bool wastruncated = false;
+            if (extract.size() > maxPayloadDisplaySize) {
+                extract = extract.left(maxPayloadDisplaySize);
+                wastruncated = true;
+            }
+
+            QString finals = (of == Pip3lineConst::TEXTFORMAT ? QString::fromUtf8(extract): QString::fromUtf8(extract.toHex()));
+
+            if (wastruncated)
+                finals.append(TRUNCATED_STR);
+            return QVariant(finals);
         }
         else if (column == COLUMN_COMMENT)
             return QVariant(packet->getComment());
         else if (column == COLUMN_CID)
             return QVariant(packet->getSourceid());
+        else if (column == COLUMN_LENGTH)
+            return QVariant(GuiConst::convertSizetoBytesString(packet->getData().length()));
         else if (column > lastPredefinedColumn && column < columnNames.size()) {
             QHash<QString, QString> fields = packet->getAdditionalFields();
             if (fields.contains(columnNames.at(column))) {
@@ -155,7 +206,9 @@ QVariant PacketModelAbstract::payloadData(const Packet * packet, int column, int
     } else if (role == Qt::ToolTipRole) {
         return packet->getSourceString();
     } else if (role == Qt::FontRole) {
-        return GuiStyles::GLOBAL_REGULAR_FONT;
+        return GlobalsValues::GLOBAL_REGULAR_FONT;
+    } else if (role == Qt::TextAlignmentRole && column == COLUMN_LENGTH) {
+        return Qt::AlignRight;
     }
 
     return QVariant();

@@ -103,6 +103,8 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     quickViewWasVisible = false;
     compareWasVisible = false;
 
+    GuiConst::GLOBAL_LAST_PATH = QDir::home().absolutePath();
+
 #ifdef Q_OS_LINUX
     // handling signals in linux
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, MainWindow::sigFd))
@@ -126,6 +128,8 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     qRegisterMetaType<BytesRangeList>("BytesRangeList");
     qRegisterMetaType<QSslSocket::SslMode>("QSslSocket::SslMode");
     qRegisterMetaType<ConnectionDetails>("ConnectionDetails");
+    qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
+    qRegisterMetaType<QItemSelection>("QItemSelection");
 
 #if QT_VERSION >= 0x050000
     qRegisterMetaType<qintptr>("qintptr");
@@ -160,13 +164,13 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     // looks for Python libraries path
 
     QStringList supportedPythonVersion;
-    supportedPythonVersion << "2.7" << "3.4" << "3.5";
+    supportedPythonVersion << "2.7" << "3.6" << "3.7";
 
     // yet another Windows Python mess
 #ifdef _WIN64
-    supportedPythonVersion << "2.7-64" << "3.5-64";
+    supportedPythonVersion << "2.7-64" << "3.5-64" << "3.6-64" << "3.7-64";
 #else
-    supportedPythonVersion << "2.7-32" << "3.5-32";
+    supportedPythonVersion << "2.7-32" << "3.5-32" << "3.6-32" << "3.7-32";
 #endif
 
     QStringList pythonRegistry;
@@ -182,7 +186,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
                 for (int j = 0; j < groups.size(); j++ ) {
                     if (groups.at(j) == QString("InstallPath")) {
                         setting.beginGroup(groups.at(j));
-                        qDebug() << "Found Python" << list.at(i);
+                        qInfo() << "Found Python" << list.at(i);
                         newPATH.append(setting.value(".").toString().toUtf8()).append(";");
                         setting.endGroup();
                     }
@@ -726,9 +730,10 @@ SettingsDialog *MainWindow::getSettingsDialog() const
 
 void MainWindow::onSaveState()
 {
-    QString conffileName = QFileDialog::getSaveFileName(this,tr("Choose file to save to"),QDir::home().absolutePath(), tr("all (*)"));
+    QString conffileName = QFileDialog::getSaveFileName(this,tr("Choose file to save to"),GuiConst::GLOBAL_LAST_PATH, tr("all (*)"));
     if (!conffileName.isEmpty()) {
         QFileInfo finfo(conffileName);
+        GuiConst::GLOBAL_LAST_PATH = finfo.absoluteFilePath();
         if (finfo.exists()) // resetting the file if exist
             QFile::resize(conffileName,0);
 
@@ -739,8 +744,10 @@ void MainWindow::onSaveState()
 
 void MainWindow::onLoadState()
 {
-    QString conffileName = QFileDialog::getOpenFileName(this,tr("Choose state file to load from"),QDir::home().absolutePath(), tr("all (*)"));
+    QString conffileName = QFileDialog::getOpenFileName(this,tr("Choose state file to load from"),GuiConst::GLOBAL_LAST_PATH, tr("all (*)"));
     if (!conffileName.isEmpty()) {
+        QFileInfo fi(conffileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         saveLoadState(conffileName, guiHelper->getDefaultLoadStateFlags());
     }
 }
@@ -909,8 +916,10 @@ void MainWindow::onNewAction(QAction *action)
 {
     if (action == newLargeFileTabAction) {
         TabAbstract *ftab = mainTabs->newFileTab();
-        QString fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"));
+        QString fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"),GuiConst::GLOBAL_LAST_PATH);
         if (!fileName.isEmpty()) {
+            QFileInfo fi(fileName);
+            GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
             ftab->loadFromFile(fileName);
         }
     } else if (action == newTransformTabAction) {
@@ -1154,10 +1163,7 @@ void MainWinStateObj::run()
     }
     emit addNewState(temp);
 
-
-    AppDialog * dialog = nullptr;
-
-    dialog = mwin->getSettingsDialog();
+    AppDialog * dialog = mwin->getSettingsDialog();
     if (dialog != nullptr) {
         temp = dialog->getStateMngtObj();
         emit addNewState(temp);

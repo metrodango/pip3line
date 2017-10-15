@@ -78,6 +78,8 @@ class PcapIO : public QObject
         bool getLittleEndian() const;
         void setLittleEndian(bool value);
         static QByteArray reverseBytesOrder(QByteArray &in);
+        QString getErrorString() const;
+
     private:
         static  QHash<int, QString> initTypeList();
         void initAttributes();
@@ -103,6 +105,7 @@ class PcapIO : public QObject
         qint64 currentPos;
         quint64 numberOfPacketsInFile;
         bool ownFileObject;
+        QString errorString;
 };
 
 #endif // PCAPIO_H

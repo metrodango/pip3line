@@ -1,5 +1,6 @@
 #include "guiconst.h"
 
+#include <QFontMetrics>
 
 namespace GuiConst
 {
@@ -35,6 +36,10 @@ namespace GuiConst
     const QString SETTINGS_AUTO_SAVE_TIMER_INTERVAL = "AutoSaveTimerInterval";
     const QString SETTINGS_AUTO_RESTORE_ON_STARTUP = "AutoRestoreOnStartup";
     const QString SETTINGS_REGULAR_FONT = "RegularFont";
+    const QString SETTINGS_FUZZING_EXPORT_MAX_SIZE = "FuzzingExportMaxSize";
+    const QString SETTINGS_FUZZING_EXPORT_FORMAT = "FuzzingExportFormat";
+    const QString SETTINGS_EQUALITY_PACKETS_BACKGROUND = "EqualityPacketBackground";
+    const QString SETTINGS_EQUALITY_PACKETS_FOREGROUND = "EqualityPacketForeground";
 
     const QString DEFAULT_STATE_FILE = "savedstate.conf";
     const QString STATE_PIP3LINE_DOC = "Pip3lineState";
@@ -67,6 +72,7 @@ namespace GuiConst
     const QString STATE_CURRENT_INDEX = "CurrentIndex";
     const QString STATE_IS_FOLDED = "IsFolded";
     const QString STATE_SCROLL_INDEX = "ScrollIndex";
+    const QString STATE_SYNTAX = "Syntax";
     const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET = "CurrentStartingOffset";
     const QString STATE_CHUNK_SIZE = "ChunkSize";
     const QString STATE_LARGE_FILE_NAME = "LargeFileName";
@@ -79,6 +85,7 @@ namespace GuiConst
     const QString STATE_WINDOWED_TABS_ARRAY = "WindowTabs";
     const QString STATE_WINDOWED = "Windowed";
     const QString STATE_TYPE = "Type";
+    const QString STATE_ENCODING = "Encoding";
     const QString STATE_TRANSFORMGUI_ARRAY = "TransformGuiList";
     const QString STATE_TAB_NAME = "TabName";
     const QString STATE_DATA = "Data";
@@ -147,6 +154,21 @@ namespace GuiConst
     const QString STATE_INJECTED_PACKET = "Injected";
     const QString STATE_TRACK_PACKETS = "TrackLast";
     const QString STATE_AUTO_MERGE = "AutoMerge";
+    const QString STATE_SOURCEID = "SourceID";
+    const QString STATE_MAX_PAYLOAD_DISPLAY_SIZE = "MaxPayloadDisplaySize";
+    const QString STATE_PACKET_PROXY_FILTERS_ENABLE = "FiltersEnabled";
+    const QString STATE_PACKET_PROXY_FILTERS_LIST = "FiltersList";
+    const QString STATE_PACKET_PROXY_EQUALITY_ENABLE = "EqualityEnabled";
+    const QString STATE_PACKET_PROXY_EQUALITY_TARGET_COLUMNS = "EqualityColumns";
+    const QString STATE_PACKET_PROXY_SORTING_TARGET_COLUMN = "SortingColumn";
+    const QString STATE_PACKET_PROXY_SORTING_ORDER = "SortingOrder";
+    const QString STATE_FIELD_SEPARATOR = ":";
+    const QString STATE_FILTER_SORT = "FilterSortInfo";
+    const QString STATE_FILTER_ITEMS = "FilterItems";
+    const QString STATE_FILTER_ITEM = "FilterItem";
+    const QString STATE_OFFSET = "Offset";
+    const QString STATE_REVERSE_SELECTION = "ReverseSelection";
+    const QString STATE_MASK = "Mask";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;
@@ -240,6 +262,68 @@ namespace GuiConst
 
     const quint16 DEFAULT_INCOMING_SERVER_PORT = 40000;
     const QHostAddress DEFAULT_INCOMING_SERVER_ADDRESS = QHostAddress::LocalHost;
+
+    const quint64 DEFAULT_FUZZING_EXPORT_MAX_SIZE = 10 * 1024 * 1024; // 10 MB way more than enough
+    const QJsonDocument::JsonFormat DEFAULT_FUZZING_EXPORT_FORMAT = QJsonDocument::Indented;
+
+    const QString HEXCHAR = "abcdef1234567890ABCDEF";
+    const QString WILDCARD_HEXCHAR = "*xX";
+
+    QByteArray extractSearchHexa(QString searchRequest, QBitArray &mask)
+    {
+        QByteArray searchItem;
+        mask.resize(searchRequest.size()/2);
+        int i = 0;
+        while (i < searchRequest.size() -1 ) { // this is fine, we konw that val.size() > 0
+                if (HEXCHAR.contains(searchRequest.at(i))
+                        && HEXCHAR.contains(searchRequest.at(i+1))) { // check if valid hexa value
+                    mask.setBit(i/2,true);
+                    searchItem.append(
+                                QByteArray::fromHex(
+                                    QString(searchRequest.at(i)).append(searchRequest.at(i+1)).toUtf8()
+                                    )
+                                );
+                    i += 2;
+                    continue;
+                } else if (WILDCARD_HEXCHAR.contains(searchRequest.at(i))
+                           && WILDCARD_HEXCHAR.contains(searchRequest.at(i+1))){ // check if this is a mask character
+                    searchItem.append('\0');
+                    mask.setBit(i/2, false);
+                    i += 2;
+                    continue;
+                } // otherwise discard the first character
+            i++;
+        }
+        return searchItem;
+    }
+
+    QString GLOBAL_LAST_PATH;
+
+    QString convertSizetoBytesString(quint64 size)
+    {
+        QString ret;
+        if (size < 1000)
+            ret = QString("%1 B").arg(size);
+        else if (size >= 1000 && size < 1000000)
+            ret = QString("%1 KiB").arg((double)size/(double)1000,0,'f',2);
+        else if (size >= 1000000 && size < 1000000000)
+            ret = QString("%1 MiB").arg((double)size/(double)1000000,0,'f',2);
+
+        return ret;
+    }
+
+
+    const int DEFAULT_HEXVIEW_TEXTCOLUMN_WIDTH = 131; // arbitratry number, dont' ask
+    const int DEFAULT_HEXVIEW_HEXCOLUMN_WIDTH = 28; // arbitratry number, dont' ask
+    const int DEFAULT_HEXVIEW_ROWS_HEIGHT = 20;
+
+    int calculateStringWidthWithGlobalFont(QString value)
+    {
+        QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
+        return fm.width(value);;
+    }
+
+    // arbitratry number, dont' ask
 }
 
 namespace GuiStyles {
@@ -248,7 +332,8 @@ namespace GuiStyles {
      const QString PushButtonReadonly = "QPushButton { color : #FF0000; }";
      const QString LineEditWarning = "";
      const QString LineEditMessage = "";
-     const QColor EqualPackets = QColor(255,255,128);
+     const QColor DEFAULT_EQUAL_PACKETS_BACKGROUND = QColor(255,255,128);
+     const QColor DEFAULT_EQUAL_PACKETS_FOREGROUND = QColor(0,0,0);
      const QColor DEFAULT_MARKING_COLOR = QColor(255,182,117);
      const QColor DEFAULT_MARKING_COLOR_DATA = QColor(11449599);
      const QColor DEFAULT_MARKING_COLOR_SIZE = QColor(16755616);
@@ -264,5 +349,13 @@ namespace GuiStyles {
 #else
      const QFont DEFAULT_REGULAR_FONT = QFont("Courier New",10);
 #endif
-     QFont GLOBAL_REGULAR_FONT;
+}
+
+namespace GlobalsValues {
+    int TEXTCOLUMNWIDTH = GuiConst::DEFAULT_HEXVIEW_TEXTCOLUMN_WIDTH;
+    int HEXCOLUMNWIDTH = GuiConst::DEFAULT_HEXVIEW_HEXCOLUMN_WIDTH;
+    int ROWSHEIGHT = GuiConst::DEFAULT_HEXVIEW_ROWS_HEIGHT;
+    QFont GLOBAL_REGULAR_FONT;
+    QColor EqualsPacketsBackground = GuiStyles::DEFAULT_EQUAL_PACKETS_BACKGROUND;
+    QColor EqualsPacketsForeground = GuiStyles::DEFAULT_EQUAL_PACKETS_FOREGROUND;
 }

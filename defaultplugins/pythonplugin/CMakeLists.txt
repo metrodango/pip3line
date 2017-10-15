@@ -29,14 +29,16 @@ endif(WITH_QT5)
 # hardcoded paths, in case none are supplied or found
 
 if (WIN32)
-  set (PYTHON_HARDCODED_INCLUDE "C:\\Python34\\include")
-  set (PYTHON_HARDCODED_LIBS "C:\\Python34\\libs\\python34.lib")
+  set (PYTHON_HARDCODED_INCLUDE "C:\\Program Files\\Python36\\include")
+  set (PYTHON_HARDCODED_LIBS "C:\\Program Files\\Python36\\libs\\python36.lib")
 elseif(APPLE)
   list(APPEND CMAKE_PREFIX_PATH "/usr/local")
   set (PYTHON_HARDCODED_INCLUDE "/usr/local/Frameworks/Python.framework/Versions/3.5/include/python3.5m")
   set (PYTHON_HARDCODED_LIBS    "/usr/local/Frameworks/Python.framework/Versions/3.5/lib/libpython3.5.dylib")
 else()
-  set (PYTHON_HARDCODED_INCLUDE "/usr/include/python3.4")
+  set (PYTHON_HARDCODED_INCLUDE 
+	  "/usr/include/python3.4"
+	  "/usr/include/python3.4m")
   set (PYTHON_HARDCODED_LIBS "/usr/lib/libpython3.4.so")
 endif()
 	

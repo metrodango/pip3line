@@ -78,9 +78,8 @@ void UdpClientListener::sendBlock(Block *block)
         }
 
         if (!foundSource) { // or we open a new connection
-            QUdpSocket * socket = nullptr;
 
-            socket = new(std::nothrow) QUdpSocket();
+            QUdpSocket * socket = new(std::nothrow) QUdpSocket();
             if (socket == nullptr) {
                 qFatal("Cannot allocate memory for QUdpSocket X{");
             }

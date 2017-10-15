@@ -33,6 +33,11 @@ Released under AGPL see LICENSE for more information
 #include <threadedprocessor.h>
 #include <QNetworkProxy>
 #include <QTimer>
+#include <QFontMetrics>
+#include "tabs/generictab.h"
+#include "tabs/transformsgui.h"
+#include "tabs/packetanalysertab.h"
+#include "tabs/randomaccesstab.h"
 #include "shared/guiconst.h"
 #include "sources/blocksources/tlsserverlistener.h"
 
@@ -166,17 +171,21 @@ QList<TabAbstract *> GuiHelper::getTabs()
 
 void GuiHelper::onTabDestroyed()
 {
-    qDebug() << "tab destroyed";
     QObject * s = sender();
     if (s == nullptr) {
         qCritical() << tr("[GuiHelper::onTabDestroyed] nullptr sender");
     } else {
-        TabAbstract * tg = static_cast<TabAbstract *>(s); // we only want the address, the pointer is never dereferenced
-        if (!tabs.remove(tg)) {
-            qCritical() << tr("[GuiHelper::onTabDestroyed] Deleted Tab not found");
+       // qDebug() << tr("[GuiHelper::onTabDestroyed] trying to convert sender:") << s->objectName();
+        TabAbstract * ta = static_cast<TabAbstract *>(s);
+        if (ta != nullptr) {
+            if (!tabs.remove(ta)) {
+                qCritical() << tr("[GuiHelper::onTabDestroyed] Deleted Tab not found") << ta->getPreTabType();
+            } else {
+                updateSortedTabs();
+                emit tabsUpdated();
+            }
         } else {
-            updateSortedTabs();
-            emit tabsUpdated();
+            qCritical() << tr("[GuiHelper::onTabDestroyed] Cast to TabAbstract failed") << s;
         }
     }
 }
@@ -530,6 +539,32 @@ void GuiHelper::refreshAutoSaveTimer()
         autoSaveTimer = nullptr;
     }
 }
+
+QJsonDocument::JsonFormat GuiHelper::getFuzzingExportFormat() const
+{
+    return fuzzingExportFormat;
+}
+
+void GuiHelper::setFuzzingExportFormat(const QJsonDocument::JsonFormat &value)
+{
+    if (value != fuzzingExportFormat) {
+        fuzzingExportFormat = value;
+        settings->setValue(GuiConst::SETTINGS_FUZZING_EXPORT_FORMAT, fuzzingExportFormat);
+    }
+}
+
+quint64 GuiHelper::getMaxSizeForFuzzingExport() const
+{
+    return maxSizeForFuzzingExport;
+}
+
+void GuiHelper::setMaxSizeForFuzzingExport(const quint64 &value)
+{
+    if (value != maxSizeForFuzzingExport) {
+        maxSizeForFuzzingExport = value;
+        settings->setValue(GuiConst::SETTINGS_FUZZING_EXPORT_MAX_SIZE, value);
+    }
+}
 QMenu *GuiHelper::getNewTabMenu() const
 {
     return newTabMenu;
@@ -550,9 +585,38 @@ void GuiHelper::setRegularFont(const QFont &value)
 {
     if (value != regularFont) {
         regularFont = value;
-        GuiStyles::GLOBAL_REGULAR_FONT = regularFont;
+        GlobalsValues::GLOBAL_REGULAR_FONT = regularFont;
         settings->setValue(GuiConst::SETTINGS_REGULAR_FONT, regularFont.toString());
+        calculatingHexTableSizes();
     }
+}
+
+void GuiHelper::saveEqualityPacketColors()
+{
+    settings->setValue(SETTINGS_EQUALITY_PACKETS_BACKGROUND, GlobalsValues::EqualsPacketsBackground.rgb());
+    settings->setValue(SETTINGS_EQUALITY_PACKETS_FOREGROUND, GlobalsValues::EqualsPacketsForeground.rgb());
+}
+
+void GuiHelper::loadEqualityPacketColors()
+{
+    bool ok = false;
+    uint val = settings->value(SETTINGS_EQUALITY_PACKETS_BACKGROUND,GuiStyles::DEFAULT_EQUAL_PACKETS_BACKGROUND.toRgb()).toUInt(&ok);
+
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            GlobalsValues::EqualsPacketsBackground = color;
+        }
+    }
+
+    val = settings->value(SETTINGS_EQUALITY_PACKETS_FOREGROUND,GuiStyles::DEFAULT_EQUAL_PACKETS_FOREGROUND.toRgb()).toUInt(&ok);
+
+        if (ok) {
+            QColor color(val);
+            if (color.isValid()) {
+                GlobalsValues::EqualsPacketsForeground = color;
+            }
+        }
 }
 
 void GuiHelper::registerBlockSource(BlocksSource *bs)
@@ -610,7 +674,7 @@ void GuiHelper::unregisterOrchestrator(SourcesOrchestatorAbstract *orch)
         }
         emit registeredOrchestratorsUpdated();
     } else {
-        logger->logError(tr("Orchestrator is not registered T_T"),"");
+        logger->logError(tr("Orchestrator is not registered T_T"),"GuiHelper::unregisterOrchestrator");
     }
 }
 
@@ -809,6 +873,19 @@ void GuiHelper::logMessage(const QString &message, const QString &source, Pip3li
     logger->logMessage(message,source,level);
 }
 
+void GuiHelper::calculatingHexTableSizes()
+{
+    QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
+    GlobalsValues::HEXCOLUMNWIDTH = calculateStringWidthWithGlobalFont(" FF ");
+    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFF");
+#if QT_VERSION >= 0x050800
+    GlobalsValues::ROWSHEIGHT = qMax(fm.height(), fm.capHeight()) + 2; // random value for some "special" cases
+#else
+    GlobalsValues::ROWSHEIGHT = fm.height() + 2; // random value for some "special" cases
+#endif
+    emit hexTableSizesUpdated();
+}
+
 quint16 GuiHelper::getProxyPort() const
 {
     return proxyPort;
@@ -895,7 +972,8 @@ void GuiHelper::refreshAll()
 
     regularFont = QFont();
     regularFont.fromString(settings->value(GuiConst::SETTINGS_REGULAR_FONT,GuiStyles::DEFAULT_REGULAR_FONT).toString());
-    GuiStyles::GLOBAL_REGULAR_FONT.fromString(regularFont.toString());
+    GlobalsValues::GLOBAL_REGULAR_FONT.fromString(regularFont.toString());
+    calculatingHexTableSizes();
 
     QByteArray temp = settings->value(GuiConst::SETTINGS_SERVER_SEPARATOR,QByteArray()).toByteArray();
     temp = QByteArray::fromHex(temp);
@@ -940,6 +1018,14 @@ void GuiHelper::refreshAll()
 
     autoRestoreOnStartup = settings->value(GuiConst::SETTINGS_AUTO_RESTORE_ON_STARTUP, GuiConst::DEFAULT_AUTO_RESTORE_ENABLED).toBool();
 
+    maxSizeForFuzzingExport = settings->value(GuiConst::SETTINGS_FUZZING_EXPORT_MAX_SIZE, GuiConst::DEFAULT_FUZZING_EXPORT_MAX_SIZE).toULongLong();
+    vl = settings->value(GuiConst::SETTINGS_FUZZING_EXPORT_FORMAT, GuiConst::DEFAULT_FUZZING_EXPORT_FORMAT).toInt(&ok);
+    if (ok && (vl == QJsonDocument::Indented || vl == QJsonDocument::Compact)) {
+        fuzzingExportFormat = (QJsonDocument::JsonFormat) vl;
+    } else {
+        fuzzingExportFormat = GuiConst::DEFAULT_FUZZING_EXPORT_FORMAT;
+    }
+
     if (!ok || autoSaveTimerInterval < GuiConst::MIN_AUTO_SAVE_TIMER_INTERVAL || autoSaveTimerInterval > GuiConst::MAX_AUTO_SAVE_TIMER_INTERVAL) {
         autoSaveTimerInterval = GuiConst::DEFAULT_AUTO_SAVE_TIMER_INTERVAL;
     }
@@ -956,13 +1042,15 @@ void GuiHelper::refreshAll()
         while (i.hasNext()) {
             i.next();
             QColor color(i.value().toUInt(&ok));
-            if (!ok) {
+            if (!ok || !color.isValid()) {
                 logger->logError(tr("Invalid color for marking from persistant conf"), LOGID);
                 continue;
             }
             markingColors.insert(i.key(),color);
         }
     }
+
+    loadEqualityPacketColors();
 
     deleteImportExportFuncs();
     loadImportExportFunctions();
@@ -1213,10 +1301,9 @@ bool GuiHelper::eventFilter(QObject *o, QEvent *e)
 
 void GuiHelper::updateCopyContextMenu(QMenu *copyMenu)
 {
-    QAction * action = nullptr;
     copyMenu->clear();
 
-    action = new(std::nothrow) QAction(UTF8_STRING_ACTION, copyMenu);
+    QAction * action = new(std::nothrow) QAction(UTF8_STRING_ACTION, copyMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus UTF8 X{");
         return;
@@ -1237,9 +1324,8 @@ void GuiHelper::updateCopyContextMenu(QMenu *copyMenu)
 
 void GuiHelper::updateLoadContextMenu(QMenu *loadMenu)
 {
-    QAction * action = nullptr;
     loadMenu->clear();
-    action = new(std::nothrow) QAction(UTF8_STRING_ACTION, loadMenu);
+    QAction * action = new(std::nothrow) QAction(UTF8_STRING_ACTION, loadMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus loadMenu UTF8 X{");
         return;
@@ -1302,9 +1388,10 @@ void GuiHelper::copyAction(QString action, QByteArray value)
 
 void GuiHelper::saveToFileAction(QByteArray value, QWidget *parent)
 {
-    QString fileName = QFileDialog::getSaveFileName(parent,tr("Choose a file to save to"));
+    QString fileName = QFileDialog::getSaveFileName(parent,tr("Choose a file to save to"), GuiConst::GLOBAL_LAST_PATH);
     if (!fileName.isEmpty()) {
-
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly)) {
             QString mess = tr("Failed to open the file for writing:\n %1").arg(file.errorString());

@@ -101,7 +101,7 @@ void OpenSSLHashes::transform(const QByteArray &input, QByteArray &output)
         return;
     }
     EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
-    EVP_DigestInit_ex(mdctx, md, NULL);
+    EVP_DigestInit_ex(mdctx, md, nullptr);
     EVP_DigestUpdate(mdctx, input.data(), input.size());
     EVP_DigestFinal_ex(mdctx, md_value, &md_len);
     output.append((char *)md_value,md_len);

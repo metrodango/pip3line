@@ -166,7 +166,7 @@ bool QuickViewItem::configure()
     if (ret == QDialog::Accepted) {
         delete currentTransform;
         currentTransform = guiConfig->getTransform();
-        if (currentTransform != 0) {
+        if (currentTransform != nullptr) {
             ui->nameLabel->setText(guiConfig->getName());
             format = guiConfig->getFormat();
             outputType = guiConfig->getOutputType();

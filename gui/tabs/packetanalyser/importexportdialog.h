@@ -17,12 +17,14 @@ class ImportExportDialog : public QDialog
         QString getFileName() const;
         GuiConst::FileFormat getFormat() const;
         bool getSelectionOnly() const;
+        bool getEnableCompression() const;
         bool opGuiConfSelected();
 
     private slots:
         void onChooseFileName();
         void onAccept();
         void onOpTypeToggled(bool enable);
+        void onPcapToggled(bool enable);
     private:
         Ui::ImportExportDialog *ui;
         GuiConst::FileOperations type;

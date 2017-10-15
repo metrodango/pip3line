@@ -9,7 +9,7 @@ IF "%GOTVERSION%"=="false" GOTO Usage
 
 SET VSVERSION=%1
 REM Default Qt dir
-SET "BASE_DIR_QT=C:\Qt\5.7"
+SET "BASE_DIR_QT=C:\Qt\5.9.2"
 
 IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 IF "%VSVERSION%"=="2015_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2015_64"
@@ -51,6 +51,7 @@ copy %QT_LIBS%"\bin\Qt5Svg.dll"
 copy %QT_LIBS%"\bin\Qt5Widgets.dll"
 copy %QT_LIBS%"\bin\Qt5XmlPatterns.dll"
 copy %QT_LIBS%"\bin\Qt5Concurrent.dll"
+copy %QT_LIBS%"\bin\Qt5PrintSupport.dll"
 
 echo [3] Copying QT mandatory plugins
 REM QT mandatory plug-ins, if missing the application won't even start
@@ -68,6 +69,12 @@ echo [5] Copying OpenSSL lib (if present)
 IF NOT EXIST %OPENSSL_PATH% GOTO NonexistentOpenssl
 copy %OPENSSL_PATH%"\bin\ssleay32.dll"
 copy %OPENSSL_PATH%"\bin\libeay32.dll"
+
+echo [6] Copying QScintilla lib (if present)
+REM Qscintilla lib
+SET "QSCINTILLA_PATH=..\..\QScintilla\Qt4Qt5\release"
+IF NOT EXIST %QSCINTILLA_PATH% GOTO Nonexistentqscintilla
+copy %QSCINTILLA_PATH%"\qscintilla2_qt5.dll"
 
 REM For OpenSSL 1.1.0 "NG"
 REM copy %OPENSSL_PATH%"\bin\libcrypto-1_1-x64.dll"
@@ -113,6 +120,10 @@ GOTO End
 
 :NonexistentOpenssl
 ECHO The directory %OPENSSL_PATH% not found, skipping.
+GOTO End
+
+:Nonexistentqscintilla
+ECHO The directory %QSCINTILLA_PATH% not found, skipping.
 GOTO End
 
 :End

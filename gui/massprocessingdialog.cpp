@@ -119,8 +119,12 @@ void MassProcessingDialog::setTranformChain(const QString &chainConf)
 void MassProcessingDialog::selectInputFile()
 {
     QString init = ui->inputFileLineEdit->text();
+    if (init.isEmpty())
+        init = GuiConst::GLOBAL_LAST_PATH;
     QString fileName = QFileDialog::getOpenFileName(this,tr("Select input file"),init);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         ui->inputFileLineEdit->setText(fileName);
     }
 }
@@ -128,8 +132,12 @@ void MassProcessingDialog::selectInputFile()
 void MassProcessingDialog::selectOutputFile()
 {
     QString init = ui->outputFileLineEdit->text();
+    if (init.isEmpty())
+        init = GuiConst::GLOBAL_LAST_PATH;
     QString fileName = QFileDialog::getSaveFileName(this,tr("Choose output file"),init);
     if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
         ui->outputFileLineEdit->setText(fileName);
     }
 }

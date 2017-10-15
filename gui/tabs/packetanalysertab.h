@@ -39,6 +39,7 @@ class QTabBar;
 class NewViewMenu;
 class OrchestratorChooser;
 class SendToMenu;
+class FilterDialog;
 
 class PacketAnalyserTab : public TabAbstract
 {
@@ -57,7 +58,6 @@ class PacketAnalyserTab : public TabAbstract
         bool getIntercepting() const;
         bool isTrackingLast() const;
         void setAutoMerge(bool value);
-
     private slots:
         void onAddNewColumn();
         void onImport();
@@ -68,6 +68,7 @@ class PacketAnalyserTab : public TabAbstract
         void onSelectionChanged(const QItemSelection &selection);
         void onContextMenuAction(QAction *action);
         void onRightClick(QPoint pos);
+        void onHeaderContextMenu(QPoint pos);
         void updateStatus();
         void onOptionsClicked();
         void onOptionDialogClosed();
@@ -92,15 +93,18 @@ class PacketAnalyserTab : public TabAbstract
         void onOutboundTransformRequested();
         void onSaveLoadFinished();
         void onItemClicked(const QModelIndex &index);
+        void onFilter();
+        void onFilterDialogClosed();
+        void onDeleteColumn();
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
+        void onFontUpdated();
     private:
-        static const int TIMESTAMP_COLUMN_WIDTH;
-        static const int DIRECTION_COLUMN_WIDTH;
-        static const int RAWDATA_COLUMN_WIDTH;
         void selectLastPacket();
         void checkIfOriginalTabNeeded();
         void removeTabButton(int index);
         void buildContextMenu();
+        void buildHeadersContextMenu();
+        QList<ViewTab> getTabData();
         bool eventFilter(QObject * receiver, QEvent * event);
         Ui::PacketAnalyserTab *ui;
         DetachTabButton *detachButton;
@@ -112,12 +116,18 @@ class PacketAnalyserTab : public TabAbstract
         ByteSourceAbstract *oriBytesource;
         HexView *oriHexView;
         QMenu * globalContextMenu;
+        QMenu * headerContextMenu;
         SendToMenu * sendToMenu;
+        QMenu *autoMergeMenu;
         QMenu * copyAsMenu;
         QAction * merge;
+        QAction * deleteColumn;
         QAction * split;
         QAction * deleteSelection;
         PacketAnalyserOptionsDialog * optionsDialog;
+        FilterDialog * filterDialog;
+
+        int selectedHeader;
 
         quint32 pcapLinkType;
         bool exportFormattedXML;

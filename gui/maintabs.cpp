@@ -17,7 +17,6 @@ Released under AGPL see LICENSE for more information
 #include <QMouseEvent>
 #include <QFileInfo>
 #include <QDebug>
-#include <QFileDialog>
 #include <QAction>
 #include "shared/guiconst.h"
 #include "state/closingstate.h"
@@ -63,7 +62,7 @@ MainTabs::MainTabs(GuiHelper *nguiHelper, QWidget *parent) :
         return;
     }
     updateTabHeaderMenu();
-    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateTabHeaderMenu()));
+    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateTabHeaderMenu()),Qt::QueuedConnection);
     connect(tabHeaderContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onDeletedTabSelected(QAction*)));
     connect(guiHelper, SIGNAL(tabRevived(TabAbstract*)), this, SLOT(integrateTab(TabAbstract*)));
 }
@@ -626,14 +625,12 @@ void MainTabsStateObj::run()
 
         int listSize = mtabs->count();
 
-
         QWidget *logger = mtabs->getLogger();
         writer->writeAttribute(GuiConst::STATE_LOGGER_INDEX, write(mtabs->indexOf(logger)));
         int numberOfTabs = listSize - (mtabs->indexOf(logger) != -1 ? 1 : 0);
         QList<TabAbstract *> windowedTabs = mtabs->activeWindows.keys();
         numberOfTabs += windowedTabs.count();
         writer->writeAttribute(GuiConst::STATE_SIZE, write(numberOfTabs));
-
 
         for (int i = listSize - 1; i > -1; i--) { // need to run in reverse due to the stack structure
             QWidget * w = mtabs->widget(i);
@@ -702,7 +699,8 @@ void MainTabsStateObj::run()
                         qFatal("Cannot allocate memory for InitTabStateObj X{");
                     }
                     connect(initTab, SIGNAL(detachTab(TabAbstract*,QByteArray)), mtabs, SLOT(detachTab(TabAbstract*,QByteArray)), Qt::QueuedConnection);
-                    connect(initTab, SIGNAL(newTab(TabAbstract*)), mtabs, SLOT(integrateTab(TabAbstract*)), Qt::QueuedConnection);
+                    // don't need that the integration is done automagically already
+                //    connect(initTab, SIGNAL(newTab(TabAbstract*)), mtabs, SLOT(integrateTab(TabAbstract*)), Qt::QueuedConnection);
 
                     emit addNewState(initTab);
                 }

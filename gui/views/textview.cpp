@@ -14,7 +14,6 @@ Released under AGPL see LICENSE for more information
 #include <QMimeData>
 #include <QScrollBar>
 #include <QDebug>
-#include <QFileDialog>
 #include <QTextCodec>
 #include <QMessageBox>
 #include <QTextDocumentFragment>
@@ -79,6 +78,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     ui->setupUi(this);
 
 #ifdef SCINTILLA
+    lexerCombobox = nullptr;
     scintEditor = new(std::nothrow) QsciScintilla();
     if (scintEditor == nullptr) {
         qFatal("Cannot allocate memory for QsciScintilla X{");
@@ -87,11 +87,11 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     scintEditor->installEventFilter(this);
     connect(scintEditor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
     connect(scintEditor,SIGNAL(selectionChanged()), this, SLOT(updateStats()));
-    scintEditor->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+    scintEditor->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     scintEditor->setReadOnly(byteSource->isReadonly());
     scintEditor->setWrapMode(QsciScintilla::WrapCharacter);
 
-    QComboBox * lexerCombobox = new(std::nothrow) QComboBox();
+    lexerCombobox = new(std::nothrow) QComboBox();
     if (lexerCombobox == nullptr) {
         qFatal("Cannot allocate memory for QComboBox X{");
     }
@@ -119,7 +119,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     plainTextEdit->installEventFilter(this);
     connect(plainTextEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
     connect(plainTextEdit,SIGNAL(selectionChanged()), &updateTimer, SLOT(start()));
-    plainTextEdit->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+    plainTextEdit->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     plainTextEdit->setReadOnly(byteSource->isReadonly());
     connect(plainTextEdit, SIGNAL(cursorPositionChanged()),&updateTimer, SLOT(start()));
 #endif
@@ -137,6 +137,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     ui->codecsComboBox->setMaximumWidth(200);
     ui->codecsComboBox->installEventFilter(guiHelper);
     connect(ui->codecsComboBox,SIGNAL(currentIndexChanged(QString)), this, SLOT(onCodecChange(QString)));
+    connect(guiHelper, SIGNAL(hexTableSizesUpdated()), this, SLOT(onFontUpdated()));
 
     onCodecChange(DEFAULT_CODEC);
     buildContextMenu();
@@ -338,6 +339,15 @@ void TextView::onSaveToFile(QAction * action)
         guiHelper->saveToFileAction(byteSource->getRawData(),this);
 }
 
+void TextView::onFontUpdated()
+{
+#ifdef SCINTILLA
+    scintEditor->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+#else
+    plainTextEdit->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+#endif
+}
+
 #ifdef SCINTILLA
 void TextView::onLexerChanged(int index)
 {
@@ -366,17 +376,61 @@ void TextView::onLexerChanged(int index)
 
     }
     if (newLexer != nullptr) {
-        newLexer->setDefaultFont(GuiStyles::GLOBAL_REGULAR_FONT);
+        newLexer->setDefaultFont(GlobalsValues::GLOBAL_REGULAR_FONT);
         newLexer->setDefaultColor(QApplication::palette().text().color());
     }
     scintEditor->setLexer(newLexer);
     delete prevLexer;
 
     if (newLexer == nullptr) {
-        scintEditor->setFont(GuiStyles::GLOBAL_REGULAR_FONT);
+        scintEditor->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     }
 }
+
+QString TextView::getCurrentSyntax()
+{
+    return lexerCombobox->currentText();
+}
+
+void TextView::setCurrentSyntax(QString syntaxName)
+{
+    int index = lexerCombobox->findText(syntaxName);
+    if (index > 0)
+        lexerCombobox->setCurrentIndex(index);
+}
+
 #endif
+
+QHash<QString, QString> TextView::getConfiguration()
+{
+    QHash<QString, QString> conf = SingleViewAbstract::getConfiguration();
+    conf.insert(GuiConst::STATE_ENCODING, ui->codecsComboBox->currentText());
+#ifdef SCINTILLA
+    conf.insert(GuiConst::STATE_SYNTAX, lexerCombobox->currentText());
+#endif
+    return conf;
+}
+
+void TextView::setConfiguration(QHash<QString, QString> conf)
+{
+    SingleViewAbstract::setConfiguration(conf);
+
+    if (conf.contains(GuiConst::STATE_ENCODING)) {
+        int index = ui->codecsComboBox->findText(conf.value(GuiConst::STATE_ENCODING));
+        if (index > 0) {
+            ui->codecsComboBox->setCurrentIndex(index);
+        }
+    }
+
+#ifdef SCINTILLA
+    if (conf.contains(GuiConst::STATE_SYNTAX)) {
+        int index = lexerCombobox->findText(conf.value(GuiConst::STATE_SYNTAX));
+        if (index > 0) {
+            lexerCombobox->setCurrentIndex(index);
+        }
+    }
+#endif
+}
 
 void TextView::updateImportExportMenu()
 {
@@ -621,11 +675,10 @@ void TextView::updateStats()
 
 bool TextView::eventFilter(QObject *obj, QEvent *event)
 {
-    QAbstractScrollArea * sa = nullptr;
 #ifdef SCINTILLA
-    sa = scintEditor;
+    QAbstractScrollArea * sa = scintEditor;
 #else
-    sa = plainTextEdit;
+    QAbstractScrollArea * sa = plainTextEdit;
 #endif
 
     if (obj == sa) {

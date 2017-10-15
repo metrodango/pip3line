@@ -186,8 +186,10 @@ void RandomAccessTab::fileLoadRequest()
 {
     QString fileName;
     if (bytesource->hasCapability(ByteSourceAbstract::CAP_LOADFILE)) {
-        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"));
+        fileName = QFileDialog::getOpenFileName(this,tr("Choose file to load from"), GuiConst::GLOBAL_LAST_PATH);
         if (!fileName.isEmpty()) {
+            QFileInfo fi(fileName);
+            GuiConst::GLOBAL_LAST_PATH = fi.absoluteFilePath();
             bytesource->fromLocalFile(fileName);
             integrateByteSource();
         }
