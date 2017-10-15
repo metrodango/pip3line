@@ -7,6 +7,7 @@
  * OpenSSL development libraries and headers (optional)
  * Python 2.7 or 3 (or both) dev environment (optional)
  * Distorm development libraries and headers (optional)
+ * QScintilla development libraries and headers (optional)
 
 Qt4 is not supported anymore, too many changes have occurred , and Pip3line is now using Qt5 new APIs.
 
@@ -19,7 +20,7 @@ See http://www.cmake.org/
 
 > -DALL=ON
 
-Configure and compile everything.
+Configure and compile everything, apart from the Scintilla support (has to be added separately).
 In this configuration non-basic modules can be deactivated individually by setting them to OFF
 
 > -DBASIC=ON
@@ -78,14 +79,18 @@ git
 libssl-dev
 libdistorm3-dev
 
+and the QScintilla library for Qt5
+
 ## Windows specific
 Brace yourself, the build process on a Windows platform can be quite tricky.
 
-First, use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment. Additionaly this guide only covers building with Visual Studio (2013 and onwards)
+First make sure that the VisualStudio environment is configured properly, some breakage in the VS installation may prevent the compilation to even start (i.e. "cl binary is not able to compile a simple source file")
+
+Use the preconfigured Qt command lines shortcuts to start with a proper pre-configured environment. Additionaly this guide only covers building with Visual Studio (2015 and should work on 2017 as well)
 
 On windows you need to specify the nmake generator for CMake.
 
-You also have to run the script vsvars.bat located in the Visual Studio directory first.
+You also have to run the script vcvarsall.bat located in the Visual Studio directory first.
 
 For an x64 compilation with VS 2015:
 
@@ -130,7 +135,7 @@ Just make sure to set up the CMAKE_PREFIX_PATH to the Qt base dir. For a default
 
 for example
 
-> export CMAKE_PREFIX_PATH=/Users/user1/Qt/5.6/clang_64/
+> export CMAKE_PREFIX_PATH=/Users/user1/Qt/5.9.2/clang_64/
 
 Then the rest is exactly the same as on Linux platform. 
 
@@ -145,6 +150,7 @@ The **OpenSSL plugin** has been disabled on this platform though.
 Defaults path for the libraries and headers have been hardcoded in the cmake configuration file on Windows  for easier use. (i.e. C:\OpenSSL-Win32 and C:\OpenSSL-Win64)
 
 Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes can replace the most common hashes offered by OpenSSL.
+As cited earlier the OpenSSL plugin has been disabled on MacOS for various build issues reasons.
 
 ## Python27 and Python3 plugins
 
@@ -152,7 +158,7 @@ Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes
 
 The cmake configuration does not check for the presence of the different libraries files needed, as it  get confused when there is a dual installation  (Python 2.7 and Python 3.x).
 
-Defaults libraries path locations are hardcoded to make things easier for the default installation environment on Windows (i.e. C:\Python27\ and C:\Python34\).
+Defaults libraries path locations are hardcoded to make things easier for the default installation environment on Windows (i.e. C:\Python27\ and C:\Program Files\Python36\).
 
 Alternatively one can specify the path by adding the following options for cmake:
 
@@ -180,3 +186,11 @@ Distorm can be found on GitHub and it is recommended to use the latest git versi
 git clone https://github.com/gdabah/distorm.git
 
 It is relatively easy to compile (compare to OpenSSL for instance), even on Windows platforms (hint: Have a look into the 'make' directory)
+
+## Using QScintilla for text highlights
+
+> -DWITH_SCINTILLA=ON
+
+Some defaults libraries path have been hard-coded, on the basis that the QScintilla source tree is at the same level as the Pip3line source directory.
+
+QScintilla can be found here https://www.riverbankcomputing.com/software/qscintilla/intro. Use the latest released version.
