@@ -877,7 +877,7 @@ void GuiHelper::calculatingHexTableSizes()
 {
     QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
     GlobalsValues::HEXCOLUMNWIDTH = calculateStringWidthWithGlobalFont(" FF ");
-    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFF");
+    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFF ");
 #if QT_VERSION >= 0x050800
     GlobalsValues::ROWSHEIGHT = qMax(fm.height(), fm.capHeight()) + 2; // random value for some "special" cases
 #else
