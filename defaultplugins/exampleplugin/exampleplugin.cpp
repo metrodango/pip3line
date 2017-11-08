@@ -68,11 +68,11 @@ const QStringList ExamplePlugin::getTransformList(QString typeName)
 QWidget *ExamplePlugin::getConfGui(QWidget * /* parent */)
 {
     // You can return a gui QWidget oject to manage your plugin via the gui
-    // Return 0 otherwise
+    // Return nullptr otherwise
     // you don't have to delete your object, the main program will take care of this.
     // or you can delete it yourself, whatever suits you, it should be guaranted
     // to work in both cases due to Qt magic
-    return 0;
+    return nullptr;
 }
 
 // This function returns a list of transformation types name used by this plugin
@@ -110,13 +110,4 @@ QString ExamplePlugin::compiledWithQTversion() const
 {
     return QT_VERSION_STR;
 }
-
-// this line is important if you are using QT < 5, if you forget it the main programme will not be able to recognize your plugin
-// Q_EXPORT_PLUGIN2(s1,s2)
-// s1 = name of the plugin (which is going to be the name of the library file), or TARGET in your .pro file
-// s2 = name of the actual plugin class
-//
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(exampleplugin, ExamplePlugin)
-#endif
 

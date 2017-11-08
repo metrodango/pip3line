@@ -16,6 +16,8 @@ class ImportExportDialog : public QDialog
         ~ImportExportDialog();
         QString getFileName() const;
         GuiConst::FileFormat getFormat() const;
+        bool isPlainBase64() const;
+        bool isPlainFile() const;
         bool getSelectionOnly() const;
         bool getEnableCompression() const;
         bool opGuiConfSelected();
@@ -25,6 +27,9 @@ class ImportExportDialog : public QDialog
         void onAccept();
         void onOpTypeToggled(bool enable);
         void onPcapToggled(bool enable);
+        void onPlainToggled(bool enable);
+        void onXmlorJsonToggled(bool enable);
+        void onToClipboardToggled(bool enable);
     private:
         Ui::ImportExportDialog *ui;
         GuiConst::FileOperations type;

@@ -10,9 +10,7 @@ Released under AGPL see LICENSE for more information
 
 #include "largefile.h"
 #include "filewidget.h"
-#if QT_VERSION >= 0x050000
 #include <QtConcurrent>
-#endif
 #include <QtConcurrentRun>
 #include <QDebug>
 #include <string.h>

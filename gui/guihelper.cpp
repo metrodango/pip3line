@@ -253,7 +253,8 @@ void GuiHelper::buildTransformComboBox(QComboBox *box, const QString &defaultSel
         QStringList list = transformFactory->getTransformsList(typesList.at(i));
         if (list.isEmpty())
             continue;
-        qSort(list);
+
+        list.sort();
         tempLabel = typesList.at(i);
         row = box->model()->rowCount();
         box->addItem(tempLabel);
@@ -409,7 +410,7 @@ void GuiHelper::saveImportExportFunctions()
 QStringList GuiHelper::getImportExportFunctions()
 {
     QStringList list = importExportFunctions.keys();
-    qSort(list);
+    list.sort();
     return list;
 }
 

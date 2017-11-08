@@ -652,7 +652,7 @@ QJsonObject HexView::createFuzzingTemplate(ByteSourceAbstract *bs)
             QJsonArray injectionPoints;
             for (int i = 0 ; i < brl->size(); i++) {
                 QJsonObject injp;
-                BytesRange *br = brl->at(i);
+                QSharedPointer<BytesRange> br = brl->at(i);
                 injp.insert(GuiConst::STATE_TYPE, br->getDescription());
                 injp.insert(GuiConst::START_STR,QJsonValue((qint64)br->getLowerVal())); // size should be reasonable, so it should not matter
                 injp.insert(GuiConst::STATE_SIZE, QJsonValue((qint64)br->getSize()));

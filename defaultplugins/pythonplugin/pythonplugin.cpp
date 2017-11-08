@@ -113,10 +113,3 @@ QString PythonPlugin::pluginVersion() const
 {
     return VERSION_STRING;
 }
-
-
-QT_BEGIN_NAMESPACE
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(pythonplugin, PythonPlugin)
-#endif
-QT_END_NAMESPACE

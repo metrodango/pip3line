@@ -109,8 +109,6 @@ TransformAbstract *BasePlugins::getTransform(QString name)
         return getTransformFromFile(":/harcoded/composedxml/hexanumber.xml");
     } else
 
-#if QT_VERSION >= 0x050000
-
     if (Sha224::id == name) {
         ta = new(std::nothrow) Sha224();
         if (ta == nullptr) {
@@ -132,8 +130,6 @@ TransformAbstract *BasePlugins::getTransform(QString name)
             qFatal("Cannot allocate memory for Sha512 X{");
         }
     } else
-
-#endif
 
 #if QT_VERSION >= 0x050100
         if (Sha3_224::id == name) {
@@ -498,9 +494,3 @@ TransformAbstract *BasePlugins::getTransformFromFile(QString resFile)
     }
     return nullptr;
 }
-
-QT_BEGIN_NAMESPACE
-#if QT_VERSION < 0x050000
-Q_EXPORT_PLUGIN2(baseplugins, BasePlugins)
-#endif
-QT_END_NAMESPACE

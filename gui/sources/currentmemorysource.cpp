@@ -146,6 +146,16 @@ void MemRange::setCopy(bool value)
 }
 #endif
 
+bool MemRange::lessThanFunc(QSharedPointer<MemRange> or1, QSharedPointer<MemRange> or2)
+{ // "overall" less than
+    MemRange * br1 = or1.data();
+    MemRange * br2 = or2.data();
+    if (br1->lowerVal == br2->lowerVal) { // in case both begins the same
+        return br1->upperVal < br2->upperVal; // we compare the upper limit
+    }
+    return br1->lowerVal < br2->lowerVal;
+}
+
 
 const QFont MemRangeModel::RegularFont = QFont("Courier New",10,2);
 const QStringList MemRangeModel::headers = QStringList() << "Start" << "End" << "Permissions" << "Size" << "Description" ;
@@ -161,7 +171,7 @@ MemRangeModel::~MemRangeModel()
     clear();
 }
 
-QList<MemRange *> MemRangeModel::getList()
+QList<QSharedPointer<MemRange> > MemRangeModel::getList()
 {
     return ranges;
 }
@@ -170,30 +180,34 @@ bool MemRangeModel::isOffsetInRange(quint64 offset)
 {
     bool valid = false;
     for (int i = 0; i < ranges.size(); i++) {
-        if (ranges.at(i)->isInRange(offset)) {
+        QSharedPointer<MemRange> r = ranges.at(i);
+        if (r->isInRange(offset)) {
             valid = true;
             break;
         }
     }
     return valid ;
 }
-MemRange *MemRangeModel::getRange(const QModelIndex &index)
+QSharedPointer<MemRange> MemRangeModel::getRange(const QModelIndex &index)
 {
+    QSharedPointer<MemRange> ret;
     int i = index.row();
     if (i < ranges.size()) {
-        return ranges.at(i);
+        ret = ranges.at(i);
     }
-    return nullptr;
+    return ret;
 }
 
-MemRange *MemRangeModel::getRange(quint64 offset)
+QSharedPointer<MemRange> MemRangeModel::getRange(quint64 offset)
 {
+    QSharedPointer<MemRange> ret;
     for (int i = 0; i < ranges.size(); i++) {
         if (ranges.at(i)->isInRange(offset)) {
-            return ranges.at(i);
+            ret = ranges.at(i);
+            break;
         }
     }
-    return nullptr;
+    return ret;
 }
 
 void MemRangeModel::setCurrentMem(const QModelIndex &index)
@@ -275,23 +289,23 @@ void MemRangeModel::clear()
 {
     beginResetModel();
     while (!ranges.isEmpty()) {
-        delete ranges.takeLast();
+        ranges.takeLast().clear();
     }
     endResetModel();
 }
 
-void MemRangeModel::addRange(MemRange *range)
+void MemRangeModel::addRange(QSharedPointer<MemRange> range)
 {
     if (ranges.contains(range)) {
         return; // nothing to do here
     }
     beginInsertRows(QModelIndex(),ranges.size(),ranges.size());
     ranges.append(range);
-    qSort(ranges.begin(),ranges.end(), BytesRange::lessThanFunc);
+    std::sort(ranges.begin(),ranges.end(), MemRange::lessThanFunc);
     endInsertRows();
 }
 
-void MemRangeModel::setCurrentRange(MemRange *range)
+void MemRangeModel::setCurrentRange(QSharedPointer<MemRange> range)
 {
     currentMemRow = ranges.indexOf(range);
     emit dataChanged ( createIndex(currentMemRow,0), createIndex(currentMemRow,3));
@@ -303,7 +317,7 @@ CurrentMemorysource::CurrentMemorysource(QObject *parent) :
     _readonly = true;
     _name = tr("Current process memory");
     capabilities = CAP_HISTORY;
-    currentRange = nullptr;
+    currentRange.clear();
     rangesModel = new(std::nothrow) MemRangeModel(this);
     if (rangesModel == nullptr) {
         qFatal("Cannot allocate memory for MemRangeModel X{");
@@ -377,7 +391,9 @@ void CurrentMemorysource::mapMemory()
         if (entries.size() > 6) {
 
             QList<QByteArray> range = entries.at(0).split('-');
-            MemRange *memrange = new(std::nothrow) MemRange(range.at(0).toULongLong(0,16),range.at(1).toULongLong(0,16) - 1,QString::fromUtf8(entries.last()));
+            QSharedPointer<MemRange> memrange(new(std::nothrow) MemRange(range.at(0).toULongLong(0,16),
+                                                                         range.at(1).toULongLong(0,16) - 1,
+                                                                         QString::fromUtf8(entries.last())));
             if (memrange == nullptr) {
                 qFatal("Cannot allocate memory for MemRange X{");
             }
@@ -411,9 +427,9 @@ void CurrentMemorysource::mapMemory()
         lastBase = (ULONG_PTR) memMeminfo.BaseAddress;
 
         if(memMeminfo.State == MEM_COMMIT) {
-            MemRange *memrange = new(std::nothrow) MemRange((quint64)memMeminfo.BaseAddress,
+            QSharedPointer<MemRange> memrange = QSharedPointer<MemRange>(new(std::nothrow) MemRange((quint64)memMeminfo.BaseAddress,
                                                             (quint64)(memMeminfo.BaseAddress + memMeminfo.RegionSize - 1)
-                                                            );
+                                                            ));
             switch (memMeminfo.AllocationProtect)
             {
                 case PAGE_EXECUTE:
@@ -472,8 +488,8 @@ void CurrentMemorysource::mapMemory()
 
 quint64 CurrentMemorysource::lowByte()
 {
-    MemRange * range = rangesModel->getRange(currentStartingOffset);
-    if (range != nullptr)
+    QSharedPointer<MemRange> range(rangesModel->getRange(currentStartingOffset));
+    if (!range.isNull())
         return range->getLowerVal();
 
     emit log(tr("The current starting offset was not found in any registered memory range T_T"),metaObject()->className(), Pip3lineConst::LERROR);
@@ -482,8 +498,8 @@ quint64 CurrentMemorysource::lowByte()
 
 quint64 CurrentMemorysource::highByte()
 {
-    MemRange * range = rangesModel->getRange(currentStartingOffset);
-    if (range != nullptr)
+    QSharedPointer<MemRange> range(rangesModel->getRange(currentStartingOffset));
+    if (!range.isNull())
         return range->getUpperVal();
 
     emit log(tr("The current starting offset was not found in any registered memory range T_T"),metaObject()->className(), Pip3lineConst::LERROR);
@@ -553,7 +569,7 @@ void CurrentMemorysource::fromLocalFile(QString )
 bool CurrentMemorysource::setStartingOffset(quint64 offset)
 {
     bool found = false;
-    QList<MemRange *> ranges = rangesModel->getList();
+    QList<QSharedPointer<MemRange> > ranges = rangesModel->getList();
     for (int i = 0; i < ranges.size(); i++) {
         if (ranges.at(i)->isInRange(offset)) {
             found = true;
@@ -590,7 +606,7 @@ bool CurrentMemorysource::setStartingOffset(quint64 offset)
 
 bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
 {
-    QList<MemRange *> ranges = rangesModel->getList();
+    QList<QSharedPointer<MemRange> > ranges = rangesModel->getList();
     // qDebug() << "read current memory data" << QString::number(offset,16).prepend("0x") << size;
     if (size < 0 || ranges.size() < 1) { // trivial
         return false;
@@ -601,7 +617,7 @@ bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
     }
 
 
-    MemRange * curRange = nullptr;
+    QSharedPointer<MemRange> curRange;
     bool valid = false;
     for (int i = 0; i < ranges.size(); i++) {
         curRange = ranges.at(i);
@@ -662,9 +678,9 @@ bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
 
 bool CurrentMemorysource::writeData(quint64 offset, int length,  const QByteArray &data, quintptr source)
 {
-    QList<MemRange *> ranges = rangesModel->getList();
+    QList<QSharedPointer<MemRange> > ranges = rangesModel->getList();
     bool valid = false;
-    MemRange * curRange = nullptr;
+    QSharedPointer<MemRange> curRange;
     if (length < 0 || ranges.size() < 1)
         return valid;
 

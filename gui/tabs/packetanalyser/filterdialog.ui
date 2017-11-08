@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>568</height>
+    <width>863</width>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,81 +46,37 @@
        <number>0</number>
       </property>
       <item>
+       <widget class="QWidget" name="exprWidget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="exprLabel">
+           <property name="text">
+            <string>Expr</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="booleanExprLineEdit">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Boolean expression using the defined filters as operands.&lt;/p&gt;&lt;p&gt;Parenthesis allowed : (  )&lt;/p&gt;&lt;p&gt;Allowed boolean operators: AND, OR, XOR, NOT&lt;/p&gt;&lt;p&gt;NOT operator has precedence over the binary ones.&lt;/p&gt;&lt;p&gt;Binary operators are evaluated in order of appearance. In doubt use parenthesis.&lt;/p&gt;&lt;p&gt;If no expression is provided, the result is produced by using a simple AND evaluation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="placeholderText">
+            <string>boolean expression here (or not)</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QSplitter" name="splitter">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <widget class="QListWidget" name="filtersListWidget"/>
-        <widget class="QWidget" name="widget" native="true">
-         <layout class="QFormLayout" name="formLayout">
-          <item row="1" column="1">
-           <widget class="QLabel" name="filterNameLabel">
-            <property name="text">
-             <string>Filter Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="filterNameLineEdit"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="filterLabel">
-            <property name="text">
-             <string>Filter Value</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="filterLineEdit"/>
-          </item>
-          <item row="6" column="0" colspan="2">
-           <widget class="QLabel" name="startingOffsetLabel">
-            <property name="text">
-             <string>Starting Offset</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QLineEdit" name="startOffsetLineEdit"/>
-          </item>
-          <item row="10" column="1">
-           <widget class="QCheckBox" name="reverseCheckBox">
-            <property name="text">
-             <string>Reverse Selection</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QGroupBox" name="FilterGroupBox">
-            <property name="title">
-             <string>Filter type</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="QRadioButton" name="hexaRadioButton">
-               <property name="text">
-                <string>He&amp;xadecimal (Use */x/X for wildcards)</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="utf8RadioButton">
-               <property name="text">
-                <string>UTF-&amp;8</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="utf16RadioButton">
-               <property name="text">
-                <string>UTF-&amp;16</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="0" column="1">
+        <widget class="QWidget" name="filtersWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
            <widget class="QWidget" name="actionButtonWidget" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
@@ -159,7 +115,7 @@
              <item>
               <widget class="QPushButton" name="applyPushButton">
                <property name="text">
-                <string>apply</string>
+                <string>update</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -202,6 +158,279 @@
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QLabel" name="filterNameLabel">
+            <property name="text">
+             <string>Filter Name</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="filterNameLineEdit"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="reverseCheckBox">
+            <property name="text">
+             <string>Reverse Selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="columnLabel">
+            <property name="text">
+             <string>Target column</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="columnComboBox"/>
+          </item>
+          <item>
+           <widget class="QStackedWidget" name="stackedWidget">
+            <property name="currentIndex">
+             <number>3</number>
+            </property>
+            <widget class="QWidget" name="directionPage">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLabel" name="directionLabel">
+                <property name="text">
+                 <string>Direction</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="directionComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="timestampPage">
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <widget class="QCheckBox" name="afterCheckBox">
+                <property name="text">
+                 <string>Only after</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateTimeEdit" name="afterDateTimeEdit">
+                <property name="calendarPopup">
+                 <bool>true</bool>
+                </property>
+                <property name="timeSpec">
+                 <enum>Qt::TimeZone</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="beforeCheckBox">
+                <property name="text">
+                 <string>Not before</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDateTimeEdit" name="beforeDateTimeEdit">
+                <property name="calendarPopup">
+                 <bool>true</bool>
+                </property>
+                <property name="timeSpec">
+                 <enum>Qt::TimeZone</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="dataPage">
+             <layout class="QFormLayout" name="formLayout">
+              <item row="0" column="0">
+               <widget class="QLabel" name="filterLabel">
+                <property name="text">
+                 <string>Search for</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="filterLineEdit"/>
+              </item>
+              <item row="1" column="1">
+               <widget class="QGroupBox" name="FilterGroupBox">
+                <property name="title">
+                 <string>Filter type</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <item>
+                  <widget class="QRadioButton" name="hexaRadioButton">
+                   <property name="text">
+                    <string>He&amp;xadecimal (Use */x/X for wildcards)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="utf8RadioButton">
+                   <property name="text">
+                    <string>UTF-&amp;8</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="utf16RadioButton">
+                   <property name="text">
+                    <string>UTF-&amp;16</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="startOffsetLineEdit"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="startingOffsetLabel">
+                <property name="text">
+                 <string>Starting Offset</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="lengthPage">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLabel" name="packetLengthLabel">
+                <property name="text">
+                 <string>Packet length</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="lengthOpComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="lengthSpinBox">
+                <property name="maximum">
+                 <number>100000000</number>
+                </property>
+                <property name="singleStep">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="cidPage">
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QLabel" name="cidLabel">
+                <property name="text">
+                 <string>CIDs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cidLineEdit">
+                <property name="placeholderText">
+                 <string>CID numbers, separated by commas</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="textPage">
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QLabel" name="regexpLabel">
+                <property name="text">
+                 <string>Regular Expression</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="regexpLineEdit"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="regexpTypeLabel">
+                <property name="text">
+                 <string>type</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="regexpTypeComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="caseSensitiveCheckBox">
+                <property name="text">
+                 <string>Case sensitive</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>
@@ -210,13 +439,35 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
-     </property>
+    <widget class="QWidget" name="bottomWidget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="errorLabel">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="closePushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Close</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
@@ -224,38 +475,5 @@
  <resources>
   <include location="../../gui_res.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>FilterDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>FilterDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -84,11 +84,8 @@ ConnectionsWidget::ConnectionsWidget(BlocksSource * source, QWidget *parent) :
 {
     ui->setupUi(this);
     QHeaderView * hHeaders = ui->connectionTableView->horizontalHeader();
-#if QT_VERSION >= 0x050000
     hHeaders->setSectionResizeMode(QHeaderView::ResizeToContents);
-#else
-    hHeaders->setResizeMode(QHeaderView::ResizeToContents);
-#endif
+
     hHeaders->setStretchLastSection(true);
 
     ui->connectionTableView->verticalHeader()->hide();

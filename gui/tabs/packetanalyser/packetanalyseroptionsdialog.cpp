@@ -16,7 +16,7 @@
 const QStringList ColumnModel::colNames =  QStringList () << "Name"
                                         << "Hidden"
                                         << "Equality"
-                                        << "   ";
+                                        << "DEL";
 
 ColumnModel::ColumnModel(GuiHelper *guiHelper,
                          PacketModelAbstract *mainModel,
@@ -120,8 +120,12 @@ Qt::ItemFlags ColumnModel::flags(const QModelIndex &index) const
 
 int ColumnModel::getDefaultColumnwidth(int column)
 {
-    if (column >= 0 && column < colNames.size())
-        return GuiConst::calculateStringWidthWithGlobalFont(colNames.at(column));
+    if (column >= 0 && column < colNames.size()) {
+        QString columnName = colNames.at(column);
+        columnName.append("  "); // cosmetics
+
+        return GuiConst::calculateStringWidthWithGlobalFont(columnName);
+    }
 
     return 0;
 }

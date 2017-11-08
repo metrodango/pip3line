@@ -28,15 +28,10 @@ Released under AGPL see LICENSE for more information
 FILE * _logFile = nullptr; // logFile
 MainWindow * w = nullptr;
 
-#if QT_VERSION >= 0x050000
 void myMessageOutput(QtMsgType type, const QMessageLogContext &, const QString &msg)
 {
     QByteArray fmess = msg.toUtf8();
     const char *localMsg = fmess.constData();
-#else
-void myMessageOutput(QtMsgType type, const char *localMsg)
-{
-#endif
     QByteArray ftime = QDateTime::currentDateTime().toString(Qt::ISODate).toUtf8();
     const char * currentTime = ftime.constData();
 
@@ -108,11 +103,11 @@ int main(int argc, char *argv[])
 
     QStringList pathlist = QCoreApplication::libraryPaths();
     qDebug() << pathlist;
-#if QT_VERSION >= 0x050000
+
     // Fixing the qt5 plugin mess
     pathlist << ".";
     QCoreApplication::setLibraryPaths(pathlist);
-#endif
+
 
     // Creating the QT log file
 
@@ -143,16 +138,10 @@ int main(int argc, char *argv[])
             qWarning("Cannot open log file for writing");
 #endif
         } else {
-#if QT_VERSION >= 0x050000
             qInstallMessageHandler(myMessageOutput);
-#else
-            qInstallMsgHandler(myMessageOutput);
-#endif
         }
     }
 
-
-#if QT_VERSION >= 0x050000
     // forcing style for Qt5. can be overwritten at runtime
     // with the option -style [style name]
     // An indicative list of available themes is given in the Help->info dialog
@@ -164,8 +153,6 @@ int main(int argc, char *argv[])
         QApplication::setStyle("WindowsVista");
     else if (stylelist.contains("WindowsXP"))
         QApplication::setStyle("WindowsXP");
-#endif
-
 #endif
 
  //   a.setStyleSheet("QWidget{ selection-background-color: blue}");

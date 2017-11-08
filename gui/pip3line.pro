@@ -155,7 +155,8 @@ SOURCES += main.cpp\
     tabs/packetanalyser/socksorchestrator.cpp \
     tabs/packetanalyser/filterdialog.cpp \
     tabs/packetanalyser/filteritem.cpp \
-    shared/transformguibutton.cpp
+    shared/transformguibutton.cpp \
+    tabs/packetanalyser/filterengine.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -266,7 +267,8 @@ HEADERS  += mainwindow.h \
     tabs/packetanalyser/socksorchestrator.h \
     tabs/packetanalyser/filterdialog.h \
     tabs/packetanalyser/filteritem.h \
-    shared/transformguibutton.h
+    shared/transformguibutton.h \
+    tabs/packetanalyser/filterengine.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \

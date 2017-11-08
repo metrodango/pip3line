@@ -107,7 +107,7 @@ endif()
 	target_link_libraries ( python3plugin ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
 
 	IF(UNIX)
-		install (TARGETS python3plugin DESTINATION share/pip3line/
+		install (TARGETS python3plugin DESTINATION lib/pip3line/
 			PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 			GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 	ENDIF(UNIX)

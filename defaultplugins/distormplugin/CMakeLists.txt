@@ -91,7 +91,7 @@ endif(WITH_QT5)
 target_link_libraries ( distormplugin  ${EXTERN_LIBS} )
 
 IF(UNIX)
-	install (TARGETS distormplugin DESTINATION share/pip3line/
+	install (TARGETS distormplugin DESTINATION lib/pip3line/
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 		GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
 ENDIF(UNIX)

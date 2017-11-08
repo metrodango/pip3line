@@ -81,14 +81,14 @@ class PacketAnalyserTab : public TabAbstract
         void addViewTab(TabAbstract::ViewTab data);
         void onDeleteTab(int index);
         void onScrollBarChanged(int min, int max);
-        void onCurrentPacketUpdated(quintptr source);
+        void onByteSourceUpdated(quintptr source);
         void setTrackingLast(bool value);
         void onSendToTriggered(QAction* action);
         void onClearListClicked();
         void onCopyAs(QAction* action);
         void setIntercepting(bool value);
         void setForwarding(bool value);
-        void onMergeRequested();
+        void onAutoMergeRequested();
         void onInboundTransformRequested();
         void onOutboundTransformRequested();
         void onSaveLoadFinished();
@@ -98,6 +98,7 @@ class PacketAnalyserTab : public TabAbstract
         void onDeleteColumn();
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
         void onFontUpdated();
+
     private:
         void selectLastPacket();
         void checkIfOriginalTabNeeded();

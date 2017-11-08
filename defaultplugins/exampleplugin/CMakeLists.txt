@@ -59,7 +59,7 @@ endif(WITH_QT5)
 target_link_libraries ( exampleplugin ${EXTERN_LIB} )
 
 IF(UNIX)
-	install (TARGETS exampleplugin DESTINATION share/pip3line/
+	install (TARGETS exampleplugin DESTINATION lib/pip3line/
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 		GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 ENDIF(UNIX)

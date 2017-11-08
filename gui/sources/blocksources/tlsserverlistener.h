@@ -19,17 +19,10 @@ class BaseTcpServer : public QTcpServer
     public:
         explicit BaseTcpServer(QObject *parent = 0);
         ~BaseTcpServer();
-#if QT_VERSION >= 0x050000
     signals:
         void newClient(qintptr socketDescriptor);
     private slots:
         void incomingConnection(qintptr socketDescriptor);
-#else
-    signals:
-        void newClient(int socketDescriptor);
-    private slots:
-        void incomingConnection(int socketDescriptor);
-#endif
 };
 
 
@@ -55,11 +48,7 @@ class TLSServerListener : public IPBlocksSources
         void newConnectionData(int sourceId, ConnectionDetails cd);
     private slots:
         void dataReceived();
-#if QT_VERSION >= 0x050000
         void handlingClient(qintptr socketDescriptor);
-#else
-        void handlingClient(int socketDescriptor);
-#endif
         void onSslErrors(const QList<QSslError> & errors);
         void onError(QAbstractSocket::SocketError error);
         void onSSLModeChange(QSslSocket::SslMode mode);

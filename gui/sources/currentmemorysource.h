@@ -38,6 +38,7 @@ class MemRange : public BytesRange {
         void setCopy(bool value);
 #endif
         bool operator<(const MemRange& other) const;
+        static bool lessThanFunc(QSharedPointer<MemRange> or1, QSharedPointer<MemRange> or2);
     private:
         bool read;
         bool write;
@@ -54,10 +55,10 @@ class MemRangeModel : public QAbstractListModel
     public:
         explicit MemRangeModel(QObject * parent = 0);
         ~MemRangeModel();
-        QList<MemRange *> getList();
+        QList<QSharedPointer<MemRange> > getList();
         bool isOffsetInRange(quint64 offset);
-        MemRange * getRange(quint64 offset);
-        MemRange * getRange(const QModelIndex &index);
+        QSharedPointer<MemRange> getRange(quint64 offset);
+        QSharedPointer<MemRange> getRange(const QModelIndex &index);
         void setCurrentMem(const QModelIndex & parent = QModelIndex());
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -65,8 +66,8 @@ class MemRangeModel : public QAbstractListModel
         QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
     public slots:
         void clear();
-        void addRange(MemRange *range);
-        void setCurrentRange(MemRange *range);
+        void addRange(QSharedPointer<MemRange> range);
+        void setCurrentRange(QSharedPointer<MemRange> range);
     private:
         enum COLUMN { START_OFFSET = 0,
                       END_OFFSET = 1,
@@ -74,7 +75,7 @@ class MemRangeModel : public QAbstractListModel
                       SIZE = 3,
                       DESCRIPTION = 4}; // don't change the numbering, it is in sync with the QStringlist
         static const QFont RegularFont;
-        QList<MemRange *> ranges;
+        QList<QSharedPointer<MemRange> > ranges;
         int currentMemRow;
         static const QStringList headers;
 };
@@ -86,7 +87,7 @@ class MemSearch : public SearchAbstract {
         ~MemSearch();
     private:
         void internalStart();
-        QList<MemRange *> ranges;
+        QList<QSharedPointer<MemRange> > ranges;
 };
 
 class CurrentMemorysource : public LargeRandomAccessSource
@@ -117,7 +118,7 @@ class CurrentMemorysource : public LargeRandomAccessSource
         bool writeData(quint64 offset, int length, const QByteArray &data, quintptr source);
         MemRangeModel *rangesModel;
         QString errorString(int errnoVal);
-        MemRange *currentRange;
+        QSharedPointer<MemRange> currentRange;
 };
 
 #endif // CURRENTMEMORYSOURCE_H

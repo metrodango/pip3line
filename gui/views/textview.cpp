@@ -129,7 +129,8 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     connect(byteSource, SIGNAL(readOnlyChanged(bool)), this, SLOT(onReadOnlyChanged(bool)));
 
     QList<QByteArray> codecs =  QTextCodec::availableCodecs();
-    qSort(codecs);
+    std::sort(codecs.begin(),codecs.end());
+
     for (int i = 0; i < codecs.size(); i++) {
         ui->codecsComboBox->addItem(QString(codecs.at(i)),QVariant(codecs.at(i)));
     }
@@ -578,10 +579,14 @@ void TextView::updateText(quintptr source)
         } else {
             qCritical() << tr("%1:updatedText() currentCodec is nullptr T_T").arg(metaObject()->className());
         }
+
+        if (autoCopyToClipboard)
+            copyToClipboard();
+    } else {
+        scintEditor->setText(QString());
+        updateStats();
     }
 
-    if (autoCopyToClipboard)
-        copyToClipboard();
     scintEditor->blockSignals(false);
 #else
     plainTextEdit->blockSignals(true);
@@ -664,7 +669,7 @@ void TextView::updateStats()
     ret.append(QString::number(plainText.size())).append(tr(" characters"));
     if (selectedSize > 0)
         ret.append(tr(" (%1 selected) |").arg(selectedSize));
-    ret.append(tr(" Lines: ")).append(QString::number(plainText.count("\n") + 1));
+    ret.append(tr(" Lines: ")).append((plainText.size() > 0 ? QString::number(plainText.count("\n") + 1) : QString::number(0)));
 
     if (currentLine > 0)
         ret.append(tr("| Line: %1 Col:%2").arg(currentLine).arg(currentcolumn));

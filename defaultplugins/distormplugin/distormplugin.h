@@ -17,9 +17,8 @@ Released under AGPL see LICENSE for more information
 class DISTORMSHARED_EXPORT DistormPlugin : public QObject, public TransformFactoryPluginInterface
 {
         Q_OBJECT
-#if QT_VERSION >= 0x050000
+
         Q_PLUGIN_METADATA(IID pluginIID FILE "distormplugin.json")
-#endif
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
         DistormPlugin();

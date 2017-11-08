@@ -63,9 +63,18 @@ set ( EXTERN_LIBS transform )
 
 if (WITH_SCINTILLA)
 	if ((WIN32) OR (APPLE))
-            set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
+        set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
 	else()
-	    set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2)
+        find_program(LSB_RELEASE lsb_release)
+        execute_process(COMMAND ${LSB_RELEASE} -is
+            OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        if (LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu")
+            set ( EXTERN_LIBS ${EXTERN_LIBS} qt5scintilla2)
+        else ()
+            set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2)
+        endif()
 	endif()
 endif(WITH_SCINTILLA)
 
@@ -159,6 +168,7 @@ set ( pip3line_HDRS
 	tabs/packetanalyser/socksorchestrator.h
 	tabs/packetanalyser/filterdialog.h
 	tabs/packetanalyser/filteritem.h
+	tabs/packetanalyser/filterengine.h
 	shared/offsetgotowidget.h
 	shared/searchwidget.h
 	shared/readonlybutton.h
@@ -275,6 +285,7 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/socksorchestrator.cpp
 	tabs/packetanalyser/filterdialog.cpp
 	tabs/packetanalyser/filteritem.cpp
+	tabs/packetanalyser/filterengine.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp

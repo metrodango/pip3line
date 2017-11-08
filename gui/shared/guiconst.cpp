@@ -99,7 +99,7 @@ namespace GuiConst
     const QString STATE_PRETAB_TYPE = "PreTab";
     const QString STATE_NAME = "Name";
     const QString STATE_READONLY = "Readonly";
-    const QString STATE__MARKINGS = "Markings";
+    const QString STATE_MARKINGS = "Markings";
     const QString STATE_USERMARKINGS = "UserMarkings";
     const QString STATE_MARKING = "Marking";
     const QString STATE_HEX_HISTORY = "HexHistory";
@@ -166,9 +166,18 @@ namespace GuiConst
     const QString STATE_FILTER_SORT = "FilterSortInfo";
     const QString STATE_FILTER_ITEMS = "FilterItems";
     const QString STATE_FILTER_ITEM = "FilterItem";
+    const QString STATE_FILTER_EXPR = "FilterExpr";
+    const QString STATE_FILTER_ID = "FitlerId";
     const QString STATE_OFFSET = "Offset";
     const QString STATE_REVERSE_SELECTION = "ReverseSelection";
     const QString STATE_MASK = "Mask";
+    const QString STATE_AFTER = "After";
+    const QString STATE_BEFORE = "Before";
+    const QString STATE_TIMEZONE = "TimeZone";
+    const QString STATE_REGEXP_PATTERN = "RegExpPattern";
+    const QString STATE_REGEXP_CASE_SENSITIVE = "RegExpCaseSensitive";
+    const QString STATE_REGEXP_PATTERN_SYNTAX = "RegExpPatternSyntax";
+    const QString STATE_CID_LIST = "CIDsList";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;
@@ -328,6 +337,7 @@ namespace GuiConst
 
 namespace GuiStyles {
      const QString LineEditError = "QLineEdit { background-color: #FFB1B2; }";
+     const QString LineEditOk = "QLineEdit { background-color: #b3e7ff; }";
      const QString ComboBoxError = "QComboBox { color : red; }";
      const QString PushButtonReadonly = "QPushButton { color : #FF0000; }";
      const QString LineEditWarning = "";

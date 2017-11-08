@@ -132,7 +132,7 @@ void FoundOffsetsModel::clear()
         disconnect(ranges, SIGNAL(destroyed()), this, SLOT(onRangeDestroyed()));
         beginResetModel();
         while(!ranges->isEmpty())
-            delete ranges->takeFirst();
+            ranges->takeFirst().clear();
         delete ranges;
         ranges = nullptr;
         endResetModel();
@@ -449,7 +449,7 @@ void SearchWidget::nextFind(quint64 pos)
     if (searchDelegate != nullptr) {
         BytesRangeList * ranges = model->getRanges();
         if (ranges != nullptr && ranges->size() > 0) {
-            BytesRange * initial = ranges->at(0);
+            QSharedPointer<BytesRange> initial = ranges->at(0);
             for (int i = 0 ; i < ranges->size(); i++) {
                 if (pos < ranges->at(i)->getLowerVal()) {
                     processJump(ranges->at(i)->getLowerVal(), ranges->at(i)->getUpperVal());

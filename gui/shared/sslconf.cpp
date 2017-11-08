@@ -1,8 +1,6 @@
 #include "sslconf.h"
 #include <QFile>
-#if QT_VERSION >= 0x050000
 #include <QSslCertificateExtension>
-#endif
 #include <QSslSocket>
 #include "ssloptionswidget.h"
 #include <QDebug>

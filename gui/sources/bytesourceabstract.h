@@ -20,6 +20,7 @@ Released under AGPL see LICENSE for more information
 #include <QSettings>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
+#include <QSharedPointer>
 #include "searchabstract.h"
 #include "../shared/guiconst.h"
 #include "../state/basestateabstract.h"
@@ -27,7 +28,7 @@ Released under AGPL see LICENSE for more information
 class SourceWidgetAbstract;
 class BytesRange;
 
-class BytesRangeList : public QObject, public QList<BytesRange *> {
+class BytesRangeList : public QObject, public QList<QSharedPointer<BytesRange> > {
         Q_OBJECT
     public:
         explicit BytesRangeList(QObject *parent = 0);
@@ -40,7 +41,7 @@ class BytesRangeList : public QObject, public QList<BytesRange *> {
         void updated();
 };
 
-class BytesRange
+class BytesRange : public QObject
 {
     public:
         static const QString HEXFORMAT;
@@ -65,10 +66,10 @@ class BytesRange
         bool hasSameMarkings(const BytesRange& other) const;
         void copyMarkings(const BytesRange& other);
         static QString offsetToString(quint64 val);
-        static bool lessThanFunc(BytesRange * or1, BytesRange *or2);
+        static bool lessThanFunc(QSharedPointer<BytesRange> or1, QSharedPointer<BytesRange> or2);
         quint64 getSize() const;
         void setSize(const quint64 &value);
-        static void addMarkToList(BytesRangeList *list, BytesRange * range);
+        static void addMarkToList(BytesRangeList *list, QSharedPointer<BytesRange> range);
         static void addMarkToList(BytesRangeList *list, quint64 start, quint64 end, const QColor &bgcolor, const QColor &fgColor, QString toolTip);
         static void clearMarkingFromList(BytesRangeList *list, quint64 start, quint64 end);
         static void moveMarkingAfterDelete(BytesRangeList *list, quint64 pos, quint64 deleteSize);
@@ -224,7 +225,7 @@ class ByteSourceAbstract : public QObject
         void writeToFile(QString destFilename, QByteArray data);
         void clearAllMarkingsNoUpdate();
         static const quintptr INVALID_SOURCE;
-        BytesRange *cachedRange; // internal use value (does not need saving)
+        QWeakPointer<BytesRange> cachedRange; // internal use value (does not need saving)
         QWidget *confGui;
         QWidget *buttonBar;
         QWidget *upperView;

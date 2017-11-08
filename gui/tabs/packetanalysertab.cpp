@@ -15,9 +15,7 @@ Released under AGPL see LICENSE for more information
 #include "loggerwidget.h"
 #include "packetanalyser/packetanalyseroptionsdialog.h"
 #include <QDialog>
-#if QT_VERSION >= 0x050000
 #include <QtConcurrent>
-#endif
 #include <QtConcurrentRun>
 #include <transformchain.h>
 #include <QItemSelectionModel>
@@ -140,11 +138,8 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     ui->packetTableView->setColumnWidth(PacketModelAbstract::COLUMN_TIMESPTAMP,packetModel->getDefaultWidthForColumn(PacketModelAbstract::COLUMN_TIMESPTAMP));
     ui->packetTableView->setColumnWidth(PacketModelAbstract::COLUMN_PAYLOAD,packetModel->getDefaultWidthForColumn(PacketModelAbstract::COLUMN_PAYLOAD));
     ui->packetTableView->verticalHeader()->setDefaultSectionSize(20);
-#if QT_VERSION >= 0x050000
+
     ui->packetTableView->horizontalHeader()->setSectionsMovable( true );
-#else
-    ui->packetTableView->horizontalHeader()->setMovable(true);
-#endif
     ui->packetTableView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->packetTableView->setSortingEnabled(true);
     ui->packetTableView->verticalHeader()->setDefaultSectionSize(GlobalsValues::ROWSHEIGHT);
@@ -204,13 +199,14 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
 
     // connecting stuff
     connect(bytesource,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)),Qt::QueuedConnection);
-    connect(ui->packetTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onSelectionChanged(QItemSelection)), Qt::QueuedConnection);
+    connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onByteSourceUpdated(quintptr)), Qt::UniqueConnection);
+    connect(ui->packetTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onSelectionChanged(QItemSelection)));
     connect(ui->packetTableView,SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRightClick(QPoint)));
     connect(packetModel, SIGNAL(sendRequest(TransformRequest*)), guiHelper->getCentralTransProc(), SLOT(processRequest(TransformRequest*)), Qt::QueuedConnection);
     connect(packetModel, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), guiHelper->getLogger(), SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
     connect(packetModel, SIGNAL(modelReset()), SLOT(onModelReseted()));
     connect(packetModel, SIGNAL(updated()),&updateTimer, SLOT(start()));
-    connect(ui->actionMergePacketsNow, SIGNAL(triggered(bool)),this, SLOT(onMergeRequested()));
+    connect(ui->actionMergePacketsNow, SIGNAL(triggered(bool)),this, SLOT(onAutoMergeRequested()));
     connect(ui->actionAuto_merge_packets, SIGNAL(toggled(bool)), packetModel, SLOT(setAutoMergeConsecutivePackets(bool)));
     connect(ui->clearPushButton, SIGNAL(clicked(bool)), this, SLOT(onClearListClicked()));
     connect(orchCombo, SIGNAL(newOrchestrator(SourcesOrchestatorAbstract*)), this, SLOT(setOrchestrator(SourcesOrchestatorAbstract*)));
@@ -374,12 +370,21 @@ void PacketAnalyserTab::onImport()
                 qFatal("Cannot allocate memory for ImportExportWorker X{");
             }
 
+            worker->setPlainBase64(ied->isPlainBase64());
+            worker->setPlainToFile(ied->isPlainFile());
+
             connect(worker,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
 
             QtConcurrent::run(worker, &ImportExportWorker::run);
-            ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_DIRECTION, true);
-            ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_COMMENT, true);
-            ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_CID, true);
+            // only hide for pcap format, as packets do not have the "direction" property in this case
+            ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_DIRECTION, ied->getFormat() == GuiConst::PCAP_FORMAT);
+
+            // timestamps are arbitrary in this mode, very little need to show them
+            ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_TIMESPTAMP, ied->getFormat() == GuiConst::PLAIN_FORMAT);
+
+            // should not be necessary, but just in case
+            // ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_CID, true);
+            // ui->packetTableView->setColumnHidden(PacketModelAbstract::COLUMN_COMMENT, true);
         }
     }
 }
@@ -430,11 +435,14 @@ void PacketAnalyserTab::onExport()
                 qFatal("Cannot allocate memory for ImportExportWorker X{");
             }
 
+            worker->setPlainBase64(ied->isPlainBase64());
+            worker->setPlainToFile(ied->isPlainFile());
+
             if (ied->getSelectionOnly()) {
                 QList<qint64> selected;
                 QModelIndexList indexList = ui->packetTableView->selectionModel()->selectedRows();
                 for (int i = 0; i < indexList.size(); i++) {
-                    selected.append(packetModel->indexToPacketIndex(indexList.at(i)));
+                    selected.append(sortFilterProxyModel->indexToPacketIndex(indexList.at(i)));
                 }
 
                 if (selected.isEmpty()){
@@ -442,7 +450,7 @@ void PacketAnalyserTab::onExport()
                     delete ied;
                     return;
                 } else {
-                    qSort(selected);
+                    std::sort(selected.begin(),selected.end(), std::greater<qint64>());
                     worker->setFilteredList(selected);
                 }
             }
@@ -465,13 +473,12 @@ void PacketAnalyserTab::onModelReseted()
 
 void PacketAnalyserTab::clearCurrentPacket()
 {
-    if (bytesource != nullptr) {
-        disconnect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdated(quintptr)));
-        bytesource->clearAllMarkings();
-        bytesource->clear();
-        bytesource->historyClear();
-    }
-    currentPacket = nullptr;
+    currentPacket = nullptr; // in case this was not already done
+    // disconnect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdatedByGui(quintptr)));
+    bytesource->clearAllMarkings();
+    bytesource->clear();
+    bytesource->historyClear();
+    sortFilterProxyModel->setSelectedPacket(PacketModelAbstract::INVALID_POS);
 }
 
 void PacketAnalyserTab::copyAsUpdate()
@@ -483,7 +490,6 @@ void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
 {
    // qDebug() << tr("selection changed");
     if (!selection.isEmpty()) {
-        qDebug() << tr("selection changed not empty (maptosource)");
         QModelIndex last_i = selection.last().bottomRight();
         if (last_i.isValid()) {
             QModelIndex last = sortFilterProxyModel->mapToSource(last_i);
@@ -491,8 +497,7 @@ void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
                 int index = last.row();
                 currentPacket = packetModel->getPacket(index);
                 if (currentPacket != nullptr) {
-                    bytesource->setData(currentPacket->getData());
-                    connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdated(quintptr)), Qt::UniqueConnection);
+                    bytesource->setData(currentPacket->getData(),(quintptr)this);
                     sortFilterProxyModel->setSelectedPacket(index);
                     checkIfOriginalTabNeeded();
                     return; // nofail
@@ -632,7 +637,6 @@ void PacketAnalyserTab::onForwardPressed()
                 orchestrator->postPacket(pa);
                 if (!packetQueue.isEmpty()) {
                     packetModel->addPacket(packetQueue.head());
-                    selectLastPacket();
                 }
             }
         } else if (currentPacket != nullptr) {
@@ -719,11 +723,14 @@ void PacketAnalyserTab::onScrollBarChanged(int min, int max)
         ui->packetTableView->verticalScrollBar()->setValue(max);
 }
 
-void PacketAnalyserTab::onCurrentPacketUpdated(quintptr source)
+void PacketAnalyserTab::onByteSourceUpdated(quintptr source)
 {
-    if (currentPacket != nullptr && source != (quintptr)this) {
-        currentPacket->setData(bytesource->getRawData());
-        checkIfOriginalTabNeeded();
+    if (currentPacket != nullptr) { // current packet is null during cleaning operations, no need to update anything
+        if (source != (quintptr)this) { // if the source is not the tab object (i.e. the source is the hex editor)
+            // write the data back to the packet
+            currentPacket->setData(bytesource->getRawData());
+            checkIfOriginalTabNeeded();
+        }
     }
 }
 
@@ -787,19 +794,18 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
         }
 
         for (int i = 0; i < modelList.size(); i++) {
-            selected.append(packetModel->indexToPacketIndex(modelList.at(i)));
+            selected.append(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
         }
 
         int nindex = packetModel->merge(selected);
         if (nindex != PacketModelAbstract::INVALID_POS) {
-            ui->packetTableView->selectRow(nindex);
+            QModelIndex index = packetModel->createIndex(nindex,0);
+            index = sortFilterProxyModel->mapFromSource(index);
             Packet * pac = packetModel->getPacket(nindex);
             if (pac != nullptr) {
-                // blocking signals to prevent an update loop
-                bytesource->blockSignals(true);
-                bytesource->setData(pac->getData());
-                bytesource->blockSignals(false);
-
+                currentPacket = pac;
+                bytesource->setData(currentPacket->getData(), (quintptr)this);
+                ui->packetTableView->selectRow(index.row());
                 sortFilterProxyModel->setSelectedPacket(nindex);
             } else {
                 clearCurrentPacket();
@@ -830,12 +836,11 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
             QList<qint64> selected;
 
             for (int i = 0; i < modelList.size(); i++) {
-                selected.append(packetModel->indexToPacketIndex(modelList.at(i)));
+                selected.append(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
             }
             ui->packetTableView->selectionModel()->clearSelection();
             packetModel->removePackets(selected);
-            if (packetModel->size() == 0)
-                clearCurrentPacket();
+            clearCurrentPacket();
         }
     }
 }
@@ -944,7 +949,7 @@ void PacketAnalyserTab::setTrackingLast(bool value)
         ui->trackPushButton->setChecked(trackingLast);
         ui->trackPushButton->blockSignals(false);
         if (trackingLast) {
-            ui->packetTableView->selectRow(packetModel->rowCount() - 1);
+            ui->packetTableView->selectRow(sortFilterProxyModel->rowCount() - 1);
         }
     }
 }
@@ -955,7 +960,7 @@ void PacketAnalyserTab::onSendToTriggered(QAction *action)
     QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
 
     for (int i = 0; i < modelList.size(); i++) {
-        Packet * pac = packetModel->getPacket(packetModel->indexToPacketIndex(modelList.at(i)));
+        Packet * pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
         if (pac != nullptr)
             selectedData.append(pac->getData());
         else
@@ -978,7 +983,7 @@ void PacketAnalyserTab::onCopyAs(QAction *action)
     QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
 
     for (int i = 0; i < modelList.size(); i++) {
-        Packet * pac = packetModel->getPacket(packetModel->indexToPacketIndex(modelList.at(i)));
+        Packet * pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
         if (pac != nullptr)
             selectedData.append(pac->getData());
         else
@@ -1005,11 +1010,9 @@ void PacketAnalyserTab::checkIfOriginalTabNeeded()
 
 void PacketAnalyserTab::removeTabButton(int index)
 {
-#if QT_VERSION >= 0x050000
         tabBarRef = ui->viewTabWidget->tabBar();
         tabBarRef->setTabButton(index, QTabBar::RightSide,nullptr);
         tabBarRef->setTabButton(index, QTabBar::LeftSide, nullptr);
-#endif
 }
 
 bool PacketAnalyserTab::getForwarding() const
@@ -1022,10 +1025,11 @@ void PacketAnalyserTab::setForwarding(bool value)
     forwarding = value;
 }
 
-void PacketAnalyserTab::onMergeRequested()
+void PacketAnalyserTab::onAutoMergeRequested()
 {
+    ui->packetTableView->selectionModel()->clear();
     packetModel->mergeConsecutivePackets();
-    selectLastPacket();
+
 }
 
 void PacketAnalyserTab::onInboundTransformRequested()
@@ -1143,7 +1147,6 @@ void PacketAnalyserTab::onFontUpdated()
 
 void PacketAnalyserTab::selectLastPacket()
 {
-    ui->packetTableView->selectionModel()->select(packetModel->getLastPacketRow(),QItemSelectionModel::ClearAndSelect);
     if (ui->packetTableView->verticalScrollBar()->isVisible()) {
         ui->packetTableView->verticalScrollBar()->setValue( ui->packetTableView->verticalScrollBar()->maximum());
     }

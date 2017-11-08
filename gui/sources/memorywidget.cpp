@@ -68,7 +68,7 @@ QSize MemoryWidget::sizeHint() const
 void MemoryWidget::onDoubleClick(QModelIndex index)
 {
     if (index.isValid()) {
-        MemRange * range = msource->getMemRangesModel()->getRange(index);
+        QSharedPointer<MemRange> range = msource->getMemRangesModel()->getRange(index);
         if (range != nullptr) {
             msource->setStartingOffset(range->getLowerVal());
         }
@@ -95,7 +95,7 @@ void MemoryWidget::contextMenuAction(QAction *action)
     if (list.size() < 1)
         return;
 
-    MemRange * range = msource->getMemRangesModel()->getRange(list.at(0));
+    QSharedPointer<MemRange> range = msource->getMemRangesModel()->getRange(list.at(0));
     quint64 offset = range->getLowerVal();
     if (action->text() != GOTOSTART) {
         quint64 endoffset = range->getUpperVal();

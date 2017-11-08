@@ -74,7 +74,7 @@ void CompareWorker::compare()
         qFatal("Cannot allocate memory for BytesRangeList X{");
     }
 
-    quint64 BLOCKSIZE = 4096;
+    quint64 BLOCKSIZE = GEN_BLOCK_SIZE;
 
     quint64 count = (compSize / BLOCKSIZE) + ((compSize % BLOCKSIZE) == 0 ? 0 : 1);
     for(quint64 j = 0; j < count; j++) {

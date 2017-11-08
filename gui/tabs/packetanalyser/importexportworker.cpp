@@ -1,11 +1,12 @@
 #include "importexportworker.h"
 #include <QFile>
 #include <QDebug>
-#if QT_VERSION >= 0x050000
+#include <QBuffer>
+#include <QClipboard>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
-#endif
+#include <QApplication>
 #include "pcapio/pcapio.h"
 #include "packet.h"
 #include "shared/guiconst.h"
@@ -29,10 +30,9 @@ ImportExportWorker::ImportExportWorker(PacketModelAbstract *model,
     applyFilter = false;
     currentIndex = -1;
     noMore = false;
-    if (filename.isEmpty()) { // in case this is not specified
-        this->ops = GuiConst::UNKNOWN_OPERATION;
-        this->format = GuiConst::INVALID_FORMAT;
-    }
+    plainBase64 = false;
+    plainToFile = true;
+    plainSeparator = '\n';
 
     connect(this, SIGNAL(finished()), SLOT(deleteLater()), Qt::QueuedConnection);
 }
@@ -44,48 +44,83 @@ ImportExportWorker::~ImportExportWorker()
 
 void ImportExportWorker::run()
 {
-    if (filename.isEmpty() || ops == GuiConst::UNKNOWN_OPERATION || format == GuiConst::INVALID_FORMAT) {
+    if (ops == GuiConst::UNKNOWN_OPERATION || format == GuiConst::INVALID_FORMAT) {
         qCritical() << tr("[ImportExportWorker::run] worker not configured properly to work on its own: %1 | %2 | %3").arg(filename).arg(ops).arg(format);
         return;
     }
-    QFile target(filename);
+    QIODevice *target = nullptr;
+
+    if (format == GuiConst::PLAIN_FORMAT && !plainToFile) {
+        target = new(std::nothrow) QBuffer();
+    } else {
+        if (filename.isEmpty()) {
+            qCritical() << tr("[ImportExportWorker::run] worker is missing a filename T_T");
+            return;
+        }
+        target = new(std::nothrow) QFile(filename);
+    }
+
+    if (target == nullptr) {
+        qFatal("Cannot allocate memory for target(QIODevice) X{");
+    }
+
     if (ops == GuiConst::EXPORT_OPERATION) {
-        if (target.open(QIODevice::WriteOnly)) {
+
+        if (target->open(QIODevice::WriteOnly)) {
             switch (format) {
                 case GuiConst::PCAP_FORMAT:
-                    toPcap(&target);
+                    toPcap(target);
                     break;
                 case GuiConst::XML_FORMAT:
-                    toXMLFile(&target);
+                    toXMLFile(target);
                     break;
                 case GuiConst::JSON_FORMAT:
-#if QT_VERSION >= 0x050000
-                    toJSonFile(&target);
-#else
-                    qCritical() << tr("Json is only supported with QT > 5.0");
-#endif
+                    toJSonFile(target);
+                    break;
+                case GuiConst::PLAIN_FORMAT:
+                    toPlain(target);
                     break;
                 default:
                     qCritical() << tr("[ImportExportWorker::run] Unmanaged format for writing: %1 T_T").arg(format);
                     break;
             }
         }
+
+        if (format == GuiConst::PLAIN_FORMAT && !plainToFile) {
+            QBuffer *buf = dynamic_cast<QBuffer *>(target);
+            if (buf != nullptr) {
+                QByteArray data  = buf->data();
+                QClipboard *clipboard = QApplication::clipboard();
+                clipboard->setText(QString::fromUtf8(data));
+            } else {
+                qCritical() << tr("[ImportExportWorker::run] invalid cast to QBuffer");
+            }
+        }
     } else if (ops == GuiConst::IMPORT_OPERATION) {
         loadedPackets.clear();
-        if (target.open(QIODevice::ReadOnly)) {
+        if (format == GuiConst::PLAIN_FORMAT && !plainToFile) {
+            QBuffer *buf = dynamic_cast<QBuffer *>(target);
+            if (buf != nullptr) {
+                QClipboard *clipboard = QApplication::clipboard();
+                QByteArray data  = clipboard->text().toUtf8();
+                buf->setData(data);
+            } else {
+                qCritical() << tr("[ImportExportWorker::run] invalid cast to QBuffer");
+            }
+        }
+        if (target->open(QIODevice::ReadOnly)) {
             switch (format) {
                 case GuiConst::PCAP_FORMAT:
-                    loadFromPcap(&target);
+                    loadFromPcap(target);
                     break;
                 case GuiConst::XML_FORMAT:
-                    loadFromXMLFile(&target);
+                    loadFromXMLFile(target);
                     break;
                 case GuiConst::JSON_FORMAT:
-#if QT_VERSION >= 0x050000
-                    loadFromJsonFile(&target);
-#else
-                    qCritical() << tr("Json is only supported with QT > 5.0");
-#endif
+                    loadFromJsonFile(target);
+                    break;
+                case GuiConst::PLAIN_FORMAT:
+                    loadFromPlain(target);
                     break;
                 default:
                     qCritical() << tr("[ImportExportWorker::run] Unmanaged format for reading: %1 T_T").arg(format);
@@ -96,8 +131,8 @@ void ImportExportWorker::run()
         }
     }
 
-    if (target.isOpen())
-        target.close();
+    if (target->isOpen())
+        target->close();
 
 
     emit finished();
@@ -549,6 +584,54 @@ void ImportExportWorker::loadFromJsonFile(QIODevice *file)
     }
 }
 
+void ImportExportWorker::toPlain(QIODevice *file)
+{
+    QByteArray endChar(1,plainSeparator);
+    Packet *pac = nextPacket();
+    while (pac != nullptr ) {
+        QByteArray data = pac->getData();
+        if (plainBase64) {
+            data = data.toBase64();
+        }
+        file->write(data);
+        file->write(endChar);
+
+        pac = nextPacket();
+    }
+}
+
+void ImportExportWorker::loadFromPlain(QIODevice *file)
+{
+    QByteArray data;
+    QByteArray prevData;
+    QDateTime date = QDateTime::currentDateTime();
+    while (!file->atEnd()) {
+        data = file->read(GEN_BLOCK_SIZE);
+        QList<QByteArray> list = data.split(plainSeparator);
+        for (int i = 0; i < list.size() - 1; i++) {
+            prevData.append(list.at(i));
+            if (!prevData.isEmpty()) {
+                addPlainRawPacket(prevData, date);
+                prevData.clear();
+            }
+            date = date.addSecs(1); // arbitrary, so that the packets are sorted in the list order
+        }
+
+        prevData = list.last();
+        if (!prevData.isEmpty() && data.endsWith(plainSeparator)) { // rare scenario
+            addPlainRawPacket(prevData, date);
+            prevData.clear();
+            date = date.addSecs(1);
+        }
+    }
+
+    if (!prevData.isEmpty()) { // the last block did not have the separator
+        date = date.addSecs(1);
+        addPlainRawPacket(prevData, date);
+    }
+
+}
+
 Packet *ImportExportWorker::nextPacket()
 {
     if (noMore)
@@ -569,6 +652,40 @@ Packet *ImportExportWorker::nextPacket()
     noMore = true;
 
     return nullptr;
+}
+
+void ImportExportWorker::addPlainRawPacket(QByteArray data, QDateTime date)
+{
+    if (data.isEmpty()) {
+        qCritical() << tr("[ImportExportWorker::addPlainRawPacket] data is empty, ignoring");
+        return;
+    }
+
+    if (plainBase64) {
+        data = QByteArray::fromBase64(data);
+        if (data.isEmpty()) {
+            qCritical() << tr("[ImportExportWorker::addPlainRawPacket] Decoded data is empty, ignoring");
+            return;
+        }
+
+    }
+
+    Packet *pac = new(std::nothrow) Packet();
+    if (pac == nullptr)
+        qFatal("[ImportExportWorker::addPlainRawPacket] Cannot allocate memory for Packet X{");
+    pac->setOriginalData(data,true);
+    pac->setTimestamp(date);
+    loadedPackets.append(pac);
+}
+
+void ImportExportWorker::setPlainToFile(bool value)
+{
+    plainToFile = value;
+}
+
+void ImportExportWorker::setPlainBase64(bool value)
+{
+    plainBase64 = value;
 }
 
 QList<Packet *> ImportExportWorker::getLoadedPackets() const

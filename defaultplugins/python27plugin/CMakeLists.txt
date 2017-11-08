@@ -110,7 +110,7 @@ target_link_libraries ( python27plugin ${EXTERN_LIB} )
 
 
 IF(UNIX)
-	install (TARGETS python27plugin DESTINATION share/pip3line/
+	install (TARGETS python27plugin DESTINATION lib/pip3line/
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 		GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 ENDIF(UNIX)

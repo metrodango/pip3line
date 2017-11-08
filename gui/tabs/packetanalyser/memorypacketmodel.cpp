@@ -111,33 +111,32 @@ void MemoryPacketModel::removePacket(qint64 index)
 void MemoryPacketModel::removePackets(QList<qint64> indexes)
 {
     QList<Packet *> toBeDeleted;
-    qint64 first = packetsList.size();
-    qint64 last = 0;
+
+    // sorting packets by index
+    std::sort(indexes.begin(),indexes.end(), std::less<qint64>());
+
     // get all the payloads to be deleted
     for (qint64 i = 0; i < (qint64)indexes.size(); i++) {
         qint64 index = indexes.at(i);
         if (index >= 0 && index < (qint64)packetsList.size()) {
-            first = qMin(first,index);
-            last = qMax(last,index);
             toBeDeleted.append(packetsList.at((int)index));
         }
     }
 
-    if (first <= last) { // if this is not true, trouble!!
-        // delete them
-        beginRemoveRows(QModelIndex(), (int)first, (int)last);
-        while (!toBeDeleted.isEmpty()) {
-            Packet *dt = toBeDeleted.takeFirst();
-            int res = packetsList.removeAll(dt); // should not have duplicate problems -_-'
-            if (res > 1)
-                qCritical() << tr("more than one payload was removed T_T");
-            delete dt;
-        }
+    int lindex = 0;
+
+    while (!toBeDeleted.isEmpty()) {
+        Packet *dt = toBeDeleted.takeFirst();
+        lindex = packetsList.indexOf(dt, lindex); // values are ordered so no we can start the search at the last
+        beginRemoveRows(QModelIndex(), lindex, lindex);
+        int res = packetsList.removeAll(dt); // should not have duplicate problems -_-'
         endRemoveRows();
-        emit updated();
-    } else {
-        qCritical() << tr("[MemoryPacketModel::removePackets] first > last T_T");
+        if (res > 1)
+            qCritical() << tr("more than one payload was removed T_T");
+        delete dt;
     }
+
+    emit updated();
 }
 
 qint64 MemoryPacketModel::merge(QList<qint64> list)
@@ -147,65 +146,65 @@ qint64 MemoryPacketModel::merge(QList<qint64> list)
         QByteArray temp;
         QList<Packet *> toBeDeleted;
 
+        // sorting packets by index
+        std::sort(list.begin(),list.end(), std::less<qint64>());
+
         // take the first one
         pindex = list.at(0);
-        qint64 first = pindex;
-        qint64 last = first;
 
         Packet * newp = nullptr;
-        if (first > -1 && first < packetsList.size()) {
-            newp = packetsList.at((int)first);
+        if (pindex > -1 && pindex < packetsList.size()) {
+            newp = packetsList.at((int)pindex);
             temp.append(newp->getData());
         }
         else {
-            qCritical() << tr("first payload index is not there T_T");
+            qCritical() << tr("[MemoryPacketModel::merge] first payload index is not there T_T");
             return INVALID_POS;
         }
 
         // then create the resulting payload
+        // get the first packet
+        qint64 first = list.at(1); // list.size > 1
+        // get the last
+        qint64 last = list.last();
         for (qint64 i = 1; i < list.size(); i++) {
             qint64 index = list.at(i);
             if (index > -1 && index < packetsList.size()) {
                 Packet * p = packetsList.at((int)index);
-                first = qMin(first,index);
-                last = qMax(last,index);
+
                 toBeDeleted.append(p);
                 temp.append(p->getData());
             } else {
-                qCritical() << tr("Payload index is not there T_T");
-                return INVALID_POS;
+                qCritical() << tr("[MemoryPacketModel::merge] Selected payload index (%1) is invalid T_T, ignoring.. ").arg(i);
             }
         }
 
         // set the first one to be the resulting payload, and remove the others
 
         newp->setOriginalData(temp);
-        QModelIndex modified1;
-        QModelIndex modified2;
-
-        modified1 = QAbstractTableModel::createIndex(pindex, 0);
-        modified2 = QAbstractTableModel::createIndex(pindex, columnNames.size() - 1);
-        emit dataChanged(modified1, modified2);
 
         if (first <= last) { // if this is not true, trouble!!
             if (toBeDeleted.size() == packetsList.size()) {
+                qCritical() << tr("[MemoryPacketModel::merge] toBeDeleted size cannot be equal to packet list size ...");
                 first = 1;
                 pindex = 0;
             }
-
-            // at this point first and last should be < MAX_INT
-            beginRemoveRows(QModelIndex(),(int)first + 1, (int)last ); // the first one is not going to be deleted
+            int lindex = 0;
             qDebug() << toBeDeleted.size() << "rows to be removed. Initial list" << packetsList.size();
             for (int i = 0; i < toBeDeleted.size(); i++) {
-                int res = packetsList.removeAll(toBeDeleted.at(i)); // should not have duplicate problems -_-'
+                Packet * p  = toBeDeleted.at(i);
+                lindex = packetsList.indexOf(p, lindex); // values are ordered so no we can start the search at the last
+                beginRemoveRows(QModelIndex(),lindex, lindex );
+                int res = packetsList.removeAll(p); // should not have duplicate problems -_-'
                 if (res > 1)
-                    qCritical() << tr("more than one payload was remvoved T_T");
-                delete toBeDeleted.at(i);
+                    qCritical() << tr("[MemoryPacketModel::merge] More than one payload was remvoved T_T");
+                delete p;
+                endRemoveRows();
             }
-            endRemoveRows();
+
             emit updated();
         } else {
-            qCritical() << tr("first and last are wrong T_T");
+            qCritical() << tr("[MemoryPacketModel::merge] first and last are wrong T_T");
         }
 
     }

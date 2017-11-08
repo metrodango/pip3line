@@ -18,9 +18,8 @@ Released under AGPL see LICENSE for more information
 class OPENSSLPLUGINSHARED_EXPORT OpensslPlugin : public QObject, public TransformFactoryPluginInterface
 {
         Q_OBJECT
-#if QT_VERSION >= 0x050000
+
         Q_PLUGIN_METADATA(IID pluginIID FILE "opensslplugin.json")
-#endif
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
         static const QStringList blacklistHash;

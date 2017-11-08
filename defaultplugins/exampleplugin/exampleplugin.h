@@ -22,9 +22,8 @@ class QWidget;
 
 class EXAMPLEPLUGINSHARED_EXPORT ExamplePlugin : public QObject, public TransformFactoryPluginInterface {
         Q_OBJECT // mandatory when inheriting from QObject
-#if QT_VERSION >= 0x050000
+
         Q_PLUGIN_METADATA(IID pluginIID FILE "exampleplugin.json") // mandatory for QT5. the json file is included automatically in the plugin during compilation.
-#endif
         Q_INTERFACES(TransformFactoryPluginInterface) // mandatory when implementing a plugin
     public:
         explicit ExamplePlugin();

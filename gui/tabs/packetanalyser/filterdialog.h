@@ -5,9 +5,12 @@
 #include <QItemSelection>
 #include <QList>
 #include <QObject>
+#include <QTimer>
+#include <QValidator>
+#include  "filteritem.h"
 
-class FilterItem;
 class QEvent;
+class FilterEngine;
 
 
 namespace Ui {
@@ -15,6 +18,24 @@ namespace Ui {
 }
 
 class PacketSortFilterProxyModel;
+
+class NameValidator : public QValidator
+{
+        Q_OBJECT
+    public:
+        explicit NameValidator(QObject *parent = Q_NULLPTR);
+        ~NameValidator();
+        QValidator::State validate(QString &input, int &pos) const;
+};
+
+class CIDValidator : public QValidator
+{
+        Q_OBJECT
+    public:
+        explicit CIDValidator(QObject *parent = Q_NULLPTR);
+        ~CIDValidator();
+        QValidator::State validate(QString &input, int &pos) const;
+};
 
 class FilterDialog : public QDialog
 {
@@ -24,19 +45,28 @@ class FilterDialog : public QDialog
         explicit FilterDialog(PacketSortFilterProxyModel *sortFilterProxyModel, QWidget *parent = 0);
         ~FilterDialog();
     public slots:
+        void updatedList();
+        void validate();
+    private slots:
         void onAdd();
-        void updateList();
         void onDeleteItem(QString name);
         void onFilterToggled(bool toggled);
         void onItemSelected(QItemSelection selection);
         void onClear();
         void onSave();
+        void onColumnsUpdated();
+        void onColumnSelected(int index);
     private:
-        FilterItem getCurrentConfItem();
+        void initUi();
+        QSharedPointer<FilterItem> getCurrentConfItem();
         bool eventFilter(QObject *obj, QEvent *event);
+        QTimer validationTimer;
         Ui::FilterDialog *ui;
         PacketSortFilterProxyModel *sortFilterProxyModel;
-        QList<FilterItem> list;
+        FilterItemsList list;
+        FilterEngine * filterEngine;
+        NameValidator nameValidator;
+        CIDValidator cidValidator;
 };
 
 #endif // FILTERDIALOG_H

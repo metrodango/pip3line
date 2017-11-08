@@ -78,6 +78,7 @@ cmake
 git
 libssl-dev
 libdistorm3-dev
+libqt5scintilla2-dev
 
 and the QScintilla library for Qt5
 

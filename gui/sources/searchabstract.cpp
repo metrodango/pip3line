@@ -11,9 +11,7 @@ Released under AGPL see LICENSE for more information
 #include <QTimerEvent>
 #include <QDebug>
 #include <QApplication>
-#if QT_VERSION >= 0x050000
 #include <QtConcurrent>
-#endif
 #include <QtConcurrentRun>
 #include "searchabstract.h"
 #include "bytesourceabstract.h"
@@ -36,8 +34,8 @@ SearchWorker::SearchWorker(SourceReader * device,QObject *parent)
 {
     startOffset = 0;
     endOffset = 0;
-    BufferSize = 4096;
-    statsStep = 4096;
+    BufferSize = GEN_BLOCK_SIZE;
+    statsStep = GEN_BLOCK_SIZE;
     cancelled = true;
     searchMask = nullptr;
     listSend = false;
@@ -57,7 +55,7 @@ SearchWorker::~SearchWorker()
         foundList = nullptr;
     else { // unless the list was never requested
         while (!foundList->isEmpty())
-            delete foundList->takeFirst();
+            foundList->takeFirst().clear();
         delete foundList;
     }
     searchMask = nullptr;
@@ -139,7 +137,7 @@ void SearchWorker::search()
                         break;
             if (i > len)
             {
-                BytesRange * br = new(std::nothrow) BytesRange(realOffset - (quint64)len, realOffset);
+                QSharedPointer<BytesRange> br(new(std::nothrow) BytesRange(realOffset - (quint64)len, realOffset));
                 br->setBackground(SearchAbstract::SEARCH_COLOR);
                 if (br == nullptr) {
                     qFatal("Cannot allocate memory for BytesRange X{");
@@ -226,7 +224,7 @@ SearchAbstract::SearchAbstract():
     totalSearchSize = 0;
     stopped = true;
     hasError = false;
-    statsStep = 4096; // by default report every 4k bytes
+    statsStep = GEN_BLOCK_SIZE; // by default report every 4k bytes
     mask = nullptr;
     globalFoundList = nullptr;
     moveToThread(&eventThread);
@@ -300,7 +298,7 @@ void SearchAbstract::onChildFinished()
         if (stopped) { // no need to process anything just ignore
 
             while (!tempList->isEmpty())
-                delete tempList->takeFirst();
+                tempList->takeFirst().clear();
         } else {
             globalFoundList->append(*tempList); // range objects are not owned by the global list
         }
@@ -319,7 +317,7 @@ void SearchAbstract::onChildFinished()
             globalFoundList->unify();
             globalFoundList->moveToThread(QApplication::instance()->thread());// dirty, there must be a better way
             if (jumpToNext) {
-                BytesRange * range = globalFoundList->at(0); // if not found take the first
+                QSharedPointer<BytesRange> range = globalFoundList->at(0); // if not found take the first
                 int size = globalFoundList->size();
                 for(int i = 0 ; i < size; i++) {
                     if (cursorOffset < globalFoundList->at(i)->getLowerVal()) {

@@ -131,9 +131,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
     qRegisterMetaType<QItemSelection>("QItemSelection");
 
-#if QT_VERSION >= 0x050000
     qRegisterMetaType<qintptr>("qintptr");
-#endif
 
     qApp->setOrganizationName(APPNAME);
     qApp->setApplicationName(APPNAME);
@@ -873,7 +871,7 @@ void MainWindow::updateTrayIcon()
 
         trayIconMenu->addAction(action);
         QStringList list = guiHelper->getImportExportFunctions();
-        qSort(list);
+
         for (int i = 0; i < list.size(); i++) {
             action = new(std::nothrow) QAction(list.at(i), trayIconMenu);
             if (action == nullptr) {

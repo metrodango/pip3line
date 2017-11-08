@@ -18,6 +18,7 @@ Released under AGPL see LICENSE for more information
 #include <QKeyEvent>
 #include <QAction>
 #include <transformmgmt.h>
+#include <QStringList>
 #include "guihelper.h"
 #include "views/hexview.h"
 #include "sources/basicsource.h"
@@ -98,13 +99,13 @@ void DebugDialog::refreshTransformInstances()
 {
     ui->transformListWidget->clear();
     QList<TransformAbstract *> list = guiHelper->getTransformFactory()->getTransformInstances();
-    QList<QString> slist;
+    QStringList slist;
     for (int i = 0; i < list.size(); i++) {
         QString value = QString("0x%1").arg(QString::number((quintptr)list.at(i),16));
         slist.append(value);
     }
 
-    qSort(slist);
+    slist.sort();
     ui->transformListWidget->addItems(slist);
 }
 

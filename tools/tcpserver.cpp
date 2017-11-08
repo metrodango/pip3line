@@ -21,11 +21,8 @@ InternalTcpServer::InternalTcpServer(QObject *parent):
     QTcpServer(parent)
 {
 }
-#if QT_VERSION >= 0x050000
+
 void InternalTcpServer::incomingConnection(qintptr socketDescriptor)
-#else
-void InternalTcpServer::incomingConnection(int socketDescriptor)
-#endif
 {
     emit newClient(socketDescriptor);
 }
@@ -33,11 +30,7 @@ void InternalTcpServer::incomingConnection(int socketDescriptor)
 const QString TcpSocketProcessor::TCP_SOCKET = "Tcp socket";
 
 TcpSocketProcessor::TcpSocketProcessor(TransformMgmt *tFactory,
-#if QT_VERSION >= 0x050000
                                        qintptr socketDescr,
-#else
-                                       int socketDescr,
-#endif
                                        QObject *parent) :
     StreamProcessor(tFactory,parent)
 {
@@ -84,11 +77,7 @@ TcpServer::TcpServer(TransformMgmt * tFactory, QObject *parent) :
 {
     tcpServer = new(std::nothrow) InternalTcpServer(parent);
     if (tcpServer != nullptr)
-#if QT_VERSION >= 0x050000
         connect(tcpServer, SIGNAL(newClient(qintptr)), this, SLOT(processingNewClient(qintptr)));
-#else
-        connect(tcpServer, SIGNAL(newClient(int)), this, SLOT(processingNewClient(int)));
-#endif
 
     else {
         qFatal("Cannot allocate memory for tcpServer X{");
@@ -108,11 +97,7 @@ void TcpServer::setIP(const QString &ip)
     IP = ip;
 }
 
-#if QT_VERSION >= 0x050000
 void TcpServer::processingNewClient(qintptr socketDescriptor)
-#else
-void TcpServer::processingNewClient(int socketDescriptor)
-#endif
 {
     TcpSocketProcessor * processor = new(std::nothrow) TcpSocketProcessor(transformFactory, socketDescriptor);
     if (processor != nullptr) {

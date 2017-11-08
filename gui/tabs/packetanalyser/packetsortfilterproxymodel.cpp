@@ -13,12 +13,18 @@ PacketSortFilterProxyModel::PacketSortFilterProxyModel(QObject *parent) :
     equalityViewEnabled = false;
     selectedPacket = PacketModelAbstract::INVALID_POS;
     packetModel = nullptr;
-    filteringEnabled = false;
     setDynamicSortFilter(false);
+    filterEngine = new(std::nothrow)FilterEngine(this);
+    if (filterEngine == nullptr) {
+        qFatal("Cannot allocate FilterEngine X{");
+    }
+
+    connect(filterEngine, SIGNAL(updated()), this, SLOT(onFitlersUpdated()));
 }
 
 PacketSortFilterProxyModel::~PacketSortFilterProxyModel()
 {
+    delete filterEngine;
     qDebug() << "Destroying" << this;
 }
 
@@ -104,12 +110,20 @@ qint64 PacketSortFilterProxyModel::getSelectedPacket() const
 
 void PacketSortFilterProxyModel::setSelectedPacket(const qint64 &packetNumber)
 {
-    if (packetNumber >= 0) {
+    if (packetNumber >= PacketModelAbstract::INVALID_POS && packetNumber < packetModel->size()) {
         selectedPacket = packetNumber;
-        emitGlobalDataChanged();
     } else {
         qCritical() << "[PacketSortFilterProxyModel::setSelectedPacket] invalid packet number:" << packetNumber;
+        selectedPacket = PacketModelAbstract::INVALID_POS;
     }
+
+    emitGlobalDataChanged();
+}
+
+qint64 PacketSortFilterProxyModel::indexToPacketIndex(const QModelIndex &index)
+{
+    QModelIndex trueIndex = mapToSource(index);
+    return packetModel->indexToPacketIndex(trueIndex);
 }
 
 bool PacketSortFilterProxyModel::getEnableEqualityView() const
@@ -154,68 +168,15 @@ void PacketSortFilterProxyModel::setColumnSortingType(int column, PacketSortFilt
 
 void PacketSortFilterProxyModel::onModelUpdated()
 {
-    sort(sortColumn());
+   sort(sortColumn());
 }
 
-//bool PacketSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
-//{
-//    int col1 = left.column();
-//    int col2 = right.column();
 
-//    if (col1 != col2) {
-//        qCritical() << tr("[PacketSortFilterProxyModel::lessThan] Columns of the operands are not the same T_T");
-//        return false;
-//    }
-
-//    if (columnSorting.contains(col1)) { // if there is a special sorting algorithm set
-//        switch (columnSorting.value(col1)) {
-//            case IP:
-//            {
-//                QHostAddress la;
-//                QHostAddress ra;
-
-//                if (la.setAddress(left.data().toString())) {
-//                    if (ra.setAddress(right.data().toString())) {
-//                        QAbstractSocket::NetworkLayerProtocol lp = la.protocol();
-//                        QAbstractSocket::NetworkLayerProtocol rp = ra.protocol();
-//                        if (lp == rp) { // if both are the same protocol
-//                            if (lp == QAbstractSocket::IPv4Protocol) {
-//                                return la.toIPv4Address() < ra.toIPv4Address();
-//                            } else if (lp == QAbstractSocket::IPv6Protocol){
-//                                Q_IPV6ADDR laddr = la.toIPv6Address();
-//                                Q_IPV6ADDR raddr = ra.toIPv6Address();
-//                                for (int i = 0; i < 16; ++i) {
-//                                    if (laddr[i] == raddr[i])
-//                                        continue;
-//                                    else
-//                                        return laddr[i] < raddr[i];
-//                                }
-//                                return false; // left is not less than right (i.e equal)
-//                            }
-
-//                        } else { // if the two protocols are differents
-//                            return lp < rp; // following Qt definition "Unknown < IPv4 < IPv6"
-//                        }
-//                    } else { // if the right address is invalid
-//                        return false; // again 'Unknown < IPv4 < IPv6'
-//                    }
-//                } else { // the left address is invalid
-//                    if (ra.setAddress(right.data().toString())) { // but the right one is valid
-//                        return true; // and again 'Unknown < IPv4 < IPv6'
-//                    } else { // well, at this point there is no hope left, calling the default behaviour
-//                        return QSortFilterProxyModel::lessThan(left,right);
-//                    }
-//                }
-//            }
-//                break;
-//            default:
-//                return QSortFilterProxyModel::lessThan(left,right);
-//        }
-//    }
-
-//    // by default use the one form the parent
-//    return QSortFilterProxyModel::lessThan(left,right);
-//}
+void PacketSortFilterProxyModel::onFitlersUpdated()
+{
+    beginResetModel();
+    endResetModel();
+}
 
 void PacketSortFilterProxyModel::emitGlobalDataChanged()
 {
@@ -223,23 +184,16 @@ void PacketSortFilterProxyModel::emitGlobalDataChanged()
         emit dataChanged(packetModel->createIndex(0,0), packetModel->createIndex(packetModel->rowCount() - 1, packetModel->columnCount() - 1));
 }
 
-bool PacketSortFilterProxyModel::isFilteringEnabled() const
+FilterEngine *PacketSortFilterProxyModel::getFilterEngine() const
 {
-    return filteringEnabled;
-}
-
-void PacketSortFilterProxyModel::setFilteringEnabled(bool value)
-{
-    beginResetModel();
-    filteringEnabled = value;
-    endResetModel();
+    return filterEngine;
 }
 
 QHash<QString, QString> PacketSortFilterProxyModel::getConfiguration()
 {
     QHash<QString, QString> ret;
 
-    ret.insert(GuiConst::STATE_PACKET_PROXY_FILTERS_ENABLE, filteringEnabled ? QString("1") : QString("0"));
+    ret.insert(GuiConst::STATE_PACKET_PROXY_FILTERS_ENABLE, filterEngine->getFilteringEnabled() ? QString("1") : QString("0"));
     ret.insert(GuiConst::STATE_PACKET_PROXY_EQUALITY_ENABLE, equalityViewEnabled ? QString("1") : QString("0"));
     QSetIterator<int> i(equalityColumns);
     QString equalSTR;
@@ -262,7 +216,7 @@ void PacketSortFilterProxyModel::setConfiguration(const QHash<QString, QString> 
     if (conf.contains(GuiConst::STATE_PACKET_PROXY_FILTERS_ENABLE)) {
         int val = conf.value(GuiConst::STATE_PACKET_PROXY_FILTERS_ENABLE).toInt(&ok);
         if (ok && (val == 0 || val == 1)) {
-            filteringEnabled = (val == 1);
+            filterEngine->setFilteringEnabled(val == 1);
         }
     }
 
@@ -312,41 +266,13 @@ bool PacketSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
 {
     bool ret = true;
 
-    if (filteringEnabled) {
-        QByteArray data = packetModel->getPacket(sourceRow)->getData();
-        for (int i = 0; i < filterList.size(); i++) {
-            FilterItem it = filterList.at(i);
-            ret = it.selectable(data);
-//            if (data.contains(it.getValue())) {
-//                ret = true;
-//            } else {
-//                ret = false;
-//            }
-//            if (it.isReverseSelection()) {
-//                ret = !ret;
-//            }
-
-            if (!ret) // stopping at this filter
-                break;
-        }
+    if (filterEngine != nullptr) {
+        Packet * pac = packetModel->getPacket(sourceRow);
+        if (pac != nullptr)
+            ret = filterEngine->evaluate(pac);
     }
     return ret;
 }
-
-QList<FilterItem> PacketSortFilterProxyModel::getFilterList() const
-{
-    return filterList;
-}
-
-void PacketSortFilterProxyModel::setFilterList(const QList<FilterItem> &value)
-{
-    beginResetModel();
-    filterList = value;
-    endResetModel();
-}
-
-
-
 
 SortFilterProxyStateObj::SortFilterProxyStateObj(PacketSortFilterProxyModel *proxyModel) :
     proxyModel(proxyModel)
@@ -362,10 +288,11 @@ SortFilterProxyStateObj::~SortFilterProxyStateObj()
 void SortFilterProxyStateObj::run()
 {
     QHash<QString, QString> conf;
-    QList<FilterItem> filterList = proxyModel->filterList;
+    FilterItemsList filterList = proxyModel->filterEngine->getItems();
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         // saving sorting/filtering information
         writer->writeStartElement(GuiConst::STATE_FILTER_SORT);
+        writer->writeAttribute(GuiConst::STATE_FILTER_EXPR,proxyModel->filterEngine->getExpressionStr());
         conf = proxyModel->getConfiguration();
         QHashIterator<QString, QString> hi(conf);
         while (hi.hasNext()) {
@@ -374,10 +301,10 @@ void SortFilterProxyStateObj::run()
         }
 
         writer->writeStartElement(GuiConst::STATE_FILTER_ITEMS);
-        for (int i = 0; i < proxyModel->filterList.size(); i++) {
+        for (int i = 0; i < filterList.size(); i++) {
             writer->writeStartElement(GuiConst::STATE_FILTER_ITEM);
-            FilterItem item = filterList.at(i);
-            conf = item.getConfiguration();
+            QSharedPointer<FilterItem> item = filterList.at(i);
+            conf = item->getConfiguration();
             QHashIterator<QString, QString> it(conf);
             while (it.hasNext()) {
                 it.next();
@@ -392,6 +319,11 @@ void SortFilterProxyStateObj::run()
         if (reader->name() == GuiConst::STATE_FILTER_SORT || readNextStart(GuiConst::STATE_FILTER_SORT)) {
             QXmlStreamAttributes attrList = reader->attributes();
             conf.clear();
+            QString expr;
+            if (attrList.hasAttribute(GuiConst::STATE_FILTER_EXPR)) {
+                expr = attributes.value(GuiConst::STATE_FILTER_EXPR).toString();
+            }
+
             for (int i = 0; i < attrList.size(); i++) {
                 QXmlStreamAttribute attr = attrList.at(i);
                 conf.insert(attr.name().toString(), attr.value().toString());
@@ -409,13 +341,13 @@ void SortFilterProxyStateObj::run()
                         QXmlStreamAttribute attr = attrList.at(i);
                         conf.insert(attr.name().toString(), attr.value().toString());
                     }
-                    FilterItem item;
-                    item.setConfiguration(conf);
-                    if (item.isValid()) {
+                    QSharedPointer<FilterItem> item = QSharedPointer<FilterItem>(FilterItem::instanciateFromConf(conf));
+                    if (!item.isNull() && item->isValid()) {
                         filterList.append(item);
                     }
 
-                    proxyModel->setFilterList(filterList);
+                    proxyModel->filterEngine->setItems(filterList);
+                    proxyModel->filterEngine->assert(expr);
                     readEndElement(GuiConst::STATE_FILTER_ITEM);
                     reader->readNext();
                 }

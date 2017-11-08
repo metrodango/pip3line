@@ -43,6 +43,8 @@ RandomAccessTab::RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *gui
     }
     ui->setupUi(this);
 
+    ui->viewSizeSpinBox->setMaximum(GEN_BLOCK_SIZE);
+
     setName(bytesource->name());
     connect(bytesource,SIGNAL(nameChanged(QString)), SLOT(setName(QString)));
 

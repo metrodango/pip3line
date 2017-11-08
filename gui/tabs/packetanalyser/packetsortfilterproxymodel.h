@@ -5,6 +5,7 @@
 #include <QSet>
 #include <QHash>
 #include "filteritem.h"
+#include "filterengine.h"
 #include "packetmodelabstract.h"
 #include "state/basestateabstract.h"
 
@@ -28,6 +29,8 @@ class PacketSortFilterProxyModel : public QSortFilterProxyModel
         qint64 getSelectedPacket() const;
         void setSelectedPacket(const qint64 &packetNumber);
 
+        qint64 indexToPacketIndex(const QModelIndex & index);
+
         bool getEnableEqualityView() const;
         void setEnableEqualityView(bool value);
         void setEqualitycolumn(int column, bool enable = true);
@@ -36,18 +39,17 @@ class PacketSortFilterProxyModel : public QSortFilterProxyModel
 
         void setColumnSortingType(int column, SortingTypes type);
 
-        QList<FilterItem> getFilterList() const;
-        void setFilterList(const QList<FilterItem> &value);
-        bool isFilteringEnabled() const;
-        void setFilteringEnabled(bool value);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         BaseStateAbstract *getStateMngtObj();
+        FilterEngine *getFilterEngine() const;
+        void setFilterEngine(FilterEngine *value);
+
     protected:
         bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
     private slots:
         void onModelUpdated();
-
+        void onFitlersUpdated();
     private:
         //        bool lessThan(const QModelIndex & left, const QModelIndex & right) const;
         void emitGlobalDataChanged();
@@ -56,8 +58,7 @@ class PacketSortFilterProxyModel : public QSortFilterProxyModel
         bool equalityViewEnabled;
         qint64 selectedPacket;
         PacketModelAbstract * packetModel;
-        QList<FilterItem> filterList;
-        bool filteringEnabled;
+        FilterEngine *filterEngine;
 
         friend class SortFilterProxyStateObj;
 };

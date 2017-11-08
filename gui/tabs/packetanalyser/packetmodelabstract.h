@@ -28,6 +28,13 @@ class PacketModelAbstract : public QAbstractTableModel
             COLUMN_INVALID = -1
         };
 
+        static const QString COLUMN_DIRECTION_STR;
+        static const QString COLUMN_TIMESPTAMP_STR;
+        static const QString COLUMN_PAYLOAD_STR;
+        static const QString COLUMN_COMMENT_STR;
+        static const QString COLUMN_CID_STR;
+        static const QString COLUMN_LENGTH_STR;
+
         static const int DEFAULT_MAX_PAYLOAD_DISPLAY_SIZE;
         static const int MAX_PAYLOAD_DISPLAY_SIZE_MIN_VAL;
         static const int MAX_PAYLOAD_DISPLAY_SIZE_MAX_VAL;
@@ -115,12 +122,6 @@ class PacketModelAbstract : public QAbstractTableModel
         virtual void launchUpdate(TransformAbstract * transform, int row, int column,int length = -1) = 0;
 
         void resetColumnNames();
-        static const QString COLUMN_DIRECTION_STR;
-        static const QString COLUMN_TIMESPTAMP_STR;
-        static const QString COLUMN_PAYLOAD_STR;
-        static const QString COLUMN_COMMENT_STR;
-        static const QString COLUMN_CID_STR;
-        static const QString COLUMN_LENGTH_STR;
         static const QString TRUNCATED_STR;
         QStringList columnNames;
         static const QString DEFAULT_DATETIME_FORMAT;

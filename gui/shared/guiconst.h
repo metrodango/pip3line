@@ -20,6 +20,8 @@ Released under AGPL see LICENSE for more information
 #include <QJsonDocument>
 #include <QBitArray>
 
+#define GEN_BLOCK_SIZE 4096
+
 namespace GuiConst
 {
     extern const QString UNDEFINED_TEXT;
@@ -117,7 +119,7 @@ namespace GuiConst
     extern const QString STATE_PRETAB_TYPE;
     extern const QString STATE_NAME;
     extern const QString STATE_READONLY;
-    extern const QString STATE_extern_MARKINGS;
+    extern const QString STATE_MARKINGS;
     extern const QString STATE_USERMARKINGS;
     extern const QString STATE_MARKING;
     extern const QString STATE_HEX_HISTORY;
@@ -184,9 +186,18 @@ namespace GuiConst
     extern const QString STATE_FILTER_SORT;
     extern const QString STATE_FILTER_ITEMS;
     extern const QString STATE_FILTER_ITEM;
+    extern const QString STATE_FILTER_ID;
+    extern const QString STATE_FILTER_EXPR;
     extern const QString STATE_OFFSET;
     extern const QString STATE_REVERSE_SELECTION;
     extern const QString STATE_MASK;
+    extern const QString STATE_AFTER;
+    extern const QString STATE_BEFORE;
+    extern const QString STATE_TIMEZONE;
+    extern const QString STATE_REGEXP_PATTERN;
+    extern const QString STATE_REGEXP_CASE_SENSITIVE;
+    extern const QString STATE_REGEXP_PATTERN_SYNTAX;
+    extern const QString STATE_CID_LIST;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;
@@ -267,7 +278,7 @@ namespace GuiConst
     };
 
     enum FileOperations {IMPORT_OPERATION, EXPORT_OPERATION, UNKNOWN_OPERATION};
-    enum FileFormat {PCAP_FORMAT, JSON_FORMAT, XML_FORMAT, INVALID_FORMAT};
+    enum FileFormat {PCAP_FORMAT, JSON_FORMAT, XML_FORMAT, PLAIN_FORMAT, INVALID_FORMAT};
 
     extern const QString TRANSFORM_TAB_STRING;
     extern const QString LARGE_FILE_TAB_STRING;
@@ -314,6 +325,7 @@ namespace GlobalsValues {
 
 namespace GuiStyles {
     extern const QString LineEditError;
+    extern const QString LineEditOk;
     extern const QString ComboBoxError;
     extern const QString PushButtonReadonly;
     extern const QString LineEditWarning;

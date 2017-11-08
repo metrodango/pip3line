@@ -67,10 +67,10 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
     }
     ui->setupUi(this);
     ui->tabWidget->addTab(hexView, tr("Hex"));
-#if QT_VERSION >= 0x050000
+
     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
-#endif
+
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), SLOT(onDeleteTab(int)));
 
     searchWidget = new(std::nothrow) SearchWidget(bytesource, guiHelper, this);

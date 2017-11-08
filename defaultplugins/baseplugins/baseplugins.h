@@ -18,9 +18,9 @@ class Pip3lineCallback;
 
 class BASEPLUGINSSHARED_EXPORT BasePlugins : public QObject, public TransformFactoryPluginInterface {
         Q_OBJECT
-#if QT_VERSION >= 0x050000
+
         Q_PLUGIN_METADATA(IID pluginIID FILE "baseplugin.json")
-#endif
+
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
         explicit BasePlugins();

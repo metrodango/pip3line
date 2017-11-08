@@ -38,7 +38,8 @@ BytesRange::BytesRange(quint64 nlowerVal, quint64 nupperVal, QString ndescriptio
     size = upperVal - lowerVal + 1;
 }
 
-BytesRange::BytesRange(const BytesRange &other)
+BytesRange::BytesRange(const BytesRange &other) :
+    QObject(nullptr)
 {
     *this = other;
 }
@@ -143,12 +144,14 @@ QString BytesRange::offsetToString(quint64 val)
     return HEXFORMAT.arg(val,16,16,QChar('0'));
 }
 
-bool BytesRange::lessThanFunc(BytesRange *or1, BytesRange *or2)
+bool BytesRange::lessThanFunc(QSharedPointer<BytesRange> or1, QSharedPointer<BytesRange> or2)
 { // "overall" less than
-    if (or1->lowerVal == or2->lowerVal) { // in case both begins the same
-        return or1->upperVal < or2->upperVal; // we compare the upper limit
+    BytesRange * br1 = or1.data();
+    BytesRange * br2 = or2.data();
+    if (br1->lowerVal == br2->lowerVal) { // in case both begins the same
+        return br1->upperVal < br2->upperVal; // we compare the upper limit
     }
-    return or1->lowerVal < or2->lowerVal;
+    return br1->lowerVal < br2->lowerVal;
 }
 
 quint64 BytesRange::getSize() const
@@ -161,13 +164,13 @@ void BytesRange::setSize(const quint64 &value)
     size = value;
 }
 
-void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
+void BytesRange::addMarkToList(BytesRangeList *list, QSharedPointer<BytesRange> newRange)
 {
     if (list == nullptr) return; // nothing to do here
     if (!(newRange->backgroundColor.isValid() || newRange->foregroundColor.isValid()) && newRange->description.isEmpty()) {
         // apply clearing algo instead
         BytesRange::clearMarkingFromList(list, newRange->lowerVal,newRange->upperVal);
-        delete newRange;
+        newRange.clear();
         return;
     }
 
@@ -175,12 +178,12 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
     int listsize = list->size();
 
     for (int i = 0; i < listsize; i++) {
-        BytesRange *currange = list->at(i);
+        QSharedPointer<BytesRange> currange = list->at(i);
         bool sameMarkings = currange->hasSameMarkings(*newRange);
         if (newRange->upperVal < currange->lowerVal) { // new range under current
             if (sameMarkings && newRange->upperVal == currange->lowerVal - 1) { // if both range have the same marking and the new range is right under the current (rare)
                 currange->lowerVal = newRange->lowerVal;
-                delete newRange; // cleaning
+                newRange.clear(); // cleaning
                 sorted = true;
                 break;
             }
@@ -192,7 +195,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
         } else if (newRange->lowerVal > currange->upperVal) { // new range strictly above current
             if (sameMarkings && newRange->lowerVal == currange->upperVal + 1) { // same markings and right above (rare)
                 currange->upperVal = newRange->upperVal; // extend the current range
-                delete newRange;
+                newRange.clear();
                 newRange = currange; // we still need to check if the extension overlaps with the next ones
                 sorted = true; // but no need to add the range (already there)
             }
@@ -204,7 +207,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
                 // just remove the old range and continue
                 // the iterator will just continue to the next range (or end)
                 list->removeAt(i);
-                delete currange;
+                currange.clear();
                 i--; // need to update the cursor to take into account the removal
                 listsize--;
                 continue;
@@ -215,7 +218,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
                     int rem = list->removeAll(newRange);
                     if (rem > 1)
                         qWarning() << QObject::tr("more than one range removed ... smells bad T_T");
-                    delete newRange; // cleaning
+                    newRange.clear(); // cleaning
                     sorted = true;
                     break;
                 } else {
@@ -235,7 +238,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
             // if markings are the same, all done, no need for the new range, just grow the current one
                 if ( newRange->upperVal > currange->upperVal)
                     currange->upperVal = newRange->upperVal;
-                delete newRange;
+                newRange.clear();
                 newRange = currange;
                 sorted = true; // range already in list, no touching
                 // we need to continue in case the current range now expand over other ones
@@ -251,10 +254,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, BytesRange *newRange)
             } else {
                 // final case if the new range is included entirely into the current one
                 // we need to create a new one after
-                BytesRange *newRange2 = new(std::nothrow)BytesRange(newRange->upperVal + 1,oldupperval);
-                if (newRange2 == nullptr) {
-                    qFatal("Cannot allocate memory for OffsetsRange X{");
-                }
+                QSharedPointer<BytesRange> newRange2(new(std::nothrow)BytesRange(newRange->upperVal + 1,oldupperval));
                 newRange2->copyMarkings(*currange);
                 //insert the new range (if not there already)
                 if (!list->contains(newRange))
@@ -285,7 +285,7 @@ void BytesRange::addMarkToList(BytesRangeList *list, quint64 start, quint64 end,
         end = temp;
     }
 
-    BytesRange *newRange = new(std::nothrow)BytesRange(start,end);
+    QSharedPointer<BytesRange> newRange(new(std::nothrow)BytesRange(start,end));
     if (newRange == nullptr) {
         qFatal("Cannot allocate memory for OffsetsRange X{");
     }
@@ -308,7 +308,7 @@ void BytesRange::clearMarkingFromList(BytesRangeList *list, quint64 start, quint
 
     int msize = list->size();
     for (int i = 0; i < msize; i++) {
-        BytesRange * currRange = list->at(i);
+        QSharedPointer<BytesRange> currRange = list->at(i);
         if (start <= currRange->lowerVal) { //possible overlap
             if (end < currRange->lowerVal) // clearing a non-existing marking, nothing to see here
                 break;
@@ -316,7 +316,7 @@ void BytesRange::clearMarkingFromList(BytesRangeList *list, quint64 start, quint
                 currRange->lowerVal = end  + 1;
                 break;// we are done here
             } else {// just clear the entire range
-                delete currRange;
+                currRange.clear();
                 list->removeAt(i);
                 i--; // need to take into account the fact that one object was removed;
                 msize--;
@@ -330,7 +330,7 @@ void BytesRange::clearMarkingFromList(BytesRangeList *list, quint64 start, quint
                 currRange->upperVal = start - 1; // reducing the range up to start (exclusive)
                 continue; // need to check the next range
             } else { // some split need to be performed
-                BytesRange *newRange2 = new(std::nothrow)BytesRange(end + 1,currRange->upperVal);
+                QSharedPointer<BytesRange> newRange2(new(std::nothrow)BytesRange(end + 1,currRange->upperVal));
                 if (newRange2 == nullptr) {
                     qFatal("Cannot allocate memory for OffsetsRange X{");
                 }
@@ -354,7 +354,7 @@ void BytesRange::moveMarkingAfterDelete(BytesRangeList *list, quint64 pos, quint
     if (list == nullptr) return; // nothing to do here
     int msize = list->size();
     for (int i = 0; i < msize; i++) {
-        BytesRange * currRange = list->at(i);
+        QSharedPointer<BytesRange> currRange = list->at(i);
         if (pos > currRange->upperVal) {
             continue;
         }
@@ -366,7 +366,7 @@ void BytesRange::moveMarkingAfterDelete(BytesRangeList *list, quint64 pos, quint
         }
 
         if (currRange->upperVal < deleteSize) { // at this point the range is ... out of range, removing it
-            delete currRange;
+            currRange.clear();
             list->removeAt(i);
             msize--;
         }
@@ -380,14 +380,14 @@ void BytesRange::moveMarkingAfterInsert(BytesRangeList *list, quint64 pos, quint
     if (list == nullptr) return; // nothing to do here
     int msize = list->size();
     for (int i = 0; i < msize; i++) {
-        BytesRange * currRange = list->at(i);
+        QSharedPointer<BytesRange> currRange = list->at(i);
 
         if (pos > currRange->upperVal) {
             continue;
         }
         if (pos <= currRange->lowerVal){
             if (currRange->lowerVal > ULLONG_MAX - insertSize){ // at this point the range is ... out of range, removing it
-                delete currRange;
+                currRange.clear();
                 list->removeAt(i);
                 i--; // need to take into account the fact that one object was removed;
                 msize--;
@@ -410,7 +410,7 @@ void BytesRange::moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int 
     if (diff == 0 || list == nullptr) return; // nothing to do here
     int msize = list->size();
     for (int i = 0; i < msize; i++) {
-        BytesRange * currRange = list->at(i);
+        QSharedPointer<BytesRange> currRange = list->at(i);
 
         if (pos > currRange->upperVal) { // probably need some work here
             continue;
@@ -420,7 +420,7 @@ void BytesRange::moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int 
             diff = qAbs(diff);
             if (pos < currRange->lowerVal){
                 if (currRange->lowerVal > ULLONG_MAX - diff){ // at this point the range is ... out of range, removing it
-                    delete currRange;
+                    currRange.clear();
                     list->removeAt(i);
                     i--; // need to take into account the fact that one object was removed;
                     msize--;
@@ -444,7 +444,7 @@ void BytesRange::moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int 
             }
 
             if (currRange->upperVal < (quint64)diff) { // at this point the range is ... out of range, removing it
-                delete currRange;
+                currRange.clear();
                 list->removeAt(i);
                 msize--;
             }
@@ -462,14 +462,14 @@ BytesRangeList::BytesRangeList(QObject * parent) :
 
 BytesRangeList::BytesRangeList(const BytesRangeList &other) :
     QObject(other.parent()),
-    QList<BytesRange *>(other)
+    QList< QSharedPointer<BytesRange> >(other)
 {
     emit updated();
 }
 
 BytesRangeList &BytesRangeList::operator =(const BytesRangeList &other)
 {
-    QList<BytesRange *>::operator =(other);
+    QList<QSharedPointer<BytesRange> >::operator =(other);
     emit updated();
     return *this;
 }
@@ -492,15 +492,15 @@ void BytesRangeList::unify()
 {
     int listSize = size();
     if (listSize > 1) {
-        qSort(this->begin(), this->end(), BytesRange::lessThanFunc);
+        std::sort(this->begin(),this->end(), BytesRange::lessThanFunc);
 
-        BytesRange * previous = at(0);
-        BytesRange * current = nullptr;
+        QSharedPointer<BytesRange> previous = at(0);
+        QSharedPointer<BytesRange> current;
         for (int i = 1; i < listSize;) {
             current = this->at(i);
             if (previous->getLowerVal() == current->getLowerVal() &&
                     previous->getUpperVal() == current->getUpperVal()) {
-                delete this->takeAt(i);
+                this->takeAt(i).clear();
                 listSize--;
                 qWarning() << "[BytesRangeList::unify] duplicate found T_T" << QString::number(previous->getLowerVal(), 16);
             } else {
@@ -519,7 +519,7 @@ ByteSourceAbstract::ByteSourceAbstract(QObject *parent) :
     buttonBar = nullptr;
     upperView = nullptr;
     searchObj = nullptr;
-    cachedRange = nullptr;
+    cachedRange.clear();
     userMarkingsRanges = nullptr;
     currentHistoryPointer = -1;
     applyingHistory = false;
@@ -702,7 +702,7 @@ void ByteSourceAbstract::mark(quint64 start, quint64 end, const QColor &bgcolor,
 
 void ByteSourceAbstract::markNoUpdate(quint64 start, quint64 end, const QColor &bgcolor, const QColor &fgColor, QString toolTip)
 {
-    cachedRange = nullptr;
+    cachedRange.clear();
     if (userMarkingsRanges == nullptr) {
         userMarkingsRanges = new(std::nothrow) BytesRangeList();
         if (userMarkingsRanges == nullptr) {
@@ -726,7 +726,7 @@ void ByteSourceAbstract::viewClearMarking(int start, int end)
 
 void ByteSourceAbstract::clearMarking(quint64 start, quint64 end)
 {
-    cachedRange = nullptr;
+    cachedRange.clear();
     if (userMarkingsRanges != nullptr) {
         BytesRange::clearMarkingFromList(userMarkingsRanges, start,end);
         emit minorUpdate(start,end);
@@ -752,11 +752,11 @@ void ByteSourceAbstract::clearAllMarkings()
 
 void ByteSourceAbstract::clearAllMarkingsNoUpdate()
 {
-    cachedRange = nullptr;
+    cachedRange.clear();
     if (userMarkingsRanges != nullptr) {
         disconnect(userMarkingsRanges, SIGNAL(destroyed()), this, SLOT(onMarkingsListDeleted()));
         while(!userMarkingsRanges->isEmpty())
-            delete userMarkingsRanges->takeFirst();
+            userMarkingsRanges->takeFirst().clear();
         delete userMarkingsRanges;
         userMarkingsRanges = nullptr;
     }
@@ -780,7 +780,7 @@ void ByteSourceAbstract::setStaticMarking(bool value)
 void ByteSourceAbstract::onMarkingsListDeleted()
 {
     userMarkingsRanges = nullptr;
-    cachedRange = nullptr;
+    cachedRange.clear();
 }
 
 bool ByteSourceAbstract::hasMarking() const
@@ -792,15 +792,17 @@ bool ByteSourceAbstract::hasMarking() const
 QColor ByteSourceAbstract::getBgColor(quint64 pos)
 {
     QColor color;
+    QSharedPointer<BytesRange> data = cachedRange.toStrongRef();
     if (userMarkingsRanges != nullptr) {
-        if (cachedRange!= nullptr && cachedRange->isInRange(pos)) {
-            color = cachedRange->backgroundColor;
+        if (!data.isNull() && data->isInRange(pos)) {
+                color = data->backgroundColor;
         } else {
             int size = userMarkingsRanges->size();
             for (int i = 0; i < size ; i++) {
                 if (userMarkingsRanges->at(i)->isInRange(pos)) {
-                    cachedRange = userMarkingsRanges->at(i);
-                    color = cachedRange->backgroundColor;
+                    data = userMarkingsRanges->at(i);
+                    cachedRange = data.toWeakRef();
+                    color = data->backgroundColor;
                     break;
                 }
             }
@@ -822,20 +824,23 @@ QColor ByteSourceAbstract::getBgViewColor(int pos)
 QColor ByteSourceAbstract::getFgColor(quint64 pos)
 {
     QColor color;
+    QSharedPointer<BytesRange> data = cachedRange.toStrongRef();
     if (userMarkingsRanges != nullptr) {
-        if (cachedRange!= nullptr && cachedRange->isInRange(pos)) {
-            color = cachedRange->foregroundColor;
+        if (!data.isNull() && data->isInRange(pos)) {
+                color = data->foregroundColor;
         } else {
         int size = userMarkingsRanges->size();
             for (int i = 0; i < size ; i++) {
                 if (userMarkingsRanges->at(i)->isInRange(pos)) {
-                    cachedRange = userMarkingsRanges->at(i);
-                    color = cachedRange->foregroundColor;
+                    data = userMarkingsRanges->at(i);
+                    cachedRange = data.toWeakRef();
+                    color = data->foregroundColor;
                     break;
                 }
             }
         }
     }
+    data.clear();
     return color;
 }
 
@@ -851,20 +856,24 @@ QColor ByteSourceAbstract::getFgViewColor(int pos)
 QString ByteSourceAbstract::getToolTip(quint64 pos)
 {
     QString texttip;
+    QSharedPointer<BytesRange> data  = cachedRange.toStrongRef();
     if (userMarkingsRanges != nullptr) {
-        if (cachedRange!= nullptr && cachedRange->isInRange(pos)) {
-            texttip = cachedRange->description;
+        if (!data.isNull() && data->isInRange(pos)) {
+                texttip = data->description;
         } else {
             int size = userMarkingsRanges->size();
             for (int i = 0; i < size ; i++) {
                 if (userMarkingsRanges->at(i)->isInRange(pos)) {
-                    cachedRange = userMarkingsRanges->at(i);
-                    texttip = cachedRange->description;
+                    data = userMarkingsRanges->at(i);
+                    cachedRange = data.toWeakRef();
+                    texttip = data->description;
                     break;
                 }
             }
         }
     }
+
+    data.clear();
     return texttip;
 }
 
@@ -1205,7 +1214,7 @@ void ByteSourceStateObj::run()
             writer->writeAttribute(GuiConst::STATE_SIZE, write(size));
             for (int i = 0; i < size; i++) {
                 writer->writeStartElement(GuiConst::STATE_MARKING);
-                BytesRange * br = userMarkingsRanges->at(i);
+                QSharedPointer<BytesRange> br = userMarkingsRanges->at(i);
                 writer->writeAttribute(GuiConst::STATE_BYTE_DESC, write(br->description));
                 writer->writeAttribute(GuiConst::STATE_BYTE_LOWER_VAL, write(br->getLowerVal()));
                 writer->writeAttribute(GuiConst::STATE_BYTE_UPPER_VAL, write(br->getUpperVal()));
@@ -1312,7 +1321,7 @@ void ByteSourceStateObj::run()
 
                         QString desc = readString(attributes.value(GuiConst::STATE_BYTE_DESC));
 
-                        BytesRange * bRange =  new(std::nothrow) BytesRange(lv,uv,desc);
+                        QSharedPointer<BytesRange> bRange(new(std::nothrow) BytesRange(lv,uv,desc));
                         if (bRange == nullptr) {
                             qFatal("Cannot allocate memory for BytesRange X{");
                         }

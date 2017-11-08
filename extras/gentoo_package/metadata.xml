@@ -6,5 +6,7 @@
   <flag name='openssl'>Compile the OpenSSL plugin</flag>
   <flag name='python27'>Compile the python 2.7 plugin</flag>
   <flag name='python3'>Compile the python 3 plugin</flag>
+  <flag name='distorm'>Compile the distorm plugin</flag>
+  <flag name='qscintilla'>Use QScintilla for advanced text display</flag>
 </use>
 </pkgmetadata>

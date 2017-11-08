@@ -4,9 +4,7 @@
 #include <QObject>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#if QT_VERSION >= 0x050000
 #include <QJsonDocument>
-#endif
 #include <QIODevice>
 #include <QTime>
 #include "shared/guiconst.h"
@@ -46,6 +44,12 @@ class ImportExportWorker : public QObject
         void toJSonFile(QIODevice *file);
         void loadFromJson(QJsonDocument *jdoc);
         void loadFromJsonFile(QIODevice *file);
+        void toPlain(QIODevice *file);
+        void loadFromPlain(QIODevice *file);
+
+        void setPlainBase64(bool value);
+        void setPlainToFile(bool value);
+
         QList<Packet *> getLoadedPackets() const;
 
     public slots:
@@ -55,6 +59,7 @@ class ImportExportWorker : public QObject
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     private:
         Packet *nextPacket();
+        void addPlainRawPacket(QByteArray data, QDateTime date = QDateTime::currentDateTime());
         GuiConst::FileOperations ops;
         GuiConst::FileFormat format;
         QString filename;
@@ -69,6 +74,9 @@ class ImportExportWorker : public QObject
         bool enableCompression;
         QTime timer;
         QList<Packet *> loadedPackets;
+        bool plainBase64;
+        bool plainToFile;
+        char plainSeparator;
 };
 
 #endif // IMPORTEXPORTWORKER_H

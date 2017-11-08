@@ -16,6 +16,19 @@ add_definitions ( -Wall -DLIBTRANSFORM_LIBRARY)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+file(STRINGS commonstrings.h VERSION_FILE)
+
+STRING(REGEX MATCH ".* LIB_TRANSFORM_VERSION ([0-9]+);.*" OUPUT_MATCH
+	"${VERSION_FILE}")
+
+
+if ("${CMAKE_MATCH_1}" STREQUAL "")
+	message( FATAL_ERROR " Cannot determine LibTransform version number" )
+else()
+	set (LIBTRANSFORM_VERSION_MAJOR ${CMAKE_MATCH_1})
+	message( STATUS "Lib transform version : ${LIBTRANSFORM_VERSION_MAJOR}")
+endif()
+
 if(WITH_QT5)
 	find_package(Qt5Widgets)
 	find_package(Qt5Core)
@@ -75,6 +88,10 @@ endif(WITH_QT5)
 
 add_library ( transform SHARED ${transform_SRCS} ${RSCS} ${UIS} )
 
+if (UNIX)
+	set_target_properties(transform PROPERTIES VERSION ${LIBTRANSFORM_VERSION_MAJOR}
+		SOVERSION ${LIBTRANSFORM_VERSION_MAJOR})
+endif(UNIX)
 if(WITH_QT5)
 	qt5_use_modules(transform Widgets Svg Concurrent)
 else(WITH_QT5)

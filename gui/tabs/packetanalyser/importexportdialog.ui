@@ -15,8 +15,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>476</height>
+    <width>430</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -108,6 +108,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QRadioButton" name="plainRadioButton">
+        <property name="text">
+         <string>Plain (one packet per line)</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -145,8 +152,54 @@
    </item>
    <item>
     <widget class="QStackedWidget" name="optionsStackedWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
      <widget class="QWidget" name="pcapPage"/>
-     <widget class="QWidget" name="otherPage"/>
+     <widget class="QWidget" name="plainOptionsPage">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="plainDestGroupBox">
+         <property name="title">
+          <string>Destination</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QRadioButton" name="toFileRadioButton">
+            <property name="text">
+             <string>File</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="toClipboardRadioButton">
+            <property name="text">
+             <string>Clipboard</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="base64CheckBox">
+         <property name="text">
+          <string>Base64 encoded</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="plainWarningLabel">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;In this mode timestamps are going to be arbitrary, they are generated following the list order.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

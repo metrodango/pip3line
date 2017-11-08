@@ -25,9 +25,7 @@ Released under AGPL see LICENSE for more information
 #include <QMessageBox>
 #include <QFontMetrics>
 #include <QTimer>
-#if QT_VERSION >= 0x050000
 #include <QtConcurrent>
-#endif
 #include <QtConcurrentRun>
 #include "../sources/searchabstract.h"
 #include "../shared/guiconst.h"
@@ -374,13 +372,9 @@ ByteTableView::ByteTableView(QWidget *parent) :
 
     // Do not touch the resize mode policy !!!
     // Fixed is the only one that has good performance
-#if QT_VERSION >= 0x050000
+
     verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-#else
-    verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    horizontalHeader()->setResizeMode(QHeaderView::Fixed);
-#endif
     verticalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     horizontalHeader()->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     currentSelectionModel = nullptr;

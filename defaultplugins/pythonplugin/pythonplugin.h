@@ -22,9 +22,7 @@ class Pip3lineCallback;
 class PYTHONPLUGINSHARED_EXPORT PythonPlugin : public QObject, public TransformFactoryPluginInterface
 {
         Q_OBJECT
-#if QT_VERSION >= 0x050000
         Q_PLUGIN_METADATA(IID pluginIID FILE "pythonplugin.json")
-#endif
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
 

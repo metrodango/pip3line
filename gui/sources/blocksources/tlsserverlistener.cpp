@@ -15,11 +15,7 @@ BaseTcpServer::~BaseTcpServer()
 
 }
 
-#if QT_VERSION >= 0x050000
 void BaseTcpServer::incomingConnection(qintptr socketDescriptor)
-#else
-void BaseTcpServer::incomingConnection(int socketDescriptor)
-#endif
 {
     emit newClient(socketDescriptor);
 }
@@ -114,11 +110,7 @@ bool TLSServerListener::startListening()
         if (server == nullptr) {
             qFatal("Cannot allocate memory for BaseTcpServer X{");
         }
-#if QT_VERSION >= 0x050000
         connect(server,SIGNAL(newClient(qintptr)), SLOT(handlingClient(qintptr)),Qt::QueuedConnection);
-#else
-        connect(server,SIGNAL(newClient(int)), SLOT(handlingClient(int)),Qt::QueuedConnection);
-#endif
     }
 
     if (server->isListening()) { // already listening nothing to do
@@ -270,11 +262,7 @@ void TLSServerListener::dataReceived()
     }
 }
 
-#if QT_VERSION >= 0x050000
 void TLSServerListener::handlingClient(qintptr socketDescriptor)
-#else
-void TLSServerListener::handlingClient(int socketDescriptor)
-#endif
 {
     qDebug() << "[TLSServerListener::handlingClient] New client" << socketDescriptor;
 

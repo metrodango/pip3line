@@ -221,8 +221,8 @@ void BasicSource::remove(quint64 offset, int length, quintptr source)
                     offset = offset - length;
                 }
             } else {
-                if (offset + (quint64)length + 1 > (quint64)rawData.size())
-                    end = rawData.size() - 1;
+                if (offset + (quint64)length > (quint64)rawData.size())
+                    end = rawData.size();
                 else
                     end = offset + (quint64)length - 1;
             }

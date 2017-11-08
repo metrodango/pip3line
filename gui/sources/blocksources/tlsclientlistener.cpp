@@ -329,7 +329,6 @@ void TLSClientListener::onTLSStarted()
                     .arg(sslConfiguration->getSslPeerNameSNI())
                     .arg(socket->peerAddress().toString())
                     .arg(socket->peerPort()));
-#if QT_VERSION >= 0x050000
 
     QStringList infoList = socket->peerCertificate().subjectInfo(QSslCertificate::CommonName);
 
@@ -363,29 +362,6 @@ void TLSClientListener::onTLSStarted()
             mess.append(QString("%1,").arg(infoList.at(i)));
         mess.chop(1);
     }
-#else
-    QString info = socket->peerCertificate().subjectInfo(QSslCertificate::CommonName);
-
-    if (!info.isEmpty()) {
-        mess.append("CN: ").append(info);
-    }
-
-    info = socket->peerCertificate().subjectInfo(QSslCertificate::Organization);
-
-    if (!info.isEmpty()) {
-        mess.append(" O: ").append(info);
-    }
-    info = socket->peerCertificate().subjectInfo(QSslCertificate::OrganizationalUnitName);
-    if (!info.isEmpty()) {
-        mess.append(" OU: ").append(info);
-    }
-
-    info = socket->peerCertificate().subjectInfo(QSslCertificate::CountryName);
-    if (!info.isEmpty()) {
-        mess.append(" Country: ").append(info);
-    }
-
-#endif
     mess.append("]");
     emit log(mess, actualID, Pip3lineConst::LSTATUS);
 }
