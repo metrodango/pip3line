@@ -206,6 +206,7 @@ namespace GuiConst
     const QString START_STR = QObject::tr("Start");
     const QString STOP_STR = QObject::tr("Stop");
     const QString TEXT_TEXT = QObject::tr("Text");
+    const QString JSON_TEXT = QObject::tr("Json");
     const QString ORIGINAL_DATA_STR = QObject::tr("Original");
 
 #if defined(Q_OS_WIN32)

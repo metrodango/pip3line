@@ -24,7 +24,8 @@ ByteRotWidget::ByteRotWidget(ByteRot * transf, QWidget *parent) :
     transform = transf;
     ui->spinBox->setValue(transform->getRotation());
 
-    connect(ui->spinBox, SIGNAL(valueChanged(int)), SLOT(onRotationChanged(int)));
+    //connect(ui->spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [=](int val) {transform->setRotation(val);});
+    connect(ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(onRotationChanged(int)));
 }
 
 ByteRotWidget::~ByteRotWidget()

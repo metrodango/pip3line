@@ -43,6 +43,7 @@ Released under AGPL see LICENSE for more information
 #include <QScrollBar>
 #include <QDialog>
 #include <QAction>
+#include <QTimer>
 #include "guihelper.h"
 #include "pcapio/pcapdef.h"
 #include "sources/blocksources/blockssource.h"
@@ -73,6 +74,8 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     ui->setupUi(this);
     sendToMenu = nullptr;
     copyAsMenu = nullptr;
+    sendPacketsMenu = nullptr;
+    sendPacketsToNew = nullptr;
 
     optionsDialog = nullptr;
     filterDialog = nullptr;
@@ -84,7 +87,7 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
         qFatal("Cannot allocate memory for NewViewMenu X{");
     }
 
-    connect(tabHeaderViewsContextMenu, SIGNAL(newViewRequested()), SLOT(onNewTabRequested()));
+    connect(tabHeaderViewsContextMenu, &NewViewMenu::newViewRequested, this, &PacketAnalyserTab::onNewTabRequested);
 
     styleDelegate = new(std::nothrow) PacketStyledItemDelegate();
     if (styleDelegate == nullptr) {
@@ -198,40 +201,40 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     ui->mergePacketsPushButton->setMenu(autoMergeMenu);
 
     // connecting stuff
-    connect(bytesource,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)),Qt::QueuedConnection);
-    connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onByteSourceUpdated(quintptr)), Qt::UniqueConnection);
-    connect(ui->packetTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onSelectionChanged(QItemSelection)));
-    connect(ui->packetTableView,SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRightClick(QPoint)));
-    connect(packetModel, SIGNAL(sendRequest(TransformRequest*)), guiHelper->getCentralTransProc(), SLOT(processRequest(TransformRequest*)), Qt::QueuedConnection);
-    connect(packetModel, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), guiHelper->getLogger(), SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-    connect(packetModel, SIGNAL(modelReset()), SLOT(onModelReseted()));
-    connect(packetModel, SIGNAL(updated()),&updateTimer, SLOT(start()));
-    connect(ui->actionMergePacketsNow, SIGNAL(triggered(bool)),this, SLOT(onAutoMergeRequested()));
-    connect(ui->actionAuto_merge_packets, SIGNAL(toggled(bool)), packetModel, SLOT(setAutoMergeConsecutivePackets(bool)));
-    connect(ui->clearPushButton, SIGNAL(clicked(bool)), this, SLOT(onClearListClicked()));
-    connect(orchCombo, SIGNAL(newOrchestrator(SourcesOrchestatorAbstract*)), this, SLOT(setOrchestrator(SourcesOrchestatorAbstract*)));
+    connect(bytesource, &ByteSourceAbstract::log, logger, &LoggerWidget::logMessage,Qt::QueuedConnection);
+    connect(bytesource, &ByteSourceAbstract::updated, this, &PacketAnalyserTab::onByteSourceUpdated, Qt::UniqueConnection);
+    connect(ui->packetTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &PacketAnalyserTab::onSelectionChanged);
+    connect(ui->packetTableView,&QTableView::customContextMenuRequested, this, &PacketAnalyserTab::onRightClick);
+    connect(packetModel, &PacketModelAbstract::sendRequest, guiHelper->getCentralTransProc(), &ThreadedProcessor::processRequest, Qt::QueuedConnection);
+    connect(packetModel, &PacketModelAbstract::log, guiHelper->getLogger(), &LoggerWidget::logMessage, Qt::QueuedConnection);
+    connect(packetModel, &PacketModelAbstract::modelReset, this, &PacketAnalyserTab::onModelReseted);
+    //connect(packetModel, &PacketModelAbstract::updated , &updateTimer, qOverload<>(&QTimer::start));
+    connect(packetModel, SIGNAL(updated()), &updateTimer, SLOT(start()));
+    connect(ui->actionMergePacketsNow, &QAction::triggered,this, &PacketAnalyserTab::onAutoMergeRequested);
+    connect(ui->actionAuto_merge_packets, &QAction::toggled, packetModel, &PacketModelAbstract::setAutoMergeConsecutivePackets);
+    connect(ui->clearPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onClearListClicked);
+    connect(orchCombo, &OrchestratorChooser::newOrchestrator, this, &PacketAnalyserTab::setOrchestrator);
 
-    connect(ui->viewTabWidget, SIGNAL(tabCloseRequested(int)), SLOT(onDeleteTab(int)));
+    connect(ui->viewTabWidget, &QTabWidget::tabCloseRequested,this, &PacketAnalyserTab::onDeleteTab);
 
-    connect(ui->importPushButton, SIGNAL(clicked(bool)), SLOT(onImport()));
-    connect(ui->exportPushButton, SIGNAL(clicked(bool)), SLOT(onExport()));
-    connect(ui->optionsPushButton, SIGNAL(clicked(bool)), SLOT(onOptionsClicked()));
-    connect(ui->refreshPushButton, SIGNAL(clicked(bool)), packetModel, SLOT(refreshAllColumn()));
-    connect(ui->forwardPushButton, SIGNAL(clicked(bool)), this, SLOT(onForwardPressed()));
-    connect(ui->addColumnPushButton, SIGNAL(clicked(bool)), this, SLOT(onAddNewColumn()));
-    //connect(ui->addViewPushButton, SIGNAL(clicked(bool)), this, SLOT(onNewTabRequested()));
+    connect(ui->importPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onImport);
+    connect(ui->exportPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onExport);
+    connect(ui->optionsPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onOptionsClicked);
+    connect(ui->refreshPushButton, &QPushButton::clicked, packetModel, &PacketModelAbstract::refreshAllColumn);
+    connect(ui->forwardPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onForwardPressed);
+    connect(ui->addColumnPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onAddNewColumn);
     ui->addViewPushButton->setMenu(tabHeaderViewsContextMenu);
 
-    connect(ui->packetTableView->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), this, SLOT(onScrollBarChanged(int, int)));
-    connect(ui->packetTableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onItemClicked(QModelIndex)));
-    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
+    connect(ui->packetTableView->verticalScrollBar(), &QScrollBar::rangeChanged, this, &PacketAnalyserTab::onScrollBarChanged);
+    connect(ui->packetTableView, &QTableView::clicked, this, &PacketAnalyserTab::onItemClicked);
+    connect(&updateTimer, &QTimer::timeout, this, &PacketAnalyserTab::updateStatus);
 
-    connect(ui->interceptPushButton, SIGNAL(clicked(bool)), this, SLOT(onInterceptClicked()));
-    // connect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdated(quintptr))); doing that later, dynamically
-    connect(ui->trackPushButton, SIGNAL(toggled(bool)), this, SLOT(setTrackingLast(bool)));
-    connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(copyAsUpdate()));
-    connect(ui->filterPushButton, SIGNAL(clicked(bool)), this, SLOT(onFilter()));
-    connect(guiHelper, SIGNAL(hexTableSizesUpdated()), this, SLOT(onFontUpdated()));
+    connect(ui->interceptPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onInterceptClicked);
+    connect(ui->trackPushButton, &QPushButton::toggled, this, &PacketAnalyserTab::setTrackingLast);
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &PacketAnalyserTab::copyAsUpdate);
+    connect(ui->filterPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onFilter);
+    connect(guiHelper, &GuiHelper::hexTableSizesUpdated, this, &PacketAnalyserTab::onFontUpdated);
+    connect(guiHelper, &GuiHelper::registeredPacketsAnalysersUpdated, this, &PacketAnalyserTab::sendPacketsToUpdate, Qt::QueuedConnection);
 }
 
 PacketAnalyserTab::~PacketAnalyserTab()
@@ -283,13 +286,19 @@ void PacketAnalyserTab::setData(const QByteArray & data)
         return; // nothign to do data is empty
     }
     if (orchestrator != nullptr) {
-        Packet *recPac = new(std::nothrow) Packet(data);
+        QSharedPointer<Packet> recPac = QSharedPointer<Packet> (new(std::nothrow) Packet(data));
         if (recPac == nullptr)
             qFatal("Cannot allocate memory for Packet X{");
 
         packetModel->addPacket(recPac);
         orchestrator->postPacket(recPac);
     }
+}
+
+void PacketAnalyserTab::addPackets(const QList<QSharedPointer<Packet> > &packets)
+{
+    packetModel->addPackets(packets);
+    // not sure if we should post all the packets as well ... we'll see if the case comes up
 }
 
 BaseStateAbstract *PacketAnalyserTab::getStateMngtObj()
@@ -340,9 +349,8 @@ void PacketAnalyserTab::onImport()
                 qFatal("Cannot allocate memory for StateOrchestrator X{");
             }
 
-            connect(stateOrchestrator, SIGNAL(finished()), this, SLOT(onSaveLoadFinished()));
-            connect(stateOrchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
-                    logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+            connect(stateOrchestrator, &StateOrchestrator::finished, this, &PacketAnalyserTab::onSaveLoadFinished);
+            connect(stateOrchestrator, &StateOrchestrator::log, logger, &LoggerWidget::logMessage);
 
             setEnabled(false); // disabling the tab temporarly
             if (!stateOrchestrator->initialize()) {
@@ -373,7 +381,7 @@ void PacketAnalyserTab::onImport()
             worker->setPlainBase64(ied->isPlainBase64());
             worker->setPlainToFile(ied->isPlainFile());
 
-            connect(worker,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
+            connect(worker,&ImportExportWorker::log, this, &PacketAnalyserTab::logMessage, Qt::QueuedConnection);
 
             QtConcurrent::run(worker, &ImportExportWorker::run);
             // only hide for pcap format, as packets do not have the "direction" property in this case
@@ -405,9 +413,8 @@ void PacketAnalyserTab::onExport()
                 qFatal("Cannot allocate memory for StateOrchestrator X{");
             }
 
-            connect(stateOrchestrator, SIGNAL(finished()), this, SLOT(onSaveLoadFinished()));
-            connect(stateOrchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
-                    logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+            connect(stateOrchestrator, &StateOrchestrator::finished, this, &PacketAnalyserTab::onSaveLoadFinished);
+            connect(stateOrchestrator, &StateOrchestrator::log, logger, &LoggerWidget::logMessage);
 
             setEnabled(false); // disabling the tab temporarly
             if (!stateOrchestrator->initialize()) {
@@ -473,8 +480,7 @@ void PacketAnalyserTab::onModelReseted()
 
 void PacketAnalyserTab::clearCurrentPacket()
 {
-    currentPacket = nullptr; // in case this was not already done
-    // disconnect(bytesource, SIGNAL(updated(quintptr)), this, SLOT(onCurrentPacketUpdatedByGui(quintptr)));
+    currentPacket.clear(); // in case this was not already done
     bytesource->clearAllMarkings();
     bytesource->clear();
     bytesource->historyClear();
@@ -484,6 +490,32 @@ void PacketAnalyserTab::clearCurrentPacket()
 void PacketAnalyserTab::copyAsUpdate()
 {
     guiHelper->updateCopyContextMenu(copyAsMenu);
+}
+
+void PacketAnalyserTab::sendPacketsToUpdate()
+{
+    sendPacketsMenu->clear();
+    sendPacketsToNew = new(std::nothrow) QAction(tr("New Packets Analyzer"), sendPacketsMenu);
+    if (sendPacketsToNew == nullptr) {
+        qFatal("Cannot allocate memory for sendPacketsToNew X{");
+        return;
+    }
+
+    sendPacketsMenu->addAction(sendPacketsToNew);
+    sendPacketsMenu->addSeparator();
+
+    QList<PacketAnalyserTab *> list = guiHelper->getRegisteredPacketsAnalysers();
+    list.removeAll(this); // removing oneself
+    for (int i = 0; i < list.size(); i++) {
+        PacketAnalyserTab * tab = list.at(i);
+        QAction * action = new(std::nothrow) QAction(tab->getName(), sendPacketsMenu);
+        if (action == nullptr) {
+            qFatal("Cannot allocate memory for action sendPacketsToUpdate X{");
+            return;
+        }
+        action->setData(QVariant(i));
+        sendPacketsMenu->addAction(action);
+    }
 }
 
 void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
@@ -496,7 +528,7 @@ void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
             if (last.isValid()) {
                 int index = last.row();
                 currentPacket = packetModel->getPacket(index);
-                if (currentPacket != nullptr) {
+                if (!currentPacket.isNull()) {
                     bytesource->setData(currentPacket->getData(),(quintptr)this);
                     sortFilterProxyModel->setSelectedPacket(index);
                     checkIfOriginalTabNeeded();
@@ -513,6 +545,26 @@ void PacketAnalyserTab::onSelectionChanged(const QItemSelection &selection)
 void PacketAnalyserTab::onRightClick(QPoint pos)
 {
     if (globalContextMenu != nullptr) {
+        QModelIndexList selectList = ui->packetTableView->selectionModel()->selectedRows();
+        if (selectList.isEmpty()) { // 0
+            merge->setEnabled(false);
+            split->setEnabled(false);
+            deleteSelection->setEnabled(false);
+            copyAsMenu->setEnabled(false);
+            sendToMenu->setEnabled(false);
+        } else if (selectList.size() == 1) { //1
+            merge->setEnabled(false);
+            deleteSelection->setEnabled(true);
+            split->setEnabled(true);
+            copyAsMenu->setEnabled(true);
+            sendToMenu->setEnabled(true);
+        } else { // >1
+            merge->setEnabled(true);
+            split->setEnabled(false);
+            deleteSelection->setEnabled(true);
+            copyAsMenu->setEnabled(true);
+            sendToMenu->setEnabled(true);
+        }
         globalContextMenu->exec(ui->packetTableView->viewport()->mapToGlobal(pos));
     }
 }
@@ -542,7 +594,7 @@ void PacketAnalyserTab::onOptionsClicked()
         if (optionsDialog == nullptr) {
             qFatal("Cannot allocate memory for PacketAnalyserOptionsDialog X{");
         }
-        connect(optionsDialog, SIGNAL(rejected()), SLOT(onOptionDialogClosed()));
+        connect(optionsDialog, &PacketAnalyserOptionsDialog::rejected, this,  &PacketAnalyserTab::onOptionDialogClosed);
 
         optionsDialog->show();
     } else {
@@ -570,24 +622,24 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
 
         ui->forwardPushButton->setEnabled(true);
 
-        connect(orchestrator, SIGNAL(forwardingChanged(bool)), this, SLOT(setForwarding(bool)));
-        connect(orchestrator, SIGNAL(newPacket(Packet*)), this, SLOT(receiveNewPacket(Packet*)));
-        connect(orchestrator, SIGNAL(connectionsChanged()), this, SLOT(onOrchestratorConnectionsChanged()));
-        connect(orchestrator, SIGNAL(packetInjected(Packet*)), packetModel, SLOT(addPacket(Packet*)));
-        connect(orchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
-        connect(orchestrator, SIGNAL(stopped()), ui->messagesLabel, SLOT(clear()));
+        connect(orchestrator, &SourcesOrchestatorAbstract::forwardingChanged, this, &PacketAnalyserTab::setForwarding);
+        connect(orchestrator, &SourcesOrchestatorAbstract::newPacket, this, &PacketAnalyserTab::receiveNewPacket);
+        connect(orchestrator, &SourcesOrchestatorAbstract::connectionsChanged, this, &PacketAnalyserTab::onOrchestratorConnectionsChanged);
+        connect(orchestrator, &SourcesOrchestatorAbstract::packetInjected, packetModel, &PacketModelAbstract::addPacket);
+        connect(orchestrator, &SourcesOrchestatorAbstract::log, this, &PacketAnalyserTab::logMessage);
+        connect(orchestrator, &SourcesOrchestatorAbstract::stopped, ui->messagesLabel, &QLabel::clear);
 
         QWidget * controlWid = orchestrator->getControlGui(this);
         if (controlWid != nullptr) {
             ui->toolBarLayout->insertWidget(ui->toolBarLayout->indexOf(orchCombo) + 1,controlWid);
-            connect(orchestrator, SIGNAL(guiRequested()), orchCombo, SLOT(showConfPanel()));
+            connect(orchestrator, &SourcesOrchestatorAbstract::guiRequested, orchCombo, [=](){ orchCombo->showConfPanel();});
         }
 
         for (int i = 0 ; i < orchestrator->blockSourceCount(); i++) {
             BlocksSource * bs = orchestrator->getBlockSource(i);
             if (bs != nullptr) {
-                connect(bs, SIGNAL(inboundTranformSelectionRequested()), this, SLOT(onInboundTransformRequested()));
-                connect(bs, SIGNAL(outboundTranformSelectionRequested()), this, SLOT(onOutboundTransformRequested()));
+                connect(bs, &BlocksSource::inboundTranformSelectionRequested, this, &PacketAnalyserTab::onInboundTransformRequested);
+                connect(bs, &BlocksSource::outboundTranformSelectionRequested, this, &PacketAnalyserTab::onOutboundTransformRequested);
             }
         }
 
@@ -604,7 +656,7 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
     }
 }
 
-void PacketAnalyserTab::receiveNewPacket(Packet *packet)
+void PacketAnalyserTab::receiveNewPacket(QSharedPointer<Packet> packet)
 {
     if (intercepting) {
 
@@ -633,13 +685,13 @@ void PacketAnalyserTab::onForwardPressed()
     if (orchestrator != nullptr) {
         if (intercepting) {
             if (!packetQueue.isEmpty()) { // sending the last packet
-                Packet * pa = packetQueue.dequeue();
+                QSharedPointer<Packet> pa = packetQueue.dequeue();
                 orchestrator->postPacket(pa);
                 if (!packetQueue.isEmpty()) {
                     packetModel->addPacket(packetQueue.head());
                 }
             }
-        } else if (currentPacket != nullptr) {
+        } else if (!currentPacket.isNull()) {
             orchestrator->postPacket(currentPacket);
         }
     }
@@ -725,7 +777,7 @@ void PacketAnalyserTab::onScrollBarChanged(int min, int max)
 
 void PacketAnalyserTab::onByteSourceUpdated(quintptr source)
 {
-    if (currentPacket != nullptr) { // current packet is null during cleaning operations, no need to update anything
+    if (!currentPacket.isNull()) { // current packet is null during cleaning operations, no need to update anything
         if (source != (quintptr)this) { // if the source is not the tab object (i.e. the source is the hex editor)
             // write the data back to the packet
             currentPacket->setData(bytesource->getRawData());
@@ -767,6 +819,16 @@ void PacketAnalyserTab::setAutoMerge(bool value)
     ui->actionAuto_merge_packets->setChecked(value);
 }
 
+void PacketAnalyserTab::registerToGlobal()
+{
+    guiHelper->registerPacketsAnalyser(this);
+}
+
+void PacketAnalyserTab::unregisterFromGlobal()
+{
+    guiHelper->unregisterPacketsAnalyser(this);
+}
+
 bool PacketAnalyserTab::getIntercepting() const
 {
     return intercepting;
@@ -801,7 +863,7 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
         if (nindex != PacketModelAbstract::INVALID_POS) {
             QModelIndex index = packetModel->createIndex(nindex,0);
             index = sortFilterProxyModel->mapFromSource(index);
-            Packet * pac = packetModel->getPacket(nindex);
+            QSharedPointer<Packet> pac = packetModel->getPacket(nindex);
             if (pac != nullptr) {
                 currentPacket = pac;
                 bytesource->setData(currentPacket->getData(), (quintptr)this);
@@ -847,7 +909,7 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
 
 void PacketAnalyserTab::buildContextMenu()
 {
-    globalContextMenu = new(std::nothrow) QMenu(this);
+    globalContextMenu = new(std::nothrow) QMenu();
     if (globalContextMenu == nullptr) {
         qFatal("Cannot allocate memory for globalContextMenu X{");
         return;
@@ -858,7 +920,7 @@ void PacketAnalyserTab::buildContextMenu()
         qFatal("Cannot allocate memory for sendToMenu X{");
         return;
     }
-    connect(sendToMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSendToTriggered(QAction*)), Qt::UniqueConnection);
+    connect(sendToMenu, &QMenu::triggered, this, &PacketAnalyserTab::onSendToTriggered, Qt::UniqueConnection);
     globalContextMenu->addMenu(sendToMenu);
     globalContextMenu->addSeparator();
 
@@ -867,8 +929,19 @@ void PacketAnalyserTab::buildContextMenu()
         qFatal("Cannot allocate memory for copyMenu X{");
         return;
     }
-    connect(copyAsMenu, SIGNAL(triggered(QAction*)), this, SLOT(onCopyAs(QAction*)), Qt::UniqueConnection);
+    connect(copyAsMenu, &QMenu::triggered, this, &PacketAnalyserTab::onCopyAs, Qt::UniqueConnection);
+    copyAsUpdate();
     globalContextMenu->addMenu(copyAsMenu);
+
+    sendPacketsMenu = new(std::nothrow) QMenu(tr("Send packet(s)"));
+    if (sendPacketsMenu == nullptr) {
+        qFatal("Cannot allocate memory for sendPacketsMenu X{");
+        return;
+    }
+    connect(sendPacketsMenu, &QMenu::triggered, this, &PacketAnalyserTab::onSendPackets, Qt::UniqueConnection);
+
+    globalContextMenu->addMenu(sendPacketsMenu);
+
     globalContextMenu->addSeparator();
 
     merge = new(std::nothrow) QAction(tr("merge"), globalContextMenu);
@@ -895,7 +968,7 @@ void PacketAnalyserTab::buildContextMenu()
 
     globalContextMenu->addAction(deleteSelection);
 
-    connect(globalContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onContextMenuAction(QAction*)), Qt::UniqueConnection);
+    connect(globalContextMenu, &QMenu::triggered, this, &PacketAnalyserTab::onContextMenuAction, Qt::UniqueConnection);
 }
 
 void PacketAnalyserTab::buildHeadersContextMenu()
@@ -916,8 +989,8 @@ void PacketAnalyserTab::buildHeadersContextMenu()
     }
     headerContextMenu->addAction(deleteColumn);
 
-    connect(deleteColumn, SIGNAL(triggered(bool)), this, SLOT(onDeleteColumn()));
-    connect(headers, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onHeaderContextMenu(QPoint)));
+    connect(deleteColumn, &QAction::triggered, this, &PacketAnalyserTab::onDeleteColumn);
+    connect(headers, &QHeaderView::customContextMenuRequested, this, &PacketAnalyserTab::onHeaderContextMenu);
 }
 
 QList<TabAbstract::ViewTab> PacketAnalyserTab::getTabData()
@@ -960,7 +1033,7 @@ void PacketAnalyserTab::onSendToTriggered(QAction *action)
     QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
 
     for (int i = 0; i < modelList.size(); i++) {
-        Packet * pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
+        QSharedPointer<Packet> pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
         if (pac != nullptr)
             selectedData.append(pac->getData());
         else
@@ -983,8 +1056,8 @@ void PacketAnalyserTab::onCopyAs(QAction *action)
     QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
 
     for (int i = 0; i < modelList.size(); i++) {
-        Packet * pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
-        if (pac != nullptr)
+        QSharedPointer<Packet> pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
+        if (!pac.isNull())
             selectedData.append(pac->getData());
         else
             qCritical() << tr("[PacketAnalyserTab::onCopyAs] packet is nullptr T_T");
@@ -992,9 +1065,40 @@ void PacketAnalyserTab::onCopyAs(QAction *action)
     guiHelper->copyAction(action->text(), selectedData);
 }
 
+void PacketAnalyserTab::onSendPackets(QAction* action)
+{
+    QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
+    QList<QSharedPointer<Packet> > list;
+    for (int i = 0; i < modelList.size(); i++) {
+        QSharedPointer<Packet> pac = QSharedPointer<Packet>(packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)))->clone());
+        if (!pac.isNull())
+            list.append(pac);
+        else
+            qCritical() << tr("[PacketAnalyserTab::onSendToNewPacketAnalyser] packet is nullptr T_T");
+    }
+
+    if (!list.isEmpty()) {
+        if (action == sendPacketsToNew) {
+            emit guiHelper->newPacketAnalyserRequested(list);
+        } else {
+            QList<PacketAnalyserTab *> tablist = guiHelper->getRegisteredPacketsAnalysers();
+            tablist.removeAll(this); // removing oneself
+            bool ok = false;
+            int index = action->data().toInt(&ok);
+            if (ok && index < tablist.size()) {
+                tablist.at(index)->addPackets(list);
+            } else {
+                qCritical() << tr("[PacketAnalyserTab::onSendPackets] Index is wrong T_T");
+            }
+
+        }
+    }
+
+}
+
 void PacketAnalyserTab::checkIfOriginalTabNeeded()
 {
-    if (currentPacket != nullptr && currentPacket->hasBeenModified()) {
+    if (!currentPacket.isNull() && currentPacket->hasBeenModified()) {
         oriBytesource->setReadOnly(false);
         oriBytesource->setData(currentPacket->getOriginalData());
         oriBytesource->setReadOnly(true);
@@ -1105,7 +1209,7 @@ void PacketAnalyserTab::onFilter()
         if (filterDialog == nullptr) {
             qFatal("Cannot allocate memory for FilterDialog X{");
         }
-        connect(filterDialog, SIGNAL(finished(int)), this, SLOT(onFilterDialogClosed()));
+        connect(filterDialog, &FilterDialog::finished, this, &PacketAnalyserTab::onFilterDialogClosed);
 
         filterDialog->show();
     } else {
@@ -1466,7 +1570,7 @@ void PacketAnalyserTabStateObj::run()
                             readEndElement(GuiConst::STATE_TABVIEW); // closing now, because there is no child defined anyway
                             if (attrList.hasAttribute(GuiConst::STATE_TYPE)) {
                                 int type = readInt(attrList.value(GuiConst::STATE_TYPE),&ok);
-                                if (ok && (type == 0 || type == 1 || type == 2 || type == 3)) {
+                                if (ok && (type == 0 || type == 1 || type == 2 || type == 3 || type == 4)) {
                                     vt.type = (TabAbstract::ViewType) type;
                                 } else {
                                     qWarning() << "Invalid state type for this view, skipping";

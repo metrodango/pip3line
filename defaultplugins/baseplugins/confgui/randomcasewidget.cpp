@@ -21,14 +21,11 @@ RandomCaseWidget::RandomCaseWidget(RandomCase *ntransform, QWidget *parent) :
     }
     transform = ntransform;
     ui->setupUi(this);
+
+    connect(ui->pushButton, &QPushButton::clicked, this, [=](bool){transform->reRandomize();});
 }
 
 RandomCaseWidget::~RandomCaseWidget()
 {
     delete ui;
-}
-
-void RandomCaseWidget::onRerandomize()
-{
-    transform->reRandomize();
 }

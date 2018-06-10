@@ -58,7 +58,7 @@ void TcpSocketProcessor::run()
         QString cAddr = socket->peerAddress().toString();
         int port = socket->peerPort();
         emit status(tr("New Client : %1:%2").arg(cAddr).arg(port), TCP_SOCKET);
-        connect(socket, SIGNAL(disconnected()), this, SLOT(stop()));
+        connect(socket, &QTcpSocket::disconnected, this, &TcpSocketProcessor::stop);
         in  = socket;
         if (out == nullptr)
             out = in;
@@ -77,7 +77,7 @@ TcpServer::TcpServer(TransformMgmt * tFactory, QObject *parent) :
 {
     tcpServer = new(std::nothrow) InternalTcpServer(parent);
     if (tcpServer != nullptr)
-        connect(tcpServer, SIGNAL(newClient(qintptr)), this, SLOT(processingNewClient(qintptr)));
+        connect(tcpServer, &InternalTcpServer::newClient, this, &TcpServer::processingNewClient);
 
     else {
         qFatal("Cannot allocate memory for tcpServer X{");
@@ -111,9 +111,10 @@ void TcpServer::processingNewClient(qintptr socketDescriptor)
         clientProcessor.append(processor);
         confLocker.unlock();
 
-        connect(processor,SIGNAL(finished(TcpSocketProcessor*)), SLOT(processorFinished(TcpSocketProcessor*)), Qt::QueuedConnection);
-        connect(processor,SIGNAL(error(QString,QString)), SLOT(logError(QString,QString)));
-        connect(processor,SIGNAL(status(QString,QString)), SLOT(logStatus(QString,QString)));
+        connect(processor, &TcpSocketProcessor::finished, this, &TcpServer::processorFinished, Qt::QueuedConnection);
+        connect(processor, &TcpSocketProcessor::error, this, &TcpServer::logError);
+        connect(processor, &TcpSocketProcessor::status, this, &TcpServer::logStatus);
+        //connect(this, &TcpServer::newTransformChain, processor, qOverload<const QString &>(&TcpSocketProcessor::setTransformsChain));
         connect(this, SIGNAL(newTransformChain(QString)), processor, SLOT(setTransformsChain(QString)));
         processor->start();
     } else {

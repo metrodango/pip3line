@@ -25,9 +25,9 @@ class HMACTransformWidget : public QWidget
     public:
         explicit HMACTransformWidget(HMACTransform *transform, QWidget *parent = 0);
         ~HMACTransformWidget();
-
+    public slots:
+        void onHashChanged(int val);
     private slots:
-        void onHashSelected(int index);
         void onKeyLineReturn();
 
     private:

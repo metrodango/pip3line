@@ -17,12 +17,14 @@ class TLSClientListener : public IPBlocksSources
         QString getName();
         QString getDescription();
         bool isStarted();
+        QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
     public slots:
         void sendBlock(Block *block);
         bool startListening();
         void stopListening();
         void setSpecificConnection(int sourceId, ConnectionDetails cd);
         void onConnectionClosed(int cid);
+        void createConnection();
     private slots:
         void dataReceived();
         void onSslErrors(const QList<QSslError> & errors);

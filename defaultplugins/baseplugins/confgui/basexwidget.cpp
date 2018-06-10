@@ -22,8 +22,9 @@ BaseXWidget::BaseXWidget(BaseX *ntransform, QWidget *parent) :
     ui->setupUi(this);
     ui->baseSpinBox->setValue(transform->getBase());
     ui->uppercaseCheckBox->setChecked(transform->getUppercase());
-    connect(ui->baseSpinBox,SIGNAL(valueChanged(int)), this, SLOT(onBaseChange(int)));
-    connect(ui->uppercaseCheckBox,SIGNAL(toggled(bool)), this, SLOT(onUpperCaseChange(bool)));
+    //connect(ui->baseSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, [=](int val){ transform->setBase(val);});
+    connect(ui->baseSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onBaseChanged(int)));
+    connect(ui->uppercaseCheckBox, &QCheckBox::toggled, this, [=]( bool val) { transform->setUppercase(val);});
 }
 
 BaseXWidget::~BaseXWidget()
@@ -31,12 +32,8 @@ BaseXWidget::~BaseXWidget()
     delete ui;
 }
 
-void BaseXWidget::onBaseChange(int val)
+void BaseXWidget::onBaseChanged(int val)
 {
     transform->setBase(val);
 }
 
-void BaseXWidget::onUpperCaseChange(bool val)
-{
-    transform->setUppercase(val);
-}

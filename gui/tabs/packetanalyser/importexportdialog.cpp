@@ -37,15 +37,15 @@ ImportExportDialog::ImportExportDialog(GuiConst::FileOperations type, bool hasSe
     ui->base64CheckBox->setChecked(true);
 
     ui->compressCheckBox->setChecked(true);
-    connect(ui->fileNamePushButton, SIGNAL(clicked(bool)), SLOT(onChooseFileName()));
-    connect(ui->buttonBox, SIGNAL(accepted()), SLOT(onAccept()));
+    connect(ui->fileNamePushButton, &QPushButton::clicked,this, &ImportExportDialog::onChooseFileName);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted,this, &ImportExportDialog::onAccept);
 
-    connect(ui->opPacketRadioButton, SIGNAL(toggled(bool)),this, SLOT(onOpTypeToggled(bool)));
-    connect(ui->pcapRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPcapToggled(bool)));
-    connect(ui->plainRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPlainToggled(bool)));
-    connect(ui->xmlRadioButton, SIGNAL(toggled(bool)), this, SLOT(onXmlorJsonToggled(bool)));
-    connect(ui->jsonRadioButton, SIGNAL(toggled(bool)), this, SLOT(onXmlorJsonToggled(bool)));
-    connect(ui->toClipboardRadioButton, SIGNAL(toggled(bool)), this, SLOT(onToClipboardToggled(bool)));
+    connect(ui->opPacketRadioButton, &QRadioButton::toggled,this, &ImportExportDialog::onOpTypeToggled);
+    connect(ui->pcapRadioButton, &QRadioButton::toggled, this, &ImportExportDialog::onPcapToggled);
+    connect(ui->plainRadioButton, &QRadioButton::toggled, this, &ImportExportDialog::onPlainToggled);
+    connect(ui->xmlRadioButton, &QRadioButton::toggled, this, &ImportExportDialog::onXmlorJsonToggled);
+    connect(ui->jsonRadioButton, &QRadioButton::toggled, this, &ImportExportDialog::onXmlorJsonToggled);
+    connect(ui->toClipboardRadioButton, &QRadioButton::toggled, this, &ImportExportDialog::onToClipboardToggled);
 }
 
 ImportExportDialog::~ImportExportDialog()

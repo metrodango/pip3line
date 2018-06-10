@@ -29,14 +29,14 @@ IntermediateSource::IntermediateSource(GuiHelper *guiHelper,
     if (wrapperTransform != nullptr) {
         _readonly == wrapperTransform->isTwoWays() || original->isReadonly();
         originalWay = wrapperTransform->way();
-        connect(original, SIGNAL(readOnlyChanged(bool)), SLOT(onOriginalReadOnlyChanged(bool)));
-        connect(wrapperTransform, SIGNAL(confUpdated()), this, SLOT(onOriginalUpdated()));
+        connect(original, &ByteSourceAbstract::readOnlyChanged, this, &IntermediateSource::onOriginalReadOnlyChanged);
+        connect(wrapperTransform, &TransformAbstract::confUpdated,this, [=](void) {onOriginalUpdated();});
     }
 
     capabilities = originalSource->getCapabilities() & !(CAP_TRANSFORM | CAP_LOADFILE) ;
-    connect(this, SIGNAL(sendRequest(TransformRequest*)), guiHelper->getCentralTransProc(), SLOT(processRequest(TransformRequest*)));
-    connect(original, SIGNAL(updated(quintptr)), SLOT(onOriginalUpdated(quintptr)));
-    connect(original, SIGNAL(sizeChanged()), SLOT(onOriginalSizeChanged()));
+    connect(this, &IntermediateSource::sendRequest, guiHelper->getCentralTransProc(), &ThreadedProcessor::processRequest);
+    connect(original, &ByteSourceAbstract::updated, this, &IntermediateSource::onOriginalUpdated);
+    connect(original, &ByteSourceAbstract::sizeChanged, this, &IntermediateSource::onOriginalSizeChanged);
     onOriginalUpdated(INVALID_SOURCE);
 }
 
@@ -139,7 +139,8 @@ void IntermediateSource::onOriginalUpdated(quintptr source)
             qFatal("Cannot allocate memory for TransformRequest X{");
         }
 
-        connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(inboundProcessingFinished(QByteArray,Messages)),Qt::QueuedConnection);
+        //connect(tr, qOverload<QByteArray,Messages>(&TransformRequest::finishedProcessing), this, &IntermediateSource::inboundProcessingFinished,Qt::QueuedConnection);
+        connect(tr, SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(inboundProcessingFinished(QByteArray,Messages)), Qt::QueuedConnection);
         emit sendRequest(tr);
     } else {
         rawData = oriData;
@@ -164,7 +165,8 @@ void IntermediateSource::onCurrentUpdated()
                 qFatal("Cannot allocate memory for TransformRequest X{");
             }
 
-            connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(outboundProcessingFinished(QByteArray,Messages)));
+            //connect(tr, qOverload<QByteArray,Messages>(&TransformRequest::finishedProcessing), this, &IntermediateSource::outboundProcessingFinished);
+            connect(tr, SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(outboundProcessingFinished(QByteArray,Messages)));
             emit sendRequest(tr);
         } else {
             qCritical() << tr("[IntermediateSource::onCurrentUpdated] Cloning failed T_T");

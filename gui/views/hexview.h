@@ -27,7 +27,6 @@ class GuiHelper;
 class LoggerWidget;
 class ByteSourceAbstract;
 class SourcesOrchestatorAbstract;
-class TabAbstract;
 class ByteItemModel;
 class ByteTableView;
 class QMenu;

@@ -11,15 +11,17 @@ IPNetworkClientWidget::IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget
 {
     resolutionTimer.setInterval(500);
     resolutionTimer.setSingleShot(true);
-    connect(&resolutionTimer, SIGNAL(timeout()), SLOT(onResolutionTimerExpired()));
+    connect(&resolutionTimer, &QTimer::timeout, this, &IPNetworkClientWidget::onResolutionTimerExpired);
 
     ui->setupUi(this);
 
     ui->portSpinBox->setValue((int)listener->getHostPort());
 
+    //connect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &IPNetworkClientWidget::onPortChanged);
     connect(ui->portSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPortChanged(int)));
-    connect(ui->peerAddrLineEdit, SIGNAL(textChanged(QString)), SLOT(onTargetchanged()));
-    connect(ui->hostResolvComboBox, SIGNAL(currentIndexChanged(QString)), SLOT(onIPChanged(QString)));
+    connect(ui->peerAddrLineEdit, &QLineEdit::textChanged, this, &IPNetworkClientWidget::onTargetchanged);
+    //connect(ui->hostResolvComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &IPNetworkClientWidget::onIPChanged);
+    connect(ui->hostResolvComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onIPChanged(QString)));
 
     //need to do taht after, to get dns resolution
     QString addressStr = listener->getHostname();
@@ -60,7 +62,7 @@ void IPNetworkClientWidget::onPortChanged(int value)
     listener->setHostPort((quint16) value);
 }
 
-void IPNetworkClientWidget::onIPChanged(QString value)
+void IPNetworkClientWidget::onIPChanged(const QString &value)
 {
     listener->setHostAddress(QHostAddress(value));
 }

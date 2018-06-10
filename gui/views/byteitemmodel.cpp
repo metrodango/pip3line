@@ -43,13 +43,13 @@ void ByteItemModel::setSource(ByteSourceAbstract *nbyteSource)
         return;
     }
     if (byteSource != nullptr)
-        disconnect(byteSource, SIGNAL(updated(quintptr)), this, SLOT(receivedSourceUpdate(quintptr)));
+        disconnect(byteSource, &ByteSourceAbstract::updated, this, &ByteItemModel::receivedSourceUpdate);
     beginResetModel();
     byteSource = nbyteSource;
     textOffsetSize = byteSource->textOffsetSize();
     endResetModel();
-    connect(byteSource, SIGNAL(updated(quintptr)), this, SLOT(receivedSourceUpdate(quintptr)));
-    connect(byteSource, SIGNAL(minorUpdate(quint64,quint64)), this, SLOT(receivedMinorSourceupdate(quint64,quint64)));
+    connect(byteSource, &ByteSourceAbstract::updated, this, &ByteItemModel::receivedSourceUpdate);
+    connect(byteSource, &ByteSourceAbstract::minorUpdate, this, &ByteItemModel::receivedMinorSourceupdate);
 }
 
 ByteSourceAbstract *ByteItemModel::getSource() const

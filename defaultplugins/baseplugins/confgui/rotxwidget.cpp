@@ -21,7 +21,8 @@ RotXWidget::RotXWidget(Rotx *ntransform, QWidget *parent) :
     transform = ntransform;
     ui->setupUi(this);
     ui->typeComboBox->setCurrentIndex(transform->getRotVariant());
-    connect(ui->typeComboBox,SIGNAL(currentIndexChanged(int)), this,SLOT(onUpdateType(int)));
+    //connect(ui->typeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=](int index){transform->setRotVariant((Rotx::RotVariant)index);});
+    connect(ui->typeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onVariantChanged(int)));
 }
 
 RotXWidget::~RotXWidget()
@@ -29,7 +30,7 @@ RotXWidget::~RotXWidget()
     delete ui;
 }
 
-void RotXWidget::onUpdateType(int val)
+void RotXWidget::onVariantChanged(int index)
 {
-    transform->setRotVariant((Rotx::RotVariant)val);
+    transform->setRotVariant((Rotx::RotVariant)index);
 }

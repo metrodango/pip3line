@@ -8,6 +8,7 @@
 #include <QDebug>
 #include "views/hexview.h"
 #include "views/textview.h"
+#include "views/jsonview.h"
 #include "shared/guiconst.h"
 #include "shared/transformguibutton.h"
 
@@ -34,6 +35,13 @@ NewViewMenu::NewViewMenu(GuiHelper *guiHelper, QWidget *parent) :
         qFatal("Cannot allocate memory for QAction X{");
     }
     addAction(newTextViewAction);
+
+    newJsonViewAction = new(std::nothrow)QAction(GuiConst::JSON_TEXT,this);
+    if (newJsonViewAction == nullptr) {
+        qFatal("Cannot allocate memory for QAction X{");
+    }
+    addAction(newJsonViewAction);
+
     addSeparator();
 
     newDefaultTextViewAction = new(std::nothrow)QAction(tr("Default Text view"),this);
@@ -42,7 +50,7 @@ NewViewMenu::NewViewMenu(GuiHelper *guiHelper, QWidget *parent) :
         }
     addAction(newDefaultTextViewAction);
 
-    connect(this,SIGNAL(triggered(QAction*)), SLOT(onNewViewTab(QAction*)));
+    connect(this, &NewViewMenu::triggered, this, &NewViewMenu::onNewViewTab);
 }
 
 NewViewMenu::~NewViewMenu()
@@ -98,6 +106,14 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
                 }
             }
             break;
+        case (TabAbstract::JSONVIEW) :
+            {
+                newView = new(std::nothrow) JsonView(bytesource,guiHelper,parent);
+                if (newView == nullptr) {
+                    qFatal("Cannot allocate memory for JsonView X{");
+                }
+            }
+        break;
         default:
         {
             qCritical() << tr("[NewViewMenu::getView] View Type undefined");
@@ -142,6 +158,8 @@ void NewViewMenu::onNewViewTab(QAction *action)
                 vt.type = TabAbstract::HEXVIEW;
             } else if (action == newTextViewAction) {
                 vt.type = TabAbstract::TEXTVIEW;
+            } else if (action == newJsonViewAction) {
+                vt.type = TabAbstract::JSONVIEW;
             } else {
                 qWarning("New View Action not managed T_T");
                 vt.type = TabAbstract::UNDEFINED;

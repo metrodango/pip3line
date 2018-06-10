@@ -50,7 +50,7 @@ class ImportExportWorker : public QObject
         void setPlainBase64(bool value);
         void setPlainToFile(bool value);
 
-        QList<Packet *> getLoadedPackets() const;
+        QList<QSharedPointer<Packet> > getLoadedPackets() const;
 
     public slots:
         void run();
@@ -58,7 +58,7 @@ class ImportExportWorker : public QObject
         void finished();
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     private:
-        Packet *nextPacket();
+        QSharedPointer<Packet> nextPacket();
         void addPlainRawPacket(QByteArray data, QDateTime date = QDateTime::currentDateTime());
         GuiConst::FileOperations ops;
         GuiConst::FileFormat format;
@@ -73,7 +73,7 @@ class ImportExportWorker : public QObject
         bool exportFormattedJson;
         bool enableCompression;
         QTime timer;
-        QList<Packet *> loadedPackets;
+        QList<QSharedPointer<Packet> > loadedPackets;
         bool plainBase64;
         bool plainToFile;
         char plainSeparator;

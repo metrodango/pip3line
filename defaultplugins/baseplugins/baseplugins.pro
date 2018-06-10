@@ -11,7 +11,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = baseplugins
 TEMPLATE = lib
-CONFIG += plugin debug c++11 warn_on
+CONFIG += plugin debug c++14 warn_on
+
+DEFINES += QT_DEPRECATED_WARNINGS
 
 unix {
     LIBS += -L"../../bin/" -ltransform
@@ -99,7 +101,10 @@ SOURCES += baseplugins.cpp \
     hmactransform.cpp \
     confgui/hmactransformwidget.cpp \
     crc32.cpp \
-    confgui/crc32widget.cpp
+    confgui/crc32widget.cpp \
+    findandreplace.cpp \
+    confgui/findandreplacewidget.cpp \
+    tds7_enc.cpp
 
 
 greaterThan(QT_MAJOR_VERSION, 4): SOURCES += sha256.cpp \
@@ -186,7 +191,10 @@ HEADERS += baseplugins.h\
     hmactransform.h \
     confgui/hmactransformwidget.h \
     crc32.h \
-    confgui/crc32widget.h
+    confgui/crc32widget.h \
+    findandreplace.h \
+    confgui/findandreplacewidget.h \
+    tds7_enc.h
 
 greaterThan(QT_MAJOR_VERSION, 4): HEADERS += sha256.h \
     sha512.h \
@@ -228,7 +236,8 @@ FORMS += \
     confgui/bytestofloatwdiget.ui \
     confgui/byterotwidget.ui \
     confgui/hmactransformwidget.ui \
-    confgui/crc32widget.ui
+    confgui/crc32widget.ui \
+    confgui/findandreplacewidget.ui
 
 RESOURCES += \
     baseplugins_res.qrc

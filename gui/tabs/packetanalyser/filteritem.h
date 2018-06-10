@@ -29,7 +29,7 @@ class FilterItem : public QObject
         void setName(const QString &nname);
         bool isReverseSelection() const;
         void setReverseSelection(bool reverse);
-        virtual bool selectable(Packet *packet);
+        virtual bool selectable(QSharedPointer<Packet> packet);
         virtual bool operator == (FilterItem const &other) const;
         virtual bool isValid();
         virtual QHash<QString, QString> getConfiguration();
@@ -62,7 +62,7 @@ class FilterData : public FilterItem
         FilterData::SEARCH_TYPE getSearchType() const;
         void setSearchType(const FilterData::SEARCH_TYPE &type);
         QString getHexValueWithMask() const;
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
 
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
@@ -80,7 +80,7 @@ class FilterTimeStamp : public FilterItem
     public:
         explicit FilterTimeStamp();
         virtual ~FilterTimeStamp();
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();
@@ -110,7 +110,7 @@ class FilterLength : public FilterItem
         static const QStringList OperatorsString;
         explicit FilterLength();
         virtual ~FilterLength();
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();
@@ -129,7 +129,7 @@ class FilterDirection : public FilterItem
     public:
         explicit FilterDirection();
         virtual ~FilterDirection();
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();
@@ -146,7 +146,7 @@ class FilterText : public FilterItem
         static const QStringList RegexpTypesStr;
         explicit FilterText();
         virtual ~FilterText();
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();
@@ -166,7 +166,7 @@ class FilterCIDs : public FilterItem
         static const QString SEP;
         explicit FilterCIDs();
         virtual ~FilterCIDs();
-        bool selectable(Packet *packet);
+        bool selectable(QSharedPointer<Packet> packet);
         QHash<QString, QString> getConfiguration();
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();

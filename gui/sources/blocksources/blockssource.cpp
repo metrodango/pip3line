@@ -68,13 +68,13 @@ BlocksSource::BlocksSource(QObject *parent) :
 {
     updateTimer.setInterval(500);
     updateTimer.setSingleShot(true);
-    connect(&updateTimer, SIGNAL(timeout()), this, SLOT(triggerUpdate()), Qt::QueuedConnection);
+    connect(&updateTimer, &QTimer::timeout, this, &BlocksSource::triggerUpdate, Qt::QueuedConnection);
 
     b64MaxBlockLength = DEFAULT_B64_BLOCK_MAX_SIZE;
     b64BlocksSeparator = '\x0a';
     type = INVALID_TYPE;
     sid = BlocksSource::newSourceID(this);
-    connect(this, SIGNAL(blockToBeSend(Block *)), SLOT(sendBlock(Block *)), Qt::QueuedConnection);
+    connect(this, &BlocksSource::blockToBeSend, this, &BlocksSource::sendBlock, Qt::QueuedConnection);
     //qDebug() << this << "created";
 }
 
@@ -93,10 +93,15 @@ QWidget *BlocksSource::getGui(QWidget * parent)
     if (gui == nullptr) {
         gui = requestGui(parent);
         if (gui != nullptr) {
-            connect(gui, SIGNAL(destroyed()), this, SLOT(onGuiDestroyed()), Qt::UniqueConnection);
+            connect(gui, &QWidget::destroyed, this, &BlocksSource::onGuiDestroyed, Qt::UniqueConnection);
         }
     }
     return gui;
+}
+
+QWidget *BlocksSource::getAdditionnalCtrls(QWidget *)
+{
+    return nullptr;
 }
 
 bool BlocksSource::isReadWrite()

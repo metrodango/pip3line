@@ -40,6 +40,7 @@ Released under AGPL see LICENSE for more information
 #include "tabs/randomaccesstab.h"
 #include "shared/guiconst.h"
 #include "sources/blocksources/tlsserverlistener.h"
+#include "tabs/packetanalyser/packet.h"
 
 using namespace GuiConst;
 
@@ -145,7 +146,7 @@ void GuiHelper::setUniveralReceiver(TabAbstract *tab)
 
 void GuiHelper::addTab(TabAbstract *tab)
 {
-    connect(tab, SIGNAL(destroyed()), this, SLOT(onTabDestroyed()), Qt::UniqueConnection);
+    connect(tab, &TabAbstract::destroyed, this, &GuiHelper::onTabDestroyed, Qt::UniqueConnection);
     tabNameUpdated(tab);
 }
 
@@ -159,7 +160,7 @@ void GuiHelper::tabNameUpdated(TabAbstract *tab)
 void GuiHelper::removeTab(TabAbstract *tab)
 {
     tabs.remove(tab);
-    disconnect(tab, SIGNAL(destroyed()), this, SLOT(onTabDestroyed()));
+    disconnect(tab, &TabAbstract::destroyed, this, &GuiHelper::onTabDestroyed);
     updateSortedTabs();
     emit tabsUpdated();
 }
@@ -377,8 +378,8 @@ void GuiHelper::loadImportExportFunctions()
         }
         else {
             ta = talist.takeFirst();
-            connect(ta, SIGNAL(error(QString,QString)), logger, SLOT(logError(QString,QString)));
-            connect(ta, SIGNAL(warning(QString,QString)), logger, SLOT(logWarning(QString,QString)));
+            connect(ta, &TransformAbstract::error, logger, &LoggerWidget::logError);
+            connect(ta, &TransformAbstract::warning, logger, &LoggerWidget::logWarning);
             if (talist.size() > 0) {
                 logger->logError(tr("Configuration loaded multiple transform, clearing the remaining ones."), LOGID);
                 while (!talist.isEmpty()) {
@@ -426,7 +427,7 @@ TransformAbstract *GuiHelper::getImportExportFunction(const QString &name)
         return importExportFunctions.value(name);
     }
 
-    logger->logError(tr("Unkown import/export function name: \"%1\"").arg(name));
+    logger->logError(tr("Unknown import/export function name: '%1'").arg(name));
     return nullptr;
 }
 
@@ -528,7 +529,7 @@ void GuiHelper::refreshAutoSaveTimer()
            if (autoSaveTimer == nullptr) {
                qFatal("Cannot allocate memory for auto save QTimer X{");
            }
-           connect(autoSaveTimer, SIGNAL(timeout()), this, SIGNAL(requestSaveState()), Qt::UniqueConnection);
+           connect(autoSaveTimer, &QTimer::timeout, this, &GuiHelper::requestSaveState, Qt::UniqueConnection);
         }
 
         // value is initially in minutes, have to convert in ms
@@ -538,6 +539,42 @@ void GuiHelper::refreshAutoSaveTimer()
         autoSaveTimer->stop();
         delete autoSaveTimer;
         autoSaveTimer = nullptr;
+    }
+}
+
+void GuiHelper::registerPacketsAnalyser(PacketAnalyserTab *paTab)
+{
+    if (registeredPacketsAnalysers.contains(paTab)) {
+        qDebug() << tr("[GuiHelper::registerPacketsAnalysers] Packets Analyser already registered, ignoring.");
+    } else {
+        registeredPacketsAnalysers << paTab;
+        emit registeredPacketsAnalysersUpdated();
+    }
+}
+
+void GuiHelper::unregisterPacketsAnalyser(PacketAnalyserTab *paTab)
+{
+    if (registeredPacketsAnalysers.contains(paTab)) {
+        int num = registeredPacketsAnalysers.removeAll(paTab);
+        if (num != 1) {
+            qCritical() << tr("[GuiHelper::unregisterPacketsAnalysers] More than one Packets Analyser have been removed: %1 T_T").arg(num);
+        }
+        emit registeredPacketsAnalysersUpdated();
+    } else {
+        qDebug() << tr("[GuiHelper::unregisterPacketsAnalysers] Packets Analyser is not registered, never mind");
+    }
+}
+
+QList<PacketAnalyserTab *> GuiHelper::getRegisteredPacketsAnalysers() const
+{
+    return registeredPacketsAnalysers;
+}
+
+void GuiHelper::clearRegisteredPacketsAnalysers()
+{
+    if (registeredPacketsAnalysers.size() > 0) {
+        registeredPacketsAnalysers.clear();
+        emit registeredPacketsAnalysersUpdated();
     }
 }
 
@@ -574,7 +611,7 @@ QMenu *GuiHelper::getNewTabMenu() const
 void GuiHelper::setNewTabMenu(QMenu *value)
 {
     newTabMenu = value;
-    connect(newTabMenu, SIGNAL(destroyed(QObject*)), SLOT(onNewTabMenuDestroyed()), Qt::UniqueConnection);
+    connect(newTabMenu, &QMenu::destroyed, this, &GuiHelper::onNewTabMenuDestroyed, Qt::UniqueConnection);
 }
 
 QFont GuiHelper::getRegularFont() const
@@ -623,7 +660,7 @@ void GuiHelper::loadEqualityPacketColors()
 void GuiHelper::registerBlockSource(BlocksSource *bs)
 {
     if (registeredBlockSources.contains(bs)) {
-        logger->logWarning(tr("BlockSource already registered, ignoring.T_T"),"");
+        qCritical() << tr("[GuiHelper::registerBlockSource] BlockSource already registered, ignoring.T_T");
     } else {
         registeredBlockSources.append(bs);
         emit registeredBlockSourcesUpdated();
@@ -635,11 +672,11 @@ void GuiHelper::unregisterBlockSource(BlocksSource *bs)
     if (registeredBlockSources.contains(bs)) {
         int num = registeredBlockSources.removeAll(bs);
         if (num != 1) {
-            logger->logError(tr("More than one BlockSource have been removed: %1 T_T").arg(num),"");
+            qCritical() << tr("[GuiHelper::unregisterBlockSource] More than one BlockSource have been removed: %1 T_T").arg(num);
         }
         emit registeredBlockSourcesUpdated();
     } else {
-        logger->logError(tr("BlockSource is not registered T_T"),"");
+        qCritical() << tr("[GuiHelper::unregisterBlockSource] BlockSource is not registered T_T");
     }
 }
 
@@ -659,7 +696,7 @@ void GuiHelper::clearRegisteredBlockSources()
 void GuiHelper::registerOrchestrator(SourcesOrchestatorAbstract *orch)
 {
     if (registeredOrchestators.contains(orch)) {
-        logger->logWarning(tr("Orchestrator already registered, ignoring. T_T"),"");
+        qCritical() << tr("[GuiHelper::registerOrchestrator] Orchestrator already registered, ignoring. T_T");
     } else {
         registeredOrchestators << orch;
         emit registeredOrchestratorsUpdated();
@@ -671,11 +708,11 @@ void GuiHelper::unregisterOrchestrator(SourcesOrchestatorAbstract *orch)
     if (registeredOrchestators.contains(orch)) {
         int num = registeredOrchestators.removeAll(orch);
         if (num != 1) {
-            logger->logError(tr("More than one Orchestrator have been removed: %1 T_T").arg(num),"");
+            qCritical() << tr("[GuiHelper::unregisterOrchestrator] More than one Orchestrator have been removed: %1 T_T").arg(num);
         }
         emit registeredOrchestratorsUpdated();
     } else {
-        logger->logError(tr("Orchestrator is not registered T_T"),"GuiHelper::unregisterOrchestrator");
+        qCritical() << tr("[GuiHelper::unregisterOrchestrator] Orchestrator is not registered T_T");
     }
 }
 
@@ -1187,7 +1224,7 @@ void GuiHelper::requestDownload(QUrl url, ByteSourceAbstract *byteSource, Downlo
                 return;
             }
             if (byteSource != nullptr) {
-                connect(downloadManager,SIGNAL(finished(QByteArray)),byteSource, SLOT(setData(QByteArray)));
+                connect(downloadManager, &DownloadManager::finished, byteSource, [=](QByteArray data) { byteSource->setData(data);});
             }
         } else { // caller has supplied their own DownloadManager Object, use it
             downloadManager = ndownloadManager;

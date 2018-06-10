@@ -82,7 +82,7 @@ QWidget *DistormPlugin::getConfGui(QWidget *)
         label->setWordWrap(true);
         label->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);
         gui = label;
-        connect(gui,SIGNAL(destroyed()), SLOT(onGuiDelete()));
+        connect(gui, &QWidget::destroyed, this, &DistormPlugin::onGuiDelete);
     }
     return gui;
 }

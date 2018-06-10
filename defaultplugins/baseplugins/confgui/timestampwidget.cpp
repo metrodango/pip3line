@@ -28,26 +28,16 @@ TimestampWidget::TimestampWidget(TimeStamp *ntransform, QWidget *parent) :
     } else {
         ui->tzLocalRadioButton->setChecked(true);
     }
-    connect(ui->formatLineEdit, SIGNAL(textChanged(QString)), this, SLOT(formatChanged(QString)));
-    connect(ui->tzLocalRadioButton, SIGNAL(toggled(bool)), this, SLOT(outBoundTZLocalChanged(bool)));
+    connect(ui->formatLineEdit, &QLineEdit::textChanged, this, [=](const QString & format) {
+        transform->setDateFormat(format);
+    });
+    connect(ui->tzLocalRadioButton, &QRadioButton::toggled, this, [=](bool checked){
+        transform->setTZ(checked ? TimeStamp::TZ_LOCAL : TimeStamp::TZ_UTC);
+    });
 
 }
 
 TimestampWidget::~TimestampWidget()
 {
     delete ui;
-}
-
-void TimestampWidget::formatChanged(QString format)
-{
-    transform->setDateFormat(format);
-}
-
-void TimestampWidget::outBoundTZLocalChanged(bool checked)
-{
-    if (checked) {
-        transform->setTZ(TimeStamp::TZ_LOCAL);
-    } else {
-        transform->setTZ(TimeStamp::TZ_UTC);
-    }
 }

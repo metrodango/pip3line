@@ -25,10 +25,11 @@ class PaddingWidget : public QWidget
     public:
         explicit PaddingWidget(Padding *ntransform, QWidget *parent = 0);
         ~PaddingWidget();
+    public slots:
+        void onVariantChanged(int val);
+        void onBlockSizeChanged(int val);
     private slots:
-        void onTypeChange(int index);
         void onPaddingCharChange(char);
-        void onBlockSizeChange(int size);
     private:
         Ui::PaddingWidget *ui;
         Padding *transform;

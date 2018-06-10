@@ -99,7 +99,7 @@ ConnectionsWidget::ConnectionsWidget(BlocksSource * source, QWidget *parent) :
     ui->connectionTableView->setModel(model);
     delete omodel;
 
-    connect(source,SIGNAL(updated()), this, SLOT(connectionsUpdated()));
+    connect(source, &BlocksSource::updated, this, &ConnectionsWidget::connectionsUpdated);
     setVisible(model->size() > 0);
 }
 

@@ -17,7 +17,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (WITH_SCINTILLA)
     message ( STATUS "-- Enabling QScintilla support --" )
-    add_definitions ( -DSCINTILLA )
+    add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
         ..\\..\\QScintilla\\Qt4Qt5
     )
@@ -63,18 +63,18 @@ set ( EXTERN_LIBS transform )
 
 if (WITH_SCINTILLA)
 	if ((WIN32) OR (APPLE))
-        set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
+          set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
 	else()
-        find_program(LSB_RELEASE lsb_release)
-        execute_process(COMMAND ${LSB_RELEASE} -is
+          find_program(LSB_RELEASE lsb_release)
+          execute_process(COMMAND ${LSB_RELEASE} -is
             OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
             OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        if (LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu")
+          )
+          if (LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu")
             set ( EXTERN_LIBS ${EXTERN_LIBS} qt5scintilla2)
-        else ()
-            set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2)
-        endif()
+          else ()
+            set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
+          endif()
 	endif()
 endif(WITH_SCINTILLA)
 
@@ -112,7 +112,6 @@ set ( pip3line_HDRS
 	../tools/pipeserver.h
 	../tools/streamprocessor.h
 	../tools/tcpserver.h
-	../tools/binaryprocessor.h
 	../tools/textprocessor.h
 	../tools/serverabstract.h
 	../tools/processingstats.h
@@ -140,12 +139,15 @@ set ( pip3line_HDRS
 	sources/blocksources/ipnetworkclientwidget.h
 	sources/blocksources/tlsclientlistener.h
 	sources/blocksources/socksproxyhelper.h
+	sources/blocksources/pipeclientlistener.h
+	sources/blocksources/pipeclientwidget.h
 	views/hexview.h
 	views/textview.h
 	views/bytetableview.h
 	views/byteitemmodel.h
 	views/singleviewabstract.h
 	views/foldedview.h
+	views/jsonview.h
 	tabs/tababstract.h
 	tabs/transformsgui.h
 	tabs/generictab.h
@@ -188,12 +190,12 @@ set ( pip3line_HDRS
 	shared/sendtomenu.h
 	shared/transformguibutton.h
 	shared/transformselectorwidget.h
+	shared/newconnectionbutton.h
 	state/basestateabstract.h
 	state/stateorchestrator.h
 	state/closingstate.h
 	state/statedialog.h
 	state/statestatuswidget.h
-	pcapio/pcapngio.h
 	pcapio/pcapio.h
 	pcapio/pcapdef.h
 	)
@@ -227,7 +229,6 @@ set ( pip3line_SRCS
 	comparisondialog.cpp
 	appdialog.cpp
 	../tools/processor.cpp
-	../tools/binaryprocessor.cpp
 	../tools/textprocessor.cpp
 	../tools/pipeserver.cpp
 	../tools/streamprocessor.cpp
@@ -256,12 +257,15 @@ set ( pip3line_SRCS
 	sources/blocksources/ipnetworkclientwidget.cpp
 	sources/blocksources/tlsclientlistener.cpp
 	sources/blocksources/socksproxyhelper.cpp
+	sources/blocksources/pipeclientlistener.cpp
+	sources/blocksources/pipeclientwidget.cpp
 	views/hexview.cpp
 	views/bytetableview.cpp
 	views/byteitemmodel.cpp
 	views/textview.cpp
 	views/singleviewabstract.cpp
 	views/foldedview.cpp
+	views/jsonview.cpp
 	tabs/generictab.cpp
 	tabs/tababstract.cpp
 	tabs/transformsgui.cpp
@@ -305,6 +309,7 @@ set ( pip3line_SRCS
 	shared/sendtomenu.cpp
 	shared/transformselectorwidget.cpp
 	shared/transformguibutton.cpp
+	shared/newconnectionbutton.cpp
 	state/basestateabstract.cpp
 	state/stateorchestrator.cpp
 	state/closingstate.cpp
@@ -312,7 +317,6 @@ set ( pip3line_SRCS
 	state/statestatuswidget.cpp
 	pcapio/pcapdef.cpp
 	pcapio/pcapio.cpp
-	pcapio/pcapngio.cpp
 	)
 
 set ( pip3line_UIS
@@ -352,6 +356,7 @@ set ( pip3line_UIS
 	sources/blocksources/ipnetworkserverwidget.ui
 	sources/blocksources/baseblocksourcewidget.ui
 	sources/blocksources/ipnetworkclientwidget.ui
+	sources/blocksources/pipeclientwidget.ui
 	shared/searchresultswidget.ui
 	shared/transformdisplayconf.ui
 	shared/ssloptionswidget.ui

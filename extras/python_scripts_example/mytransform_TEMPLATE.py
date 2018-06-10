@@ -6,11 +6,11 @@
 # https://github.com/metrodango/pip3line
 # Released under AGPL see LICENSE for more information
 
-# [Optional] you can precise that this transformation is bidirectional and check for the 
+# [Optional] you can precise that this transformation is bidirectional and check for the
 # Pip3line_INBOUND module attribute later on (see gzip and bz2 for examples)
 Pip3line_is_two_ways = False
 
-# [Optional] one can also define default parameter names like this 
+# [Optional] one can also define default parameter names like this
 # (they have to be unicode strings, if not they will be ignored)
 Pip3line_params_names = ["param1", "param2"]
 
@@ -27,5 +27,3 @@ def pip3line_transform(inputData):
 
 	# just remember to convert it back to a bytearray
 	return bytearray(string, 'utf-8')
-      
-

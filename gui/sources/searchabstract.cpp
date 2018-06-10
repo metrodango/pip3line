@@ -339,9 +339,9 @@ void SearchAbstract::addSearchWorker(SearchWorker *worker)
 {
     workers.insert(worker,0);
     worker->setSearchItem(sitem,mask);
-    connect(worker, SIGNAL(finished()), SLOT(onChildFinished()),Qt::QueuedConnection);
-    connect(worker,SIGNAL(progressUpdate(quint64)), SLOT(processStats(quint64)),Qt::QueuedConnection);
-    connect(worker,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(worker, &SearchWorker::finished, this, &SearchAbstract::onChildFinished,Qt::QueuedConnection);
+    connect(worker, &SearchWorker::progressUpdate, this, &SearchAbstract::processStats,Qt::QueuedConnection);
+    connect(worker, &SearchWorker::log, this, &SearchAbstract::log);
     QtConcurrent::run(worker, &SearchWorker::search);
 }
 BytesRangeList *SearchAbstract::getGlobalFoundList()

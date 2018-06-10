@@ -47,7 +47,7 @@ set ( CMAKE_BUILD_TYPE Release )
 
 add_definitions(-DQT_NO_DEBUG_OUTPUT)
 
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 14)
 
 if (MSVC)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP ")
@@ -72,6 +72,7 @@ endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s -Wformatsecurity")
+	add_definitions( -DQT_DEPRECATED_WARNINGS=1)
 endif()
 
 set (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

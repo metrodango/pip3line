@@ -22,7 +22,6 @@ Released under AGPL see LICENSE for more information
 #include "singleviewabstract.h"
 
 class QTextCodec;
-class TabAbstract;
 class QMenu;
 class QAction;
 class SendToMenu;
@@ -71,7 +70,7 @@ class TextView : public SingleViewAbstract
         void onSendToTriggered(QAction *action);
         void onSelectAll();
         void onKeepOnlySelection();
-        void onCodecChange(QString codecName);
+        void onCodecChange(const QString &codecName);
         void onReadOnlyChanged(bool viewIsReadonly);
         void onSaveToFile(QAction* action);
         void onFontUpdated();

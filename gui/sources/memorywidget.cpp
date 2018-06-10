@@ -40,14 +40,14 @@ MemoryWidget::MemoryWidget(CurrentMemorysource *source, QWidget *parent) :
     ui->mappingsTableWidget->resizeColumnsToContents();
     ui->mappingsTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->mappingsTableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(ui->mappingsTableWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(onDoubleClick(QModelIndex)));
+    connect(ui->mappingsTableWidget, &QTableView::doubleClicked, this, &MemoryWidget::onDoubleClick);
 
     ui->refreshCheckBox->setChecked(msource->isRefreshEnabled());
     ui->refreshRateSpinBox->setValue(msource->refreshInterval());
     ui->refreshRateSpinBox->setEnabled(msource->isRefreshEnabled());
 
     initContextMenu();
-    connect(ui->refreshCheckBox,SIGNAL(toggled(bool)), SLOT(onRefreshToggled(bool)));
+    connect(ui->refreshCheckBox, &QCheckBox::toggled, this, &MemoryWidget::onRefreshToggled);
 }
 
 MemoryWidget::~MemoryWidget()
@@ -118,7 +118,7 @@ void MemoryWidget::initContextMenu()
         qFatal("Cannot allocate memory for the Memory contextMenu X{");
     }
 
-    connect(contextMenu, SIGNAL(triggered(QAction*)), SLOT(contextMenuAction(QAction*)));
+    connect(contextMenu, &QMenu::triggered, this, &MemoryWidget::contextMenuAction);
     QAction * action = new(std::nothrow) QAction(GOTOSTART,contextMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for GOTOSTART X{");
@@ -135,5 +135,5 @@ void MemoryWidget::initContextMenu()
     contextMenu->addAction(action);
 
     ui->mappingsTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mappingsTableWidget,SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRightClick(QPoint)));
+    connect(ui->mappingsTableWidget, &QTableView::customContextMenuRequested, this, &MemoryWidget::onRightClick);
 }

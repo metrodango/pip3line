@@ -26,7 +26,7 @@ Identity::~Identity()
 QString Identity::name() const {
     // return the identifier of your transformation
     // it MUST be unique from the ones already loaded
-    // In case of duplicate the application will keep the first one to appear, and ignore the rest
+    // In case of duplicate the application will keep the first one and ignore the rest
     return id;
 }
 

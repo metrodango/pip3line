@@ -95,7 +95,7 @@ void BasicSearch::internalStart()
             qFatal("Cannot allocate memory for QBuffer X{");
         }
 
-        connect(buffer, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+        connect(buffer, &BasicSourceReader::log, this, &BasicSearch::log);
 
         sw = new(std::nothrow) SearchWorker(buffer);
         if (sw == nullptr) {
@@ -320,8 +320,8 @@ SearchAbstract *BasicSource::requestSearchObject(QObject *)
     if (sobj == nullptr) {
         qFatal("Cannot allocate memory for BasicSearch X{");
     }
-    connect(sobj, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-    connect(sobj, SIGNAL(foundList(BytesRangeList*)), SLOT(setNewMarkings(BytesRangeList*)), Qt::QueuedConnection);
+    connect(sobj, &BasicSearch::log, this, &BasicSource::log, Qt::QueuedConnection);
+    connect(sobj, &BasicSearch::foundList, this, &BasicSource::setNewMarkings, Qt::QueuedConnection);
     return sobj;
 }
 

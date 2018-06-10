@@ -15,7 +15,7 @@ UdpClientListener::UdpClientListener(QHostAddress hostAddress, quint16 hostPort,
 {
     flags |= REFLEXION_OPTIONS;
     type = CLIENT;
-    connect(&connectionsTimer, SIGNAL(timeout()), this, SLOT(checkTimeouts()));
+    connect(&connectionsTimer, &QTimer::timeout, this, &UdpClientListener::checkTimeouts);
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&workerThread);
     updateTimer.moveToThread(&workerThread);
@@ -83,7 +83,7 @@ void UdpClientListener::sendBlock(Block *block)
             if (socket == nullptr) {
                 qFatal("Cannot allocate memory for QUdpSocket X{");
             }
-            connect(socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
+            connect(socket, &QUdpSocket::readyRead, this, &UdpClientListener::dataReceived);
             sid = BlocksSource::newSourceID(this);
             ConnectionDetails uc(hostAddress, hostPort);
             uc.setSid(sid);

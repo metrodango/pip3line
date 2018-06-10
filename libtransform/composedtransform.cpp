@@ -18,8 +18,8 @@ ComposedTransform::ComposedTransform(TransformChain transformChain) :
     twoWaysFlag = true;
     for (int i = 0; i < chain.size(); i++) {
         twoWaysFlag = chain.at(i)->isTwoWays() && twoWaysFlag;
-        connect(chain.at(i), SIGNAL(error(QString,QString)), this , SLOT(logError(QString,QString)));
-        connect(chain.at(i), SIGNAL(warning(QString,QString)), this , SLOT(logWarning(QString,QString)));
+        connect(chain.at(i), &TransformAbstract::error, this , &ComposedTransform::logError);
+        connect(chain.at(i), &TransformAbstract::warning, this , &ComposedTransform::logWarning);
         defaultWays.append(chain.at(i)->way());
     }
 }

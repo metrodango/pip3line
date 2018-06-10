@@ -98,8 +98,8 @@ void DownloadManager::createRequest(QUrl url)
     QNetworkRequest request(url);
     request.setSslConfiguration(QSslConfiguration::defaultConfiguration());
     QNetworkReply * reply = networkManager->get(request);
-    connect(reply, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(networkSSLError(QList<QSslError>)));
-    connect(reply,SIGNAL(finished()), this, SLOT(requestFinished()));
+    connect(reply, &QNetworkReply::sslErrors, this, &DownloadManager::networkSSLError);
+    connect(reply, &QNetworkReply::finished, this, &DownloadManager::requestFinished);
     if (QSslConfiguration::defaultConfiguration().peerVerifyMode() == QSslSocket::VerifyNone)
         reply->ignoreSslErrors();
 }

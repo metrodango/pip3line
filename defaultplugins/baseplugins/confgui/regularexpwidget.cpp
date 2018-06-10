@@ -33,14 +33,16 @@ RegularExpWidget::RegularExpWidget(RegularExp *ntransform, QWidget *parent) :
     ui->groupSpinBox->setEnabled(!transform->isTakingAllGroup());
     ui->replaceLineEdit->setText(transform->getReplacementString());
 
-    connect(ui->lineByLineCheckBox,SIGNAL(toggled(bool)), this, SLOT(onLinByLineChange(bool)));
+    connect(ui->lineByLineCheckBox, &QCheckBox::toggled, this, &RegularExpWidget::onLinByLineChange);
+    //connect(ui->typeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &RegularExpWidget::onActionTypeChange);
     connect(ui->typeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onActionTypeChange(int)));
-    connect(ui->greedyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onGreedyChange(bool)));
-    connect(ui->regExpLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onRegularExpressionChange(QString)));
-    connect(ui->caseCheckBox, SIGNAL(toggled(bool)), this, SLOT(onCaseInsensitiveChange(bool)));
+    connect(ui->greedyCheckBox, &QCheckBox::toggled, this, &RegularExpWidget::onGreedyChange);
+    connect(ui->regExpLineEdit, &QLineEdit::textChanged, this, &RegularExpWidget::onRegularExpressionChange);
+    connect(ui->caseCheckBox, &QCheckBox::toggled, this, &RegularExpWidget::onCaseInsensitiveChange);
+    //connect(ui->groupSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &RegularExpWidget::onGroupChange);
     connect(ui->groupSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onGroupChange(int)));
-    connect(ui->allGroupCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAllGroupsChange(bool)));
-    connect(ui->replaceLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onReplacementStringChange(QString)));
+    connect(ui->allGroupCheckBox, &QCheckBox::toggled, this, &RegularExpWidget::onAllGroupsChange);
+    connect(ui->replaceLineEdit, &QLineEdit::textChanged, this, &RegularExpWidget::onReplacementStringChange);
 }
 
 RegularExpWidget::~RegularExpWidget()

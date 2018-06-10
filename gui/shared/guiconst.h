@@ -226,6 +226,7 @@ namespace GuiConst
     extern const QString START_STR;
     extern const QString STOP_STR;
     extern const QString TEXT_TEXT;
+    extern const QString JSON_TEXT;
     extern const QString ORIGINAL_DATA_STR;
 
     extern const QString DEFAULT_PIPE_MASS ;
@@ -273,7 +274,6 @@ namespace GuiConst
         LARGE_FILE_PRETAB = 1,
         CURRENTMEM_PRETAB = 2,
         HEXAEDITOR_PRETAB = 3,
-        INTERCEPT_PRETAB = 4,
         PACKET_ANALYSER_PRETAB = 5
     };
 

@@ -10,7 +10,7 @@ QT       += svg gui
 
 TARGET = exampleplugin
 TEMPLATE = lib
-CONFIG += plugin release c++11 warn_on
+CONFIG += plugin release c++14 warn_on
 
 unix {
     LIBS += -L"../../bin/" -ltransform

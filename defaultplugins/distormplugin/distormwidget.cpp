@@ -39,11 +39,13 @@ DistormWidget::DistormWidget(DistormTransf *ntransform, QWidget *parent) :
     ui->showOffsetCheckBox->setChecked(transform->getShowOffset());
     ui->showOpcodesCheckBox->setChecked(transform->getShowOpcodes());
 
-    connect(ui->maxInstructionSpinBox, SIGNAL(valueChanged(int)), SLOT(onMaxInstruc(int)));
-    connect(ui->offsetLineEdit, SIGNAL(textChanged(QString)), SLOT(onOffset(QString)));
-    connect(ui->asmTypeComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onType(int)));
-    connect(ui->showOffsetCheckBox,SIGNAL(toggled(bool)),SLOT(onShowOffset(bool)));
-    connect(ui->showOpcodesCheckBox,SIGNAL(toggled(bool)),SLOT(onShowOpcodes(bool)));
+    //connect(ui->maxInstructionSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &DistormWidget::onMaxInstruc);
+    connect(ui->maxInstructionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onMaxInstruc(int)));
+    connect(ui->offsetLineEdit, &QLineEdit::textChanged, this, &DistormWidget::onOffset);
+    //connect(ui->asmTypeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &DistormWidget::onType);
+    connect(ui->asmTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onType(int)));
+    connect(ui->showOffsetCheckBox, &QCheckBox::toggled, this, &DistormWidget::onShowOffset);
+    connect(ui->showOpcodesCheckBox, &QCheckBox::toggled, this, &DistormWidget::onShowOpcodes);
 
 }
 

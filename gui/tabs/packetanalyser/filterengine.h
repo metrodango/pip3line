@@ -21,7 +21,7 @@ class BasicToken
         };
         explicit BasicToken(TokenType type = BasicToken::INVALID);
         virtual ~BasicToken();
-        virtual bool evaluate(Packet *packet);
+        virtual bool evaluate(QSharedPointer<Packet> packet);
         TokenType getType() const;
         void setType(const TokenType &value);
         QSharedPointer<BasicToken> getParent() const;
@@ -48,7 +48,7 @@ class BinaryOperator : public BasicToken
         QSharedPointer<BasicToken> getLoperand() const;
         void setRoperand(QSharedPointer<BasicToken> value);
         QSharedPointer<BasicToken> getRoperand() const;
-        bool evaluate(Packet *packet);
+        bool evaluate(QSharedPointer<Packet> packet);
         QString toStr();
     private:
         BinaryOps op;
@@ -61,7 +61,7 @@ class NotOperator : public BasicToken
     public:
         explicit NotOperator();
         ~NotOperator();
-        bool evaluate(Packet *packet);
+        bool evaluate(QSharedPointer<Packet> packet);
         void setOperand(QSharedPointer<BasicToken> value);
         QSharedPointer<BasicToken> getUoperand() const;
     private:
@@ -73,7 +73,7 @@ class Operand : public BasicToken
     public:
         explicit Operand(QSharedPointer<FilterItem> fitem);
         ~Operand();
-        bool evaluate(Packet *packet);
+        bool evaluate(QSharedPointer<Packet> packet);
         QSharedPointer<FilterItem> getFitem() const;
         QString toStr();
     private:
@@ -100,8 +100,8 @@ class FilterEngine : public QObject
         Q_OBJECT
     public:
         explicit FilterEngine(QObject *parent = nullptr);
-        bool assert(QString expression);
-        bool evaluate(Packet *packet);
+        bool assertExpr(QString expression);
+        bool evaluate(QSharedPointer<Packet> packet);
         QString getErrorStr() const;
         FilterItemsList getItems() const;
         void setItems(const FilterItemsList &value);

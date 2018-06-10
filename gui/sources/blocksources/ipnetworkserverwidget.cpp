@@ -19,9 +19,11 @@ IPNetworkServerWidget::IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget
     if (index != -1)
         ui->bindToComboBox->setCurrentIndex(index);
 
-    connect(ui->portSpinBox, SIGNAL(valueChanged(int)), SLOT(onPortChanged(int)));
-    connect(ui->bindToComboBox, SIGNAL(currentIndexChanged(QString)), SLOT(onIPChanged(QString)));
-    connect(ui->refreshPushButton, SIGNAL(clicked(bool)), SLOT(refreshIPs()));
+    //connect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &IPNetworkServerWidget::onPortChanged);
+    connect(ui->portSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPortChanged(int)));
+    //connect(ui->bindToComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &IPNetworkServerWidget::onIPChanged);
+    connect(ui->bindToComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onIPChanged(QString)));
+    connect(ui->refreshPushButton, &QPushButton::clicked, this, &IPNetworkServerWidget::refreshIPs);
 }
 
 IPNetworkServerWidget::~IPNetworkServerWidget()
@@ -61,7 +63,7 @@ void IPNetworkServerWidget::onPortChanged(int port)
     listener->setHostPort((quint16) port);
 }
 
-void IPNetworkServerWidget::onIPChanged(QString value)
+void IPNetworkServerWidget::onIPChanged(const QString &value)
 {
     listener->setHostAddress(QHostAddress(value));
 }

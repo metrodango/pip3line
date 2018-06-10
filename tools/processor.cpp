@@ -66,8 +66,8 @@ bool Processor::setTransformsChain(TransformChain ntlist)
     } else {
         for (int i = 0; i < tlist.size(); i++) {
             //qDebug() << "Tranformation loaded" << tlist.at(i)->name();
-            connect(tlist.at(i),SIGNAL(error(QString,QString)), this, SLOT(logError(QString, QString)));
-            connect(tlist.at(i),SIGNAL(warning(QString,QString)), this, SLOT(logError(QString, QString)));
+            connect(tlist.at(i), &TransformAbstract::error, this, &Processor::logError);
+            connect(tlist.at(i), &TransformAbstract::warning, this, &Processor::logError);
         }
         emit status(tr("%1 transformations loaded").arg(tlist.size()), "Processor");
     }

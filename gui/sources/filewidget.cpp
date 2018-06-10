@@ -31,8 +31,8 @@ FileWidget::FileWidget(LargeFile *fsource, QWidget *parent) :
     ui->setupUi(this);
 
     refresh();
-    connect(source,SIGNAL(infoUpdated()), SLOT(refresh()));
-    connect(ui->refreshPushButton, SIGNAL(clicked()), SLOT(refresh()));
+    connect(source,&LargeFile::infoUpdated, this, &FileWidget::refresh);
+    connect(ui->refreshPushButton, &QPushButton::clicked, this, &FileWidget::refresh);
 }
 
 FileWidget::~FileWidget()

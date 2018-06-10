@@ -24,7 +24,7 @@ DeleteableListItem::DeleteableListItem(const QString &text, const QPixmap &im, Q
 
     if (!im.isNull())
         ui->pixLabel->setPixmap(im);
-    connect(ui->deletePushButton, SIGNAL(clicked()), this, SLOT(onDelete()));
+    connect(ui->deletePushButton, &QPushButton::clicked, this, &DeleteableListItem::onDelete);
 }
 
 DeleteableListItem::~DeleteableListItem()

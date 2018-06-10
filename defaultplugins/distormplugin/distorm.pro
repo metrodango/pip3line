@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = distormplugin
 TEMPLATE = lib
-CONFIG += plugin c++11 warn_on
+CONFIG += plugin c++14 warn_on
 
 DEFINES += DISTORM_LIBRARY
 

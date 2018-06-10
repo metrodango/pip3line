@@ -34,7 +34,7 @@ ImportExportWorker::ImportExportWorker(PacketModelAbstract *model,
     plainToFile = true;
     plainSeparator = '\n';
 
-    connect(this, SIGNAL(finished()), SLOT(deleteLater()), Qt::QueuedConnection);
+    connect(this, &ImportExportWorker::finished, this, &ImportExportWorker::deleteLater, Qt::QueuedConnection);
 }
 
 ImportExportWorker::~ImportExportWorker()
@@ -63,6 +63,8 @@ void ImportExportWorker::run()
     if (target == nullptr) {
         qFatal("Cannot allocate memory for target(QIODevice) X{");
     }
+
+    timer.restart();
 
     if (ops == GuiConst::EXPORT_OPERATION) {
 
@@ -96,6 +98,9 @@ void ImportExportWorker::run()
                 qCritical() << tr("[ImportExportWorker::run] invalid cast to QBuffer");
             }
         }
+
+        qDebug() << "Written packets:" << loadedPackets.size() << timer.restart();
+
     } else if (ops == GuiConst::IMPORT_OPERATION) {
         loadedPackets.clear();
         if (format == GuiConst::PLAIN_FORMAT && !plainToFile) {
@@ -126,8 +131,11 @@ void ImportExportWorker::run()
                     qCritical() << tr("[ImportExportWorker::run] Unmanaged format for reading: %1 T_T").arg(format);
                     break;
             }
-            qDebug() << "loaded packets:" << loadedPackets.size();
+            qDebug() << "loaded packets:" << loadedPackets.size() << timer.restart();
+            std::sort(loadedPackets.begin(), loadedPackets.end(), Packet::lessThanFunc);
+            qDebug() << "Packets sorted " << timer.restart();
             model->addPackets(loadedPackets);
+            qDebug() << "Packet added " << timer.restart();
         }
     }
 
@@ -147,7 +155,7 @@ void ImportExportWorker::toPcap(QIODevice *file)
     pfile->setLinkLayerType(pcapLinkType);
 
     if (pfile->createAndOpenFile()) {
-        Packet *pac = nextPacket();
+        QSharedPointer<Packet> pac = nextPacket();
         while (pac != nullptr ) {
             PcapPacket * ppacket = new(std::nothrow) PcapPacket(pac->getData());
             if (ppacket == nullptr)
@@ -170,7 +178,7 @@ void ImportExportWorker::toPcap(QIODevice *file)
 
 void ImportExportWorker::loadFromPcap(QIODevice *file)
 {
-    qDebug() << "perf 1: " << timer.restart();
+    // qDebug() << "perf 1: " << timer.restart();
     PcapIO *pfile = new(std::nothrow) PcapIO(file);
     if (pfile == nullptr)
         qFatal("Cannot allocate memory for PcapIO X{");
@@ -180,7 +188,7 @@ void ImportExportWorker::loadFromPcap(QIODevice *file)
         qint64 count = 0;
         while (ppacket != nullptr) {
             count++;
-            Packet *pac = new(std::nothrow) Packet(ppacket->getData());
+            QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet(ppacket->getData()));
             if (pac == nullptr)
                 qFatal("Cannot allocate memory for Packet X{");
 
@@ -198,13 +206,14 @@ void ImportExportWorker::loadFromPcap(QIODevice *file)
     } else {
         emit log(tr("Cannot open the pcap source file: %1").arg(pfile->getErrorString()), "Pcap import",Pip3lineConst::LERROR);
     }
-    qDebug() << "perf 10: " << timer.restart();
+
+    //qDebug() << "perf 10: " << timer.restart();
 }
 
 void ImportExportWorker::toXML(QXmlStreamWriter *stream)
 {
     stream->writeStartElement(GuiConst::STATE_PACKET_LIST);
-    Packet *pac = nextPacket();
+    QSharedPointer<Packet> pac = nextPacket();
     while (pac != nullptr ) {
         stream->writeStartElement(GuiConst::STATE_PACKET);
         stream->writeAttribute(GuiConst::STATE_TIMESTAMP, QString::number(pac->getTimestamp().toMSecsSinceEpoch()));
@@ -260,7 +269,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
         if (stream->name() == GuiConst::STATE_PACKET_LIST) {
             while (stream->readNextStartElement()) {
                 if (stream->name() == GuiConst::STATE_PACKET) {
-                    Packet *pac = new(std::nothrow) Packet();
+                    QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet());
                     if (pac == nullptr)
                         qFatal("[ImportExportWorker::loadFromXML] Cannot allocate memory for Packet X{");
 
@@ -370,7 +379,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
                     if (gotData)
                         loadedPackets.append(pac);
                     else
-                        delete pac;
+                        pac.clear();
 
                 } else {
                     qCritical() << tr("[ImportExportWorker::loadFromXML] Expecting a <%1> element here not <%2>").arg(GuiConst::STATE_PACKET).arg(stream->name().toString());
@@ -396,7 +405,7 @@ void ImportExportWorker::loadFromXMLFile(QIODevice *file)
 
 void ImportExportWorker::toJSon(QJsonDocument *jdoc)
 {
-    Packet *pac = nextPacket();
+    QSharedPointer<Packet> pac = nextPacket();
     QJsonArray packetList;
     while (pac != nullptr ) {
         QJsonObject jsonobj;
@@ -458,8 +467,8 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
             }
             QJsonObject jsonpac = packetList.at(i).toObject();
 
-            Packet *pac = new(std::nothrow) Packet();
-            if (pac == nullptr)
+            QSharedPointer<Packet> pac = QSharedPointer<Packet>(new(std::nothrow) Packet());
+            if (pac.isNull())
                 qFatal("[ImportExportWorker::loadFromJson] Cannot allocate memory for Packet X{");
 
             bool ok = false;
@@ -565,7 +574,7 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
             if (gotData)
                 loadedPackets.append(pac);
             else
-                delete pac;
+                pac.clear();
         }
     } else {
         qCritical() << tr("[ImportExportWorker::loadFromJson] The base object has to be a JSON array");
@@ -587,7 +596,7 @@ void ImportExportWorker::loadFromJsonFile(QIODevice *file)
 void ImportExportWorker::toPlain(QIODevice *file)
 {
     QByteArray endChar(1,plainSeparator);
-    Packet *pac = nextPacket();
+    QSharedPointer<Packet> pac = nextPacket();
     while (pac != nullptr ) {
         QByteArray data = pac->getData();
         if (plainBase64) {
@@ -632,7 +641,7 @@ void ImportExportWorker::loadFromPlain(QIODevice *file)
 
 }
 
-Packet *ImportExportWorker::nextPacket()
+QSharedPointer<Packet> ImportExportWorker::nextPacket()
 {
     if (noMore)
         return nullptr;
@@ -670,7 +679,7 @@ void ImportExportWorker::addPlainRawPacket(QByteArray data, QDateTime date)
 
     }
 
-    Packet *pac = new(std::nothrow) Packet();
+    QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet());
     if (pac == nullptr)
         qFatal("[ImportExportWorker::addPlainRawPacket] Cannot allocate memory for Packet X{");
     pac->setOriginalData(data,true);
@@ -688,7 +697,7 @@ void ImportExportWorker::setPlainBase64(bool value)
     plainBase64 = value;
 }
 
-QList<Packet *> ImportExportWorker::getLoadedPackets() const
+QList<QSharedPointer<Packet> > ImportExportWorker::getLoadedPackets() const
 {
     return loadedPackets;
 }

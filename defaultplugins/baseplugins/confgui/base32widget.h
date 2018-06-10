@@ -29,7 +29,6 @@ class Base32Widget : public QWidget
     private slots:
         void onVariantchange(int newVariant);
         void onPaddingChange(QString val);
-        void onIncludePaddingToggled(bool val);
     private:
         Ui::Base32Widget *ui;
         Base32 *transform;

@@ -7,15 +7,30 @@
 # Released under AGPL see LICENSE for more information
 
 
-QT       += svg concurrent
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += svg concurrent widgets
 
 TARGET = transform
 TEMPLATE = lib
-CONFIG += debug plugin c++11 warn_on
+CONFIG += debug plugin c++14 warn_on
 DEFINES += LIBTRANSFORM_LIBRARY
 
+#CONFIG += CONF_ADDR_SANITIZER
+#CONFIG += CONF_THREAD_SANITIZER
+
+DEFINES += QT_DEPRECATED_WARNINGS
+
 unix {
+
+    CONF_ADDR_SANITIZER {
+        QMAKE_CXXFLAGS += -fsanitize=address
+        QMAKE_LDFLAGS += -fsanitize=address
+        LIBS += -L"/usr/lib/clang/5.0.0/lib/linux" -lclang_rt.asan_cxx-x86_64
+    }
+
+    CONF_THREAD_SANITIZER {
+        QMAKE_CXXFLAGS += -fsanitize=thread
+        LIBS += -L"/usr/lib/clang/5.0.0/lib/linux" -ltsan
+    }
     DESTDIR = ../bin
 }
 

@@ -24,7 +24,7 @@ NumberToCharWidget::NumberToCharWidget(NumberToChar *ntransform, QWidget *parent
 
     ui->separatorLineEdit->setText(QByteArray(1,transform->getSeparator()));
 
-    connect(ui->separatorLineEdit, SIGNAL(textEdited(QString)), this, SLOT(onSeparatorChanged(QString)));
+    connect(ui->separatorLineEdit, &QLineEdit::textEdited, this, &NumberToCharWidget::onSeparatorChanged);
 }
 
 NumberToCharWidget::~NumberToCharWidget()
@@ -32,7 +32,7 @@ NumberToCharWidget::~NumberToCharWidget()
     delete ui;
 }
 
-void NumberToCharWidget::onSeparatorChanged(QString val)
+void NumberToCharWidget::onSeparatorChanged(const QString &val)
 {
     if (val.size() == 1) { // one and only character
         QByteArray c = val.toUtf8();

@@ -25,12 +25,8 @@ class BytesToFloatWdiget : public QWidget
     public:
         explicit BytesToFloatWdiget(BytesToFloat *transform,QWidget *parent = 0);
         ~BytesToFloatWdiget();
-        
-    private slots:
-        void onLittleEndianChange(bool checked);
-        void on32BitSizeChanged(bool checked);
+    public slots:
         void onPrecisionChanged(int val);
-
     private:
         Ui::BytesToFloatWdiget *ui;
         BytesToFloat *transform;

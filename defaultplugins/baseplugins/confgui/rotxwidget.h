@@ -25,8 +25,8 @@ class RotXWidget : public QWidget
     public:
         explicit RotXWidget(Rotx *ntransform, QWidget *parent = 0);
         ~RotXWidget();
-    private slots:
-        void onUpdateType(int val);
+    public slots:
+        void onVariantChanged(int val);
     private:
         Ui::RotXWidget *ui;
         Rotx *transform;

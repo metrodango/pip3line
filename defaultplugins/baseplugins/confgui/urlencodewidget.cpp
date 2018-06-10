@@ -24,10 +24,10 @@ UrlEncodeWidget::UrlEncodeWidget(UrlEncode *ntransform, QWidget *parent) :
     ui->percentLineEdit->setText(QString(transform->getPercentSign()));
     ui->excludeLineEdit->setText(QString(transform->getExclude()));
 
-    connect(ui->includeLineEdit,SIGNAL(textChanged(QString)),this,SLOT(onIncludeChange(QString)));
-    connect(ui->excludeLineEdit,SIGNAL(textChanged(QString)),this,SLOT(onExcludeChange(QString)));
-    connect(ui->includeAllPushButton,SIGNAL(clicked()),this,SLOT(onIncludeAll()));
-    connect(ui->percentLineEdit,SIGNAL(textChanged(QString)), this, SLOT(onPercentChange(QString)));
+    connect(ui->includeLineEdit, &QLineEdit::textChanged, this, &UrlEncodeWidget::onIncludeChange);
+    connect(ui->excludeLineEdit, &QLineEdit::textChanged, this, &UrlEncodeWidget::onExcludeChange);
+    connect(ui->includeAllPushButton, &QPushButton::clicked, this, &UrlEncodeWidget::onIncludeAll);
+    connect(ui->percentLineEdit, &QLineEdit::textChanged, this, &UrlEncodeWidget::onPercentChange);
 }
 
 UrlEncodeWidget::~UrlEncodeWidget()

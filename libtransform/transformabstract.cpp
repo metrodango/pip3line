@@ -56,7 +56,7 @@ QWidget *TransformAbstract::getGui(QWidget * parent)
     if (confGui == nullptr) {
         confGui = requestGui(parent);
         if (confGui != nullptr) {
-            connect(confGui, SIGNAL(destroyed()), this, SLOT(onGuiDelete()), Qt::UniqueConnection);
+            connect(confGui, &QWidget::destroyed, this, &TransformAbstract::onGuiDelete, Qt::UniqueConnection);
         }
     }
     return confGui;

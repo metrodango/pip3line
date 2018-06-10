@@ -188,17 +188,18 @@ PacketAnalyserOptionsDialog::PacketAnalyserOptionsDialog(GuiHelper *guiHelper,
     ui->equalityExampleLabel->setAutoFillBackground(true);
     ui->equalityExampleLabel->setPalette(example_palette);
 
-    connect(ui->columnsTableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onItemSelected(QItemSelection)));
-    connect(uiTransform->inboundRadioButton, SIGNAL(toggled(bool)), SLOT(onInboundButtonToggled(bool)));
-    connect(uiTransform->infoPushButton, SIGNAL(clicked()), this, SLOT(onInfoClicked()));
-    connect(uiTransform->textRadioButton, SIGNAL(toggled(bool)), this, SLOT(onTextFormatToggled(bool)));
-    connect(ui->textRadioButton, SIGNAL(toggled(bool)), this, SLOT(onTextFormatToggled(bool)));
+    connect(ui->columnsTableView->selectionModel(), &QItemSelectionModel::selectionChanged,this, [=](QItemSelection selection,QItemSelection) { onItemSelected(selection);});
+    connect(uiTransform->inboundRadioButton, &QRadioButton::toggled, this, &PacketAnalyserOptionsDialog::onInboundButtonToggled);
+    connect(uiTransform->infoPushButton, &QPushButton::clicked, this, &PacketAnalyserOptionsDialog::onInfoClicked);
+    connect(uiTransform->textRadioButton, &QRadioButton::toggled, this, &PacketAnalyserOptionsDialog::onTextFormatToggled);
+    connect(ui->textRadioButton, &QRadioButton::toggled, this, &PacketAnalyserOptionsDialog::onTextFormatToggled);
+    //connect(ui->maxPayloadSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), mainModel, &PacketModelAbstract::setMaxPayloadDisplaySize);
     connect(ui->maxPayloadSizeSpinBox, SIGNAL(valueChanged(int)), mainModel, SLOT(setMaxPayloadDisplaySize(int)));
-    connect(ui->columnsTableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onIndexClicked(QModelIndex)));
-    connect(mainModel, SIGNAL(columnsUpdated()), this , SLOT(onColumnsUpdated()));
+    connect(ui->columnsTableView, &QTableView::clicked, this, &PacketAnalyserOptionsDialog::onIndexClicked);
+    connect(mainModel, &PacketModelAbstract::columnsUpdated, this , &PacketAnalyserOptionsDialog::onColumnsUpdated);
 
-    connect(ui->equalityBackgroundPushButton, SIGNAL(clicked(bool)), this, SLOT(onEqualityBackgroundClicked()));
-    connect(ui->equalityTextPushButton, SIGNAL(clicked(bool)), this, SLOT(onEqualityForegroundClicked()));
+    connect(ui->equalityBackgroundPushButton, &QPushButton::clicked, this, &PacketAnalyserOptionsDialog::onEqualityBackgroundClicked);
+    connect(ui->equalityTextPushButton, &QPushButton::clicked, this, &PacketAnalyserOptionsDialog::onEqualityForegroundClicked);
 
     uiTransform->wayGroupBox->setVisible(true);
     uiTransform->formatGroupBox->setVisible(true);
@@ -206,9 +207,9 @@ PacketAnalyserOptionsDialog::PacketAnalyserOptionsDialog(GuiHelper *guiHelper,
     uiTransform->nameWidget->setVisible(false);
     ui->maxPayloadSizeWidget->setVisible(false);
 
-    connect(this, SIGNAL(rejected()), SLOT(deleteLater()));
+    connect(this, &PacketAnalyserOptionsDialog::rejected,this, &PacketAnalyserOptionsDialog::deleteLater);
 
-    connect(ui->addPushButton, SIGNAL(clicked(bool)), SLOT(onAddNewColumn()));
+    connect(ui->addPushButton, &QPushButton::clicked, this, &PacketAnalyserOptionsDialog::onAddNewColumn);
 
     onItemSelected(0);
 }

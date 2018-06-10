@@ -30,8 +30,8 @@ using namespace GuiConst;
 const QString MainTabs::ID = "MainTabs";
 const QString MainTabs::STATE_LOGGER_TAB = "LoggerTab";
 
-MainTabs::MainTabs(GuiHelper *nguiHelper, QWidget *parent) :
-    QTabWidget(parent)
+MainTabs::MainTabs(GuiHelper *nguiHelper) :
+    QTabWidget(nullptr)
 {
     tabHeaderContextMenu = nullptr;
     tabBarRef = tabBar();
@@ -45,12 +45,12 @@ MainTabs::MainTabs(GuiHelper *nguiHelper, QWidget *parent) :
     setMovable(true);
 
     guiHelper = nguiHelper;
-    connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(onDeleteTab(int)));
+    connect(this, &MainTabs::tabCloseRequested, this, &MainTabs::onDeleteTab);
 
     logger = guiHelper->getLogger();
     if (logger != nullptr) {
-        connect(logger, SIGNAL(errorRaised()), this, SLOT(onLogError()));
-        connect(logger,SIGNAL(cleanStatus()), this, SLOT(onLogCleanStatus()));
+        connect(logger, &LoggerWidget::errorRaised, this, &MainTabs::onLogError);
+        connect(logger, &LoggerWidget::cleanStatus, this, &MainTabs::onLogCleanStatus);
         int index = this->addTab(logger,tr("Logs"));
         if (logger->hasUncheckedError())
             tabBarRef->setTabTextColor(index, Qt::red);
@@ -62,9 +62,10 @@ MainTabs::MainTabs(GuiHelper *nguiHelper, QWidget *parent) :
         return;
     }
     updateTabHeaderMenu();
-    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateTabHeaderMenu()),Qt::QueuedConnection);
-    connect(tabHeaderContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(onDeletedTabSelected(QAction*)));
-    connect(guiHelper, SIGNAL(tabRevived(TabAbstract*)), this, SLOT(integrateTab(TabAbstract*)));
+    connect(guiHelper, &GuiHelper::deletedTabsUpdated, this, &MainTabs::updateTabHeaderMenu,Qt::QueuedConnection);
+    connect(tabHeaderContextMenu, &QMenu::triggered, this, &MainTabs::onDeletedTabSelected);
+    connect(guiHelper, &GuiHelper::tabRevived, this, &MainTabs::integrateTab);
+    connect(guiHelper, &GuiHelper::newPacketAnalyserRequested, this, &MainTabs::newPacketAnalyserTab);
 }
 
 MainTabs::~MainTabs()
@@ -156,7 +157,7 @@ int MainTabs::integrateTab(TabAbstract *newTab)
     }
 
     nextInsert = count() - ((indexOf(logger) == -1) ? 0 : 1);
-    connect(newTab, SIGNAL(askWindowTabSwitch()), this, SLOT(receivedTabWindowSwitch()), Qt::UniqueConnection);
+    connect(newTab, &TabAbstract::askWindowTabSwitch, this, &MainTabs::receivedTabWindowSwitch, Qt::UniqueConnection);
 
     tabList.insert(newTab,false);
 
@@ -167,13 +168,14 @@ int MainTabs::integrateTab(TabAbstract *newTab)
         newTab->setName(tabName);
     }
 
-    connect(newTab, SIGNAL(nameChanged()), this, SLOT(receivedNameChanged()), Qt::UniqueConnection);
-    connect(newTab, SIGNAL(askBringFront()), this, SLOT(receivedBringToFront()), Qt::UniqueConnection);
+    connect(newTab, &TabAbstract::nameChanged, this, &MainTabs::receivedNameChanged, Qt::UniqueConnection);
+    connect(newTab, &TabAbstract::askBringFront, this, &MainTabs::receivedBringToFront, Qt::UniqueConnection);
 
     insertTab(nextInsert, newTab, tabName);
     setCurrentIndex(nextInsert);
     guiHelper->addTab(newTab);
     tabCount++;
+    newTab->registerToGlobal();
     return nextInsert;
 }
 
@@ -210,6 +212,30 @@ void MainTabs::changeEvent(QEvent *event)
             list.at(i)->setEnabled(enableValue);
         }
     }
+}
+
+QString MainTabs::generateUniqueName(const QString &name)
+{
+    QString newName = name;
+    bool found = true;
+    int count = 0;
+    while (found) {
+        found = false;
+        QHashIterator<TabAbstract *,bool> i(tabList);
+        while (i.hasNext()) {
+            i.next();
+            if (i.key()->getName() == newName) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            count++;
+            newName = QString("%1 %2").arg(name).arg(count);
+        }
+    }
+
+    return newName;
 }
 
 BaseStateAbstract *MainTabs::getStateMngtObj()
@@ -319,12 +345,12 @@ TabAbstract * MainTabs::newFileTab(QString fileName)
 
     if (!fileName.isEmpty())
         fs->fromLocalFile(fileName);
-    connect(fs,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)),Qt::QueuedConnection);
+    connect(fs, &LargeFile::log, logger, &LoggerWidget::logMessage,Qt::QueuedConnection);
 
     TabAbstract *ft = newTab(fs, GuiConst::RANDOM_ACCESS_TAB_TYPE);
     if (ft != nullptr) {
         ft->setPreTabType(GuiConst::LARGE_FILE_PRETAB);
-        ft->setName(QFileInfo(fileName).fileName());
+        ft->setName(generateUniqueName(QFileInfo(fileName).fileName()));
     }
 
     return ft;
@@ -336,12 +362,12 @@ TabAbstract * MainTabs::newHexEditorTab(QByteArray data)
     if (bs == nullptr) {
         qFatal("Cannot allocate memory for BasicSource X{");
     }
-    connect(bs,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)),Qt::QueuedConnection);
+    connect(bs, &BasicSource::log, logger, &LoggerWidget::logMessage,Qt::QueuedConnection);
 
     TabAbstract *tab = newTab(bs, GuiConst::GENERIC_TAB_TYPE);
     if (tab != nullptr) {
         tab->setPreTabType(GuiConst::HEXAEDITOR_PRETAB);
-        tab->setName(GuiConst::BASEHEX_TAB_STRING);
+        tab->setName(generateUniqueName(GuiConst::BASEHEX_TAB_STRING));
         tab->setData(data);
     }
 
@@ -354,18 +380,18 @@ TabAbstract * MainTabs::newCurrentMemTab()
     if (cms == nullptr) {
         qFatal("Cannot allocate memory for CurrentMemorysource X{");
     }
-    connect(cms,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)),Qt::QueuedConnection);
+    connect(cms, &CurrentMemorysource::log, logger, &LoggerWidget::logMessage, Qt::QueuedConnection);
 
     TabAbstract *raTab = newTab(cms, GuiConst::RANDOM_ACCESS_TAB_TYPE);
     if (raTab != nullptr) {
         raTab->setPreTabType(GuiConst::CURRENTMEM_PRETAB);
-        raTab->setName("Current memory");
+        raTab->setName(generateUniqueName(tr("Current memory")));
     }
 
     return raTab;
 }
 
-TabAbstract *MainTabs::newPacketAnalyserTab()
+TabAbstract *MainTabs::newPacketAnalyserTab(QList<QSharedPointer<Packet> >  packets)
 {
     PacketAnalyserTab *pat =new(std::nothrow) PacketAnalyserTab(guiHelper);
     if (pat == nullptr) {
@@ -373,7 +399,11 @@ TabAbstract *MainTabs::newPacketAnalyserTab()
     }
 
     integrateTab(pat);
-    pat->setName(tr("Packet analyser"));
+
+    pat->setName(generateUniqueName(tr("Packet analyser")));
+    if (!packets.isEmpty()) {
+        pat->addPackets(packets);
+    }
 
     return pat;
 }
@@ -388,7 +418,7 @@ void MainTabs::onDeleteTab(int index)
         tabList.remove(tgui);
         guiHelper->removeTab(tgui);
         guiHelper->addDeletedTab(tgui);
-      //  delete tgui;
+        tgui->unregisterFromGlobal();
         setCurrentIndex(index > 0 ? index - 1 : 0);
     } else {
         removeTab(index);
@@ -499,7 +529,7 @@ void MainTabs::detachTab(TabAbstract *tab, QByteArray windowState)
             fd->raise();
             fd->show();
             tabList.insert(tab,true);
-            connect(fd,SIGNAL(rejected()), this, SLOT(onFloatingWindowsReject()));
+            connect(fd, &FloatingDialog::rejected, this, &MainTabs::onFloatingWindowsReject);
         } else {
             qFatal("Cannot allocate memory for FloatingDialog X{");
         }
@@ -698,9 +728,8 @@ void MainTabsStateObj::run()
                     if (initTab == nullptr) {
                         qFatal("Cannot allocate memory for InitTabStateObj X{");
                     }
-                    connect(initTab, SIGNAL(detachTab(TabAbstract*,QByteArray)), mtabs, SLOT(detachTab(TabAbstract*,QByteArray)), Qt::QueuedConnection);
-                    // don't need that the integration is done automagically already
-                //    connect(initTab, SIGNAL(newTab(TabAbstract*)), mtabs, SLOT(integrateTab(TabAbstract*)), Qt::QueuedConnection);
+                    connect(initTab, &InitTabStateObj::detachTab, mtabs, &MainTabs::detachTab, Qt::QueuedConnection);
+                    // don't need to connect the newTab signal, integration is done automagically already
 
                     emit addNewState(initTab);
                 }

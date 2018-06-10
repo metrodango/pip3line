@@ -124,7 +124,7 @@ QWidget *OpensslPlugin::getConfGui(QWidget * /* parent */)
         }
         label->setWordWrap(true);
         gui = label;
-        connect(gui,SIGNAL(destroyed()), SLOT(onGuiDelete()));
+        connect(gui, &QWidget::destroyed, this, &OpensslPlugin::onGuiDelete);
     }
     return gui;
 }

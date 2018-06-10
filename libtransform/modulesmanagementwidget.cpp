@@ -28,10 +28,10 @@ ModulesManagementWidget::ModulesManagementWidget(ModulesManagement *nmodulesMgmt
 
     ui->setupUi(this);
     ui->infoLabel->setText(modulesMgmt->getInfos());
-    connect(modulesMgmt,SIGNAL(modulesUpdated()), this, SLOT(loadModules()));
-    connect(modulesMgmt,SIGNAL(pathsUpdated()), this, SLOT(loadPaths()));
-    connect(ui->modulesListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onModuleSelected(QListWidgetItem*)));
-    connect(ui->loadPushButton, SIGNAL(clicked()), this, SLOT(onManualClicked()));
+    connect(modulesMgmt, &ModulesManagement::modulesUpdated, this, &ModulesManagementWidget::loadModules);
+    connect(modulesMgmt, &ModulesManagement::pathsUpdated, this, &ModulesManagementWidget::loadPaths);
+    connect(ui->modulesListWidget, &QListWidget::itemClicked, this, &ModulesManagementWidget::onModuleSelected);
+    connect(ui->loadPushButton, &QPushButton::clicked, this, &ModulesManagementWidget::onManualClicked);
 
     loadPaths();
     loadModules();
@@ -67,7 +67,7 @@ void ModulesManagementWidget::loadModules()
                 itemWid->setEnableDelete(true);
             }
 
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(unload(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &ModulesManagementWidget::unload);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item == nullptr) {
                 qFatal("Cannot allocate memory for QListWidgetItem X{");

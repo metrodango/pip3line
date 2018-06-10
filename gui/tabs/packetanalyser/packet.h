@@ -15,6 +15,7 @@ Released under AGPL see LICENSE for more information
 #include <QColor>
 #include "sources/bytesourceabstract.h"
 #include <QObject>
+#include <QSharedPointer>
 
 class Block;
 
@@ -27,7 +28,7 @@ class Packet : public QObject
         explicit Packet(QByteArray data = QByteArray(), int sourceid = USER_SOURCE);
         explicit Packet(Block *block);
         ~Packet();
-
+        Packet * clone();
         QByteArray getOriginalData() const;
         void setOriginalData(const QByteArray &value, bool setDataAsWell = true);
         QByteArray getData() const;
@@ -65,6 +66,8 @@ class Packet : public QObject
 
         bool isInjected() const;
         void setInjected(bool value);
+
+        static bool lessThanFunc(QSharedPointer<Packet> or1, QSharedPointer<Packet> or2);
 
     signals:
         void updated();

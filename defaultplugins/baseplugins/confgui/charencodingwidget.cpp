@@ -11,6 +11,7 @@ Released under AGPL see LICENSE for more information
 #include "charencodingwidget.h"
 #include "ui_charencodingwidget.h"
 #include <QTextCodec>
+#include <QDebug>
 
 CharEncodingWidget::CharEncodingWidget(CharEncoding *ntransform, QWidget *parent) :
     QWidget(parent)
@@ -23,7 +24,8 @@ CharEncodingWidget::CharEncodingWidget(CharEncoding *ntransform, QWidget *parent
     ui->setupUi(this);
 
     QList<QByteArray> codecs =  QTextCodec::availableCodecs();
-    qSort(codecs);
+    std::sort(codecs.begin(), codecs.end());
+
     for (int i = 0; i < codecs.size(); i++) {
         ui->codecComboBox->addItem(QString(codecs.at(i)),QVariant(codecs.at(i)));
     }
@@ -32,18 +34,18 @@ CharEncodingWidget::CharEncodingWidget(CharEncoding *ntransform, QWidget *parent
     ui->convertInvalidToNullCheckBox->setChecked(transform->getConvertInvalidToNull());
     ui->insertBOMCheckBox->setChecked(transform->getIncludeHeader());
 
-    connect(ui->codecComboBox,SIGNAL(currentIndexChanged(int)), this, SLOT(onCodecChange()));
-    connect(ui->UTF8pushButton, SIGNAL(clicked()), SLOT(onUTF8Clicked()));
+//    connect(ui->codecComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=](int) {
+//        transform->setCodecName(ui->codecComboBox->itemData(ui->codecComboBox->currentIndex()).toByteArray());
+//    });
+    connect(ui->codecComboBox, SIGNAL(currentIndexChanged(int)), this , SLOT(onCodecChanged()));
+    connect(ui->UTF8pushButton, &QPushButton::clicked, this, &CharEncodingWidget::onUTF8Clicked);
+    connect(ui->insertBOMCheckBox, &QCheckBox::toggled, this , [=](bool val) {transform->setIncludeHeader(val);});
+    connect(ui->convertInvalidToNullCheckBox, &QCheckBox::toggled, this , [=](bool val) {transform->setConvertInvalidToNull(val);});
 }
 
 CharEncodingWidget::~CharEncodingWidget()
 {
     delete ui;
-}
-
-void CharEncodingWidget::onCodecChange()
-{
-    transform->setCodecName(ui->codecComboBox->itemData(ui->codecComboBox->currentIndex()).toByteArray());
 }
 
 void CharEncodingWidget::on_UTF16PushButton_clicked()
@@ -64,12 +66,7 @@ void CharEncodingWidget::onUTF8Clicked()
     ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData((QVariant) transform->getCodecName()));
 }
 
-void CharEncodingWidget::onInsertBOMChanged(bool val)
+void CharEncodingWidget::onCodecChanged()
 {
-    transform->setIncludeHeader(val);
-}
-
-void CharEncodingWidget::onConvertInvalidToNullChanged(bool val)
-{
-    transform->setConvertInvalidToNull(val);
+    transform->setCodecName(ui->codecComboBox->itemData(ui->codecComboBox->currentIndex()).toByteArray());
 }

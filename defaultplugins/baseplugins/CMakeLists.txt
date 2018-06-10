@@ -85,7 +85,9 @@ set ( baseplugins_HDRS
 	bytestofloat.h
 	byterot.h
 	hmactransform.h
-	crc32.cpp
+	findandreplace.h
+	crc32.h
+	tds7_enc.h
 	confgui/xorwidget.h
 	confgui/urlencodewidget.h
 	confgui/splitwidget.h
@@ -116,6 +118,7 @@ set ( baseplugins_HDRS
 	confgui/byterotwidget.h
 	confgui/hmactransformwidget.h
 	confgui/crc32widget.h
+	confgui/findandreplacewidget.h
 	)
 
 set ( baseplugins_SRCS
@@ -163,6 +166,8 @@ set ( baseplugins_SRCS
 	byterot.cpp
 	hmactransform.cpp
 	crc32.cpp
+	tds7_enc.cpp
+	findandreplace.cpp
 	confgui/xorwidget.cpp
 	confgui/urlencodewidget.cpp
 	confgui/splitwidget.cpp
@@ -193,6 +198,7 @@ set ( baseplugins_SRCS
 	confgui/byterotwidget.cpp
 	confgui/hmactransformwidget.cpp
 	confgui/crc32widget.cpp
+	confgui/findandreplacewidget.cpp
 	)
 
 set ( baseplugins_UIS
@@ -226,6 +232,7 @@ set ( baseplugins_UIS
 	confgui/byterotwidget.ui
 	confgui/hmactransformwidget.ui
 	confgui/crc32widget.ui
+	confgui/findandreplacewidget.ui
 	)
 
 if(WITH_QT5)

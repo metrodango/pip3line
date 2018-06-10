@@ -27,9 +27,7 @@ class ZlibWidget : public QWidget
         ~ZlibWidget();
         
     private slots:
-        void on_compressionSpinBox_valueChanged(int value);
-
-        void on_removeHeaderCheckBox_toggled(bool checked);
+        void onCompressionChanged(int value);
 
     private:
         Ui::ZlibWidget *ui;

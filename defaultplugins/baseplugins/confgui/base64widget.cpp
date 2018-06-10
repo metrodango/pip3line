@@ -40,14 +40,14 @@ Base64Widget::Base64Widget(Base64 *ntransform, QWidget *parent) :
         ui->noPaddingRadioButton->setChecked(true);
     }
 
-    connect(ui->char62LineEdit,SIGNAL(textChanged(QString)),this,SLOT(verifyChar62(QString)));
-    connect(ui->char63LineEdit,SIGNAL(textChanged(QString)),this,SLOT(verifyChar63(QString)));
-    connect(ui->paddingLineEdit,SIGNAL(textChanged(QString)),this,SLOT(verifyCharPadding(QString)));
-    connect(ui->inclPaddingRadioButton,SIGNAL(toggled(bool)),this,SLOT(onCustomConf()));
-    connect(ui->netPaddingRadioButton,SIGNAL(toggled(bool)),this,SLOT(onCustomConf()));
-    connect(ui->noPaddingRadioButton,SIGNAL(toggled(bool)),this,SLOT(onCustomConf()));
-    connect(ui->variantComboBox,SIGNAL(currentIndexChanged(int)),this,SLOT(onChangeVariant(int)));
-
+    connect(ui->char62LineEdit, &QLineEdit::textChanged, this, &Base64Widget::verifyChar62);
+    connect(ui->char63LineEdit, &QLineEdit::textChanged, this, &Base64Widget::verifyChar63);
+    connect(ui->paddingLineEdit, &QLineEdit::textChanged, this, &Base64Widget::verifyCharPadding);
+    connect(ui->inclPaddingRadioButton, &QRadioButton::clicked, this, &Base64Widget::onCustomConf);
+    connect(ui->netPaddingRadioButton, &QRadioButton::clicked, this, &Base64Widget::onCustomConf);
+    connect(ui->noPaddingRadioButton, &QRadioButton::clicked, this, &Base64Widget::onCustomConf);
+    //connect(ui->variantComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &Base64Widget::onChangeVariant);
+    connect(ui->variantComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onChangeVariant(int)));
 }
 
 Base64Widget::~Base64Widget()

@@ -31,8 +31,8 @@ MasterThread::MasterThread(bool nbinaryInput, bool hideErrorsFlag, bool verboseF
         qFatal("Cannot allocate memory for messlog X{");
     }
 
-    connect(&transformFactory, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
-    connect(&transformFactory, SIGNAL(status(QString,QString)), this, SLOT(logStatus(QString)));
+    connect(&transformFactory, &TransformMgmt::error, this, &MasterThread::logError);
+    connect(&transformFactory, &TransformMgmt::status, this, &MasterThread::logStatus);
     transformFactory.initialize(QCoreApplication::applicationDirPath());
 }
 
@@ -67,10 +67,10 @@ void MasterThread::run()
     processor->setInput(&fin);
     processor->setOutput(&fout);
     if (!hideErrors)
-        connect(processor,SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
+        connect(processor, &Processor::error, this, &MasterThread::logError);
 
     if (verbose)
-        connect(processor,SIGNAL(status(QString, QString)), this, SLOT(logStatus(QString)));
+        connect(processor, &Processor::status, this, &MasterThread::logStatus);
 
     if (!transformName.isEmpty() && processor->configureFromName(transformName, singleWay)) {
         processor->start();

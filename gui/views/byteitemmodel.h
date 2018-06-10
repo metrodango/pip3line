@@ -27,7 +27,7 @@ class ByteItemModel : public QAbstractTableModel
     public:
         enum UpdateSource {TEXTVIEW = 0, HEXVIEW = 1, EXTERNAL = 2};
         static int INVALID_POSITION;
-        explicit ByteItemModel(ByteSourceAbstract * byteSource, QObject *parent = 0);
+        explicit ByteItemModel(ByteSourceAbstract * byteSource, QObject *parent = nullptr);
         ~ByteItemModel();
         void setSource(ByteSourceAbstract * byteSource);
         ByteSourceAbstract *getSource() const;

@@ -20,7 +20,7 @@ class TransformSelectorWidget : public QWidget
     signals:
         void newTransform(TransformAbstract * transform);
     private slots:
-        void onTransformSelected(QString name);
+        void onTransformSelected(const QString &name);
         void onTransformDelete();
     private:
         Ui::TransformSelectorWidget *ui;

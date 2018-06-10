@@ -21,8 +21,8 @@ TransformRequest::TransformRequest(TransformAbstract *ntransform, const QByteArr
     multiProcessing(false)
 {
     transform = ntransform;
-    connect(transform, SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)),Qt::DirectConnection);
-    connect(transform, SIGNAL(warning(QString,QString)), this, SLOT(logWarning(QString,QString)),Qt::DirectConnection);
+    connect(transform, &TransformAbstract::error, this, &TransformRequest::logError,Qt::DirectConnection);
+    connect(transform, &TransformAbstract::warning, this, &TransformRequest::logWarning,Qt::DirectConnection);
     deleteObject = takeOwnerShip;
     if (ptid == 0)
         ptid = (quintptr) this;
@@ -35,8 +35,8 @@ TransformRequest::TransformRequest(TransformAbstract *ntransform, const QList<QB
     multiProcessing(true)
 {
     transform = ntransform;
-    connect(transform, SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)),Qt::DirectConnection);
-    connect(transform, SIGNAL(warning(QString,QString)), this, SLOT(logWarning(QString,QString)),Qt::DirectConnection);
+    connect(transform, &TransformAbstract::error, this, &TransformRequest::logError,Qt::DirectConnection);
+    connect(transform, &TransformAbstract::warning, this, &TransformRequest::logWarning,Qt::DirectConnection);
     deleteObject = takeOwnerShip;
     if (ptid == 0)
         ptid = (quintptr) this;
@@ -179,7 +179,7 @@ void ThreadedProcessor::onRequestFinished()
 
 void ThreadedProcessor::startRequest(TransformRequest *request)
 {
-    connect(request, SIGNAL(endOfProcess()), this, SLOT(onRequestFinished()),Qt::QueuedConnection);
+    connect(request, &TransformRequest::endOfProcess, this, &ThreadedProcessor::onRequestFinished,Qt::QueuedConnection);
     QFuture<void> future = QtConcurrent::run(request, &TransformRequest::runRequest);
     currentRunning.insert(request, future);
 }

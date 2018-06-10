@@ -24,7 +24,8 @@ BinaryWidget::BinaryWidget(Binary *ntransform, QWidget *parent) :
     ui->groupBySpinBox->setValue(transform->getBlockSize());
     ui->groupBySpinBox->setMinimum(Binary::MINBLOCKSIZE);
     ui->groupBySpinBox->setMaximum(Binary::MAXBLOCKSIZE);
-    connect(ui->groupBySpinBox,SIGNAL(valueChanged(int)), this, SLOT(onChangeGroupBy(int)));
+    //connect(ui->groupBySpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &BinaryWidget::onChangeGroupBy);
+    connect(ui->groupBySpinBox, SIGNAL(valueChanged(int)), this, SLOT(onChangeGroupBy(int)));
 }
 
 BinaryWidget::~BinaryWidget()

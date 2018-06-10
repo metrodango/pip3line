@@ -42,12 +42,12 @@ HexEncodeWidget::HexEncodeWidget(HexEncode *ntransform, QWidget *parent) :
 
     ui->addPrefixCheckBox->setChecked(transform->getAddHexPrefix());
 
-    connect(ui->normalRadioButton, SIGNAL(clicked()), this, SLOT(onTypeChange()));
-    connect(ui->escapedRadioButton, SIGNAL(clicked()), this, SLOT(onTypeChange()));
-    connect(ui->escapedMixedRadioButton, SIGNAL(clicked()), this, SLOT(onTypeChange()));
-    connect(ui->cstyleRadioButton, SIGNAL(clicked()), this, SLOT(onTypeChange()));
-    connect(ui->csvRadioButton, SIGNAL(clicked()), this, SLOT(onTypeChange()));
-    connect(ui->addPrefixCheckBox, SIGNAL(toggled(bool)), SLOT(onAddPrefixChanged(bool)));
+    connect(ui->normalRadioButton, &QRadioButton::clicked, this, &HexEncodeWidget::onTypeChange);
+    connect(ui->escapedRadioButton, &QRadioButton::clicked, this, &HexEncodeWidget::onTypeChange);
+    connect(ui->escapedMixedRadioButton, &QRadioButton::clicked, this, &HexEncodeWidget::onTypeChange);
+    connect(ui->cstyleRadioButton, &QRadioButton::clicked, this, &HexEncodeWidget::onTypeChange);
+    connect(ui->csvRadioButton, &QRadioButton::clicked, this, &HexEncodeWidget::onTypeChange);
+    connect(ui->addPrefixCheckBox, &QCheckBox::toggled, this, &HexEncodeWidget::onAddPrefixChanged);
 }
 
 HexEncodeWidget::~HexEncodeWidget()

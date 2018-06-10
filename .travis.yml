@@ -1,0 +1,32 @@
+language: cpp
+sudo: required
+dist: trusty
+compiler:
+  - clang
+  - gcc
+os:
+  - linux
+
+before_install:
+  - sudo apt-get -qq update
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake .. -DALL=ON -DWITH_SCINTILLA=ON
+
+script: make
+
+addons:
+  apt:
+    packages:
+    - cmake
+    - python2.7-dev
+    - python3-dev
+    - libqt5svg5-dev
+    - qt5-default
+    - libqt5xmlpatterns5-dev
+    - git
+    - libssl-dev
+    - libdistorm3-dev
+    - libqt5scintilla2-dev

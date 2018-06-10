@@ -9,9 +9,9 @@ DefaultControlGui::DefaultControlGui(QWidget *parent) :
     ui->setupUi(this);
     ui->startStopPushButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     setStateStopped(stateStopped);
-    connect(ui->resetPushButton, SIGNAL(clicked(bool)), this, SIGNAL(reset()));
-    connect(ui->startStopPushButton, SIGNAL(clicked(bool)), this, SLOT(onStartStop()));
-    connect(ui->configPushButton, SIGNAL(clicked(bool)), this, SIGNAL(requestConfPanel()));
+    connect(ui->resetPushButton, &QPushButton::clicked, this, &DefaultControlGui::reset);
+    connect(ui->startStopPushButton, &QPushButton::clicked, this, &DefaultControlGui::onStartStop);
+    connect(ui->configPushButton, &QPushButton::clicked, this, &DefaultControlGui::requestConfPanel);
 }
 
 DefaultControlGui::~DefaultControlGui()

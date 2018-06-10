@@ -29,8 +29,8 @@ QuickViewDialog::QuickViewDialog(GuiHelper *nguiHelper, QWidget *parent) :
     }
     ui->setupUi(this);
     setModal(false);
-    connect(ui->addPushButton, SIGNAL(clicked()), this, SLOT(newItem()));
-    connect(ui->resetPushButton, SIGNAL(clicked()), this, SLOT(onReset()));
+    connect(ui->addPushButton, &QPushButton::clicked, this, &QuickViewDialog::newItem);
+    connect(ui->resetPushButton, &QPushButton::clicked, this, &QuickViewDialog::onReset);
 
     QStringList saved = guiHelper->getQuickViewConf();
     for (int i = 0; i < saved.size(); i++) {
@@ -64,7 +64,7 @@ void QuickViewDialog::newItem()
     QuickViewItem * qvi = new(std::nothrow) QuickViewItem(guiHelper, this);
     if (qvi != nullptr) {
         itemList.append(qvi);
-        connect(qvi, SIGNAL(destroyed()), this, SLOT(itemDeleted()));
+        connect(qvi, &QuickViewItem::destroyed, this, &QuickViewDialog::itemDeleted);
         if (qvi->configure()) {
             ui->itemLayout->addWidget(qvi);
             qvi->processData(currentData);
@@ -111,7 +111,7 @@ void QuickViewDialog::addItem(const QString &conf)
         itemList.append(qvi);
         ui->itemLayout->addWidget(qvi);
         qvi->processData(currentData);
-        connect(qvi, SIGNAL(destroyed()), this, SLOT(itemDeleted()));
+        connect(qvi, &QuickViewItem::destroyed, this, &QuickViewDialog::itemDeleted);
     } else {
         qFatal("Cannot allocate memory for QuickViewItem for addItem X{");
     }
@@ -148,9 +148,6 @@ void QuickViewDialog::receivingData(const QByteArray &data)
     }
 
 }
-
-
-
 
 QuickViewDialogStateObj::QuickViewDialogStateObj(QuickViewDialog *diag) :
     AppStateObj(diag)

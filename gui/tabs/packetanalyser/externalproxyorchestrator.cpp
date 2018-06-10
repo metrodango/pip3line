@@ -11,29 +11,29 @@ ExternalProxyOrchestrator::ExternalProxyOrchestrator(BlocksSource *inboundSource
     if (inboundSource != nullptr && outboundSource != nullptr) {
         checkForwarder();
 
-        connect(this, SIGNAL(startChildren()), inboundSource, SLOT(startListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(stopChildren()), inboundSource, SLOT(stopListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(resetChildren()), inboundSource, SLOT(restart()), Qt::QueuedConnection);
-        connect(inboundSource, SIGNAL(started()), SIGNAL(started()));
-        connect(inboundSource, SIGNAL(stopped()), SIGNAL(stopped()));
-        connect(inboundSource, SIGNAL(destroyed(QObject*)), this, SLOT(onInboundBlockSourceDestroyed()));
-        connect(inboundSource, SIGNAL(blockReceived(Block*)), SLOT(onBlockReceived(Block*)));
-        connect(inboundSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-        connect(inboundSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(inboundSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(inboundSource, SIGNAL(reflexionChanged(bool)), this, SLOT(checkForwarder()), Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::startChildren, inboundSource, &BlocksSource::startListening, Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::stopChildren, inboundSource, &BlocksSource::stopListening, Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::resetChildren, inboundSource, &BlocksSource::restart, Qt::QueuedConnection);
+        connect(inboundSource, &BlocksSource::started, this, &ExternalProxyOrchestrator::started);
+        connect(inboundSource, &BlocksSource::stopped, this, &ExternalProxyOrchestrator::stopped);
+        connect(inboundSource, &BlocksSource::destroyed, [=](QObject *) { onInboundBlockSourceDestroyed();});
+        connect(inboundSource, &BlocksSource::blockReceived, this, &ExternalProxyOrchestrator::onBlockReceived);
+        connect(inboundSource, &BlocksSource::log, this, &ExternalProxyOrchestrator::log, Qt::QueuedConnection);
+        connect(inboundSource, &BlocksSource::updated, this, &ExternalProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(inboundSource, &BlocksSource::newConnection, this, [=](BlocksSource *) { SourcesOrchestatorAbstract::connectionsChanged();}, Qt::QueuedConnection);
+        connect(inboundSource, &BlocksSource::reflexionChanged, this, &ExternalProxyOrchestrator::checkForwarder, Qt::QueuedConnection);
 
-        connect(this, SIGNAL(startChildren()), outboundSource, SLOT(startListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(stopChildren()), outboundSource, SLOT(stopListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(resetChildren()), outboundSource, SLOT(restart()), Qt::QueuedConnection);
-        connect(outboundSource, SIGNAL(started()), SIGNAL(started()));
-        connect(outboundSource, SIGNAL(stopped()), SIGNAL(stopped()));
-        connect(outboundSource, SIGNAL(destroyed(QObject*)), this, SLOT(onOutboundBlockSourceDestroyed()));
-        connect(outboundSource, SIGNAL(blockReceived(Block*)), SLOT(onBlockReceived(Block*)));
-        connect(outboundSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-        connect(outboundSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(outboundSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(outboundSource, SIGNAL(reflexionChanged(bool)), this, SLOT(checkForwarder()), Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::startChildren, outboundSource, &BlocksSource::startListening, Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::stopChildren, outboundSource, &BlocksSource::stopListening, Qt::QueuedConnection);
+        connect(this, &ExternalProxyOrchestrator::resetChildren, outboundSource, &BlocksSource::restart, Qt::QueuedConnection);
+        connect(outboundSource, &BlocksSource::started, this, &ExternalProxyOrchestrator::started);
+        connect(outboundSource, &BlocksSource::stopped, this, &ExternalProxyOrchestrator::stopped);
+        connect(outboundSource, &BlocksSource::destroyed, this, &ExternalProxyOrchestrator::onOutboundBlockSourceDestroyed);
+        connect(outboundSource, &BlocksSource::blockReceived, this, &ExternalProxyOrchestrator::onBlockReceived);
+        connect(outboundSource, &BlocksSource::log, this, &ExternalProxyOrchestrator::log, Qt::QueuedConnection);
+        connect(outboundSource, &BlocksSource::updated, this, &ExternalProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(outboundSource, &BlocksSource::newConnection, this, &ExternalProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(outboundSource, &BlocksSource::reflexionChanged, this, &ExternalProxyOrchestrator::checkForwarder, Qt::QueuedConnection);
     } else {
         if (inboundSource == nullptr) {
             qCritical() << tr("[ExternalProxyUDPOrchestrator::ExternalProxyUDPOrchestrator] inbound source is null T_T");
@@ -79,7 +79,7 @@ int ExternalProxyOrchestrator::blockSourceCount() const
     return ((inboundSource != nullptr ? 1 : 0) + (outboundSource != nullptr ? 1 : 0));
 }
 
-void ExternalProxyOrchestrator::postPacket(Packet *packet)
+void ExternalProxyOrchestrator::postPacket(QSharedPointer<Packet> packet)
 {
 
     SourcesOrchestatorAbstract::postPacket(packet);
@@ -119,7 +119,7 @@ void ExternalProxyOrchestrator::onBlockReceived(Block *block)
             return;
         }
 
-        Packet * pac = new(std::nothrow) Packet(block);
+        QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet(block));
         if (pac == nullptr) {
             qFatal("Cannot allocate Packet X{");
         }

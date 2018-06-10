@@ -24,7 +24,6 @@ class Pip3line:
 		self.tcpparam = self.DEFAULT_TCP
 		self.base64inUse = False
 		self.conn = None
-	
 	def __del__(self):
 		if self.conn != None:
 			self.conn.close()
@@ -82,7 +81,7 @@ class Pip3line:
 
 	
 	def process(self,data):
-		if type(data) != type(b''):
+		if isinstance(data, b''):
 			print("Need array of bytes")
 			return b''
 

@@ -49,7 +49,7 @@ void FoundOffsetsModel::setSearchDelegate(SearchAbstract *nsearchObj)
 {
     searchDelegate = nsearchObj;
     if (searchDelegate != nullptr) {
-        connect(searchDelegate, SIGNAL(dataReset()), SLOT(clear()), Qt::UniqueConnection);
+        connect(searchDelegate, &SearchAbstract::dataReset, this, &FoundOffsetsModel::clear, Qt::UniqueConnection);
     }
 }
 
@@ -129,7 +129,7 @@ int FoundOffsetsModel::elapsed()
 void FoundOffsetsModel::clear()
 {
     if (ranges != nullptr && !ranges->isEmpty()) {
-        disconnect(ranges, SIGNAL(destroyed()), this, SLOT(onRangeDestroyed()));
+        disconnect(ranges, &BytesRangeList::destroyed, this, &FoundOffsetsModel::onRangeDestroyed);
         beginResetModel();
         while(!ranges->isEmpty())
             ranges->takeFirst().clear();
@@ -147,7 +147,7 @@ void FoundOffsetsModel::setNewList(BytesRangeList *list)
     beginResetModel();
     ranges = list;
     endResetModel();
-    connect(ranges, SIGNAL(destroyed()), SLOT(onRangeDestroyed()));
+    connect(ranges, &BytesRangeList::destroyed, this, &FoundOffsetsModel::onRangeDestroyed);
     emit updated();
 }
 
@@ -303,7 +303,7 @@ void SearchLine::setBytesource(ByteSourceAbstract * source)
 {
     if (source != nullptr) {
         bytesource = source;
-        connect(bytesource,SIGNAL(updated(quintptr)), SLOT(onSourceUpdated(quintptr)), Qt::QueuedConnection);
+        connect(bytesource, &ByteSourceAbstract::updated, this, &SearchLine::onSourceUpdated, Qt::QueuedConnection);
         sourceSize = bytesource->size();
     }
 }
@@ -370,11 +370,11 @@ SearchWidget::SearchWidget(ByteSourceAbstract * source, GuiHelper *nguiHelper, Q
 
         setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
 
-        connect(stopPushButton, SIGNAL(clicked()), SIGNAL(stopSearch()), Qt::QueuedConnection);
-        connect(advancedPushButton, SIGNAL(clicked()), SLOT(onAdvanced()));
+        connect(stopPushButton, &QPushButton::clicked, this, &SearchWidget::stopSearch, Qt::QueuedConnection);
+        connect(advancedPushButton, &QPushButton::clicked, this, &SearchWidget::onAdvanced);
 
-        connect(lineEdit, SIGNAL(newSearch(QString,int)),SLOT(onSearch(QString,int)));
-        connect(lineEdit, SIGNAL(requestJumpToNext()), SLOT(onRequestNext()));
+        connect(lineEdit, &SearchLine::newSearch, this, &SearchWidget::onSearch);
+        connect(lineEdit, &SearchLine::requestJumpToNext, this, &SearchWidget::onRequestNext);
         setSearchDelegate(searchDelegate);
     }
 }
@@ -532,7 +532,7 @@ void SearchWidget::onAdvanced()
             if (resultWidget == nullptr) {
                 qFatal("Cannot allocate memory for SearchResultsWidget X{");
             }
-            connect(resultWidget, SIGNAL(jumpTo(quint64,quint64)), SLOT(processJump(quint64,quint64)));
+            connect(resultWidget, &SearchResultsWidget::jumpTo, this, &SearchWidget::processJump);
             advancedSearchDialog = new(std::nothrow) FloatingDialog(guiHelper,resultWidget ,this);
             if (advancedSearchDialog == nullptr) {
                 qFatal("Cannot allocate memory for FloatingDialog X{");
@@ -575,8 +575,8 @@ void SearchWidget::setSearchDelegate(SearchAbstract * delegate)
 {
     if (delegate != nullptr) {
         searchDelegate = delegate;
-        connect(searchDelegate, SIGNAL(searchStarted()), SLOT(onSearchStarted()), Qt::QueuedConnection);
-        connect(searchDelegate, SIGNAL(searchEnded()), SLOT(onSearchEnded()), Qt::QueuedConnection);
+        connect(searchDelegate, &SearchAbstract::searchStarted, this, &SearchWidget::onSearchStarted, Qt::QueuedConnection);
+        connect(searchDelegate, &SearchAbstract::searchEnded, this, &SearchWidget::onSearchEnded, Qt::QueuedConnection);
         if (model == nullptr) {
             model  =  new(std::nothrow)FoundOffsetsModel(this);
             if (model == nullptr) {
@@ -585,13 +585,13 @@ void SearchWidget::setSearchDelegate(SearchAbstract * delegate)
             if (searchDelegate != nullptr) {
                 model->setSearchDelegate(searchDelegate);
             }
-            connect(searchDelegate, SIGNAL(foundList(BytesRangeList*)), model, SLOT(setNewList(BytesRangeList*)));
+            connect(searchDelegate, &SearchAbstract::foundList, model, &FoundOffsetsModel::setNewList);
         }
         lineEdit->setPlaceholderText(FIND_PLACEHOLDER_TEXT);
         lineEdit->setToolTip(TOOLTIP_TEXT);
-        connect(searchDelegate, SIGNAL(errorStatus(bool)), SLOT(setError(bool)),Qt::QueuedConnection);
-        connect(searchDelegate, SIGNAL(progressStatus(double)),lineEdit, SLOT(updateProgress(double)),Qt::QueuedConnection);
-        connect(stopPushButton, SIGNAL(clicked()), searchDelegate, SLOT(stopSearch()), Qt::DirectConnection);
+        connect(searchDelegate, &SearchAbstract::errorStatus, this, &SearchWidget::setError,Qt::QueuedConnection);
+        connect(searchDelegate, &SearchAbstract::progressStatus,lineEdit, &SearchLine::updateProgress,Qt::QueuedConnection);
+        connect(stopPushButton, &QPushButton::clicked, searchDelegate, &SearchAbstract::stopSearch, Qt::DirectConnection);
 
         setVisible(true);
     } else {

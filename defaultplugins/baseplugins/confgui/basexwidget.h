@@ -25,9 +25,8 @@ class BaseXWidget : public QWidget
     public:
         explicit BaseXWidget(BaseX *transform, QWidget *parent = 0);
         ~BaseXWidget();
-    private slots:
-        void onBaseChange(int val);
-        void onUpperCaseChange(bool val);
+    public slots:
+        void onBaseChanged(int val);
     private:
         Ui::BaseXWidget *ui;
         BaseX *transform;

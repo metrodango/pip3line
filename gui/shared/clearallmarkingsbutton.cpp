@@ -21,5 +21,5 @@ ClearAllMarkingsButton::ClearAllMarkingsButton(ByteSourceAbstract *bytesource, Q
     setToolTip(tr("Clear all markings"));
     setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
     byteSource = bytesource;
-    connect(this, SIGNAL(clicked()), byteSource, SLOT(clearAllMarkings()));
+    connect(this, &ClearAllMarkingsButton::clicked, byteSource, &ByteSourceAbstract::clearAllMarkings);
 }

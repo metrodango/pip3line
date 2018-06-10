@@ -21,28 +21,17 @@ BytesToFloatWdiget::BytesToFloatWdiget(BytesToFloat *ntransform, QWidget *parent
     transform = ntransform;
     ui->setupUi(this);
 
-    connect(ui->littleEndianRadioButton, SIGNAL(toggled(bool)), this, SLOT(onLittleEndianChange(bool)));
-    connect(ui->float32radioButton, SIGNAL(toggled(bool)), this, SLOT(on32BitSizeChanged(bool)));
+    connect(ui->littleEndianRadioButton, &QRadioButton::toggled, this, [=](bool checked) {transform->setLittleEndian(checked);});
+    connect(ui->float32radioButton, &QRadioButton::toggled, this, [=](bool checked) {
+        transform->setFloatSize( checked ? BytesToFloat::F32bits : BytesToFloat::F64bits);
+    });
+    //connect(ui->precisionSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, [=](int val) { transform->setPrecision(val); });
     connect(ui->precisionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPrecisionChanged(int)));
 }
 
 BytesToFloatWdiget::~BytesToFloatWdiget()
 {
     delete ui;
-}
-
-void BytesToFloatWdiget::onLittleEndianChange(bool checked)
-{
-    transform->setLittleEndian(checked);
-}
-
-void BytesToFloatWdiget::on32BitSizeChanged(bool checked)
-{
-    if (checked) {
-        transform->setFloatSize(BytesToFloat::F32bits);
-    } else {
-        transform->setFloatSize(BytesToFloat::F64bits);
-    }
 }
 
 void BytesToFloatWdiget::onPrecisionChanged(int val)

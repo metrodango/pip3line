@@ -27,29 +27,12 @@ HtmlWidget::HtmlWidget(Html *ntransform, QWidget *parent) :
     ui->decimalRadioButton->setChecked(!transform->doWeUseHexadecimal());
     ui->entityNameCheckBox->setChecked(transform->doWeUseName());
 
-    connect(ui->encodeAllRadioButton,SIGNAL(toggled(bool)), this, SLOT(onChangeScope()));
-    connect(ui->encoderOnlyRadioButton,SIGNAL(toggled(bool)), this, SLOT(onChangeScope()));
-    connect(ui->decimalRadioButton, SIGNAL(toggled(bool)), this, SLOT(onChangeType()));
-    connect(ui->hexaRadioButton, SIGNAL(toggled(bool)), this, SLOT(onChangeType()));
-    connect(ui->entityNameCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onChangeUseName()));
+    connect(ui->encodeAllRadioButton,&QRadioButton::toggled, this, [=](bool checked) {transform->setEncodeAll(checked);});
+    connect(ui->hexaRadioButton, &QRadioButton::toggled, this, [=](bool checked) {transform->setUseHexadecimal(checked);});
+    connect(ui->entityNameCheckBox, &QCheckBox::toggled, this, [=](bool checked) {transform->setUseName(checked);});
 }
 
 HtmlWidget::~HtmlWidget()
 {
     delete ui;
-}
-
-void HtmlWidget::onChangeScope()
-{
-    transform->setEncodeAll(ui->encodeAllRadioButton->isChecked());
-}
-
-void HtmlWidget::onChangeType()
-{
-   transform->setUseHexadecimal(ui->hexaRadioButton->isChecked());
-}
-
-void HtmlWidget::onChangeUseName()
-{
-    transform->setUseName(ui->entityNameCheckBox->isChecked());
 }

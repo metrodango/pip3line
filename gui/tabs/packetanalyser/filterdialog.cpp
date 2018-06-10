@@ -94,16 +94,19 @@ FilterDialog::FilterDialog(PacketSortFilterProxyModel *sortFilterProxyModel, QWi
 
     ui->filterNameLineEdit->setFocus();
 
-    connect(this, SIGNAL(rejected()), SLOT(deleteLater()));
-    connect(this, SIGNAL(finished(int)), SLOT(deleteLater()));
-    connect(ui->closePushButton, SIGNAL(clicked(bool)), this, SLOT(close()));
-    connect(ui->addPushButton, SIGNAL(clicked(bool)), this, SLOT(onAdd()));
-    connect(ui->enableCheckBox, SIGNAL(toggled(bool)), this, SLOT(onFilterToggled(bool)));
-    connect(ui->filtersListWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), SLOT(onItemSelected(QItemSelection)));
-    connect(ui->clearPushButton, SIGNAL(clicked(bool)), this, SLOT(onClear()));
-    connect(ui->applyPushButton, SIGNAL(clicked(bool)), this, SLOT(onSave()));
+    adjustSize();
+
+    connect(this, &FilterDialog::rejected, this, &FilterDialog::deleteLater);
+    connect(this, &FilterDialog::finished,this, [=](int) { deleteLater();});
+    connect(ui->closePushButton, &QPushButton::clicked, this, &FilterDialog::close);
+    connect(ui->addPushButton, &QPushButton::clicked, this, &FilterDialog::onAdd);
+    connect(ui->enableCheckBox, &QCheckBox::toggled, this, &FilterDialog::onFilterToggled);
+    connect(ui->filtersListWidget->selectionModel(), &QItemSelectionModel::selectionChanged,this, [=](QItemSelection select ,QItemSelection) { onItemSelected(select);});
+    connect(ui->clearPushButton, &QPushButton::clicked, this, &FilterDialog::onClear);
+    connect(ui->applyPushButton, &QPushButton::clicked, this, &FilterDialog::onSave);
+    //connect(ui->booleanExprLineEdit, &QLineEdit::textChanged, &validationTimer, qOverload<>(&QTimer::start));
     connect(ui->booleanExprLineEdit, SIGNAL(textChanged(QString)), &validationTimer, SLOT(start()));
-    connect(&validationTimer, SIGNAL(timeout()), this, SLOT(validate()));
+    connect(&validationTimer, &QTimer::timeout, this, &FilterDialog::validate);
 }
 
 FilterDialog::~FilterDialog()
@@ -125,7 +128,8 @@ void FilterDialog::initUi()
         QStringList cols = sourceModel->getColumnNames();
         ui->columnComboBox->addItems(cols);
 
-        connect(sourceModel, SIGNAL(columnsUpdated()), this, SLOT(onColumnsUpdated()));
+        connect(sourceModel, &PacketModelAbstract::columnsUpdated, this, &FilterDialog::onColumnsUpdated);
+        //connect(ui->columnComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &FilterDialog::onColumnSelected);
         connect(ui->columnComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onColumnSelected(int)));
 
         ui->columnComboBox->setCurrentIndex(PacketModelAbstract::COLUMN_PAYLOAD);
@@ -190,7 +194,7 @@ void FilterDialog::updatedList()
     for (int i = 0; i < list.size(); i++) {
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(list.at(i)->getName());
         if (itemWid != nullptr) {
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onDeleteItem(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &FilterDialog::onDeleteItem);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item != nullptr) {
                 ui->filtersListWidget->addItem(item);
@@ -438,9 +442,9 @@ void FilterDialog::validate()
     ui->errorLabel->setText("");
     if (ui->booleanExprLineEdit->text().isEmpty()) {
         ui->booleanExprLineEdit->setStyleSheet("");
-        filterEngine->assert("");
+        filterEngine->assertExpr("");
         ui->enableCheckBox->setChecked(true);
-    } else if (filterEngine->assert(ui->booleanExprLineEdit->text())) {
+    } else if (filterEngine->assertExpr(ui->booleanExprLineEdit->text())) {
         ui->booleanExprLineEdit->setStyleSheet(GuiStyles::LineEditOk);
         ui->enableCheckBox->setChecked(true);
     } else {

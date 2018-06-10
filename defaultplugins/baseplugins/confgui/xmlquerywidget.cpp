@@ -21,7 +21,7 @@ XmlQueryWidget::XmlQueryWidget(XmlQuery *ntransform, QWidget *parent) :
     transform = ntransform;
     ui->setupUi(this);
     ui->queryPlainTextEdit->appendPlainText(transform->getQueryString());
-    connect(ui->submitPushButton, SIGNAL(clicked()), this, SLOT(onQuerySubmit()));
+    connect(ui->submitPushButton, &QPushButton::clicked, this, &XmlQueryWidget::onQuerySubmit);
 }
 
 XmlQueryWidget::~XmlQueryWidget()

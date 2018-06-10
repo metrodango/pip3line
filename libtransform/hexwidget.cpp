@@ -48,8 +48,8 @@ HexWidget::HexWidget(QWidget *parent) :
     }
     ui->charLineEdit->setValidator(validator);
 
-    connect(ui->hexLineEdit, SIGNAL(textEdited(QString)),this, SLOT(onHexChanged()));
-    connect(ui->charLineEdit, SIGNAL(textEdited(QString)), this, SLOT(onCharChanged(QString)));
+    connect(ui->hexLineEdit, &QLineEdit::textEdited,this, &HexWidget::onHexChanged);
+    connect(ui->charLineEdit, &QLineEdit::textEdited, this, &HexWidget::onCharChanged);
     setChar('\00');
 }
 

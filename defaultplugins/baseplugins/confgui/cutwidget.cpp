@@ -27,11 +27,13 @@ CutWidget::CutWidget(Cut *ntransform, QWidget *parent) :
     ui->cutRadioButton->setChecked(transform->isClassicCut());
     ui->lineByLineCheckBox->setChecked(transform->isLineByLine());
 
-    connect(ui->fromSpinBox,SIGNAL(valueChanged(int)),this,SLOT(onFromChange(int)));
-    connect(ui->lengthSpinBox,SIGNAL(valueChanged(int)),this,SLOT(onLengthChange(int)));
-    connect(ui->everythingCheckBox,SIGNAL(toggled(bool)),this,SLOT(onEverythingChange(bool)));
-    connect(ui->cutRadioButton, SIGNAL(toggled(bool)), this, SLOT(onCutToggled(bool)));
-    connect(ui->lineByLineCheckBox, SIGNAL(toggled(bool)), SLOT(onLineByLineToggled(bool)));
+    //connect(ui->fromSpinBox, qOverload<int>(&QSpinBox::valueChanged),this, &CutWidget::onFromChange);
+    connect(ui->fromSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onFromChange(int)));
+    //connect(ui->lengthSpinBox,qOverload<int>(&QSpinBox::valueChanged),this, &CutWidget::onLengthChange);
+    connect(ui->lengthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onLengthChange(int)));
+    connect(ui->everythingCheckBox, &QCheckBox::toggled, this, &CutWidget::onEverythingChange);
+    connect(ui->cutRadioButton, &QRadioButton::toggled, this, &CutWidget::onCutToggled);
+    connect(ui->lineByLineCheckBox, &QCheckBox::toggled, this, &CutWidget::onLineByLineToggled);
 }
 
 CutWidget::~CutWidget()

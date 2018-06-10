@@ -26,7 +26,7 @@ NewViewButton::NewViewButton(GuiHelper *guiHelper, QWidget *parent) :
     }
 
     setMenu(menu);
-    connect(menu, SIGNAL(newViewRequested()), this, SIGNAL(newViewRequested()));
+    connect(menu, &NewViewMenu::newViewRequested, this, &NewViewButton::newViewRequested);
 }
 
 NewViewButton::~NewViewButton()

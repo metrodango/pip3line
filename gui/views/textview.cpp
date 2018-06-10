@@ -54,7 +54,7 @@ const QString TextView::COPY_AS_TEXT = "Text";
 TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget *parent, bool takeByteSourceOwnership) :
     SingleViewAbstract(nbyteSource, nguiHelper, parent, takeByteSourceOwnership)
 {
-    connect(byteSource,SIGNAL(updated(quintptr)), this, SLOT(updateText(quintptr)), Qt::UniqueConnection);
+    connect(byteSource, &ByteSourceAbstract::updated, this, &TextView::updateText, Qt::UniqueConnection);
     ui = new(std::nothrow) Ui::TextView();
     if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::TextView X{");
@@ -62,7 +62,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
 
     updateTimer.setInterval(150);
     updateTimer.setSingleShot(true);
-    connect(&updateTimer, SIGNAL(timeout()), SLOT(updateStats()));
+    connect(&updateTimer, &QTimer::timeout, this, &TextView::updateStats);
     globalContextMenu = nullptr;
     sendToMenu = nullptr;
     loadMenu = nullptr;
@@ -85,8 +85,8 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     }
     ui->mainLayout->insertWidget(0,scintEditor);
     scintEditor->installEventFilter(this);
-    connect(scintEditor, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-    connect(scintEditor,SIGNAL(selectionChanged()), this, SLOT(updateStats()));
+    connect(scintEditor, &QsciScintilla::textChanged, this, &TextView::onTextChanged);
+    connect(scintEditor, &QsciScintilla::selectionChanged, this, &TextView::updateStats);
     scintEditor->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     scintEditor->setReadOnly(byteSource->isReadonly());
     scintEditor->setWrapMode(QsciScintilla::WrapCharacter);
@@ -106,8 +106,11 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     lexerCombobox->addItems(lexersStrings);
     lexerCombobox->setFrame(false);
     ui->statusLayout->insertWidget(ui->statusLayout->indexOf(ui->codecsComboBox), lexerCombobox);
-    connect(lexerCombobox, SIGNAL(currentIndexChanged(int)), SLOT(onLexerChanged(int)));
-    connect(scintEditor, SIGNAL(cursorPositionChanged(int,int)),&updateTimer, SLOT(start()));
+    //connect(lexerCombobox, qOverload<int>(&QComboBox::currentIndexChanged), this, &TextView::onLexerChanged);
+    connect(lexerCombobox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLexerChanged(int)));
+    //connect(scintEditor, &QsciScintilla::cursorPositionChanged, &updateTimer, qOverload<>(&QTimer::start));
+    //connect(scintEditor, SIGNAL(cursorPositionChanged(int,int)), &updateTimer, SLOT(start()));
+    connect(scintEditor, &QsciScintilla::cursorPositionChanged, [=](int, int) {updateTimer.start();});
 
 #else
     plainTextEdit = new(std::nothrow) QPlainTextEdit();
@@ -117,16 +120,18 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
 
     ui->mainLayout->insertWidget(0,plainTextEdit);
     plainTextEdit->installEventFilter(this);
-    connect(plainTextEdit, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
-    connect(plainTextEdit,SIGNAL(selectionChanged()), &updateTimer, SLOT(start()));
+    connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &TextView::onTextChanged);
+    //connect(plainTextEdit, &QPlainTextEdit::selectionChanged, &updateTimer, qOverload<>(&QTimer::start));
+    connect(plainTextEdit, &QPlainTextEdit::selectionChanged, [=]() {updateTimer.start();});
     plainTextEdit->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     plainTextEdit->setReadOnly(byteSource->isReadonly());
-    connect(plainTextEdit, SIGNAL(cursorPositionChanged()),&updateTimer, SLOT(start()));
+    //connect(plainTextEdit, &QPlainTextEdit::cursorPositionChanged, &updateTimer, qOverload<>(&QTimer::start));
+    connect(plainTextEdit, &QPlainTextEdit::cursorPositionChanged, [=]() {updateTimer.start();});
 #endif
 
-    connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(updateImportExportMenu()));
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &TextView::updateImportExportMenu);
     setAcceptDrops(true);
-    connect(byteSource, SIGNAL(readOnlyChanged(bool)), this, SLOT(onReadOnlyChanged(bool)));
+    connect(byteSource, &ByteSourceAbstract::readOnlyChanged, this, &TextView::onReadOnlyChanged);
 
     QList<QByteArray> codecs =  QTextCodec::availableCodecs();
     std::sort(codecs.begin(),codecs.end());
@@ -137,8 +142,9 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     ui->codecsComboBox->setCurrentIndex(ui->codecsComboBox->findData(DEFAULT_CODEC));
     ui->codecsComboBox->setMaximumWidth(200);
     ui->codecsComboBox->installEventFilter(guiHelper);
-    connect(ui->codecsComboBox,SIGNAL(currentIndexChanged(QString)), this, SLOT(onCodecChange(QString)));
-    connect(guiHelper, SIGNAL(hexTableSizesUpdated()), this, SLOT(onFontUpdated()));
+    //connect(ui->codecsComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &TextView::onCodecChange);
+    connect(ui->codecsComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onCodecChange(QString)));
+    connect(guiHelper, &GuiHelper::hexTableSizesUpdated, this, &TextView::onFontUpdated);
 
     onCodecChange(DEFAULT_CODEC);
     buildContextMenu();
@@ -167,7 +173,7 @@ TextView::~TextView()
 void TextView::setModel(ByteSourceAbstract *dataModel)
 {
     byteSource = dataModel;
-    connect(byteSource,SIGNAL(updated(quintptr)), this, SLOT(updateText(quintptr)), Qt::UniqueConnection);
+    connect(byteSource, &ByteSourceAbstract::updated, this, &TextView::updateText, Qt::UniqueConnection);
 }
 
 void TextView::search(QByteArray block, QBitArray)
@@ -296,7 +302,7 @@ void TextView::onKeepOnlySelection()
 
 }
 
-void TextView::onCodecChange(QString codecName)
+void TextView::onCodecChange(const QString &codecName)
 {
     QTextCodec *codec = QTextCodec::codecForName(codecName.toUtf8());
     if (codec == nullptr) {
@@ -447,10 +453,10 @@ void TextView::buildContextMenu()
 {
 #ifdef SCINTILLA
     scintEditor->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(scintEditor,SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onRightClick(QPoint)));
+    connect(scintEditor, &QsciScintilla::customContextMenuRequested, this, &TextView::onRightClick);
 #else
     plainTextEdit->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(plainTextEdit,SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onRightClick(QPoint)));
+    connect(plainTextEdit,&QPlainTextEdit::customContextMenuRequested, this, &TextView::onRightClick);
 #endif
 
 
@@ -460,7 +466,7 @@ void TextView::buildContextMenu()
         return;
     }
 
-    connect(sendToMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSendToTriggered(QAction*)), Qt::UniqueConnection);
+    connect(sendToMenu, &SendToMenu::triggered, this, &TextView::onSendToTriggered);
 
     loadMenu = new(std::nothrow) QMenu(tr("Load from clipboard"));
     if (loadMenu == nullptr) {
@@ -468,7 +474,7 @@ void TextView::buildContextMenu()
         return;
     }
     guiHelper->updateLoadContextMenu(loadMenu);
-    connect(loadMenu, SIGNAL(triggered(QAction*)), this, SLOT(onLoad(QAction*)), Qt::UniqueConnection);
+    connect(loadMenu, &QMenu::triggered, this, &TextView::onLoad);
 
     copyMenu = new(std::nothrow) QMenu(tr("Copy as"));
     if (copyMenu == nullptr) {
@@ -485,14 +491,14 @@ void TextView::buildContextMenu()
 
     copyMenu->insertAction(firstAction,copyAsTextAction);
     copyMenu->insertSeparator(firstAction);
-    connect(copyMenu, SIGNAL(triggered(QAction*)), this, SLOT(onCopy(QAction*)), Qt::UniqueConnection);
+    connect(copyMenu, &QMenu::triggered, this, &TextView::onCopy);
 
     saveToFileMenu = new(std::nothrow) QMenu(tr("Save to file"));
     if (saveToFileMenu == nullptr) {
         qFatal("Cannot allocate memory for saveToFile X{");
         return;
     }
-    connect(saveToFileMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSaveToFile(QAction*)), Qt::UniqueConnection);
+    connect(saveToFileMenu, &QMenu::triggered, this, &TextView::onSaveToFile);
     saveToFileMenu->addAction(ui->saveAllToFileAction);
     saveToFileMenu->addAction(ui->saveSelectedToFileAction);
 
@@ -500,20 +506,20 @@ void TextView::buildContextMenu()
     if (loadFileAction == nullptr) {
         qFatal("Cannot allocate memory for loadFileAction X{");
     }
-    connect(loadFileAction, SIGNAL(triggered()), this, SLOT(onLoadFile()));
+    connect(loadFileAction, &QAction::triggered, this, &TextView::onLoadFile);
 
     selectAllAction = new(std::nothrow) QAction("Select all", this);
     if (selectAllAction == nullptr) {
         qFatal("Cannot allocate memory for selectAllAction X{");
     }
-    connect(selectAllAction, SIGNAL(triggered()), this, SLOT(onSelectAll()));
+    connect(selectAllAction, &QAction::triggered, this, &TextView::onSelectAll);
 
     keepOnlySelectedAction = new(std::nothrow) QAction("Keep only selected", this);
     if (keepOnlySelectedAction == nullptr) {
         qFatal("Cannot allocate memory for keepOnlySelectedAction X{");
     }
 
-    connect(keepOnlySelectedAction, SIGNAL(triggered()), this, SLOT(onKeepOnlySelection()));
+    connect(keepOnlySelectedAction, &QAction::triggered, this, &TextView::onKeepOnlySelection);
 
     globalContextMenu = new(std::nothrow) QMenu();
 

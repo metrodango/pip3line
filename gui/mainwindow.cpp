@@ -110,7 +110,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, MainWindow::sigFd))
             qFatal("Couldn't create signal socketpair");
     snExit = new(std::nothrow) QSocketNotifier(MainWindow::sigFd[1],QSocketNotifier::Read, this);
-    connect(snExit, SIGNAL(activated(int)), this, SLOT(handleUnixSignal()));
+    connect(snExit, &QSocketNotifier::activated, this, &MainWindow::handleUnixSignal);
 
     if (snExit == nullptr) {
         qFatal("Cannot allocate memory for QSocketNotifier X{");
@@ -193,7 +193,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
             }
         }
     }
-    newPATH.chop(1); // removing potential semi-colon
+    newPATH.chop(1); // removing last semi-colon
     qputenv("PATH", newPATH);
 
 #endif
@@ -213,7 +213,7 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     else
         ui->actionDebug_dialog->setVisible(false);
 
-    mainTabs = new(std::nothrow) MainTabs(guiHelper, this);
+    mainTabs = new(std::nothrow) MainTabs(guiHelper);
     if (mainTabs == nullptr) {
         qFatal("Cannot allocate memory for MainTabs X{");
     }
@@ -233,25 +233,25 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
 
     BlocksSource * blockListener = guiHelper->getIncomingBlockListener();
 
-    connect(blockListener, SIGNAL(blockReceived(Block *)), SLOT(onExternalBlockReceived(Block *)),Qt::QueuedConnection);
-    connect(blockListener,SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger,SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(blockListener, &BlocksSource::blockReceived, this, &MainWindow::onExternalBlockReceived,Qt::QueuedConnection);
+    connect(blockListener, &BlocksSource::log, logger, &LoggerWidget::logMessage);
     QTimer::singleShot(0,blockListener,SLOT(startListening()));
-    connect(this, SIGNAL(exiting()), blockListener, SLOT(stopListening()), Qt::QueuedConnection);
+    connect(this, &MainWindow::exiting, blockListener, &BlocksSource::stopListening, Qt::QueuedConnection);
 
-    connect(guiHelper,SIGNAL(raiseWindowRequest()), SLOT(showWindow()));
-    connect(guiHelper, SIGNAL(newTabRequested(QByteArray)), this, SLOT(onNewDefault(QByteArray)));
-    connect(ui->actionSave_State, SIGNAL(triggered()), SLOT(onSaveState()));
-    connect(ui->actionLoad_State, SIGNAL(triggered()), SLOT(onLoadState()));
+    connect(guiHelper, &GuiHelper::raiseWindowRequest, this, &MainWindow::showWindow);
+    connect(guiHelper, &GuiHelper::newTabRequested, this, &MainWindow::onNewDefault);
+    connect(ui->actionSave_State, &QAction::triggered, this, &MainWindow::onSaveState);
+    connect(ui->actionLoad_State, &QAction::triggered, this, &MainWindow::onLoadState);
 
-    connect(guiHelper, SIGNAL(requestSaveState()), this, SLOT(autoSave()));
-    connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(onExit()));
+    connect(guiHelper, &GuiHelper::requestSaveState, this, &MainWindow::autoSave);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onExit);
 
-    connect(ui->actionSave_as_D_efault, SIGNAL(triggered(bool)), this, SLOT(autoSave()));
+    connect(ui->actionSave_as_D_efault, &QAction::triggered, this, &MainWindow::autoSave);
 
     if (guiHelper->getAutoRestoreOnStartup())
         QTimer::singleShot(0,this, SLOT(autoRestore()));
 
-    connect(ui->actionClear_memory, SIGNAL(triggered()), SLOT(onClearMemory()));
+    connect(ui->actionClear_memory, &QAction::triggered, this, &MainWindow::onClearMemory);
 
 //  qApp->setStyleSheet("* {color : green; background: black}");
 }
@@ -297,7 +297,7 @@ void MainWindow::buildToolBar()
         qFatal("Cannot allocate memory for newPushButton X{");
     }
 
-    connect(ui->actionNewDefault, SIGNAL(triggered()), SLOT(onNewDefault()));
+    connect(ui->actionNewDefault, &QAction::triggered, this, [=](void) { onNewDefault();});
 
     newTransformTabAction = new(std::nothrow) QAction(TRANSFORM_TAB_STRING, newMenu);
     if (newTransformTabAction == nullptr) {
@@ -339,21 +339,21 @@ void MainWindow::buildToolBar()
     newPushButton->setFlat(true);
 
     ui->menuFile->insertMenu(ui->actionNewDefault, newMenu);
-    connect(newMenu, SIGNAL(triggered(QAction*)), SLOT(onNewAction(QAction*)));
+    connect(newMenu, &QMenu::triggered, this, &MainWindow::onNewAction);
 
     guiHelper->setNewTabMenu(newMenu);
 
     ui->mainToolBar->insertWidget(ui->mainToolBar->actions().at(1),newPushButton );
    // ui->mainToolBar->insertSeparator(ui->action_Analyse);
 
-    connect(ui->actionHelp_with_RegExp, SIGNAL(triggered()), this, SLOT(onHelpWithRegExp()));
-    connect(ui->actionAbout_Pip3line, SIGNAL(triggered()), this, SLOT(onAboutPip3line()));
-    connect(ui->actionAbout_Qt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(ui->actionPip3line_settings, SIGNAL(toggled(bool)), this, SLOT(onSettingsDialogOpen(bool)));
-    connect(ui->actionMagic, SIGNAL(toggled(bool)), this, SLOT(onQuickView(bool)));
-    connect(ui->actionDebug_dialog, SIGNAL(triggered()), this, SLOT(onDebug()));
-    connect(ui->actionCompare, SIGNAL(toggled(bool)), this, SLOT(onCompare(bool)));
-    connect(ui->action_Analyse, SIGNAL(toggled(bool)), SLOT(onAnalyse(bool)));
+    connect(ui->actionHelp_with_RegExp, &QAction::triggered, this, &MainWindow::onHelpWithRegExp);
+    connect(ui->actionAbout_Pip3line, &QAction::triggered, this, &MainWindow::onAboutPip3line);
+    connect(ui->actionAbout_Qt, &QAction::triggered, qApp, &QApplication::aboutQt);
+    connect(ui->actionPip3line_settings, &QAction::toggled, this, &MainWindow::onSettingsDialogOpen);
+    connect(ui->actionMagic, &QAction::toggled, this, &MainWindow::onQuickView);
+    connect(ui->actionDebug_dialog, &QAction::triggered, this, &MainWindow::onDebug);
+    connect(ui->actionCompare, &QAction::toggled, this, &MainWindow::onCompare);
+    connect(ui->action_Analyse, &QAction::toggled, this, &MainWindow::onAnalyse);
 
 }
 
@@ -364,9 +364,9 @@ void MainWindow::initializeLibTransform()
         if (transformFactory == nullptr) {
             qFatal("Cannot allocate memory for the Transform Factory X{");
         }
-        connect(transformFactory,SIGNAL(error(QString, QString)),logger,SLOT(logError(QString,QString)), Qt::UniqueConnection);
-        connect(transformFactory,SIGNAL(warning(QString,QString)),logger,SLOT(logWarning(QString,QString)), Qt::UniqueConnection);
-        connect(transformFactory,SIGNAL(status(QString,QString)),logger,SLOT(logStatus(QString,QString)), Qt::UniqueConnection);
+        connect(transformFactory, &TransformMgmt::error,logger, &LoggerWidget::logError, Qt::UniqueConnection);
+        connect(transformFactory,&TransformMgmt::warning, logger,&LoggerWidget::logWarning, Qt::UniqueConnection);
+        connect(transformFactory,&TransformMgmt::status ,logger, &LoggerWidget::logStatus, Qt::UniqueConnection);
     }
 
     transformFactory->initialize(QCoreApplication::applicationDirPath());
@@ -409,9 +409,9 @@ void MainWindow::onSettingsDialogOpen(bool checked)
                 qFatal("Cannot allocate memory for settingsDialog X{");
                 return;
             }
-            connect(settingsDialog, SIGNAL(updateCheckRequested()), this, SLOT(checkForUpdates()), Qt::QueuedConnection);
-            connect(guiHelper, SIGNAL(globalUpdates()), settingsDialog, SLOT(initializeConf()), Qt::QueuedConnection);
-            connect(settingsDialog, SIGNAL(forceAutoSave()), SLOT(autoSave()),Qt::QueuedConnection);
+            connect(settingsDialog, &SettingsDialog::updateCheckRequested, this, &MainWindow::checkForUpdates, Qt::QueuedConnection);
+            connect(guiHelper, &GuiHelper::globalUpdates, settingsDialog, &SettingsDialog::initializeConf, Qt::QueuedConnection);
+            connect(settingsDialog, &SettingsDialog::forceAutoSave, this, &MainWindow::autoSave,Qt::QueuedConnection);
             settingsDialog->attachAction(ui->actionPip3line_settings);
         }
 
@@ -431,7 +431,7 @@ void MainWindow::checkForUpdates()
         return;
     }
 
-    connect(dm, SIGNAL(finished(QByteArray)), this, SLOT(processingCheckForUpdate(QByteArray)));
+    connect(dm, &DownloadManager::finished, this, &MainWindow::processingCheckForUpdate);
     guiHelper->requestDownload(resource, nullptr,dm);
 }
 
@@ -524,9 +524,8 @@ void MainWindow::createTrayIcon()
         }
         trayIcon->setIcon(QIcon(":/Images/icons/pip3line.png"));
         trayIcon->setContextMenu(trayIconMenu);
-        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-                     this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-        connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(updateTrayIcon()));
+        connect(trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::iconActivated);
+        connect(guiHelper, &GuiHelper::importExportUpdated, this, &MainWindow::updateTrayIcon);
         trayIcon->show();
     } else {
         qCritical() << tr("No System tray seems to be available, disabling tray Icon menu functionality");
@@ -564,9 +563,8 @@ void MainWindow::saveLoadState(QString filename, quint64 flags)
                 qFatal("Cannot allocate memory for StateOrchestrator X{");
             }
 
-            connect(stateOrchestrator, SIGNAL(finished()), SLOT(onSaveLoadFinished()));
-            connect(stateOrchestrator, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
-                    logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
+            connect(stateOrchestrator, &StateOrchestrator::finished, this, &MainWindow::onSaveLoadFinished);
+            connect(stateOrchestrator, &StateOrchestrator::log, logger, &LoggerWidget::logMessage);
             mainTabs->setEnabled(false);
 
             if (!stateOrchestrator->initialize()) {
@@ -596,7 +594,7 @@ void MainWindow::saveLoadState(QString filename, quint64 flags)
                 qFatal("Cannot allocate memory for GlobalConfStateObj X{");
             }
 
-            connect(stateObj, SIGNAL(settingsUpdated()), guiHelper, SLOT(refreshAll()));
+            connect(static_cast<GlobalConfStateObj *>(stateObj), &GlobalConfStateObj::settingsUpdated, guiHelper, &GuiHelper::refreshAll);
 
             stateOrchestrator->addState(stateObj);
 
@@ -639,7 +637,6 @@ void MainWindow::onClearMemory()
 {
     int res = QMessageBox::warning(this,tr("Clear memory"),tr("This will clear misc non-visibles objects from memory"),QMessageBox::Cancel,QMessageBox::Ok);
     if (res == QMessageBox::Ok) {
-        qDebug() << "Clearing memory";
         guiHelper->clearDeletedTabs();
         if (analyseDialog != nullptr && analyseDialog->isHidden()) {
             delete analyseDialog;
@@ -880,7 +877,7 @@ void MainWindow::updateTrayIcon()
             }
             trayIconMenu->addAction(action);
         }
-        connect(trayIconMenu, SIGNAL(triggered(QAction*)), this, SLOT(onImport(QAction*)), Qt::UniqueConnection);
+        connect(trayIconMenu, &QMenu::triggered, this, &MainWindow::onImport, Qt::UniqueConnection);
 
         trayIconMenu->addSeparator();
         trayIconMenu->addAction(ui->actionGet_data_from_URL);
@@ -899,7 +896,7 @@ void MainWindow::onDebug()
             qFatal("Cannot allocate memory for DebugDialog X{");
             return;
         }
-        connect(debugDialog,SIGNAL(destroyed()), SLOT(onDebugDestroyed()));
+        connect(debugDialog, &DebugDialog::destroyed, this, &MainWindow::onDebugDestroyed);
     }
 
     debugDialog->show();
@@ -990,7 +987,7 @@ void MainWindow::onDataFromURL()
             qFatal("Cannot allocate memory for DownloadManager (url) X{");
             return;
         }
-        connect(dm, SIGNAL(finished(QByteArray)), this, SLOT(processingUrlDownload(QByteArray)));
+        connect(dm, &DownloadManager::finished, this, &MainWindow::processingUrlDownload);
         guiHelper->requestDownload(resource, nullptr,dm);
     }
 }
@@ -1004,7 +1001,7 @@ void MainWindow::onQuickView(bool checked)
                 qFatal("Cannot allocate memory for QuickViewDialog X{");
                 return;
             }
-            connect(guiHelper, SIGNAL(newSelection(QByteArray)), quickView, SLOT(receivingData(QByteArray)));
+            connect(guiHelper, &GuiHelper::newSelection, quickView, &QuickViewDialog::receivingData);
             quickView->attachAction(ui->actionMagic);
         }
 

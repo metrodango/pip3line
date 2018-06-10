@@ -31,7 +31,7 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 	
 	private ArrayList<JMenuItem> itemList;
 	private IExtensionHelpers helpers;
-	IBurpExtenderCallbacks callbacks;
+	private IBurpExtenderCallbacks callbacks;
 	private int udpSizeLimit;
 	private boolean useUDP = false;
 	
@@ -40,10 +40,10 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 	public static int DEFAULT_PORT = 40000;
 	public static InetAddress DEFAULT_ADDRESS = InetAddress.getLoopbackAddress();
 	
-	public Pip3lineContextMenu(IBurpExtenderCallbacks mcallbacks) {
+	Pip3lineContextMenu(IBurpExtenderCallbacks mcallbacks) {
 		callbacks = mcallbacks;
 		helpers = callbacks.getHelpers();
-		itemList = new ArrayList<JMenuItem>();
+		itemList = new ArrayList<>();
 		udpSizeLimit = 65507; // UDP limit
 		
 		String temp = callbacks.loadExtensionSetting(BurpExtender.SEND_TO_PORT);
@@ -117,8 +117,6 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 			JMenuItem sendToPip3line = new JMenuItem(new SendToPip3lineAction(arg0));
 			itemList.add(sendToPip3line);
 			return itemList;
-		} else {
-			//System.out.println(" ==> Rejected");
 		}
 		
 		return null;
@@ -132,7 +130,7 @@ public class Pip3lineContextMenu implements IContextMenuFactory {
 		private boolean request;
 		private byte separator;
 		
-	    public SendToPip3lineAction(IContextMenuInvocation contextMenu) {
+	    SendToPip3lineAction(IContextMenuInvocation contextMenu) {
 	        super("Send to Pip3line");
 	        putValue(SHORT_DESCRIPTION, "Send data to Pip3line");
 	        separator = 0x0A;

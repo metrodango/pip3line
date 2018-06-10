@@ -26,6 +26,7 @@ class OrchestratorChooser : public QComboBox
         SourcesOrchestatorAbstract *createOrchestratorFromType(int type);
         SourcesOrchestatorAbstract *orchestrator{nullptr};
         GuiHelper *guiHelper;
+        QMetaObject::Connection destructorLink;
 };
 
 #endif // ORCHESTRATORCHOOSER_H

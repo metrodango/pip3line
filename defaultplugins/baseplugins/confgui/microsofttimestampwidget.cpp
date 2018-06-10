@@ -28,19 +28,14 @@ MicrosoftTimestampWidget::MicrosoftTimestampWidget(MicrosoftTimestamp *ntransfor
     }
 
     ui->formatLineEdit->setText(transform->getDateFormat());
-    connect(ui->formatLineEdit, SIGNAL(textChanged(QString)), this, SLOT(formatChanged(QString)));
-    connect(ui->nanoLineEdit, SIGNAL(textChanged(QString)), SLOT(onNSChanged(QString)));
-    connect(ui->localTimeRadioButton, SIGNAL(toggled(bool)), SLOT(localTzToggled(bool)));
+    connect(ui->formatLineEdit, &QLineEdit::textChanged, this, [=](const QString & format) {transform->setDateFormat(format);});
+    connect(ui->nanoLineEdit, &QLineEdit::textChanged, this, &MicrosoftTimestampWidget::onNSChanged);
+    connect(ui->localTimeRadioButton, &QRadioButton::toggled, this, [=](bool checked) {transform->setTZ(checked ? MicrosoftTimestamp::TZ_LOCAL : MicrosoftTimestamp::TZ_UTC);});
 }
 
 MicrosoftTimestampWidget::~MicrosoftTimestampWidget()
 {
     delete ui;
-}
-
-void MicrosoftTimestampWidget::formatChanged(QString format)
-{
-    transform->setDateFormat(format);
 }
 
 void MicrosoftTimestampWidget::onNSChanged(QString nsString)
@@ -49,13 +44,4 @@ void MicrosoftTimestampWidget::onNSChanged(QString nsString)
     int ns = nsString.toInt(&ok);
     if (ok)
         transform->setOutNS(ns);
-}
-
-void MicrosoftTimestampWidget::localTzToggled(bool checked)
-{
-    if (checked) {
-        transform->setTZ(MicrosoftTimestamp::TZ_LOCAL);
-    } else {
-        transform->setTZ(MicrosoftTimestamp::TZ_UTC);
-    }
 }

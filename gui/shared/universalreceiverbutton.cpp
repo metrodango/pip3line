@@ -26,9 +26,9 @@ UniversalReceiverButton::UniversalReceiverButton(TabAbstract *tab, GuiHelper *ng
     guiHelper = nguiHelper;
     attachedTab = tab;
     taken = false;
-    connect(this, SIGNAL(clicked(bool)), SLOT(onClicked(bool)));
-    connect(&staticListener, SIGNAL(taken()), SLOT(reset()));
-    connect(this, SIGNAL(tookReceiver()), &staticListener, SLOT(onReceiverConfigured()), Qt::UniqueConnection);
+    connect(this, &UniversalReceiverButton::clicked, this, &UniversalReceiverButton::onClicked);
+    connect(&staticListener, &CommonUniversalReceiverListener::taken, this, &UniversalReceiverButton::reset);
+    connect(this, &UniversalReceiverButton::tookReceiver, &staticListener, &CommonUniversalReceiverListener::onReceiverConfigured, Qt::UniqueConnection);
 }
 
 UniversalReceiverButton::~UniversalReceiverButton()

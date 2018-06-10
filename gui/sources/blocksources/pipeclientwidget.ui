@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PipeClientWidget</class>
+ <widget class="QWidget" name="PipeClientWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Unix Socket</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="nameLineEdit"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="refreshPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="statusTip">
+         <string>Refresh Named Pipe list</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../gui_res.qrc">
+          <normaloff>:/Images/icons/view-refresh.png</normaloff>:/Images/icons/view-refresh.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableView" name="pipeTableView"/>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../gui_res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

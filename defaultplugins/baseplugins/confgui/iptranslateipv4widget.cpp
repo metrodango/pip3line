@@ -39,41 +39,12 @@ IPTranslateIPv4Widget::IPTranslateIPv4Widget(IPTranslateIPv4 *ntransform, QWidge
     } else {
         ui->decimalRadioButton->setChecked(true);
     }
-    connect(ui->hexadecimalRadioButton, SIGNAL(toggled(bool)), this, SLOT(baseChanged()));
-    connect(ui->decimalRadioButton, SIGNAL(toggled(bool)), this, SLOT(baseChanged()));
-
-    connect(ui->littleEndianRadioButton, SIGNAL(toggled(bool)), this, SLOT(endianChanged()));
-    connect(ui->bigendianRadioButton, SIGNAL(toggled(bool)), this, SLOT(endianChanged()));
-
-    connect(ui->upperCaseRadioButton, SIGNAL(toggled(bool)), this, SLOT(caseChanged()));
-    connect(ui->lowerCaseRadioButton, SIGNAL(toggled(bool)), this, SLOT(caseChanged()));
+    connect(ui->hexadecimalRadioButton, &QRadioButton::toggled, this, [=](bool checked){transform->setBase(checked ? IPTranslateIPv4::BASE16 : IPTranslateIPv4::BASE10);});
+    connect(ui->littleEndianRadioButton, &QRadioButton::toggled, this, [=](bool checked){transform->setLittleEndian(checked);});
+    connect(ui->upperCaseRadioButton, &QRadioButton::toggled, this, [=](bool checked){transform->setUppercase(checked);});
 }
 
 IPTranslateIPv4Widget::~IPTranslateIPv4Widget()
 {
     delete ui;
-}
-
-void IPTranslateIPv4Widget::endianChanged()
-{
-    if (ui->littleEndianRadioButton->isChecked())
-        transform->setLittleEndian(true);
-    else
-        transform->setLittleEndian(false);
-}
-
-void IPTranslateIPv4Widget::caseChanged()
-{
-    if (ui->upperCaseRadioButton->isChecked())
-        transform->setUppercase(true);
-    else
-        transform->setUppercase(false);
-}
-
-void IPTranslateIPv4Widget::baseChanged()
-{
-    if (ui->hexadecimalRadioButton->isChecked())
-        transform->setBase(IPTranslateIPv4::BASE16);
-    else
-        transform->setBase(IPTranslateIPv4::BASE10);
 }

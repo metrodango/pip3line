@@ -22,7 +22,6 @@ Released under AGPL see LICENSE for more information
 #include <QSemaphore>
 #include <QSet>
 #include "commonstrings.h"
-
 #include "transformchain.h"
 
 class TransformAbstract;
