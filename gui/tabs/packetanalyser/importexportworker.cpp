@@ -643,8 +643,9 @@ void ImportExportWorker::loadFromPlain(QIODevice *file)
 
 QSharedPointer<Packet> ImportExportWorker::nextPacket()
 {
+    QSharedPointer<Packet> ret;
     if (noMore)
-        return nullptr;
+        return ret;
 
     currentIndex++;
 
@@ -660,7 +661,7 @@ QSharedPointer<Packet> ImportExportWorker::nextPacket()
 
     noMore = true;
 
-    return nullptr;
+    return ret;
 }
 
 void ImportExportWorker::addPlainRawPacket(QByteArray data, QDateTime date)
