@@ -220,7 +220,7 @@ QSharedPointer<Packet> PacketModelAbstract::getPacket(const QModelIndex &index)
         return getPacket((qint64)index.row());
     }
 
-    return nullptr;
+    return QSharedPointer<Packet>();
 }
 
 qint64 PacketModelAbstract::indexToPacketIndex(const QModelIndex &index)
