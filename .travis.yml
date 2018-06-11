@@ -1,6 +1,9 @@
 language: cpp
 sudo: required
-dist: xenial
+dist: 
+  - xenial
+  - artful
+  - bionic
 compiler:
   - clang
   - gcc
