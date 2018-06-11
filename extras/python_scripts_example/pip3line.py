@@ -64,7 +64,6 @@ class Pip3line:
 
 		self.conn.send(data)
 		self.conn.send(b'\n')
-		
 		endBlock = False
 		rdata = b''
 		while not endBlock:
