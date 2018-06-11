@@ -17,7 +17,7 @@ IPBlocksSources::IPBlocksSources(QHostAddress hostAddress, quint16 hostPort, QOb
         qFatal("Cannot allocate memory for SslConf X{");
     }
 
-    connect(sslConfiguration, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
+    connect(sslConfiguration, &SslConf::log, this, &IPBlocksSources::log, Qt::QueuedConnection);
 }
 
 IPBlocksSources::~IPBlocksSources()
@@ -47,7 +47,6 @@ void IPBlocksSources::setHostPort(const quint16 &port)
 
 QWidget *IPBlocksSources::requestGui(QWidget *parent)
 {
-
     BaseBlockSourceWidget * base = static_cast<BaseBlockSourceWidget *>(BlocksSource::requestGui(parent));
     if (base == nullptr) {
         qCritical() << tr("[IPBlocksSources::requestGui] base widget is nullptr T_T");
@@ -63,8 +62,8 @@ QWidget *IPBlocksSources::requestGui(QWidget *parent)
             if (widget == nullptr) {
                 qFatal("Cannot allocate memory for NetworkClientWidget X{");
             }
-            connect(widget, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
-            connect(base, SIGNAL(tlsEnabled(bool)), widget, SLOT(onTlsToggled(bool)));
+            connect(widget, &IPNetworkClientWidget::log, this, &IPBlocksSources::log);
+            connect(base, &BaseBlockSourceWidget::tlsEnabled, widget, &IPNetworkClientWidget::onTlsToggled);
             base->insertWidgetInGeneric(0,widget);
         }
     } else if (type == BlocksSource::SERVER) {
@@ -72,8 +71,8 @@ QWidget *IPBlocksSources::requestGui(QWidget *parent)
         if (widget == nullptr) {
             qFatal("Cannot allocate memory for IPNetworkServerWidget X{");
         }
-        connect(widget, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
-        connect(base, SIGNAL(tlsEnabled(bool)), widget, SLOT(onTlsToggled(bool)));
+        connect(widget, &IPNetworkServerWidget::log, this, &IPBlocksSources::log);
+        connect(base, &BaseBlockSourceWidget::tlsEnabled, widget, &IPNetworkServerWidget::onTlsToggled);
         base->insertWidgetInGeneric(0,widget);
     }
 

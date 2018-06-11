@@ -48,7 +48,7 @@ void FilterItem::setReverseSelection(bool reverse)
     reverseSelection = reverse;
 }
 
-bool FilterItem::selectable(Packet *)
+bool FilterItem::selectable(QSharedPointer<Packet> )
 {
     return false;
 }
@@ -249,7 +249,7 @@ QString FilterData::getHexValueWithMask() const
     return ret;
 }
 
-bool FilterData::selectable(Packet *packet)
+bool FilterData::selectable(QSharedPointer<Packet> packet)
 {
     QByteArray data = packet->getData();
     int length = data.size();
@@ -383,7 +383,7 @@ FilterTimeStamp::~FilterTimeStamp()
 
 }
 
-bool FilterTimeStamp::selectable(Packet *packet)
+bool FilterTimeStamp::selectable(QSharedPointer<Packet> packet)
 {
     if (!after.isValid() && !before.isValid())
         return false;
@@ -494,7 +494,7 @@ FilterLength::~FilterLength()
 
 }
 
-bool FilterLength::selectable(Packet *packet)
+bool FilterLength::selectable(QSharedPointer<Packet> packet)
 {
     bool ret = false;
     int length = packet->getData().size();
@@ -594,7 +594,7 @@ FilterDirection::~FilterDirection()
 
 }
 
-bool FilterDirection::selectable(Packet *packet)
+bool FilterDirection::selectable(QSharedPointer<Packet> packet)
 {
     bool ret = (packet->getDirection() == direction);
     return reverseSelection ? !ret : ret;
@@ -653,7 +653,7 @@ FilterText::~FilterText()
 
 }
 
-bool FilterText::selectable(Packet *packet)
+bool FilterText::selectable(QSharedPointer<Packet> packet)
 {
     bool ret = false;
 
@@ -752,7 +752,7 @@ FilterCIDs::~FilterCIDs()
 
 }
 
-bool FilterCIDs::selectable(Packet *packet)
+bool FilterCIDs::selectable(QSharedPointer<Packet> packet)
 {
     bool ret = cidList.contains(packet->getSourceid());
     return reverseSelection ? !ret : ret;

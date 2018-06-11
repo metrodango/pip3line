@@ -123,7 +123,7 @@ PythonModules::PythonModules(QString name, Pip3lineCallback *callback) :
     // saving thread state
     pymainstate = PyEval_SaveThread();
 
-   connect(this, SIGNAL(pathsUpdated()), SLOT(updatePath()));
+   connect(this, &PythonModules::pathsUpdated, this, &PythonModules::updatePath);
    qDebug() << "Created " << this;
 
 }

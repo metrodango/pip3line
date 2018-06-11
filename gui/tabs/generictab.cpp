@@ -54,7 +54,7 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
 {
     ableToReceiveData = false;
     setName(bytesource->name());
-    connect(bytesource,SIGNAL(nameChanged(QString)), SLOT(setName(QString)));
+    connect(bytesource, &ByteSourceAbstract::nameChanged, this, &GenericTab::setName);
 
     hexView = new(std::nothrow) HexView(bytesource, guiHelper,this);
     if (hexView == nullptr) {
@@ -71,17 +71,17 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
     ui->tabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
 
-    connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), SLOT(onDeleteTab(int)));
+    connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &GenericTab::onDeleteTab);
 
     searchWidget = new(std::nothrow) SearchWidget(bytesource, guiHelper, this);
     if (searchWidget == nullptr) {
         qFatal("Cannot allocate memory for SearchWidget X{");
     }
     searchWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    connect(searchWidget, SIGNAL(jumpTo(quint64,quint64)), hexView, SLOT(gotoSearch(quint64,quint64)));
+    connect(searchWidget, &SearchWidget::jumpTo, hexView, &HexView::gotoSearch);
 
     ui->mainLayout->insertWidget(1,searchWidget);
-    connect(searchWidget, SIGNAL(searchRequest(QByteArray,QBitArray,bool)), SLOT(onSearch(QByteArray,QBitArray,bool)));
+    connect(searchWidget, &SearchWidget::searchRequest, this, &GenericTab::onSearch);
 
     hexView->installEventFilter(this);
 
@@ -91,7 +91,7 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
     }
     gotoWidget->setMaximumWidth(150);
     ui->mainToolBarLayout->insertWidget(ui->mainToolBarLayout->indexOf(ui->loadPushButton) + 1, gotoWidget);
-    connect(gotoWidget,SIGNAL(gotoRequest(quint64,bool,bool,bool)), SLOT(onGotoOffset(quint64,bool,bool,bool)));
+    connect(gotoWidget, &OffsetGotoWidget::gotoRequest, this, &GenericTab::onGotoOffset);
 
     roButton = new(std::nothrow) ReadOnlyButton(bytesource,this);
     if (roButton == nullptr) {
@@ -128,9 +128,8 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
 
 
     ui->mainLayout->insertWidget(ui->mainLayout->indexOf(ui->tabWidget) + 1,messagePanel);
-    connect(bytesource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), messagePanel, SLOT(log(QString,QString,Pip3lineConst::LOGLEVEL)));
-    connect(bytesource, SIGNAL(reset()), messagePanel, SLOT(closeWidget()));
-    //connect(byteSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger, SLOT(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(bytesource, &ByteSourceAbstract::log, messagePanel, &MessagePanelWidget::log);
+    connect(bytesource, &ByteSourceAbstract::reset, messagePanel, &MessagePanelWidget::closeWidget);
 
     // Checking if there are some additional buttons
     QWidget *gui = bytesource->getGui(this, ByteSourceAbstract::GUI_BUTTONS);
@@ -152,7 +151,7 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
         qFatal("Cannot allocate memory for NewViewMenu X{");
     }
 
-    connect(newViewsContextMenu, SIGNAL(newViewRequested()), SLOT(onNewTabRequested()));
+    connect(newViewsContextMenu, &NewViewMenu::newViewRequested, this, &GenericTab::onNewTabRequested);
     ui->tabWidget->installEventFilter(this);
     ui->addViewPushButton->setMenu(newViewsContextMenu);
 
@@ -163,10 +162,10 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
 
     ui->mainToolBarLayout->insertWidget(ui->mainToolBarLayout->indexOf(gotoWidget) + 1,urb);
 
-    connect(hexView,SIGNAL(askForFileLoad()), SLOT(fileLoadRequest()));
-    connect(ui->loadPushButton, SIGNAL(clicked()), SLOT(fileLoadRequest()));
-    connect(ui->historyUndoPushButton, SIGNAL(clicked()), SLOT(onHistoryBackward()));
-    connect(ui->historyRedoPushButton, SIGNAL(clicked()), SLOT(onHistoryForward()));
+    connect(hexView, &HexView::askForFileLoad, this, &GenericTab::fileLoadRequest);
+    connect(ui->loadPushButton, &QPushButton::clicked, this, &GenericTab::fileLoadRequest);
+    connect(ui->historyUndoPushButton, &QPushButton::clicked, this, &GenericTab::onHistoryBackward);
+    connect(ui->historyRedoPushButton, &QPushButton::clicked, this, &GenericTab::onHistoryForward);
 
     setAcceptDrops(true);
 }

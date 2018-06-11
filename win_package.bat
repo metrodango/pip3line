@@ -3,24 +3,23 @@
 IF "%1"=="" goto Usage
 SET GOTVERSION=false
 IF NOT "%1"=="2015_32" SET GOTVERSION=true 
-IF NOT "%1"=="2015_64" SET GOTVERSION=true
+IF NOT "%1"=="2017_64" SET GOTVERSION=true
 
 IF "%GOTVERSION%"=="false" GOTO Usage
 
 SET VSVERSION=%1
 REM Default Qt dir
-SET "BASE_DIR_QT=C:\Qt\5.9.2"
+SET "BASE_DIR_QT=C:\Qt\5.10.1"
 
 IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
-IF "%VSVERSION%"=="2015_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2015_64"
+IF "%VSVERSION%"=="2017_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2017_64"
 
-REM Openssl lib (default is 32 bit, change for anything else if needed)
-IF "%VSVERSION%"=="2015_32" SET "OPENSSL_PATH=C:\OpenSSL-Win32"
-IF "%VSVERSION%"=="2015_64" SET "OPENSSL_PATH=C:\OpenSSL-Win64"
+REM Openssl lib
+SET "OPENSSL_PATH=C:\OpenSSL"
 
 REM needed to copy the necessary Angle libs
 SET ANGLEUSE=false
-IF "%VSVERSION%"=="2015_64" SET ANGLEUSE=true 
+IF "%VSVERSION%"=="2017_64" SET ANGLEUSE=true 
 
 IF NOT EXIST %QT_LIBS% GOTO Nonexistentdir
 
@@ -66,9 +65,8 @@ IF NOT EXIST %DISTORM_PATH% GOTO Nonexistentdistorm
 copy %DISTORM_PATH%"\distorm3.dll"
 
 echo [5] Copying OpenSSL lib (if present)
-IF NOT EXIST %OPENSSL_PATH% GOTO NonexistentOpenssl
-copy %OPENSSL_PATH%"\bin\ssleay32.dll"
-copy %OPENSSL_PATH%"\bin\libeay32.dll"
+IF NOT EXIST "%OPENSSL_PATH%" GOTO NonexistentOpenssl
+IF "%VSVERSION%"=="2017_64" copy "%OPENSSL_PATH%\bin\*.dll"
 
 echo [6] Copying QScintilla lib (if present)
 REM Qscintilla lib
@@ -104,8 +102,8 @@ ECHO.
 ECHO Need Qt Visual Studio version, i.e.
 ECHO %~n0.bat 2015
 ECHO 
-ECHO Available versions : 
-ECHO     2015_64 : VS 2015 amd64
+ECHO Available versions :
+ECHO     2017_64 : VS 2017 amd64
 ECHO     2015_32 : VS 2015 x86
 GOTO End
 

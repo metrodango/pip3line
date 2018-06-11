@@ -15,7 +15,7 @@ ScreenIODevice::ScreenIODevice(QPlainTextEdit *outWidget, QObject *parent) :
     QIODevice(parent)
 {
     widget = outWidget;
-    connect(this, SIGNAL(packet(QString)), this, SLOT(processPacket(QString)));
+    connect(this, &ScreenIODevice::packet, this, &ScreenIODevice::processPacket);
 }
 
 bool ScreenIODevice::atEnd() const

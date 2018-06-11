@@ -46,10 +46,11 @@ QuickViewItemConfig::QuickViewItemConfig(GuiHelper *nguiHelper, QWidget *parent)
     transformFactory = guiHelper->getTransformFactory();
 
     guiHelper->buildTransformComboBox(uiTransform->transformComboBox);
+    //connect(uiTransform->transformComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &QuickViewItemConfig::onTransformSelect);
     connect(uiTransform->transformComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onTransformSelect(QString)));
-    connect(uiTransform->inboundRadioButton, SIGNAL(toggled(bool)), this, SLOT(onInboundWayChange(bool)));
-    connect(uiTransform->infoPushButton, SIGNAL(clicked()), this, SLOT(onInfo()));
-    connect(uiTransform->textRadioButton, SIGNAL(toggled(bool)), this, SLOT(onTextFormatToggled(bool)));
+    connect(uiTransform->inboundRadioButton, &QRadioButton::toggled, this, &QuickViewItemConfig::onInboundWayChange);
+    connect(uiTransform->infoPushButton, &QPushButton::clicked, this, &QuickViewItemConfig::onInfo);
+    connect(uiTransform->textRadioButton, &QRadioButton::toggled, this, &QuickViewItemConfig::onTextFormatToggled);
 
     uiTransform->wayGroupBox->setVisible(false);
     uiTransform->formatGroupBox->setVisible(false);
@@ -209,7 +210,7 @@ void QuickViewItemConfig::onInfo()
 void QuickViewItemConfig::integrateTransform()
 {
     if (currentTransform != nullptr) {
-        connect(currentTransform, SIGNAL(destroyed()), this, SLOT(onTransformDelete()));
+        connect(currentTransform, &TransformAbstract::destroyed, this, &QuickViewItemConfig::onTransformDelete);
         if (currentTransform->isTwoWays()) {
             uiTransform->inboundRadioButton->setText(currentTransform->inboundString());
             uiTransform->outboundRadioButton->setText(currentTransform->outboundString());

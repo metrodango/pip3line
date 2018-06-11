@@ -25,11 +25,6 @@ class HtmlWidget : public QWidget
     public:
         explicit HtmlWidget(Html *ntransform, QWidget *parent = 0);
         ~HtmlWidget();
-    private slots:
-            void onChangeScope();
-            void onChangeType();
-            void onChangeUseName();
-        
     private:
         Ui::HtmlWidget *ui;
         Html *transform;

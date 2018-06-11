@@ -30,11 +30,12 @@ SplitWidget::SplitWidget(Split *ntransform, QWidget *parent) :
     ui->trimCheckBox->setChecked(transform->isTrimmingBlank());
     ui->procLineBLinecheckBox->setChecked(transform->isProcessingLineByLine());
 
-    connect(ui->charWidget,SIGNAL(charChanged(char)), SLOT(onSeparatorChange(char)));
-    connect(ui->groupSpinBox,SIGNAL(valueChanged(int)), SLOT(onGroupChange(int)));
-    connect(ui->allCheckBox,SIGNAL(toggled(bool)),  SLOT(onAllGroupChange(bool)));
-    connect(ui->trimCheckBox,SIGNAL(toggled(bool)), SLOT(onTrimChange(bool)));
-    connect(ui->procLineBLinecheckBox, SIGNAL(toggled(bool)), SLOT(onProcLineChanged(bool)));
+    connect(ui->charWidget, &HexWidget::charChanged, this, &SplitWidget::onSeparatorChange);
+    //connect(ui->groupSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SplitWidget::onGroupChange);
+    connect(ui->groupSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onGroupChange(int)));
+    connect(ui->allCheckBox, &QCheckBox::toggled, this, &SplitWidget::onAllGroupChange);
+    connect(ui->trimCheckBox, &QCheckBox::toggled, this, &SplitWidget::onTrimChange);
+    connect(ui->procLineBLinecheckBox, &QCheckBox::toggled, this, &SplitWidget::onProcLineChanged);
 }
 
 SplitWidget::~SplitWidget()

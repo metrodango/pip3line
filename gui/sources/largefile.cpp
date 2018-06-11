@@ -117,7 +117,7 @@ void FileSearch::internalStart()
         if (file == nullptr) {
             qFatal("Cannot allocate memory for QFile X{");
         }
-        connect(file, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+        connect(file, &FileSourceReader::log, this, &FileSearch::log);
         worker = new(std::nothrow) SearchWorker(file);
 
         if (worker == nullptr) {
@@ -142,7 +142,7 @@ LargeFile::LargeFile(QObject *parent) :
     chunksize = BLOCKSIZE;
     fileSize = 0;
     _readonly = true;
-    connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(onFileChanged(QString)));
+    connect(&watcher, &QFileSystemWatcher::fileChanged, this, &LargeFile::onFileChanged);
 }
 
 LargeFile::~LargeFile()
@@ -409,7 +409,7 @@ QWidget *LargeFile::requestGui(QWidget *parent, GUI_TYPE type)
         openFile->setMaximumWidth(25);
         openFile->setToolTip(tr("Open file"));
         openFile->setFlat(true);
-        connect(openFile, SIGNAL(clicked()), SIGNAL(askFileLoad()));
+        connect(openFile, &QPushButton::clicked, this, &LargeFile::askFileLoad);
         layout->addWidget(openFile);
     }
 
@@ -424,8 +424,8 @@ SearchAbstract *LargeFile::requestSearchObject(QObject *)
     if (sObj == nullptr) {
         qFatal("Cannot allocate memory for FileSearch X{");
     }
-    connect(sObj, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-    connect(sObj, SIGNAL(foundList(BytesRangeList*)), SLOT(setNewMarkings(BytesRangeList*)), Qt::QueuedConnection);
+    connect(sObj, &FileSearch::log, this, &LargeFile::log, Qt::QueuedConnection);
+    connect(sObj, &FileSearch::foundList, this, &LargeFile::setNewMarkings, Qt::QueuedConnection);
 
     return sObj;
 }

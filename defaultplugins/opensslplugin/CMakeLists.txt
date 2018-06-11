@@ -42,30 +42,7 @@ if (OPENSSL_FOUND)
 	message( STATUS "OpenSSL library found ... OK")
 	include_directories(${OPENSSL_INCLUDE_DIR})
 	link_directories(${OPENSSL_LIBRARIES})
-	if (UNIX)
-		set ( EXTERN_LIBS transform crypto )
-	endif (UNIX)
-
-	if (WIN32)
-		set ( EXTERN_LIBS transform libeay32 )
-		if (CMAKE_SIZEOF_VOID_P MATCHES 8) #64bit
-			link_directories (
-				C:\\OpenSSL-Win64\\lib\\
-				)
-			include_directories (
-				C:\\OpenSSL-Win64\\include\\
-				)
-		else(CMAKE_SIZEOF_VOID_P MATCHES 8) #32bit
-				link_directories (
-				C:\\OpenSSL-Win32\\lib\\
-				)
-			include_directories (
-				C:\\OpenSSL-Win32\\include\\
-				)
-		endif(CMAKE_SIZEOF_VOID_P MATCHES 8)
-
-	endif (WIN32)
-
+	set ( EXTERN_LIBS transform ${OPENSSL_CRYPTO_LIBRARY} )
 
 	set ( opensslplugin_HDRS
 		opensslplugin_global.h

@@ -47,7 +47,7 @@ HexView::HexView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget
 
     updateTimer.setInterval(150);
     updateTimer.setSingleShot(true);
-    connect(&updateTimer, SIGNAL(timeout()), SLOT(onSelectionChanged()));
+    connect(&updateTimer, &QTimer::timeout, this, &HexView::onSelectionChanged);
 
     globalContextMenu = nullptr;
     sendToMenu = nullptr;
@@ -68,9 +68,9 @@ HexView::HexView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget
     if (hexTableView == nullptr) {
         qFatal("Cannot allocate memory for ByteTableView X{");
     }
-    connect(guiHelper, SIGNAL(hexTableSizesUpdated()), hexTableView, SLOT(updateTableSizes()));
-    connect(hexTableView, SIGNAL(error(QString,QString)), logger, SLOT(logError(QString,QString)));
-    connect(hexTableView, SIGNAL(warning(QString,QString)), logger, SLOT(logWarning(QString,QString)));
+    connect(guiHelper, &GuiHelper::hexTableSizesUpdated, hexTableView, &ByteTableView::updateTableSizes);
+    connect(hexTableView, &ByteTableView::error, logger, &LoggerWidget::logError);
+    connect(hexTableView, &ByteTableView::warning, logger, &LoggerWidget::logWarning);
 
 
     dataModel = new(std::nothrow) ByteItemModel(byteSource,hexTableView);
@@ -80,23 +80,24 @@ HexView::HexView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget
         qFatal("Cannot allocate memory for ByteItemModel X{");
     }
 
-    connect(byteSource, SIGNAL(updated(quintptr)), this, SLOT(updateStats()));
+    connect(byteSource, &ByteSourceAbstract::updated, this, &HexView::updateStats);
 
-    connect(dataModel, SIGNAL(error(QString)), logger, SLOT(logError(QString)));
-    connect(dataModel, SIGNAL(warning(QString)), logger, SLOT(logWarning(QString)));
+    connect(dataModel, &ByteItemModel::error, logger, [=](const QString &message) { logger->logError(message);});
+    connect(dataModel, &ByteItemModel::warning, logger, [=](const QString &message) { logger->logWarning(message);});
     hexTableView->setModel(dataModel);
 
     ui->mainLayout->insertWidget(0,hexTableView);
-    connect(hexTableView, SIGNAL(newSelection()),&updateTimer, SLOT(start()));
+    //connect(hexTableView, &ByteTableView::newSelection,&updateTimer, qOverload<>(&QTimer::start));
+    connect(hexTableView, SIGNAL(newSelection()), &updateTimer, SLOT(start()));
 
     // creating context menus
     buildContextMenus();
     updateImportExportMenus();
     updateMarkMenu();
-    connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(updateImportExportMenus()));
-    connect(guiHelper, SIGNAL(markingsUpdated()), this, SLOT(updateMarkMenu()));
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &HexView::updateImportExportMenus);
+    connect(guiHelper, &GuiHelper::markingsUpdated, this, &HexView::updateMarkMenu);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(this,SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onRightClick(QPoint)));
+    connect(this, &HexView::customContextMenuRequested, this, &HexView::onRightClick);
 
     updateStats();
 }
@@ -763,56 +764,56 @@ void HexView::buildContextMenus()
         qFatal("Cannot allocate memory for sendToMenu X{");
         return;
     }
-    connect(sendToMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSendToTriggered(QAction*)), Qt::UniqueConnection);
+    connect(sendToMenu, &SendToMenu::triggered, this, &HexView::onSendToTriggered);
 
     markMenu = new(std::nothrow) QMenu(tr("Mark as"));
     if (markMenu == nullptr) {
         qFatal("Cannot allocate memory for markMenu X{");
         return;
     }
-    connect(markMenu, SIGNAL(triggered(QAction*)), this, SLOT(onMarkMenu(QAction*)), Qt::UniqueConnection);
+    connect(markMenu, &QMenu::triggered, this, &HexView::onMarkMenu);
 
     copyMenu = new(std::nothrow) QMenu(tr("Copy as"));
     if (copyMenu == nullptr) {
         qFatal("Cannot allocate memory for copyMenu X{");
         return;
     }
-    connect(copyMenu, SIGNAL(triggered(QAction*)), this, SLOT(onCopy(QAction*)), Qt::UniqueConnection);
+    connect(copyMenu, &QMenu::triggered, this, &HexView::onCopy);
 
     loadMenu = new(std::nothrow) QMenu(tr("Load from clipboard"));
     if (loadMenu == nullptr) {
         qFatal("Cannot allocate memory for importMenu X{");
         return;
     }
-    connect(loadMenu, SIGNAL(triggered(QAction*)), this, SLOT(onLoad(QAction*)), Qt::UniqueConnection);
+    connect(loadMenu, &QMenu::triggered, this, &HexView::onLoad);
 
     insertAfterMenu = new(std::nothrow) QMenu(tr("Insert after"));
     if (insertAfterMenu == nullptr) {
         qFatal("Cannot allocate memory for insertAfterMenu X{");
         return;
     }
-    connect(insertAfterMenu, SIGNAL(triggered(QAction*)), this, SLOT(onInsertAfter(QAction*)), Qt::UniqueConnection);
+    connect(insertAfterMenu, &QMenu::triggered, this, &HexView::onInsertAfter);
 
     replaceMenu = new(std::nothrow) QMenu(tr("Replace selection "));
     if (replaceMenu == nullptr) {
         qFatal("Cannot allocate memory for replaceMenu X{");
         return;
     }
-    connect(replaceMenu, SIGNAL(triggered(QAction*)), this, SLOT(onReplace(QAction*)), Qt::UniqueConnection);
+    connect(replaceMenu, &QMenu::triggered, this, &HexView::onReplace);
 
     insertBeforeMenu = new(std::nothrow) QMenu(tr("Insert before"));
     if (insertBeforeMenu == nullptr) {
         qFatal("Cannot allocate memory for insertBeforeMenu X{");
         return;
     }
-    connect(insertBeforeMenu, SIGNAL(triggered(QAction*)), this, SLOT(onInsertBefore(QAction*)), Qt::UniqueConnection);
+    connect(insertBeforeMenu, &QMenu::triggered, this, &HexView::onInsertBefore);
 
     selectFromSizeMenu = new(std::nothrow) QMenu(tr("Select from size"));
     if (selectFromSizeMenu == nullptr) {
         qFatal("Cannot allocate memory for selectFromSizeMenu X{");
         return;
     }
-    connect(selectFromSizeMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSelectFromSizeMenu(QAction*)), Qt::UniqueConnection);
+    connect(selectFromSizeMenu, &QMenu::triggered, this, &HexView::onSelectFromSizeMenu);
 
     QAction * action = new(std::nothrow) QAction(LITTLE_ENDIAN_STRING, selectFromSizeMenu);
     if (action == nullptr) {
@@ -833,7 +834,7 @@ void HexView::buildContextMenus()
         qFatal("Cannot allocate memory for gotoFromOffsetMenu X{");
         return;
     }
-    connect(gotoFromOffsetMenu, SIGNAL(triggered(QAction*)), this, SLOT(onGotoFromOffsetMenu(QAction*)), Qt::UniqueConnection);
+    connect(gotoFromOffsetMenu, &QMenu::triggered, this, &HexView::onGotoFromOffsetMenu);
 
     action = new(std::nothrow) QAction(ABSOLUTE_LITTLE_ENDIAN_STRING, gotoFromOffsetMenu);
     if (action == nullptr) {
@@ -868,7 +869,7 @@ void HexView::buildContextMenus()
         qFatal("Cannot allocate memory for copySelectionSizeMenu X{");
         return;
     }
-    connect(copySelectionSizeMenu, SIGNAL(triggered(QAction*)), this, SLOT(onCopySelectionSize(QAction*)), Qt::UniqueConnection);
+    connect(copySelectionSizeMenu, &QMenu::triggered, this, &HexView::onCopySelectionSize);
 
     action = new(std::nothrow) QAction(OCTAL_STRING, copySelectionSizeMenu);
     if (action == nullptr) {
@@ -896,7 +897,7 @@ void HexView::buildContextMenus()
         qFatal("Cannot allocate memory for copyCurrentOffsetMenu X{");
         return;
     }
-    connect(copyCurrentOffsetMenu, SIGNAL(triggered(QAction*)), this, SLOT(onCopyCurrentOffset(QAction*)), Qt::UniqueConnection);
+    connect(copyCurrentOffsetMenu, &QMenu::triggered, this, &HexView::onCopyCurrentOffset);
 
     action = new(std::nothrow) QAction(OCTAL_STRING, copyCurrentOffsetMenu);
     if (action == nullptr) {
@@ -924,7 +925,7 @@ void HexView::buildContextMenus()
         qFatal("Cannot allocate memory for saveToFile X{");
         return;
     }
-    connect(saveToFileMenu, SIGNAL(triggered(QAction*)), this, SLOT(onSaveToFile(QAction*)), Qt::UniqueConnection);
+    connect(saveToFileMenu, &QMenu::triggered, this, &HexView::onSaveToFile);
     saveToFileMenu->addAction(ui->saveToFileAction);
     saveToFileMenu->addAction(ui->saveSelectedToFileAction);
 
@@ -934,7 +935,7 @@ void HexView::buildContextMenus()
         return;
     }
 
-    connect(fuzzingExportAction, SIGNAL(triggered(bool)), this, SLOT(onExportForFuzzing()), Qt::UniqueConnection);
+    connect(fuzzingExportAction, &QAction::triggered, this, &HexView::onExportForFuzzing);
 
     globalContextMenu = new(std::nothrow) QMenu();
     if (globalContextMenu == nullptr) {
@@ -943,16 +944,16 @@ void HexView::buildContextMenus()
     }
 
     globalContextMenu->addAction(ui->selectAllAction);
-    connect(ui->selectAllAction, SIGNAL(triggered()), this, SLOT(onSelectAll()));
+    connect(ui->selectAllAction, &QAction::triggered, this, &HexView::onSelectAll);
     globalContextMenu->addAction(ui->keepOnlySelectionAction);
     globalContextMenu->addMenu(selectFromSizeMenu);
     globalContextMenu->addMenu(gotoFromOffsetMenu);
-    connect(ui->keepOnlySelectionAction, SIGNAL(triggered()), this, SLOT(onKeepOnlySelection()));
+    connect(ui->keepOnlySelectionAction, &QAction::triggered, this, &HexView::onKeepOnlySelection);
     globalContextMenu->addSeparator();
     globalContextMenu->addAction(ui->newByteArrayAction);
-    connect(ui->newByteArrayAction, SIGNAL(triggered()), this, SLOT(onNewByteArray()));
+    connect(ui->newByteArrayAction, &QAction::triggered, this, &HexView::onNewByteArray);
     globalContextMenu->addAction(ui->importFileAction);
-    connect(ui->importFileAction, SIGNAL(triggered()), this, SLOT(onLoadFile()));
+    connect(ui->importFileAction, &QAction::triggered, this, &HexView::onLoadFile);
     globalContextMenu->addMenu(loadMenu);
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(replaceMenu);
@@ -963,7 +964,7 @@ void HexView::buildContextMenus()
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(markMenu);
     globalContextMenu->addAction(ui->clearMarkingsAction);
-    connect(ui->clearMarkingsAction, SIGNAL(triggered()), this, SLOT(onClearSelectionMarkings()));
+    connect(ui->clearMarkingsAction, &QAction::triggered, this, &HexView::onClearSelectionMarkings);
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(saveToFileMenu);
     globalContextMenu->addMenu(copyMenu);
@@ -973,5 +974,5 @@ void HexView::buildContextMenus()
     globalContextMenu->addAction(ui->deleteSelectionAction);
     globalContextMenu->addSeparator();
     globalContextMenu->addAction(fuzzingExportAction);
-    connect(ui->deleteSelectionAction, SIGNAL(triggered()), this, SLOT(onDeleteSelection()));
+    connect(ui->deleteSelectionAction, &QAction::triggered, this, &HexView::onDeleteSelection);
 }

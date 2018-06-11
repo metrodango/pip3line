@@ -22,15 +22,10 @@ NtlmsspWidget::NtlmsspWidget(Ntlmssp *ntransform, QWidget *parent) :
     ui->setupUi(this);
     ui->decodeCheckBox->setChecked(transform->decodeBase64());
 
-    connect(ui->decodeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDecode(bool)));
+    connect(ui->decodeCheckBox, &QCheckBox::toggled, this, [=](bool checked){transform->setDecodeBase64(checked);});
 }
 
 NtlmsspWidget::~NtlmsspWidget()
 {
     delete ui;
-}
-
-void NtlmsspWidget::onDecode(bool checked)
-{
-    transform->setDecodeBase64(checked);
 }

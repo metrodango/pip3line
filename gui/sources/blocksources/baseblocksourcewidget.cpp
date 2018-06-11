@@ -23,7 +23,7 @@ BaseBlockSourceWidget::BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent) 
     ui->reflexionCheckBox->setChecked(bsource->isReflexive());
 
     if (bsource->getFlags() & BlocksSource::REFLEXION_OPTIONS) {
-        connect(ui->reflexionCheckBox, SIGNAL(toggled(bool)), bsource, SLOT(setReflexive(bool)));
+        connect(ui->reflexionCheckBox, &QCheckBox::toggled, bsource, &BlocksSource::setReflexive);
     } else {
         ui->reflexionCheckBox->setVisible(false);
     }
@@ -31,8 +31,8 @@ BaseBlockSourceWidget::BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent) 
     ui->tlsCheckBox->setChecked(bsource->isTLSEnable());
 
     if (bsource->getFlags() & BlocksSource::TLS_OPTIONS) {
-        connect(ui->tlsCheckBox, SIGNAL(toggled(bool)), bsource, SLOT(setTlsEnable(bool)));
-        connect(bsource,SIGNAL(sslChanged(bool)), this, SLOT(onTLSToggled(bool)));
+        connect(ui->tlsCheckBox, &QCheckBox::toggled, bsource, &BlocksSource::setTlsEnable);
+        connect(bsource, &BlocksSource::sslChanged, this, &BaseBlockSourceWidget::onTLSToggled);
     } else {
         ui->tlsCheckBox->setVisible(false);
     }
@@ -42,9 +42,10 @@ BaseBlockSourceWidget::BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent) 
     ui->b64SeparatorWidget->setChar(bsource->getB64BlocksSeparator());
 
     if (bsource->getFlags() & BlocksSource::B64BLOCKS_OPTIONS) {
-        connect(ui->b64BlocksGroupBox, SIGNAL(toggled(bool)), bsource, SLOT(setB64Blocks(bool)));
+        connect(ui->b64BlocksGroupBox, &QGroupBox::toggled, bsource, &BlocksSource::setB64Blocks);
+        //connect(ui->b64MaxLengthSpinBox, qOverload<int>(&QSpinBox::valueChanged), bsource, &BlocksSource::setB64MaxBlockLength);
         connect(ui->b64MaxLengthSpinBox, SIGNAL(valueChanged(int)), bsource, SLOT(setB64MaxBlockLength(int)));
-        connect(ui->b64SeparatorWidget, SIGNAL(charChanged(char)), bsource, SLOT(setB64BlocksSeparator(char)));
+        connect(ui->b64SeparatorWidget, &HexWidget::charChanged, bsource, &BlocksSource::setB64BlocksSeparator);
     } else {
         ui->b64BlocksGroupBox->setVisible(false);
     }
@@ -59,16 +60,16 @@ BaseBlockSourceWidget::BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent) 
     onInboundTransformModified();
     onOutboundTransformModified();
 
-    connect(gcg, SIGNAL(start()), bsource, SLOT(startListening()), Qt::QueuedConnection);
-    connect(gcg, SIGNAL(stop()), bsource, SLOT(stopListening()), Qt::QueuedConnection);
-    connect(gcg, SIGNAL(reset()), bsource, SLOT(restart()), Qt::QueuedConnection);
-    connect(bsource, SIGNAL(started()), gcg, SLOT(receiveStart()), Qt::QueuedConnection);
-    connect(bsource, SIGNAL(stopped()), gcg, SLOT(receiveStop()), Qt::QueuedConnection);
+    connect(gcg, &DefaultControlGui::start, bsource, &BlocksSource::startListening, Qt::QueuedConnection);
+    connect(gcg, &DefaultControlGui::stop, bsource, &BlocksSource::stopListening, Qt::QueuedConnection);
+    connect(gcg, &DefaultControlGui::reset, bsource, &BlocksSource::restart, Qt::QueuedConnection);
+    connect(bsource, &BlocksSource::started, gcg, &DefaultControlGui::receiveStart, Qt::QueuedConnection);
+    connect(bsource, &BlocksSource::stopped, gcg, &DefaultControlGui::receiveStop, Qt::QueuedConnection);
 
-    connect(ui->selectInboundTransformPushButton, SIGNAL(clicked(bool)), bsource, SIGNAL(inboundTranformSelectionRequested()));
-    connect(ui->selectOutboundTransformPushButton, SIGNAL(clicked(bool)), bsource, SIGNAL(outboundTranformSelectionRequested()));
-    connect(bsource, SIGNAL(inboundTransformModfied()), this, SLOT(onInboundTransformModified()));
-    connect(bsource, SIGNAL(outboundTranformModfied()), this, SLOT(onOutboundTransformModified()));
+    connect(ui->selectInboundTransformPushButton, &QPushButton::clicked, bsource, &BlocksSource::inboundTranformSelectionRequested);
+    connect(ui->selectOutboundTransformPushButton, &QPushButton::clicked, bsource, &BlocksSource::outboundTranformSelectionRequested);
+    connect(bsource, &BlocksSource::inboundTransformModfied, this, &BaseBlockSourceWidget::onInboundTransformModified);
+    connect(bsource, &BlocksSource::outboundTranformModfied, this, &BaseBlockSourceWidget::onOutboundTransformModified);
 
     ui->genericLayout->insertWidget(ui->genericLayout->count() - 1 , gcg);
 
@@ -132,7 +133,7 @@ void BaseBlockSourceWidget::onInboundTransformModified()
     if (ta != nullptr) {
         inboundTranformWidget = ta->getGui(nullptr);
         ui->inboundTransformTab->layout()->addWidget(inboundTranformWidget);
-        connect(inboundTranformWidget, SIGNAL(destroyed(QObject*)), this, SLOT(onInboundTransformWidgetDDestroyed()));
+        connect(inboundTranformWidget, &QWidget::destroyed, this, &BaseBlockSourceWidget::onInboundTransformWidgetDDestroyed);
     }
 }
 
@@ -147,7 +148,7 @@ void BaseBlockSourceWidget::onOutboundTransformModified()
     if (ta != nullptr) {
         outboundTranformWidget = ta->getGui(nullptr);
         ui->outboundTransformTab->layout()->addWidget(outboundTranformWidget);
-        connect(outboundTranformWidget, SIGNAL(destroyed(QObject*)), this, SLOT(onOutboundTransformWidgetDDestroyed()));
+        connect(outboundTranformWidget, &QWidget::destroyed, this, &BaseBlockSourceWidget::onOutboundTransformWidgetDDestroyed);
     }
 }
 

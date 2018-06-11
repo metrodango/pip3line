@@ -31,6 +31,7 @@ include_directories (
 	../../libtransform
 	../../../distorm/include
 	/usr/include/distorm3
+	/usr/lib/include/distorm3
 	)
 
 link_directories (

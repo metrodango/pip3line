@@ -15,11 +15,12 @@ class SingleSourceOrchestrator : public SourcesOrchestatorAbstract
         BlocksSource * getBlockSource(int index);
         int blockSourceCount() const;
     public slots:
-        void postPacket(Packet * packet);
+        void postPacket(QSharedPointer<Packet> packet);
         bool start();
     private slots:
         void onBlockSourceDestroyed();
     private:
+        QWidget * requestControlGui(QWidget *parent);
         BlocksSource * source{nullptr};
 };
 

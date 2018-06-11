@@ -25,8 +25,6 @@ class RandomCaseWidget : public QWidget
     public:
         explicit RandomCaseWidget(RandomCase *ntransform, QWidget *parent = 0);
         ~RandomCaseWidget();
-    private slots:
-        void onRerandomize();
     private:
         Ui::RandomCaseWidget *ui;
         RandomCase *transform;

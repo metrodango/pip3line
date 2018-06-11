@@ -39,8 +39,9 @@ HMACTransformWidget::HMACTransformWidget(HMACTransform *ntranform, QWidget *pare
         ui->keyComboBox->setCurrentIndex(0);
      }
 
-     connect(ui->hashComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onHashSelected(int)));
-     connect(ui->keyComboBox->lineEdit(), SIGNAL(returnPressed()), SLOT(onKeyLineReturn()));
+     connect(ui->hashComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onHashChanged(int)));
+     //connect(ui->hashComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=](int index) {transform->setSelectedHash(index);});
+     connect(ui->keyComboBox->lineEdit(), &QLineEdit::returnPressed, this, &HMACTransformWidget::onKeyLineReturn);
 }
 
 HMACTransformWidget::~HMACTransformWidget()
@@ -48,9 +49,9 @@ HMACTransformWidget::~HMACTransformWidget()
     delete ui;
 }
 
-void HMACTransformWidget::onHashSelected(int index)
+void HMACTransformWidget::onHashChanged(int val)
 {
-    transform->setSelectedHash(index);
+    transform->setSelectedHash(val);
 }
 
 void HMACTransformWidget::onKeyLineReturn()

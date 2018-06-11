@@ -62,6 +62,16 @@ bool TabAbstract::canReceiveData()
     return true;
 }
 
+void TabAbstract::registerToGlobal()
+{
+    // do nothing by default
+}
+
+void TabAbstract::unregisterFromGlobal()
+{
+    // do nothing by default
+}
+
 void TabAbstract::onDetach()
 {
     emit askWindowTabSwitch();

@@ -43,6 +43,8 @@ class DownloadManager;
 class QTimer;
 class BlocksSource;
 class SourcesOrchestatorAbstract;
+class PacketAnalyserTab;
+class Packet;
 
 class GuiHelper : public QObject
 {
@@ -189,6 +191,11 @@ class GuiHelper : public QObject
         QJsonDocument::JsonFormat getFuzzingExportFormat() const;
         void setFuzzingExportFormat(const QJsonDocument::JsonFormat &value);
 
+        void registerPacketsAnalyser(PacketAnalyserTab * paTab);
+        void unregisterPacketsAnalyser(PacketAnalyserTab * paTab);
+        QList<PacketAnalyserTab *> getRegisteredPacketsAnalysers() const;
+        void clearRegisteredPacketsAnalysers();
+
     public slots:
         void refreshAll();
         void raisePip3lineWindow();
@@ -200,9 +207,12 @@ class GuiHelper : public QObject
         void logStatus(const QString &message,const QString &source = QString());
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
         void calculatingHexTableSizes();
+        void onFilterChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+        void onTabDestroyed();
     signals:
         void newSelection(QByteArray selection);
         void newTabRequested(QByteArray initialValue);
+        void newPacketAnalyserRequested(QList<QSharedPointer<Packet> >);
         void filterChanged();
         void markingsUpdated();
         void importExportUpdated();
@@ -216,11 +226,8 @@ class GuiHelper : public QObject
         void requestSaveState();
         void registeredBlockSourcesUpdated();
         void registeredOrchestratorsUpdated();
+        void registeredPacketsAnalysersUpdated();
         void hexTableSizesUpdated();
-    private slots:
-        void onFilterChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-        void onTabDestroyed();
-
     private:
         Q_DISABLE_COPY(GuiHelper)
         static const QString LOGID;
@@ -273,6 +280,7 @@ class GuiHelper : public QObject
         BlocksSource * incomingBlockListener;
         QList<BlocksSource *> registeredBlockSources;
         QList<SourcesOrchestatorAbstract *> registeredOrchestators;
+        QList<PacketAnalyserTab *> registeredPacketsAnalysers;
         QMenu *newTabMenu;
 };
 

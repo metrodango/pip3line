@@ -48,6 +48,7 @@ Released under AGPL see LICENSE for more information
 #include "shared/clearallmarkingsbutton.h"
 #include "shared/guiconst.h"
 #include "views/bytetableview.h"
+#include "views/jsonview.h"
 #include <QScrollBar>
 
 const int TransformWidget::MAX_DIRECTION_TEXT = 20;
@@ -75,9 +76,9 @@ TransformWidget::TransformWidget(GuiHelper *nguiHelper ,QWidget *parent) :
         qFatal("Cannot allocate memory for byteSource X{");
     }
 
-    connect(byteSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), logger, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-    connect(byteSource, SIGNAL(updated(quintptr)), this, SLOT(refreshOutput()));
-    connect(byteSource, SIGNAL(nameChanged(QString)), this, SIGNAL(tryNewName(QString)));
+    connect(byteSource, &ByteSourceAbstract::log, logger, &LoggerWidget::logMessage, Qt::QueuedConnection);
+    connect(byteSource, &ByteSourceAbstract::updated, this, &TransformWidget::refreshOutput);
+    connect(byteSource, &ByteSourceAbstract::nameChanged, this, &TransformWidget::tryNewName);
 
     ui->setupUi(this);
 
@@ -86,6 +87,7 @@ TransformWidget::TransformWidget(GuiHelper *nguiHelper ,QWidget *parent) :
     ui->wayGroupBox->setVisible(false);
     ui->deleteButton->setEnabled(false);
     ui->infoPushButton->setEnabled(false);
+    //connect(ui->transfoComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &TransformWidget::onTransformSelected, Qt::UniqueConnection);
     connect(ui->transfoComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onTransformSelected(QString)), Qt::UniqueConnection);
 
     ui->activityStackedWidget->setCurrentIndex(1);
@@ -101,19 +103,19 @@ TransformWidget::TransformWidget(GuiHelper *nguiHelper ,QWidget *parent) :
 
 
     ui->mainLayout->insertWidget(0,messagePanel);
-    connect(byteSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), messagePanel, SLOT(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(byteSource, &ByteSourceAbstract::log, messagePanel, &MessagePanelWidget::log);
 
     firstView = true;
     setAcceptDrops(true);
 
-    connect(transformFactory, SIGNAL(transformsUpdated()),this, SLOT(buildSelectionArea()), Qt::QueuedConnection);
-    connect(guiHelper, SIGNAL(filterChanged()), this, SLOT(buildSelectionArea()));
+    connect(transformFactory, &TransformMgmt::transformsUpdated,this, &TransformWidget::buildSelectionArea, Qt::QueuedConnection);
+    connect(guiHelper, &GuiHelper::filterChanged, this, &TransformWidget::buildSelectionArea);
 
-    connect(this, SIGNAL(sendRequest(TransformRequest*)), guiHelper->getCentralTransProc(), SLOT(processRequest(TransformRequest*)), Qt::QueuedConnection);
-    connect(ui->deleteButton, SIGNAL(clicked()), SLOT(deleteMe()));
+    connect(this, &TransformWidget::sendRequest, guiHelper->getCentralTransProc(), &ThreadedProcessor::processRequest, Qt::QueuedConnection);
+    connect(ui->deleteButton, &QPushButton::clicked, this, &TransformWidget::deleteMe);
 
-    connect(ui->foldPushButton, SIGNAL(clicked()), this, SLOT(onFoldRequest()));
-    connect(ui->insertPushButton, SIGNAL(clicked(bool)), this, SIGNAL(insertRequest()));
+    connect(ui->foldPushButton, &QPushButton::clicked, this, &TransformWidget::onFoldRequest);
+    connect(ui->insertPushButton, &QPushButton::clicked, this, &TransformWidget::insertRequest);
 
  //   qDebug() << "Created" << this;
 }
@@ -124,7 +126,7 @@ TransformWidget::~TransformWidget()
   //  qDebug() << "Destroying:" << this << " " << (currentTransform == nullptr ? "Null" : currentTransform->name());
 
     // prevent loops when destroying
-    disconnect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(onCurrentTabChanged(int)));
+    disconnect(ui->tabWidget, &QTabWidget::currentChanged, this, &TransformWidget::onCurrentTabChanged);
 
     clearCurrentTransform();
     delete gotoWidget;
@@ -154,10 +156,23 @@ void TransformWidget::configureViewArea() {
         qFatal("Cannot allocate memory for TextView X{");
     }
 
+    jsonView = new(std::nothrow) JsonView(byteSource, guiHelper, this);
+    if (jsonView == nullptr) {
+        qFatal("Cannot allocate memory for JsonView X{");
+    }
+
     ui->tabWidget->addTab(textView,"Text");
     ui->tabWidget->addTab(hexView,"Hexadecimal");
+    if (jsonView->isJsonValid()) {
+        onJsonViewVisible();
+    } else {
+        onJsonViewHide();
+    }
 
-    connect(ui->tabWidget, SIGNAL(currentChanged(int)), SLOT(onCurrentTabChanged(int)));
+    connect(jsonView, &JsonView::hide, this, &TransformWidget::onJsonViewHide);
+    connect(jsonView, &JsonView::visible, this, &TransformWidget::onJsonViewVisible);
+
+    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &TransformWidget::onCurrentTabChanged);
 
     hexView->installEventFilter(this);
     textView->installEventFilter(this);
@@ -172,9 +187,9 @@ void TransformWidget::configureViewArea() {
     searchWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     searchWidget->setStopVisible(false);
     ui->toolsLayout->addWidget(searchWidget);
-    connect(searchWidget, SIGNAL(searchRequest(QByteArray,QBitArray,bool)), SLOT(onSearch(QByteArray,QBitArray,bool)));
-    connect(textView, SIGNAL(searchStatus(bool)), searchWidget,SLOT(setError(bool)));
-    connect(searchWidget, SIGNAL(jumpTo(quint64,quint64)), hexView, SLOT(gotoSearch(quint64,quint64)));
+    connect(searchWidget, &SearchWidget::searchRequest, this, &TransformWidget::onSearch);
+    connect(textView, &TextView::searchStatus, searchWidget, &SearchWidget::setError);
+    connect(searchWidget, &SearchWidget::jumpTo, hexView, &HexView::gotoSearch);
 
     gotoWidget = new(std::nothrow) OffsetGotoWidget(guiHelper, this);
     if (gotoWidget == nullptr) {
@@ -183,7 +198,7 @@ void TransformWidget::configureViewArea() {
 
     gotoWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     ui->toolsLayout->addWidget(gotoWidget);
-    connect(gotoWidget, SIGNAL(gotoRequest(quint64,bool,bool,bool)), SLOT(onGotoOffset(quint64,bool,bool,bool)));
+    connect(gotoWidget, &OffsetGotoWidget::gotoRequest, this, &TransformWidget::onGotoOffset);
 
     clearAllMarkingsButton = new(std::nothrow) ClearAllMarkingsButton(byteSource,this);
     if (clearAllMarkingsButton == nullptr) {
@@ -191,12 +206,12 @@ void TransformWidget::configureViewArea() {
     }
     ui->uppperToolLayout->insertWidget(1,clearAllMarkingsButton);
 
-    connect(ui->backwardPushButton, SIGNAL(clicked()), this, SLOT(onHistoryBackward()));
-    connect(ui->forwardPushButton, SIGNAL(clicked()), this, SLOT(onHistoryForward()));
+    connect(ui->backwardPushButton, &QPushButton::clicked, this, &TransformWidget::onHistoryBackward);
+    connect(ui->forwardPushButton, &QPushButton::clicked, this, &TransformWidget::onHistoryForward);
 
-    connect(textView, SIGNAL(invalidText()), this, SLOT(onInvalidText()));
-    connect(textView, SIGNAL(askForFileLoad()), this, SLOT(onFileLoadRequest()));
-    connect(hexView, SIGNAL(askForFileLoad()), this, SLOT(onFileLoadRequest()));
+    connect(textView, &TextView::invalidText, this, &TransformWidget::onInvalidText);
+    connect(textView, &TextView::askForFileLoad, this, &TransformWidget::onFileLoadRequest);
+    connect(hexView, &HexView::askForFileLoad, this, &TransformWidget::onFileLoadRequest);
 }
 
 void TransformWidget::buildSelectionArea() {
@@ -266,8 +281,8 @@ void TransformWidget::integrateTransform()
     if (currentTransform != nullptr) {
         ui->descriptionLabel->setText(currentTransform->description());
         // need to grab the errors before getting the gui, in case the gui configuration generates some
-        connect(currentTransform, SIGNAL(error(QString,QString)), this, SLOT(logError(QString)));
-        connect(currentTransform, SIGNAL(warning(QString,QString)), this, SLOT(logWarning(QString)));
+        connect(currentTransform, &TransformAbstract::error, this, &TransformWidget::logError);
+        connect(currentTransform, &TransformAbstract::warning, this, &TransformWidget::logWarning);
 
         settingsTab = currentTransform->getGui(this);
         if (settingsTab != nullptr) {
@@ -275,7 +290,7 @@ void TransformWidget::integrateTransform()
         }
 
         configureDirectionBox();
-        connect(currentTransform,SIGNAL(confUpdated()),this,SLOT(updatingFromTransform()), Qt::QueuedConnection);
+        connect(currentTransform, &TransformAbstract::confUpdated, this, &TransformWidget::updatingFromTransform, Qt::QueuedConnection);
         ui->deleteButton->setEnabled(true);
         ui->infoPushButton->setEnabled(true);
         emit transformChanged();
@@ -316,7 +331,8 @@ void TransformWidget::refreshOutput()
                 qFatal("Cannot allocate memory for TransformRequest X{");
             }
 
-            connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(processingFinished(QByteArray,Messages)));
+            //connect(tr, qOverload<QByteArray,Messages>(&TransformRequest::finishedProcessing), this, &TransformWidget::processingFinished);
+            connect(tr, SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(processingFinished(QByteArray,Messages)));
             emit sendRequest(tr);
         }
     } else { // if no transform just publish the input data
@@ -624,6 +640,23 @@ void TransformWidget::onGotoOffset(quint64 offset, bool absolute, bool negative,
     } else {
         ui->tabWidget->setCurrentWidget(hexView);
         gotoWidget->setStyleSheet(qApp->styleSheet());
+    }
+}
+
+void TransformWidget::onJsonViewHide()
+{
+    int index = ui->tabWidget->indexOf(jsonView);
+    if (index != -1) {
+        ui->tabWidget->removeTab(index);
+    }
+    jsonView->setVisible(false);
+}
+
+void TransformWidget::onJsonViewVisible()
+{
+    int index = ui->tabWidget->indexOf(jsonView);
+    if (index == -1) {
+        ui->tabWidget->addTab(jsonView,"Json");
     }
 }
 

@@ -21,7 +21,7 @@ MessagePanelWidget::MessagePanelWidget(QWidget *parent) :
     }
     ui->setupUi(this);
     this->setVisible(false);
-    connect(ui->pushButton, SIGNAL(clicked()), SLOT(closeWidget()));
+    connect(ui->pushButton, &QPushButton::clicked, this, &MessagePanelWidget::closeWidget);
 }
 
 MessagePanelWidget::~MessagePanelWidget()

@@ -77,7 +77,6 @@ void UnittestsTest::initTestCase()
     connect(transformFactory, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
     connect(transformFactory, SIGNAL(status(QString,QString)), this, SLOT(logStatus(QString)));
     transformFactory->initialize(qApp->applicationDirPath());
-
 }
 
 void UnittestsTest::cleanupTestCase()

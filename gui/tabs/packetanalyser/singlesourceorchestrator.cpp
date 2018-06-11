@@ -2,6 +2,7 @@
 #include "sources/blocksources/blockssource.h"
 #include "packet.h"
 #include <QDebug>
+#include <shared/defaultcontrolgui.h>
 
 SingleSourceOrchestrator::SingleSourceOrchestrator(BlocksSource *source, QObject *parent) :
     SourcesOrchestatorAbstract(parent),
@@ -12,23 +13,23 @@ SingleSourceOrchestrator::SingleSourceOrchestrator(BlocksSource *source, QObject
 
         forwarder = source->isReflexive();
 
-        connect(this, SIGNAL(startChildren()), source, SLOT(startListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(stopChildren()), source, SLOT(stopListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(resetChildren()), source, SLOT(restart()), Qt::QueuedConnection);
-        connect(source, SIGNAL(started()), SIGNAL(started()));
-        connect(source, SIGNAL(stopped()), SIGNAL(stopped()));
-        connect(source, SIGNAL(destroyed(QObject*)), this, SLOT(onBlockSourceDestroyed()));
-        connect(source, SIGNAL(blockReceived(Block*)), SLOT(onBlockReceived(Block*)));
-        connect(source, SIGNAL(reflexionChanged(bool)), this, SLOT(sourceReflexionChanged(bool)));
-        connect(source, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-        connect(source, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(source, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
+        connect(this, &SourcesOrchestatorAbstract::startChildren, source, &BlocksSource::startListening, Qt::QueuedConnection);
+        connect(this, &SourcesOrchestatorAbstract::stopChildren, source, &BlocksSource::stopListening, Qt::QueuedConnection);
+        connect(this, &SourcesOrchestatorAbstract::resetChildren, source, &BlocksSource::restart, Qt::QueuedConnection);
+        connect(source, &BlocksSource::started, this, &SourcesOrchestatorAbstract::started);
+        connect(source, &BlocksSource::stopped, this, &SourcesOrchestatorAbstract::stopped);
+        connect(source, &BlocksSource::destroyed, this, &SingleSourceOrchestrator::onBlockSourceDestroyed);
+        connect(source, &BlocksSource::blockReceived, this, &SingleSourceOrchestrator::onBlockReceived);
+        connect(source, &BlocksSource::reflexionChanged, this, &SingleSourceOrchestrator::sourceReflexionChanged);
+        connect(source, &BlocksSource::log, this, &SourcesOrchestatorAbstract::log, Qt::QueuedConnection);
+        connect(source, &BlocksSource::updated, this, &SourcesOrchestatorAbstract::connectionsChanged, Qt::QueuedConnection);
+        connect(source, &BlocksSource::newConnection, this, &SourcesOrchestatorAbstract::connectionsChanged, Qt::QueuedConnection);
     }
 }
 
 SingleSourceOrchestrator::~SingleSourceOrchestrator()
 {
-    disconnect(source, SIGNAL(destroyed(QObject*)), this, SLOT(onBlockSourceDestroyed()));
+    disconnect(source, &BlocksSource::destroyed, this, &SingleSourceOrchestrator::onBlockSourceDestroyed);
     delete source;
 }
 
@@ -56,7 +57,7 @@ int SingleSourceOrchestrator::blockSourceCount() const
     return 0;
 }
 
-void SingleSourceOrchestrator::postPacket(Packet *packet)
+void SingleSourceOrchestrator::postPacket(QSharedPointer<Packet> packet)
 {
     packet->setDirection(Packet::LEFTRIGHT);
     SourcesOrchestatorAbstract::postPacket(packet);
@@ -77,5 +78,19 @@ bool SingleSourceOrchestrator::start()
 void SingleSourceOrchestrator::onBlockSourceDestroyed()
 {
     source = nullptr;
+}
+
+QWidget *SingleSourceOrchestrator::requestControlGui(QWidget *parent)
+{
+    QWidget * defCtrlWidget = SourcesOrchestatorAbstract::requestControlGui(parent);
+    if (defCtrlWidget != nullptr) {
+        QWidget *addCtrl = source->getAdditionnalCtrls();
+        if (addCtrl != nullptr) {
+            DefaultControlGui * defCtrlGui = static_cast<DefaultControlGui *>(defCtrlWidget);
+            defCtrlGui->appendWidget(addCtrl);
+        }
+    }
+
+    return defCtrlWidget;
 }
 

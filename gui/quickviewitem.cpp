@@ -42,14 +42,14 @@ QuickViewItem::QuickViewItem(GuiHelper *nguiHelper, QWidget *parent, const QStri
         qFatal("Cannot allocate memory for guiConfig X{");
     }
     ui->setupUi(this);
-    connect(ui->removePushButton, SIGNAL(clicked()), this, SLOT(deleteLater()));
+    connect(ui->removePushButton, &QPushButton::clicked, this, &QuickViewItem::deleteLater);
 
     if (!xmlconfig.isEmpty())
         setXmlConf(xmlconfig);
 
     ThreadedProcessor * proc = guiHelper->getCentralTransProc();
-    connect(this, SIGNAL(sendRequest(TransformRequest *)), proc, SLOT(processRequest(TransformRequest*)), Qt::QueuedConnection);
-    connect(ui->copyPushButton, SIGNAL(clicked()), SLOT(onCopy()));
+    connect(this, &QuickViewItem::sendRequest, proc, &ThreadedProcessor::processRequest, Qt::QueuedConnection);
+    connect(ui->copyPushButton, &QPushButton::clicked, this, &QuickViewItem::onCopy);
 }
 
 QuickViewItem::~QuickViewItem()
@@ -146,6 +146,7 @@ void QuickViewItem::processData(const QByteArray &data)
             qFatal("Cannot allocate memory for TransformRequest X{");
         }
 
+        //connect(tr, qOverload<QByteArray, Messages>(&TransformRequest::finishedProcessing), this, &QuickViewItem::processingFinished, Qt::QueuedConnection);
         connect(tr,SIGNAL(finishedProcessing(QByteArray,Messages)), this, SLOT(processingFinished(QByteArray,Messages)), Qt::QueuedConnection);
         emit sendRequest(tr);
     }

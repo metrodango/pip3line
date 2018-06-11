@@ -49,27 +49,17 @@ ByteIntegerWidget::ByteIntegerWidget(BytesInteger *ntransform, QWidget *parent) 
         break;
     }
 
-    connect(ui->signedRadioButton, SIGNAL(toggled(bool)), this, SLOT(signedChanged(bool)));
-    connect(ui->littleEndianRadioButton, SIGNAL(toggled(bool)), this, SLOT(bytesOrderChanged(bool)));
-    connect(ui->I8bitsRadioButton, SIGNAL(clicked()), this, SLOT(sizeChanged()));
-    connect(ui->I16bitsRadioButton, SIGNAL(clicked()), this, SLOT(sizeChanged()));
-    connect(ui->I32bitsRadioButton, SIGNAL(clicked()), this, SLOT(sizeChanged()));
-    connect(ui->I64bitsRadioButton, SIGNAL(clicked()), this, SLOT(sizeChanged()));
+    connect(ui->signedRadioButton, &QRadioButton::toggled, this, [=](bool val) { transform->setSignedInteger(val);});
+    connect(ui->littleEndianRadioButton, &QRadioButton::toggled, this, [=](bool val) { transform->setLittleEndian(val);});
+    connect(ui->I8bitsRadioButton, &QRadioButton::clicked, this, &ByteIntegerWidget::sizeChanged);
+    connect(ui->I16bitsRadioButton, &QRadioButton::clicked, this, &ByteIntegerWidget::sizeChanged);
+    connect(ui->I32bitsRadioButton, &QRadioButton::clicked, this, &ByteIntegerWidget::sizeChanged);
+    connect(ui->I64bitsRadioButton, &QRadioButton::clicked, this, &ByteIntegerWidget::sizeChanged);
 }
 
 ByteIntegerWidget::~ByteIntegerWidget()
 {
     delete ui;
-}
-
-void ByteIntegerWidget::signedChanged(bool val)
-{
-    transform->setSignedInteger(val);
-}
-
-void ByteIntegerWidget::bytesOrderChanged(bool val)
-{
-    transform->setLittleEndian(val);
 }
 
 void ByteIntegerWidget::sizeChanged()

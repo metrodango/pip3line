@@ -68,6 +68,7 @@ class BlocksSource : public QObject
         explicit BlocksSource(QObject *parent = 0);
         virtual ~BlocksSource();
         QWidget *getGui(QWidget * parent = nullptr);
+        virtual QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
         bool isReadWrite();
         virtual void postBlockForSending(Block *block);
         bool isB64Blocks() const;

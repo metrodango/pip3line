@@ -24,7 +24,7 @@ class IPNetworkServerWidget : public QWidget
     private slots:
         void refreshIPs();
         void onPortChanged(int port);
-        void onIPChanged(QString value);
+        void onIPChanged(const QString &value);
     signals:
         void log(QString mess, QString source, Pip3lineConst::LOGLEVEL level);
     private:

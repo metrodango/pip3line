@@ -11,34 +11,34 @@ ProxyOrchestrator::ProxyOrchestrator(BlocksSource *serverSource, BlocksSource *c
     forwarder = true;
 
     if (serverSource != nullptr) {
-        connect(this, SIGNAL(startChildren()), serverSource, SLOT(startListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(stopChildren()), serverSource, SLOT(stopListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(resetChildren()), serverSource, SLOT(restart()), Qt::QueuedConnection);
-        connect(serverSource, SIGNAL(started()), SIGNAL(started()));
-        connect(serverSource, SIGNAL(stopped()), SIGNAL(stopped()));
-        connect(serverSource, SIGNAL(destroyed(QObject*)), this, SLOT(onServerSourceDestroyed()));
-        connect(serverSource, SIGNAL(blockReceived(Block*)), SLOT(onBlockReceived(Block*)));
-        connect(serverSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-        connect(serverSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(serverSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(serverSource, SIGNAL(connectionClosed(int)), clientSource, SLOT(onConnectionClosed(int)), Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::startChildren, serverSource, &BlocksSource::startListening, Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::stopChildren, serverSource, &BlocksSource::stopListening, Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::resetChildren, serverSource, &BlocksSource::restart, Qt::QueuedConnection);
+        connect(serverSource, &BlocksSource::started, this, &ProxyOrchestrator::started);
+        connect(serverSource, &BlocksSource::stopped, this, &ProxyOrchestrator::stopped);
+        connect(serverSource, &BlocksSource::destroyed, this, &ProxyOrchestrator::onServerSourceDestroyed);
+        connect(serverSource, &BlocksSource::blockReceived, this, &ProxyOrchestrator::onBlockReceived);
+        connect(serverSource, &BlocksSource::log, this, &ProxyOrchestrator::log, Qt::QueuedConnection);
+        connect(serverSource, &BlocksSource::updated, this, &ProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(serverSource, &BlocksSource::newConnection, this, &ProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(serverSource, &BlocksSource::connectionClosed, clientSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
     } else {
         qCritical() << tr("[ProxyOrchestrator::ProxyOrchestrator] server source is null T_T");
     }
 
     if (clientSource != nullptr) {
 
-        connect(this, SIGNAL(startChildren()), clientSource, SLOT(startListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(stopChildren()), clientSource, SLOT(stopListening()), Qt::QueuedConnection);
-        connect(this, SIGNAL(resetChildren()), clientSource, SLOT(restart()), Qt::QueuedConnection);
-        connect(clientSource, SIGNAL(started()), SIGNAL(started()));
-        connect(clientSource, SIGNAL(stopped()), SIGNAL(stopped()));
-        connect(clientSource, SIGNAL(destroyed(QObject*)), this, SLOT(onClientSourceDestroyed()));
-        connect(clientSource, SIGNAL(blockReceived(Block*)), SLOT(onBlockReceived(Block*)));
-        connect(clientSource, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), Qt::QueuedConnection);
-        connect(clientSource, SIGNAL(updated()), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(clientSource, SIGNAL(newConnection(BlocksSource*)), this, SIGNAL(connectionsChanged()), Qt::QueuedConnection);
-        connect(clientSource, SIGNAL(connectionClosed(int)), serverSource, SLOT(onConnectionClosed(int)), Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::startChildren, clientSource, &BlocksSource::startListening, Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::stopChildren, clientSource, &BlocksSource::stopListening, Qt::QueuedConnection);
+        connect(this, &ProxyOrchestrator::resetChildren, clientSource, &BlocksSource::restart, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::started, this, &ProxyOrchestrator::started);
+        connect(clientSource, &BlocksSource::stopped, this, &ProxyOrchestrator::stopped);
+        connect(clientSource, &BlocksSource::destroyed, this, &ProxyOrchestrator::onClientSourceDestroyed);
+        connect(clientSource, &BlocksSource::blockReceived, this, &ProxyOrchestrator::onBlockReceived);
+        connect(clientSource, &BlocksSource::log, this, &ProxyOrchestrator::log, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::updated, this, &ProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::newConnection, this, &ProxyOrchestrator::connectionsChanged, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::connectionClosed, serverSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
     } else {
         qCritical() << tr("[ProxyOrchestrator::ProxyOrchestrator] client source is null T_T");
     }
@@ -80,7 +80,7 @@ int ProxyOrchestrator::blockSourceCount() const
     return 2;
 }
 
-void ProxyOrchestrator::postPacket(Packet *packet)
+void ProxyOrchestrator::postPacket(QSharedPointer<Packet> packet)
 {
     if (serverSource == nullptr || clientSource == nullptr) {
         qCritical() << tr("[ProxyOrchestrator::postPacket] One of the source is null T_T");
@@ -131,7 +131,7 @@ void ProxyOrchestrator::onBlockReceived(Block *block)
             return;
         }
 
-        Packet * pac = new(std::nothrow) Packet(block);
+        QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet(block));
         if (pac == nullptr) {
             qFatal("Cannot allocate Packet X{");
         }

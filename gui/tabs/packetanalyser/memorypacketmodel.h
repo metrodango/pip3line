@@ -23,10 +23,10 @@ class MemoryPacketModel : public PacketModelAbstract
         explicit MemoryPacketModel(TransformMgmt *transformFactory, QObject *parent = nullptr);
         ~MemoryPacketModel();
 
-        Packet *getPacket(qint64 index);
+        QSharedPointer<Packet> getPacket(qint64 index);
         void removePacket(qint64 index);
-        void removePackets(QList<qint64> indexes);
-        qint64 merge(QList<qint64> list);
+        void removePackets(QList<qint64> &indexes);
+        qint64 merge(QList<qint64> &list);
         qint64 size() const;
 
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -36,8 +36,8 @@ class MemoryPacketModel : public PacketModelAbstract
         QItemSelection getLastPacketRow();
     public slots:
         void mergeConsecutivePackets();
-        qint64 addPacket(Packet * packet);
-        qint64 addPackets(QList<Packet *> packets);
+        qint64 addPacket(const QSharedPointer<Packet> &packet);
+        qint64 addPackets(const QList<QSharedPointer<Packet> > &packets);
         void clear();
         void transformRequestFinished(QList<QByteArray> dataList, Messages messages);
         void transformUpdated();
@@ -45,8 +45,8 @@ class MemoryPacketModel : public PacketModelAbstract
     private:
         void launchUpdate(TransformAbstract * transform, int row, int column,int length = -1);
         void internalAddUserColumn(const QString &name, TransformAbstract * transform);
-        bool arePacketsMergeable(Packet * pone, Packet * ptwo);
-        QList<Packet *> packetsList;
+        bool arePacketsMergeable(QSharedPointer<Packet>  pone, QSharedPointer<Packet> ptwo);
+        QList<QSharedPointer<Packet> > packetsList;
 };
 
 #endif // MEMORYPACKETMODEL_H

@@ -39,19 +39,11 @@ import java.awt.FlowLayout;
 public class Pip3lineTab extends JPanel implements ITab {
 	private JSpinner portSpinner;
 	private static final long serialVersionUID = -2320519714434728871L;
-	private JPanel confPanel;
-	private JLabel hostnameLabel;
 	private JTextField hostnameTextField;
-	private JPanel mainPanel;
-	private JPanel sendTopanel;
-	private JLabel lblHostname;
-	private JTextField sendToHostnametextField;
-	private JLabel lblPort;
+	private JTextField sendToHostnameTextField;
 	private JSpinner sentToPortSpinner;
 	private PayloadProcessor processor;
 	private Pip3lineContextMenu contextMenu;
-	private JButton btnPayloadResetToDefaults;
-	private JButton btnSendToResetToDefaults;
 	private SpinnerNumberModel payloadPortModel;
 	private SpinnerNumberModel sendToPortModel;
 
@@ -59,8 +51,8 @@ public class Pip3lineTab extends JPanel implements ITab {
 		processor = mprocessor;
 		contextMenu = mcontextMenu;
 		setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-		
-		mainPanel = new JPanel();
+
+		JPanel mainPanel = new JPanel();
 		add(mainPanel);
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
@@ -68,10 +60,12 @@ public class Pip3lineTab extends JPanel implements ITab {
 		lblMessage.setAlignmentX(Component.LEFT_ALIGNMENT);
 		mainPanel.add(lblMessage);
 		
-		confPanel = new JPanel();
+		JPanel confPanel = new JPanel();
 		confPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		mainPanel.add(confPanel);
-		confPanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "Pip3line Intruder Payload processor configuration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		confPanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)),
+                "Pip3line Intruder Payload processor configuration",
+                TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagLayout gbl_confPanel = new GridBagLayout();
 		gbl_confPanel.columnWidths = new int[]{220, 220, 0};
 		gbl_confPanel.rowHeights = new int[]{20, 20, 0, 0, 0, 0};
@@ -79,7 +73,7 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbl_confPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		confPanel.setLayout(gbl_confPanel);
 		
-		hostnameLabel = new JLabel("Hostname");
+		JLabel hostnameLabel = new JLabel("Hostname");
 		hostnameLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_hostnameLabel = new GridBagConstraints();
 		gbc_hostnameLabel.anchor = GridBagConstraints.WEST;
@@ -147,28 +141,22 @@ public class Pip3lineTab extends JPanel implements ITab {
 		payloadPortModel = new SpinnerNumberModel(processor.getPort(), 1, 65535, 1);
 		portSpinner.setModel(payloadPortModel);
 		portSpinner.setEditor(new JSpinner.NumberEditor(portSpinner,"#"));
-
-		ChangeListener listener = new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (!processor.setPort(((Integer)portSpinner.getValue()).intValue())) {
+		
+		portSpinner.addChangeListener((stateChanged -> {
+				if (!processor.setPort(((Integer)portSpinner.getValue()))) {
 					portSpinner.setBackground(Color.RED);
 				} else {
 					portSpinner.setBackground(Color.WHITE);
 				}
-				
-			}
-		};
-		
-		portSpinner.addChangeListener(listener);
-		
-		btnPayloadResetToDefaults = new JButton("Reset to defaults");
+		}));
+
+		JButton btnPayloadResetToDefaults = new JButton("Reset to defaults");
 		btnPayloadResetToDefaults.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				hostnameTextField.setText(PayloadProcessor.DEFAULT_ADDRESS.getHostAddress());
-				payloadPortModel.setValue(new Integer(PayloadProcessor.DEFAULT_PORT));
-				
+				payloadPortModel.setValue(PayloadProcessor.DEFAULT_PORT);
+
 			}
 		});
 		GridBagConstraints gbc_btnResetToDefaults = new GridBagConstraints();
@@ -176,10 +164,10 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbc_btnResetToDefaults.gridx = 1;
 		gbc_btnResetToDefaults.gridy = 2;
 		confPanel.add(btnPayloadResetToDefaults, gbc_btnResetToDefaults);
-		
 
-		    
-		sendTopanel = new JPanel();
+
+
+		JPanel sendTopanel = new JPanel();
 		sendTopanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		sendTopanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "\"Send to Pip3line\" configuration", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		mainPanel.add(sendTopanel);
@@ -189,8 +177,8 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbl_sendTopanel.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		gbl_sendTopanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		sendTopanel.setLayout(gbl_sendTopanel);
-		
-		lblHostname = new JLabel("Hostname");
+
+		JLabel lblHostname = new JLabel("Hostname");
 		lblHostname.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_lblHostname = new GridBagConstraints();
 		gbc_lblHostname.insets = new Insets(0, 0, 5, 5);
@@ -199,18 +187,18 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbc_lblHostname.gridy = 0;
 		sendTopanel.add(lblHostname, gbc_lblHostname);
 		
-		sendToHostnametextField = new JTextField();
-		sendToHostnametextField.setHorizontalAlignment(SwingConstants.CENTER);
-		sendToHostnametextField.setText(contextMenu.getAddress());
+		sendToHostnameTextField = new JTextField();
+		sendToHostnameTextField.setHorizontalAlignment(SwingConstants.CENTER);
+		sendToHostnameTextField.setText(contextMenu.getAddress());
 		GridBagConstraints gbc_sendToHostnametextField = new GridBagConstraints();
 		gbc_sendToHostnametextField.anchor = GridBagConstraints.WEST;
 		gbc_sendToHostnametextField.insets = new Insets(0, 0, 5, 0);
 		gbc_sendToHostnametextField.gridx = 1;
 		gbc_sendToHostnametextField.gridy = 0;
-		sendTopanel.add(sendToHostnametextField, gbc_sendToHostnametextField);
-		sendToHostnametextField.setColumns(10);
+		sendTopanel.add(sendToHostnameTextField, gbc_sendToHostnametextField);
+		sendToHostnameTextField.setColumns(10);
 		
-		sendToHostnametextField.getDocument().addDocumentListener(new DocumentListener() {
+		sendToHostnameTextField.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -230,15 +218,15 @@ public class Pip3lineTab extends JPanel implements ITab {
 			}
 			
 			private void update() {
-				if (!contextMenu.setAddress(sendToHostnametextField.getText())) {
-					sendToHostnametextField.setBackground(Color.RED);
+				if (!contextMenu.setAddress(sendToHostnameTextField.getText())) {
+					sendToHostnameTextField.setBackground(Color.RED);
 				} else {
-					sendToHostnametextField.setBackground(Color.WHITE);
+					sendToHostnameTextField.setBackground(Color.WHITE);
 				}
 			}
 		});
-		
-		lblPort = new JLabel("Port");
+
+		JLabel lblPort = new JLabel("Port");
 		lblPort.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_lblPort = new GridBagConstraints();
 		gbc_lblPort.anchor = GridBagConstraints.WEST;
@@ -258,14 +246,14 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbc_sentToPortSpinner.gridx = 1;
 		gbc_sentToPortSpinner.gridy = 1;
 		sendTopanel.add(sentToPortSpinner, gbc_sentToPortSpinner);
-		
-		btnSendToResetToDefaults = new JButton("Reset to Defaults");
+
+		JButton btnSendToResetToDefaults = new JButton("Reset to Defaults");
 		btnSendToResetToDefaults.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				sendToHostnametextField.setText(Pip3lineContextMenu.DEFAULT_ADDRESS.getHostAddress());
-				//contextMenu.setAddress(sendToHostnametextField.getText());
-				sendToPortModel.setValue(new Integer(Pip3lineContextMenu.DEFAULT_PORT));
+				sendToHostnameTextField.setText(Pip3lineContextMenu.DEFAULT_ADDRESS.getHostAddress());
+				//contextMenu.setAddress(sendToHostnameTextField.getText());
+				sendToPortModel.setValue(Pip3lineContextMenu.DEFAULT_PORT);
 				//contextMenu.setPort(((Integer)sentToPortSpinner.getValue()).intValue());
 			}
 		});
@@ -274,20 +262,14 @@ public class Pip3lineTab extends JPanel implements ITab {
 		gbc_btnResetToDefaults_1.gridx = 1;
 		gbc_btnResetToDefaults_1.gridy = 2;
 		sendTopanel.add(btnSendToResetToDefaults, gbc_btnResetToDefaults_1);
-		
-		listener = new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (!contextMenu.setPort(((Integer)sentToPortSpinner.getValue()).intValue())) {
-					sentToPortSpinner.setBackground(Color.RED);
-				} else {
-					sentToPortSpinner.setBackground(Color.WHITE);
-				}
-				
-			}
-		};
-		
-		sentToPortSpinner.addChangeListener(listener);
+
+		sentToPortSpinner.addChangeListener(stateChanged -> {
+            if (!contextMenu.setPort(((Integer)sentToPortSpinner.getValue()))) {
+                sentToPortSpinner.setBackground(Color.RED);
+            } else {
+                sentToPortSpinner.setBackground(Color.WHITE);
+            }
+        });
 		
 	}
 
@@ -302,11 +284,11 @@ public class Pip3lineTab extends JPanel implements ITab {
 	}
 	
 	public int getPort() {
-		return ((Integer)portSpinner.getValue()).intValue();
+		return ((Integer)portSpinner.getValue());
 	}
 	
 	public void setPort(int val) {
-		portSpinner.setValue(new Integer(val));
+		portSpinner.setValue(val);
 	}
 	
 	public String getHostname() {
@@ -318,18 +300,18 @@ public class Pip3lineTab extends JPanel implements ITab {
 	}
 	
 	public InetAddress getSTHostname() throws UnknownHostException {
-		return InetAddress.getByName(sendToHostnametextField.getText());
+		return InetAddress.getByName(sendToHostnameTextField.getText());
 	}
 	
 	public void setSTHostname(InetAddress val) {
-		sendToHostnametextField.setText(val.getHostAddress());
+		sendToHostnameTextField.setText(val.getHostAddress());
 	}
 	
 	public int getSTPort() {
-		return ((Integer)sentToPortSpinner.getValue()).intValue();
+		return ((Integer)sentToPortSpinner.getValue());
 	}
 	
 	public void setSTPort(int val) {
-		sentToPortSpinner.setValue(new Integer(val));
+		sentToPortSpinner.setValue(val);
 	}
 }

@@ -49,7 +49,7 @@ PacketModelAbstract::PacketModelAbstract(TransformMgmt *transformFactory, QObjec
     uc.format = Pip3lineConst::HEXAFORMAT;
     userColumnsDef.insert(COLUMN_PAYLOAD_STR, uc);
 
-    connect(this, SIGNAL(rowsInserted(QModelIndex,int,int)), SLOT(onRowsInserted(QModelIndex,int,int)));
+    connect(this, &PacketModelAbstract::rowsInserted,this, &PacketModelAbstract::onRowsInserted);
 }
 
 PacketModelAbstract::~PacketModelAbstract()
@@ -138,7 +138,7 @@ QVariant PacketModelAbstract::headerData(int section, Qt::Orientation orientatio
     }
 }
 
-QVariant PacketModelAbstract::payloadData(const Packet * packet, int column, int role) const
+QVariant PacketModelAbstract::payloadData(const QSharedPointer<Packet> packet, int column, int role) const
 {
     if (packet == nullptr)
         return QVariant();
@@ -214,7 +214,7 @@ QVariant PacketModelAbstract::payloadData(const Packet * packet, int column, int
     return QVariant();
 }
 
-Packet *PacketModelAbstract::getPacket(const QModelIndex &index)
+QSharedPointer<Packet> PacketModelAbstract::getPacket(const QModelIndex &index)
 {
     if (index.isValid()) {
         return getPacket((qint64)index.row());
@@ -255,7 +255,7 @@ void PacketModelAbstract::addUserColumn(const QString &name, TransformAbstract *
     columnNames << name;
     endInsertColumns();
     if (transform != nullptr) {
-        connect(transform, SIGNAL(confUpdated()), SLOT(transformUpdated()));
+        connect(transform, &TransformAbstract::confUpdated, this, &PacketModelAbstract::transformUpdated);
         internalAddUserColumn(name,transform);
     }
     emit columnsUpdated();

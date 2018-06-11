@@ -8,6 +8,7 @@
 #include <QPair>
 #include <QItemSelection>
 #include <transformabstract.h>
+#include <QSharedPointer>
 
 class Packet;
 class TransformRequest;
@@ -48,14 +49,14 @@ class PacketModelAbstract : public QAbstractTableModel
         virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
         virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
-        virtual QVariant payloadData(const Packet *packet,  int column, int role) const;
+        virtual QVariant payloadData(const QSharedPointer<Packet> packet,  int column, int role) const;
 
-        virtual Packet *getPacket(qint64 index) = 0;
-        virtual Packet *getPacket(const QModelIndex & index);
+        virtual QSharedPointer<Packet> getPacket(qint64 index) = 0;
+        virtual QSharedPointer<Packet> getPacket(const QModelIndex & index);
         virtual qint64 indexToPacketIndex(const QModelIndex & index);
         virtual void removePacket(qint64 index) = 0;
-        virtual void removePackets(QList<qint64> index) = 0;
-        virtual qint64 merge(QList<qint64> list) = 0;
+        virtual void removePackets(QList<qint64> &index) = 0;
+        virtual qint64 merge(QList<qint64> &list) = 0;
         virtual qint64 size() const = 0 ;
 
         QModelIndex	createIndex ( int row, int column) const;
@@ -91,8 +92,8 @@ class PacketModelAbstract : public QAbstractTableModel
         void readOnlyStateChanged(bool readonly);
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     public slots:
-        virtual qint64 addPacket(Packet * packet) = 0;
-        virtual qint64 addPackets(QList<Packet *> packets) = 0;
+        virtual qint64 addPacket(const QSharedPointer<Packet>  &packet) = 0;
+        virtual qint64 addPackets(const QList<QSharedPointer<Packet> > &packets) = 0;
         virtual void mergeConsecutivePackets() = 0;
         virtual void clear() = 0;
         virtual void refreshAllColumn();

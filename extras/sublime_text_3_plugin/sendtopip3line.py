@@ -23,9 +23,8 @@ class SendToPip3line(sublime_plugin.TextCommand):
 					self.sendData(s)
 		except e:
 			print("SendToPip3line Error:" + str(e))
-	
 	def sendData(self,data):
-		try: 
+		try:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			sock.settimeout(3)
 			sock.connect((self.adress, self.port))

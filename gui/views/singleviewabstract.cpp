@@ -32,7 +32,10 @@ SingleViewAbstract::~SingleViewAbstract()
         delete byteSource;
     }
     byteSource = nullptr;
+    guiHelper = nullptr;
     logger = nullptr;
+    delete configButton;
+    configButton = nullptr;
 }
 
 void SingleViewAbstract::searchAgain()

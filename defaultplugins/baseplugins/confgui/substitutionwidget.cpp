@@ -35,8 +35,9 @@ SubstitutionWidget::SubstitutionWidget(Substitution *ntransform, QWidget *parent
 
     ui->comboBox->addItems(Substitution::knownTables);
 
-    connect(&sModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(onModify()));
-    connect(ui->comboBox,SIGNAL(currentIndexChanged(QString)), this, SLOT(onChooseTable(QString)));
+    connect(&sModel, &SubstitutionTables::dataChanged, this, &SubstitutionWidget::onModify);
+    //connect(ui->comboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &SubstitutionWidget::onChooseTable);
+    connect(ui->comboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onChooseTable(QString)));
 }
 
 SubstitutionWidget::~SubstitutionWidget()

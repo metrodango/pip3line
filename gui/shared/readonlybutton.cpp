@@ -31,8 +31,8 @@ ReadOnlyButton::ReadOnlyButton(ByteSourceAbstract *bytesource, QWidget *parent) 
     setMaximumWidth(50);
     setFlat(true);
     refreshStateValue();
-    connect(this, SIGNAL(toggled(bool)), SLOT(onToggle(bool)));
-    connect(byteSource, SIGNAL(readOnlyChanged(bool)), this, SLOT(refreshStateValue()));
+    connect(this, &ReadOnlyButton::toggled, this, &ReadOnlyButton::onToggle);
+    connect(byteSource, &ByteSourceAbstract::readOnlyChanged, this, &ReadOnlyButton::refreshStateValue);
 
 }
 

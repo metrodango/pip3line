@@ -19,7 +19,7 @@ PacketSortFilterProxyModel::PacketSortFilterProxyModel(QObject *parent) :
         qFatal("Cannot allocate FilterEngine X{");
     }
 
-    connect(filterEngine, SIGNAL(updated()), this, SLOT(onFitlersUpdated()));
+    connect(filterEngine, &FilterEngine::updated, this, &PacketSortFilterProxyModel::onFitlersUpdated);
 }
 
 PacketSortFilterProxyModel::~PacketSortFilterProxyModel()
@@ -42,11 +42,11 @@ QVariant PacketSortFilterProxyModel::data(const QModelIndex &index, int role) co
         bool areEquals = false;
         foreach (const int &col, equalityColumns) {
            // qDebug() << tr("mapToSource usage");
-            Packet * selected = packetModel->getPacket(selectedPacket);
+            QSharedPointer<Packet> selected = packetModel->getPacket(selectedPacket);
             if (selected != nullptr) {
                 QModelIndex ori = mapToSource(index);
                 if (ori.isValid()) {
-                    Packet * current = packetModel->getPacket(ori.row());
+                    QSharedPointer<Packet> current = packetModel->getPacket(ori.row());
                     if (col == PacketModelAbstract::COLUMN_PAYLOAD) {
                         areEquals = (selected->getData() == current->getData());
                         if (!areEquals)
@@ -100,7 +100,7 @@ QVariant PacketSortFilterProxyModel::data(const QModelIndex &index, int role) co
 void PacketSortFilterProxyModel::setPacketSourceModel(PacketModelAbstract *originalModel)
 {
     packetModel = originalModel;
-    connect(packetModel, SIGNAL(updated()), SLOT(onModelUpdated()));
+    connect(packetModel, &PacketModelAbstract::updated, this, &PacketSortFilterProxyModel::onModelUpdated);
     QSortFilterProxyModel::setSourceModel(originalModel);
 }
 qint64 PacketSortFilterProxyModel::getSelectedPacket() const
@@ -267,8 +267,8 @@ bool PacketSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
     bool ret = true;
 
     if (filterEngine != nullptr) {
-        Packet * pac = packetModel->getPacket(sourceRow);
-        if (pac != nullptr)
+        QSharedPointer<Packet> pac = packetModel->getPacket(sourceRow);
+        if (!pac.isNull())
             ret = filterEngine->evaluate(pac);
     }
     return ret;
@@ -347,7 +347,7 @@ void SortFilterProxyStateObj::run()
                     }
 
                     proxyModel->filterEngine->setItems(filterList);
-                    proxyModel->filterEngine->assert(expr);
+                    proxyModel->filterEngine->assertExpr(expr);
                     readEndElement(GuiConst::STATE_FILTER_ITEM);
                     reader->readNext();
                 }

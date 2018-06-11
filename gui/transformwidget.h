@@ -40,6 +40,7 @@ class ClearAllMarkingsButton;
 class ByteTableView;
 class TransformRequest;
 class MessagePanelWidget;
+class JsonView;
 
 namespace Ui {
 class TransformWidget;
@@ -108,6 +109,8 @@ class TransformWidget : public QWidget
         void on_clearDataPushButton_clicked();
         void onSearch(QByteArray item, QBitArray mask, bool couldBeText);
         void onGotoOffset(quint64 offset, bool absolute, bool negative, bool select);
+        void onJsonViewHide();
+        void onJsonViewVisible();
     private:
         Q_DISABLE_COPY(TransformWidget)
         static const int MAX_DIRECTION_TEXT;
@@ -131,6 +134,7 @@ class TransformWidget : public QWidget
         ByteSourceAbstract *byteSource;
         HexView *hexView;
         TextView *textView;
+        JsonView *jsonView;
         QWidget *settingsTab;
         OffsetGotoWidget *gotoWidget;
         SearchWidget *searchWidget;

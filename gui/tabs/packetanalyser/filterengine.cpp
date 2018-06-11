@@ -17,7 +17,7 @@ BasicToken::~BasicToken()
     //qDebug() << "destroyed" << this;
 }
 
-bool BasicToken::evaluate(Packet *)
+bool BasicToken::evaluate(QSharedPointer<Packet> )
 {
     return false; // default
 }
@@ -94,7 +94,7 @@ void BinaryOperator::setLoperand(QSharedPointer<BasicToken> value)
     loperand = value;
 }
 
-bool BinaryOperator::evaluate(Packet *packet)
+bool BinaryOperator::evaluate(QSharedPointer<Packet> packet)
 {
     bool ret = false;
     bool lr = loperand->evaluate(packet);
@@ -152,7 +152,7 @@ NotOperator::~NotOperator()
 
 }
 
-bool NotOperator::evaluate(Packet *packet)
+bool NotOperator::evaluate(QSharedPointer<Packet> packet)
 {
     return !uoperand->evaluate(packet);
 }
@@ -179,7 +179,7 @@ Operand::~Operand()
 
 }
 
-bool Operand::evaluate(Packet *packet)
+bool Operand::evaluate(QSharedPointer<Packet> packet)
 {
     return fitem->selectable(packet);
 }
@@ -230,7 +230,7 @@ FilterEngine::FilterEngine(QObject *parent) : QObject(parent)
     filteringEnabled = false;
 }
 
-bool FilterEngine::assert(QString expression)
+bool FilterEngine::assertExpr(QString expression)
 {
     bool ret = false;
     QStringList strTokens;
@@ -286,7 +286,7 @@ bool FilterEngine::assert(QString expression)
 
 
     strTokens = temp;
-    debugprintstrlist(strTokens);
+    //debugprintstrlist(strTokens);
     temp.clear();
     // Lexer
     for (int i = 0; i < strTokens.size(); i++) {
@@ -300,7 +300,7 @@ bool FilterEngine::assert(QString expression)
         }
     }
 
-    qDebug() << "Lexer token count" << tokenList.size();
+   // qDebug() << "Lexer token count" << tokenList.size();
     if (tokenList.size() == 0) {
         qCritical() << tr("[FilterEngine::assert] tokenlist is empty T_T");
         return false;
@@ -571,7 +571,7 @@ bool FilterEngine::consolidateStacks(QStack<QSharedPointer<BasicToken> > &operan
     return true;
 }
 
-bool FilterEngine::evaluate(Packet *packet)
+bool FilterEngine::evaluate(QSharedPointer<Packet> packet)
 {
 
     bool ret = true;
@@ -612,7 +612,6 @@ void FilterEngine::debugprintstrlist(QStringList list)
         res.chop(2);
     }
     res.append("]");
-    qDebug() << res;
 }
 
 void FilterEngine::debugPrintTree(QSharedPointer<BasicToken> token)
@@ -631,8 +630,8 @@ void FilterEngine::debugPrintTree(QSharedPointer<BasicToken> token)
     }
 
     // calculate depth of the tree
-    int length = calculateLength(token, 0);
-    qDebug() << tr("Tree depth: %1").arg(length);
+   // int length = calculateLength(token, 0);
+   // qDebug() << tr("Tree depth: %1").arg(length);
 
     QJsonObject obj = debugTreetoJson(token, 0);
     QJsonDocument doc;

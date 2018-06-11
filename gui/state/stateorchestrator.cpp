@@ -89,9 +89,9 @@ void StateOrchestrator::addState(BaseStateAbstract *stateobj)
     stateobj->setReader(reader);
     stateobj->setWriter(writer);
     stateobj->setFlags(flags);
-    connect(stateobj, SIGNAL(finished()), this, SLOT(execNext()),Qt::QueuedConnection);
-    connect(stateobj, SIGNAL(addNewState(BaseStateAbstract*)), this, SLOT(addState(BaseStateAbstract*)), Qt::QueuedConnection);
-    connect(stateobj, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(stateobj, &BaseStateAbstract::finished, this, &StateOrchestrator::execNext,Qt::QueuedConnection);
+    connect(stateobj, &BaseStateAbstract::addNewState, this, &StateOrchestrator::addState, Qt::QueuedConnection);
+    connect(stateobj, &BaseStateAbstract::log, this, &StateOrchestrator::log);
     executionStack.push(stateobj);
 }
 
@@ -102,7 +102,7 @@ void StateOrchestrator::execNext()
         BaseStateAbstract *stateobj = executionStack.pop();
         emit statusupdate();
         // emit log(tr("%1 %2").arg(actionName).arg(stateobj->getName()),metaObject()->className() , Pip3lineConst::LSTATUS);
-        QTimer::singleShot(100, stateobj, SLOT(start()));
+        QTimer::singleShot(50, stateobj, SLOT(start()));
     } else {
         emit log(tr("%1 state performed in %2ms").arg(actionName).arg(timer.restart()),metaObject()->className() , Pip3lineConst::LSTATUS);
         if (writer != nullptr) {
@@ -116,6 +116,9 @@ void StateOrchestrator::execNext()
 void StateOrchestrator::onFinished()
 {
     if (isSaving()) {
+        // committing any data left;
+        file->flush();
+
         if (QFile::exists(fileName)) { // removing destination file if already exist
             QFile::remove(fileName);
         }
@@ -202,10 +205,8 @@ StateDialog *StateOrchestrator::getStatusDialog(QWidget *parent)
     }
     stateDialog->setModal(true);
 
-    connect(this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
-            stateDialog, SLOT(log(QString,QString,Pip3lineConst::LOGLEVEL)));
-    connect(this, SIGNAL(statusupdate()),
-            stateDialog, SLOT(update()));
+    connect(this, &StateOrchestrator::log,stateDialog, &StateDialog::log);
+    connect(this, &StateOrchestrator::statusupdate, stateDialog, &StateDialog::update);
 
     return stateDialog;
 }
@@ -217,11 +218,9 @@ StateStatusWidget *StateOrchestrator::getStatusGui(QWidget * parent)
         qFatal("Cannot allocate memory for StateStatusWidget X{");
     }
     w->setMessage(actionName);
-    connect(this, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)),
-            w, SLOT(log(QString,QString,Pip3lineConst::LOGLEVEL)));
+    connect(this, &StateOrchestrator::log, w,&StateStatusWidget::log);
 
-    connect(this, SIGNAL(statusupdate()),
-            w, SLOT(update()));
+    connect(this, &StateOrchestrator::statusupdate, w, &StateStatusWidget::update);
 
     return w;
 }

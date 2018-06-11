@@ -109,20 +109,20 @@ SearchResultsWidget::SearchResultsWidget(FoundOffsetsModel * offsetModel, GuiHel
     saveToClipboardMenu->addAction(copyListAsDecimal);
     ui->copyPushButton->setMenu(saveToClipboardMenu);
 
-    connect(ui->listView,SIGNAL(customContextMenuRequested(QPoint)), SLOT(onRightClick(QPoint)));
-    connect(ui->listView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), SLOT(onSelectionChanged(QModelIndex)));
-    connect(globalContextMenu, SIGNAL(triggered(QAction*)), SLOT(contextMenuAction(QAction*)));
-    connect(itemModel, SIGNAL(updated()), SLOT(onModelUpdated()));
-    connect(ui->clearResultsPushButton, SIGNAL(clicked()), SLOT(onClear()));
-    connect(saveListToFileAsHexadecimal, SIGNAL(triggered()), SLOT(onSaveToFileHexAction()));
-    connect(saveListToFileAsDecimal, SIGNAL(triggered()), SLOT(onSaveToFileDecAction()));
-    connect(saveToClipboardMenu, SIGNAL(triggered(QAction*)), this,  SLOT(contextMenuAction(QAction*)));
+    connect(ui->listView, &QListView::customContextMenuRequested, this, &SearchResultsWidget::onRightClick);
+    connect(ui->listView->selectionModel(), &QItemSelectionModel::currentChanged, this, &SearchResultsWidget::onSelectionChanged);
+    connect(globalContextMenu, &QMenu::triggered, this, &SearchResultsWidget::contextMenuAction);
+    connect(itemModel, &FoundOffsetsModel::updated, this, &SearchResultsWidget::onModelUpdated);
+    connect(ui->clearResultsPushButton, &QPushButton::clicked, this, &SearchResultsWidget::onClear);
+    connect(saveListToFileAsHexadecimal, &QAction::triggered, this, &SearchResultsWidget::onSaveToFileHexAction);
+    connect(saveListToFileAsDecimal, &QAction::triggered, this, &SearchResultsWidget::onSaveToFileDecAction);
+    connect(saveToClipboardMenu, &QMenu::triggered, this, &SearchResultsWidget::contextMenuAction);
 
     // if there is a last item selected
 
     setCurrentSelection(itemModel->getLastSelected());
 
-    connect(itemModel, SIGNAL(lastUpdated(int)), SLOT(setCurrentSelection(int)));
+    connect(itemModel, &FoundOffsetsModel::lastUpdated, this, &SearchResultsWidget::setCurrentSelection);
 }
 
 SearchResultsWidget::~SearchResultsWidget()

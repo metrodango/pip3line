@@ -9,8 +9,8 @@ TransformGuiButton::TransformGuiButton(TransformAbstract *transform, QWidget *pa
     setIcon(QIcon(":/Images/icons/configure-5.png"));
     setMaximumWidth(25);
     setFlat(true);
-    connect(transform, SIGNAL(destroyed(QObject*)), this, SLOT(onTransformDeleted()));
-    connect(this, SIGNAL(clicked(bool)), this, SLOT(onGuiRequested()));
+    connect(transform, &TransformAbstract::destroyed, this, &TransformGuiButton::onTransformDeleted);
+    connect(this, &TransformGuiButton::clicked, this, &TransformGuiButton::onGuiRequested);
 }
 
 TransformGuiButton::~TransformGuiButton()
@@ -36,7 +36,7 @@ void TransformGuiButton::onGuiRequested()
     if (transform != nullptr) {
         QWidget * guiConf = transform->getGui(nullptr);
         if (guiConf != nullptr) {
-            connect(guiConf, SIGNAL(destroyed(QObject*)), this, SLOT(onGuiDeleted()));
+            connect(guiConf, &QWidget::destroyed, [=](QObject *) {onGuiDeleted();});
             QDialog * dialog = new(std::nothrow) QDialog();
             if (dialog == nullptr) {
                 qFatal("Cannot allocate memory for QDialog [TransformGuiButton] X{");
@@ -56,8 +56,8 @@ void TransformGuiButton::onGuiRequested()
             closeButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
             closeButton->setFlat(true);
             layout->addWidget(closeButton, 0, Qt::AlignHCenter);
-            connect(closeButton, SIGNAL(clicked(bool)), dialog, SLOT(accept()));
-            connect(dialog, SIGNAL(finished(int)), dialog, SLOT(deleteLater()));
+            connect(closeButton, &QPushButton::clicked, dialog, &QDialog::accept);
+            connect(dialog, &QDialog::finished, dialog, &QDialog::deleteLater);
             dialog->open();
         }
     }

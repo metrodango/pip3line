@@ -6,10 +6,8 @@
 #
 # Released under AGPL see LICENSE for more information
 
-
-QT       += core gui xml network concurrent
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-CONFIG += debug WITH_THREAD c++11 warn_on
+QT       += core gui xml network concurrent widgets
+CONFIG += debug WITH_THREAD c++14 warn_on
 
 CONFIG += CONF_SCINTILLA
 #CONFIG += CONF_ADDR_SANITIZER
@@ -19,20 +17,22 @@ CONFIG += CONF_SCINTILLA
 TARGET = pip3line
 TEMPLATE = app
 
+DEFINES += QT_DEPRECATED_WARNINGS
+
 INCLUDEPATH +="../libtransform"
 
 unix {
 
     CONF_SCINTILLA {
         DEFINES += SCINTILLA
-        LIBS += -lqscintilla2
+        LIBS += -lqscintilla2_qt5
     }
 
     CONF_ADDR_SANITIZER {
         QMAKE_CXXFLAGS += -fsanitize=address
         QMAKE_LDFLAGS += -fsanitize=address
-        LIBS += -lasan
-    }
+        LIBS += -L"/usr/lib/clang/5.0.0/lib/linux" -shared -fPIC -lclang_rt.asan_cxx-x86_64 -lclang_rt.asan-x86_64 -L "/usr/lib/llvm/5/lib" -lclangAnalysis
+  }
 
     CONF_THREAD_SANITIZER {
         QMAKE_CXXFLAGS += -fsanitize=thread
@@ -43,6 +43,11 @@ unix {
 
 win32 {
     LIBS += -L"../lib" -ltransform
+    CONF_SCINTILLA {
+        DEFINES += SCINTILLA QSCINTILLA_DLL
+        INCLUDEPATH +="../../QScintilla/Qt4Qt5"
+        LIBS += -L"../../QScintilla/Qt4Qt5/release" -lqscintilla2_qt5
+    }
 }
 
 DESTDIR = ../bin
@@ -75,7 +80,6 @@ SOURCES += main.cpp\
     ../tools/streamprocessor.cpp \
     ../tools/textprocessor.cpp \
     ../tools/processor.cpp \
-    ../tools/binaryprocessor.cpp \
     ../tools/serverabstract.cpp \
     ../tools/pipeserver.cpp \
     tabs/tababstract.cpp \
@@ -127,7 +131,6 @@ SOURCES += main.cpp\
     tabs/packetanalyser/packetanalyseroptionsdialog.cpp \
     pcapio/pcapdef.cpp \
     pcapio/pcapio.cpp \
-    pcapio/pcapngio.cpp \
     tabs/packetanalyser/sourcesorchestatorabstract.cpp \
     tabs/packetanalyser/singlesourceorchestrator.cpp \
     shared/newviewbutton.cpp \
@@ -156,7 +159,11 @@ SOURCES += main.cpp\
     tabs/packetanalyser/filterdialog.cpp \
     tabs/packetanalyser/filteritem.cpp \
     shared/transformguibutton.cpp \
-    tabs/packetanalyser/filterengine.cpp
+    tabs/packetanalyser/filterengine.cpp \
+    sources/blocksources/pipeclientlistener.cpp \
+    sources/blocksources/pipeclientwidget.cpp \
+    views/jsonview.cpp \
+    shared/newconnectionbutton.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -184,7 +191,6 @@ HEADERS  += mainwindow.h \
     ../version.h \
     ../tools/textprocessor.h \
     ../tools/processor.h \
-    ../tools/binaryprocessor.h \
     ../tools/tcpserver.h \
     ../tools/streamprocessor.h \
     ../tools/pipeserver.h \
@@ -238,7 +244,6 @@ HEADERS  += mainwindow.h \
     tabs/packetanalyser/packetanalyseroptionsdialog.h \
     pcapio/pcapdef.h \
     pcapio/pcapio.h \
-    pcapio/pcapngio.h \
     tabs/packetanalyser/sourcesorchestatorabstract.h \
     tabs/packetanalyser/singlesourceorchestrator.h \
     shared/newviewbutton.h \
@@ -268,7 +273,11 @@ HEADERS  += mainwindow.h \
     tabs/packetanalyser/filterdialog.h \
     tabs/packetanalyser/filteritem.h \
     shared/transformguibutton.h \
-    tabs/packetanalyser/filterengine.h
+    tabs/packetanalyser/filterengine.h \
+    sources/blocksources/pipeclientlistener.h \
+    sources/blocksources/pipeclientwidget.h \
+    views/jsonview.h \
+    shared/newconnectionbutton.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \
@@ -314,7 +323,8 @@ FORMS    += mainwindow.ui \
     sources/blocksources/ipnetworkclientwidget.ui \
     sources/blocksources/baseblocksourcewidget.ui \
     shared/transformselectorwidget.ui \
-    tabs/packetanalyser/filterdialog.ui
+    tabs/packetanalyser/filterdialog.ui \
+    sources/blocksources/pipeclientwidget.ui
 
 OTHER_FILES += icons/pip3line.png \
     win.rc \

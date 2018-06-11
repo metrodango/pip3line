@@ -211,7 +211,8 @@ void Hieroglyphy::init()
     }
     qDebug() << "Base characters currently implemented " << characters.size() ;
     QList<char> list = characters.keys();
-    qSort(list);
+    std::sort(list.begin(), list.end());
+
     qDebug() << list;
 
     fromCharCodeS = hScript("return String.fromCharCode");

@@ -46,7 +46,7 @@ RandomAccessTab::RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *gui
     ui->viewSizeSpinBox->setMaximum(GEN_BLOCK_SIZE);
 
     setName(bytesource->name());
-    connect(bytesource,SIGNAL(nameChanged(QString)), SLOT(setName(QString)));
+    connect(bytesource, &ByteSourceAbstract::nameChanged, this, &RandomAccessTab::setName);
 
     hexView = new(std::nothrow) HexView(bytesource, guiHelper,this);
     if (hexView == nullptr) {
@@ -63,19 +63,19 @@ RandomAccessTab::RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *gui
     searchWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
     ui->mainLayout->insertWidget( 1,searchWidget);
-    connect(searchWidget, SIGNAL(searchRequest(QByteArray,QBitArray,bool)), SLOT(onSearch(QByteArray,QBitArray,bool)));
-    connect(searchWidget, SIGNAL(jumpTo(quint64,quint64)),hexView,  SLOT(gotoSearch(quint64,quint64)));
+    connect(searchWidget, &SearchWidget::searchRequest, this, &RandomAccessTab::onSearch);
+    connect(searchWidget, &SearchWidget::jumpTo,hexView, &HexView::gotoSearch);
 
     hexView->installEventFilter(this);
     hexView->getHexTableView()->verticalScrollBar()->setVisible(true);
-    connect(hexView,SIGNAL(askForFileLoad()), SLOT(fileLoadRequest()));
+    connect(hexView, &HexView::askForFileLoad, this, &RandomAccessTab::fileLoadRequest);
     gotoWidget = new(std::nothrow) OffsetGotoWidget(guiHelper,this);
     if (gotoWidget == nullptr) {
         qFatal("Cannot allocate memory for OffsetGotoWidget X{");
     }
     gotoWidget->setMaximumWidth(150);
     ui->toolsLayout->insertWidget(0,gotoWidget);
-    connect(gotoWidget,SIGNAL(gotoRequest(quint64,bool,bool,bool)), SLOT(onGotoOffset(quint64,bool,bool,bool)));
+    connect(gotoWidget, &OffsetGotoWidget::gotoRequest, this, &RandomAccessTab::onGotoOffset);
 
     roButton = new(std::nothrow) ReadOnlyButton(bytesource,this);
     if (roButton == nullptr) {
@@ -104,7 +104,8 @@ RandomAccessTab::RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *gui
 
     if (bytesource->hasDiscreetView()) {
         ui->viewSizeSpinBox->setValue(bytesource->viewSize());
-        connect(ui->viewSizeSpinBox, SIGNAL(valueChanged(int)),bytesource, SLOT(setViewSize(int)));
+        //connect(ui->viewSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), bytesource, &ByteSourceAbstract::setViewSize);
+        connect(ui->viewSizeSpinBox, SIGNAL(valueChanged(int)), bytesource, SLOT(setViewSize(int)));
     } else {
         ui->viewSizeSpinBox->setVisible(false);
     }
@@ -117,11 +118,11 @@ RandomAccessTab::RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *gui
 
     ui->toolsLayout->insertWidget(0,detachButton);
 
-    connect(ui->prevPushButton, SIGNAL(clicked()), bytesource,SLOT(historyBackward()));
-    connect(ui->nextPushButton, SIGNAL(clicked()), bytesource, SLOT(historyForward()));
-    connect(ui->closeLogsPushButton, SIGNAL(clicked()), SLOT(onCloseLogView()));
-    connect(bytesource, SIGNAL(askFileLoad()), SLOT(fileLoadRequest()));
-    connect(bytesource, SIGNAL(updated(quintptr)), SLOT(onSourceUpdated()));
+    connect(ui->prevPushButton, &QPushButton::clicked, bytesource, &ByteSourceAbstract::historyBackward);
+    connect(ui->nextPushButton, &QPushButton::clicked, bytesource, &ByteSourceAbstract::historyForward);
+    connect(ui->closeLogsPushButton, &QPushButton::clicked, this, &RandomAccessTab::onCloseLogView);
+    connect(bytesource, &ByteSourceAbstract::askFileLoad, this, &RandomAccessTab::fileLoadRequest);
+    connect(bytesource, &ByteSourceAbstract::updated, this, &RandomAccessTab::onSourceUpdated);
 }
 
 RandomAccessTab::~RandomAccessTab()

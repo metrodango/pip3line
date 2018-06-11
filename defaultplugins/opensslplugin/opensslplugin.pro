@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = opensslplugin
 TEMPLATE = lib
-CONFIG += plugin release c++11 warn_on
+CONFIG += plugin release c++14 warn_on
 DEFINES += OPENSSLPLUGIN_LIBRARY
 
 SOURCES += opensslplugin.cpp \

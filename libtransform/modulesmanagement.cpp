@@ -221,7 +221,7 @@ QWidget *ModulesManagement::getGui(QWidget *parent)
             qFatal("Cannot allocate memory for ModulesManagementWidget X{");
         }
 
-        connect(gui, SIGNAL(destroyed()), this, SLOT(onGuiDelete()));
+        connect(gui, &ModulesManagementWidget::destroyed, this, &ModulesManagement::onGuiDelete);
     }
     return gui;
 }

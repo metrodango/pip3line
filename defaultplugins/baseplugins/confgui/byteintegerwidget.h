@@ -27,8 +27,6 @@ class ByteIntegerWidget : public QWidget
         ~ByteIntegerWidget();
 
     private slots:
-        void signedChanged(bool val);
-        void bytesOrderChanged(bool val);
         void sizeChanged();
         
     private:

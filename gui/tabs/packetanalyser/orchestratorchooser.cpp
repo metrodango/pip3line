@@ -17,6 +17,7 @@
 #include "externalproxyorchestrator.h"
 #include "proxyorchestrator.h"
 #include "socksorchestrator.h"
+#include "sources/blocksources/pipeclientlistener.h"
 
 OrchestratorChooser::OrchestratorChooser(GuiHelper *guiHelper, SourcesOrchestatorAbstract *orchestrator, QWidget *parent) :
     QComboBox(parent),
@@ -35,8 +36,8 @@ OrchestratorChooser::OrchestratorChooser(GuiHelper *guiHelper, SourcesOrchestato
         setCurrentIndex(orchestrator->getType());
     }
 
+    //connect(this, qOverload<int>(&OrchestratorChooser::currentIndexChanged), this, &OrchestratorChooser::onSelection);
     connect(this, SIGNAL(currentIndexChanged(int)), this, SLOT(onSelection(int)));
-
 }
 
 OrchestratorChooser::~OrchestratorChooser()
@@ -111,7 +112,7 @@ void OrchestratorChooser::onSelection(int index)
 {
     if (orchestrator != nullptr) {
         // need to disconnect due to the deferred deletion
-        disconnect(orchestrator, SIGNAL(destroyed(QObject*)), this, SLOT(onOrchestratorDeleted()));
+        disconnect(destructorLink);
         orchestrator->stop();
         orchestrator->deleteLater();
         orchestrator = nullptr;
@@ -347,8 +348,8 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 client->setFlags(BlocksSource::TLS_OPTIONS |
                                  BlocksSource::TLS_ENABLED);
 
-                connect(server, SIGNAL(newConnectionData(int,ConnectionDetails)),
-                        client, SLOT(setSpecificConnection(int,ConnectionDetails))) ;
+                connect(server, &TLSServerListener::newConnectionData,
+                        client, &TLSClientListener::setSpecificConnection) ;
 
                 SocksOrchestrator *ci = new(std::nothrow) SocksOrchestrator(server,client);
                 if (ci == nullptr) {
@@ -358,13 +359,28 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 orch = ci;
             }
             break;
+            case SourcesOrchestatorAbstract::PIPE_CLIENT:
+            {
+                PipeClientListener *pl = new(std::nothrow) PipeClientListener();
+                if (pl == nullptr) {
+                    qFatal("Cannot allocate memory for PipeClientListener X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(pl);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::PIPE_CLIENT);
+                orch = ci;
+            }
+            break;
         default:
             qCritical() << tr("[OrchestratorChooser::createOrchestratorFromType] Unmanaged type: %1").arg(type);
     }
 
     if (orch != nullptr) {
-        connect(orch, SIGNAL(log(QString,QString,Pip3lineConst::LOGLEVEL)), guiHelper, SLOT(logMessage(QString,QString,Pip3lineConst::LOGLEVEL)));
-        connect(orch, SIGNAL(destroyed(QObject*)), this, SLOT(onOrchestratorDeleted()));
+        connect(orch, &SourcesOrchestatorAbstract::log, guiHelper, &GuiHelper::logMessage);
+        destructorLink = connect(orch, &SourcesOrchestatorAbstract::destroyed, this, &OrchestratorChooser::onOrchestratorDeleted);
     }
     return orch;
 }

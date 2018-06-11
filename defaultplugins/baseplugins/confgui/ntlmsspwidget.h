@@ -25,8 +25,6 @@ class NtlmsspWidget : public QWidget
     public:
         explicit NtlmsspWidget(Ntlmssp * transform, QWidget *parent = 0);
         ~NtlmsspWidget();
-    private slots:
-        void onDecode(bool checked);
     private:
         Ui::NtlmsspWidget *ui;
         Ntlmssp * transform;

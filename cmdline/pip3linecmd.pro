@@ -12,12 +12,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 VERSION  = 1.2
 
 TARGET   = pip3linecmd
-CONFIG  += console release c++11 warn_on
+CONFIG  += console release c++14 warn_on
 CONFIG  -= app_bundle
 DESTDIR  = ../bin
 TEMPLATE = app
 
 INCLUDEPATH += "../libtransform"
+
+DEFINES += QT_DEPRECATED_WARNINGS
 
 unix {
     LIBS += -L"../bin" -ltransform

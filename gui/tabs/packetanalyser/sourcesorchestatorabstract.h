@@ -24,7 +24,8 @@ class SourcesOrchestatorAbstract : public QObject
             UDP_PROXY = 6,
             BLOCKS_EXTERNAL_PROXY_TCP = 7,
             BLOCKS_EXTERNAL_PROXY_UDP = 8,
-            SOCKS5_PROXY = 9
+            SOCKS5_PROXY = 9,
+            PIPE_CLIENT = 10
         };
 
         explicit SourcesOrchestatorAbstract(QObject *parent = 0);
@@ -45,13 +46,13 @@ class SourcesOrchestatorAbstract : public QObject
         virtual QHash<QString, QString> getConfiguration();
         virtual void setConfiguration(QHash<QString, QString> conf);
     public slots:
-        virtual void postPacket(Packet * packet);
+        virtual void postPacket(QSharedPointer<Packet> packet);
         virtual bool start();
         virtual void stop();
         virtual bool restart();
     signals:
-        void newPacket(Packet * packet);
-        void packetInjected(Packet * packet);
+        void newPacket(QSharedPointer<Packet> packet);
+        void packetInjected(QSharedPointer<Packet> packet);
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
         void queueUpdated(int size);
         void forwardingChanged(bool forwarding);
@@ -66,7 +67,7 @@ class SourcesOrchestatorAbstract : public QObject
         virtual void onBlockReceived(Block *block);
         virtual void onControlGuiDestroyed();
         virtual void onConfigGuiDestroyed();
-        void sourceReflexionChanged(bool value);
+        void sourceReflexionChanged(const bool &value);
     protected:
         virtual Target<SourcesOrchestatorAbstract *> toOrchestratorTarget(Target<BlocksSource *> bst);
         virtual QList<Target<SourcesOrchestatorAbstract *> > toOrchestratorTargetList(QList<Target<BlocksSource *> > ilist);

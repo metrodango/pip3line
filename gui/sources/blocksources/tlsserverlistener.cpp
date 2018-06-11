@@ -34,7 +34,7 @@ TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort,
     flags |= REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED;
     type = SERVER;
 
-    connect(this, SIGNAL(sslChanged(bool)), this, SLOT(onTLSUpdated(bool)));
+    connect(this, &TLSServerListener::sslChanged, this, &TLSServerListener::onTLSUpdated);
     setTlsEnable(true);
 
     QString defaultCertPath = QDir::homePath()
@@ -110,7 +110,7 @@ bool TLSServerListener::startListening()
         if (server == nullptr) {
             qFatal("Cannot allocate memory for BaseTcpServer X{");
         }
-        connect(server,SIGNAL(newClient(qintptr)), SLOT(handlingClient(qintptr)),Qt::QueuedConnection);
+        connect(server, &BaseTcpServer::newClient, this, &TLSServerListener::handlingClient,Qt::QueuedConnection);
     }
 
     if (server->isListening()) { // already listening nothing to do
@@ -169,7 +169,7 @@ void TLSServerListener::onConnectionClosed(int cid)
             if (clientsProxyNeeded.contains(socket))
                 delete clientsProxyNeeded.take(socket);
 
-            disconnect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()));
+            disconnect(socket, &QSslSocket::disconnected, this, &TLSServerListener::onClientDeconnection);
             socket->disconnectFromHost();
             break;
         }
@@ -271,8 +271,9 @@ void TLSServerListener::handlingClient(qintptr socketDescriptor)
         qFatal("Cannot allocate memory for QSslSocket X{");
     }
 
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),this, SLOT(onError(QAbstractSocket::SocketError)),Qt::QueuedConnection);
-    connect(socket, SIGNAL(readyRead()), SLOT(dataReceived()),Qt::QueuedConnection);
+    //connect(socket, qOverload<QAbstractSocket::SocketError>(&QSslSocket::error),this, &TLSServerListener::onError,Qt::QueuedConnection);
+    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)), Qt::QueuedConnection);
+    connect(socket, &QSslSocket::readyRead, this, &TLSServerListener::dataReceived,Qt::QueuedConnection);
 
     socket->setSocketDescriptor(socketDescriptor);
 
@@ -301,7 +302,7 @@ void TLSServerListener::handlingClient(qintptr socketDescriptor)
 
     if (socket != nullptr) {
         emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::LSTATUS);
-        connect(socket, SIGNAL(disconnected()), this, SLOT(onClientDeconnection()),Qt::QueuedConnection);
+        connect(socket, &QSslSocket::disconnected, this, &TLSServerListener::onClientDeconnection,Qt::QueuedConnection);
 
         clients.insert(socket, BlocksSource::newSourceID(this));
         updateConnectionsInfo();
@@ -404,8 +405,9 @@ bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
     }
 
     qDebug() << tr("Trying to start TLS for %1:%2").arg(sslsocket->peerAddress().toString()).arg(sslsocket->peerPort());
-    connect(sslsocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)),Qt::QueuedConnection);
-    connect(sslsocket, SIGNAL(modeChanged(QSslSocket::SslMode)),this, SLOT(onSSLModeChange(QSslSocket::SslMode)),Qt::QueuedConnection);
+    //connect(sslsocket, qOverload<const QList<QSslError> &>(&QSslSocket::sslErrors), this, &TLSServerListener::onSslErrors,Qt::QueuedConnection);
+    connect(sslsocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)), Qt::QueuedConnection);
+    connect(sslsocket, &QSslSocket::modeChanged,this, &TLSServerListener::onSSLModeChange,Qt::QueuedConnection);
     sslsocket->setSslConfiguration(sslConfiguration->getSslConfiguration());
     sslsocket->startServerEncryption();
 

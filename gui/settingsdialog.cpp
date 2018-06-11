@@ -67,29 +67,29 @@ SettingsDialog::SettingsDialog(GuiHelper *nhelper, QWidget *parent) :
         ui->defaultIncomingLayout->addWidget(bConf);
     }
 
-    connect(ui->checkUpdatePushButton, SIGNAL(clicked()), this, SLOT(onUpdateRequest()));
-    connect(tManager, SIGNAL(savedUpdated()), this, SLOT(updateRegisteredList()));
-    connect(guiHelper, SIGNAL(markingsUpdated()), this, SLOT(updateSavedMarkingColors()));
-    connect(guiHelper, SIGNAL(importExportUpdated()), this, SLOT(updateImportExportFuncs()));
-    connect(ui->resetMarkingsPushButton, SIGNAL(clicked()), this, SLOT(onResetMarkings()));
-    connect(ui->resetIEFuncsPushButton, SIGNAL(clicked()), this, SLOT(onResetImportExportFuncs()));
-    connect(ui->savedListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onSavedClicked(QListWidgetItem*)));
-    connect(ui->pluginsListWidget, SIGNAL(clicked(QModelIndex)), this, SLOT(onPluginClicked(QModelIndex)));
-    connect(ui->importExportListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onDoubleClickImportExportFuncs(QListWidgetItem*)));
-    connect(ui->addImportExportPushButton, SIGNAL(clicked()), this, SLOT(onAddImportExportFuncs()));
-    connect(ui->slByteDataCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->dataMarkingsCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->dataHistCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->quickViewCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->comparisonCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->guiPosCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(ui->globalConfCheckBox, SIGNAL(clicked(bool)), this, SLOT(onLoadSaveOptionsToggled(bool)));
-    connect(guiHelper, SIGNAL(deletedTabsUpdated()), this, SLOT(updateDeletedTabsList()),Qt::QueuedConnection);
-    connect(ui->clearAllTabsPushButton, SIGNAL(clicked()), guiHelper, SLOT(clearDeletedTabs()));
-    connect(ui->deletedTabsListWidget, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onDeletedTabsDoubleClicked(QModelIndex)));
-    connect(ui->fileSavePushButton, SIGNAL(clicked()), this , SLOT(onAutoSaveFileButtonclicked()));
-    connect(ui->customFontPushButton, SIGNAL(clicked(bool)), SLOT(onCustomFontClicked()));
-    connect(ui->saveNowPushButton, SIGNAL(clicked(bool)), this, SLOT(onSaveNowClicked()));
+    connect(ui->checkUpdatePushButton, &QPushButton::clicked, this, &SettingsDialog::onUpdateRequest);
+    connect(tManager, &TransformMgmt::savedUpdated, this, &SettingsDialog::updateRegisteredList);
+    connect(guiHelper, &GuiHelper::markingsUpdated, this, &SettingsDialog::updateSavedMarkingColors);
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &SettingsDialog::updateImportExportFuncs);
+    connect(ui->resetMarkingsPushButton, &QPushButton::clicked, this, &SettingsDialog::onResetMarkings);
+    connect(ui->resetIEFuncsPushButton, &QPushButton::clicked, this, &SettingsDialog::onResetImportExportFuncs);
+    connect(ui->savedListWidget, &QListWidget::itemClicked, this, &SettingsDialog::onSavedClicked);
+    connect(ui->pluginsListWidget, &QListWidget::clicked, this, &SettingsDialog::onPluginClicked);
+    connect(ui->importExportListWidget, &QListWidget::itemDoubleClicked, this, &SettingsDialog::onDoubleClickImportExportFuncs);
+    connect(ui->addImportExportPushButton, &QPushButton::clicked, this, &SettingsDialog::onAddImportExportFuncs);
+    connect(ui->slByteDataCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->dataMarkingsCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->dataHistCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->quickViewCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->comparisonCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->guiPosCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(ui->globalConfCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onLoadSaveOptionsToggled);
+    connect(guiHelper, &GuiHelper::deletedTabsUpdated, this, &SettingsDialog::updateDeletedTabsList,Qt::QueuedConnection);
+    connect(ui->clearAllTabsPushButton, &QPushButton::clicked, guiHelper, &GuiHelper::clearDeletedTabs);
+    connect(ui->deletedTabsListWidget, &QListWidget::doubleClicked, this, &SettingsDialog::onDeletedTabsDoubleClicked);
+    connect(ui->fileSavePushButton, &QPushButton::clicked, this , &SettingsDialog::onAutoSaveFileButtonclicked);
+    connect(ui->customFontPushButton, &QPushButton::clicked, this, &SettingsDialog::onCustomFontClicked);
+    connect(ui->saveNowPushButton, &QPushButton::clicked, this, &SettingsDialog::onSaveNowClicked);
     ui->titleListWidget->setCurrentRow(0);
 }
 
@@ -227,7 +227,7 @@ void SettingsDialog::updateRegisteredList()
     for (int i = 0; i < list.size(); i++) {
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(list.at(i));
         if (itemWid != nullptr) {
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onDeleteSaved(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &SettingsDialog::onDeleteSaved);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item != nullptr) {
                 ui->savedListWidget->addItem(item);
@@ -252,7 +252,7 @@ void SettingsDialog::updateSavedMarkingColors()
         pix.fill(i.value());
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(i.key(), pix);
         if (itemWid != nullptr) {
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onMarkingDelete(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &SettingsDialog::onMarkingDelete);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item != nullptr) {
                 ui->markingColorsListWidget->addItem(item);
@@ -273,7 +273,7 @@ void SettingsDialog::updateImportExportFuncs()
     for (int i = 0; i < list.size(); i++) {
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(list.at(i));
         if (itemWid != nullptr) {
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onImportExportFuncDeletes(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &SettingsDialog::onImportExportFuncDeletes);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item != nullptr) {
                 ui->importExportListWidget->addItem(item);
@@ -330,7 +330,7 @@ void SettingsDialog::updateFilter()
           qFatal("Cannot allocate memory for QStandardItem 2 X{");
         }
     }
-    connect(model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), guiHelper, SLOT(onFilterChanged(QModelIndex,QModelIndex)));
+    connect(model, &QStandardItemModel::dataChanged, guiHelper, &GuiHelper::onFilterChanged);
     ui->filterListView->setModel(model);
 }
 
@@ -341,7 +341,7 @@ void SettingsDialog::updateDeletedTabsList()
     for (int i = 0; i < list.size(); i++) {
         DeleteableListItem *itemWid = new(std::nothrow) DeleteableListItem(list.at(i)->getName());
         if (itemWid != nullptr) {
-            connect(itemWid, SIGNAL(itemDeleted(QString)), this, SLOT(onDeletedTabsDeleted(QString)));
+            connect(itemWid, &DeleteableListItem::itemDeleted, this, &SettingsDialog::onDeletedTabsDeleted);
             QListWidgetItem *item = new(std::nothrow) QListWidgetItem();
             if (item != nullptr) {
                 ui->deletedTabsListWidget->addItem(item);
@@ -699,56 +699,73 @@ void SettingsDialog::onHexSizesValuesChanged()
 
 void SettingsDialog::connectUpdateSignals()
 {
-    connect(ui->autoUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(autoUpdateChanged(bool)));
-    connect(ui->minimizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onMinimizeChanged(bool)));
+    connect(ui->autoUpdateCheckBox, &QCheckBox::toggled, this, &SettingsDialog::autoUpdateChanged);
+    connect(ui->minimizeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onMinimizeChanged);
+    //connect(ui->defaultTabComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onDefaultTabChanged);
     connect(ui->defaultTabComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onDefaultTabChanged(int)));
-    connect(ui->decodeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onServerDecodeChanged(bool)));
-    connect(ui->encodeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onServerEncodeChanged(bool)));
+    connect(ui->decodeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onServerDecodeChanged);
+    connect(ui->encodeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onServerEncodeChanged);
+    //connect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onServerPortChanged);
     connect(ui->portSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onServerPortChanged(int)));
-    connect(ui->pipeNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onServerPipeNameChanged(QString)));
-    connect(ui->hexWidget, SIGNAL(charChanged(char)), this, SLOT(onServerSeparatorChanged(char)));
+    connect(ui->pipeNameLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::onServerPipeNameChanged);
+    connect(ui->hexWidget, &HexWidget::charChanged, this, &SettingsDialog::onServerSeparatorChanged);
+    //connect(ui->offsetBaseComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onOffsetBaseChanged);
     connect(ui->offsetBaseComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onOffsetBaseChanged(QString)));
-    connect(ui->enableProxyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onProxyEnabledChanged(bool)));
-    connect(ui->ignoreSSLErrCheckBox, SIGNAL(toggled(bool)), this, SLOT(onIgnoreSSLErrChanged(bool)));
-    connect(ui->proxyHostLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onProxyIPChanged(QString)));
+    connect(ui->enableProxyCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onProxyEnabledChanged);
+    connect(ui->ignoreSSLErrCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onIgnoreSSLErrChanged);
+    connect(ui->proxyHostLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::onProxyIPChanged);
+    //connect(ui->proxyPortSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onProxyPortChanged);
     connect(ui->proxyPortSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onProxyPortChanged(int)));
-    connect(ui->autoTextCopyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoTextCopyChanged(bool)));
-    connect(ui->autoSaveGroupBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveToggled(bool)));
-    connect(ui->fileSaveLineEdit, SIGNAL(textChanged(QString)), this , SLOT(onAutoSaveFileNameChanged(QString)));
-    connect(ui->saveOnExitCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveOnExitToggled(bool)));
-    connect(ui->timerSaveCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveTimerEnableToggled(bool)));
+    connect(ui->autoTextCopyCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoTextCopyChanged);
+    connect(ui->autoSaveGroupBox, &QGroupBox::toggled, this, &SettingsDialog::onAutoSaveToggled);
+    connect(ui->fileSaveLineEdit, &QLineEdit::textChanged, this , &SettingsDialog::onAutoSaveFileNameChanged);
+    connect(ui->saveOnExitCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoSaveOnExitToggled);
+    connect(ui->timerSaveCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoSaveTimerEnableToggled);
+    //connect(ui->timerSaveSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onAutoSaveTimerIntervalChanged);
     connect(ui->timerSaveSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onAutoSaveTimerIntervalChanged(int)));
-    connect(ui->slByteDataCheckBox, SIGNAL(toggled(bool)), this , SLOT(onDataSaveToggled(bool)));
-    connect(ui->autoRestoreCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoRestoreToggled(bool)));
+    connect(ui->slByteDataCheckBox, &QCheckBox::toggled, this , &SettingsDialog::onDataSaveToggled);
+    connect(ui->autoRestoreCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoRestoreToggled);
+    //connect(ui->hexadecimalTableRowsHeightSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     connect(ui->hexadecimalTableRowsHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    //connect(ui->hexadecimalTableTextWidthSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     connect(ui->hexadecimalTableTextWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+    //connect(ui->hexadecimalTableWidthSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     connect(ui->hexadecimalTableWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
 }
 
 void SettingsDialog::disconnectUpdateSignals()
 {
-    disconnect(ui->autoUpdateCheckBox, SIGNAL(toggled(bool)), this, SLOT(autoUpdateChanged(bool)));
-    disconnect(ui->minimizeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onMinimizeChanged(bool)));
+    disconnect(ui->autoUpdateCheckBox, &QCheckBox::toggled, this, &SettingsDialog::autoUpdateChanged);
+    disconnect(ui->minimizeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onMinimizeChanged);
+    //disconnect(ui->defaultTabComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onDefaultTabChanged);
     disconnect(ui->defaultTabComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onDefaultTabChanged(int)));
-    disconnect(ui->decodeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onServerDecodeChanged(bool)));
-    disconnect(ui->encodeCheckBox, SIGNAL(toggled(bool)), this, SLOT(onServerEncodeChanged(bool)));
+    disconnect(ui->decodeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onServerDecodeChanged);
+    disconnect(ui->encodeCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onServerEncodeChanged);
+    //disconnect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onServerPortChanged);
     disconnect(ui->portSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onServerPortChanged(int)));
-    disconnect(ui->pipeNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onServerPipeNameChanged(QString)));
-    disconnect(ui->hexWidget, SIGNAL(charChanged(char)), this, SLOT(onServerSeparatorChanged(char)));
+    disconnect(ui->pipeNameLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::onServerPipeNameChanged);
+    disconnect(ui->hexWidget, &HexWidget::charChanged, this, &SettingsDialog::onServerSeparatorChanged);
+    //disconnect(ui->offsetBaseComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &SettingsDialog::onOffsetBaseChanged);
     disconnect(ui->offsetBaseComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onOffsetBaseChanged(QString)));
-    disconnect(ui->enableProxyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onProxyEnabledChanged(bool)));
-    disconnect(ui->ignoreSSLErrCheckBox, SIGNAL(toggled(bool)), this, SLOT(onIgnoreSSLErrChanged(bool)));
-    disconnect(ui->proxyHostLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onProxyIPChanged(QString)));
+    disconnect(ui->enableProxyCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onProxyEnabledChanged);
+    disconnect(ui->ignoreSSLErrCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onIgnoreSSLErrChanged);
+    disconnect(ui->proxyHostLineEdit, &QLineEdit::textChanged, this, &SettingsDialog::onProxyIPChanged);
+    //disconnect(ui->proxyPortSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onProxyPortChanged);
     disconnect(ui->proxyPortSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onProxyPortChanged(int)));
-    disconnect(ui->autoTextCopyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoTextCopyChanged(bool)));
-    disconnect(ui->autoSaveGroupBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveToggled(bool)));
-    disconnect(ui->fileSaveLineEdit, SIGNAL(textChanged(QString)), this , SLOT(onAutoSaveFileNameChanged(QString)));
-    disconnect(ui->saveOnExitCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveOnExitToggled(bool)));
-    disconnect(ui->timerSaveCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoSaveTimerEnableToggled(bool)));
+    disconnect(ui->autoTextCopyCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoTextCopyChanged);
+    disconnect(ui->autoSaveGroupBox, &QGroupBox::toggled, this, &SettingsDialog::onAutoSaveToggled);
+    disconnect(ui->fileSaveLineEdit, &QLineEdit::textChanged, this , &SettingsDialog::onAutoSaveFileNameChanged);
+    disconnect(ui->saveOnExitCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoSaveOnExitToggled);
+    disconnect(ui->timerSaveCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoSaveTimerEnableToggled);
+    //disconnect(ui->timerSaveSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onAutoSaveTimerIntervalChanged);
     disconnect(ui->timerSaveSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onAutoSaveTimerIntervalChanged(int)));
-    disconnect(ui->autoRestoreCheckBox, SIGNAL(toggled(bool)), this, SLOT(onAutoRestoreToggled(bool)));
+    disconnect(ui->slByteDataCheckBox, &QCheckBox::toggled, this , &SettingsDialog::onDataSaveToggled);
+    disconnect(ui->autoRestoreCheckBox, &QCheckBox::toggled, this, &SettingsDialog::onAutoRestoreToggled);
+//    disconnect(ui->hexadecimalTableRowsHeightSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     disconnect(ui->hexadecimalTableRowsHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+//    disconnect(ui->hexadecimalTableTextWidthSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     disconnect(ui->hexadecimalTableTextWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
+//    disconnect(ui->hexadecimalTableWidthSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &SettingsDialog::onHexSizesValuesChanged);
     disconnect(ui->hexadecimalTableWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onHexSizesValuesChanged()));
 }
 

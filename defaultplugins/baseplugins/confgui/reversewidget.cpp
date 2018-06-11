@@ -25,8 +25,9 @@ ReverseWidget::ReverseWidget(Reverse *ntransform, QWidget *parent) :
     ui->blockSizeSpinBox->setMaximum(Reverse::MAXBLOCKSIZE);
     ui->entireCheckBox->setChecked(transform->getNoBlock());
 
-    connect(ui->entireCheckBox,SIGNAL(toggled(bool)),this, SLOT(onEntireCheckBoxChange(bool)));
-    connect(ui->blockSizeSpinBox,SIGNAL(valueChanged(int)), this, SLOT(onBlockSizeChange(int)));
+    connect(ui->entireCheckBox, &QCheckBox::toggled,this, &ReverseWidget::onEntireCheckBoxChange);
+    //connect(ui->blockSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ReverseWidget::onBlockSizeChange);
+    connect(ui->blockSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onBlockSizeChange(int)));
 }
 
 ReverseWidget::~ReverseWidget()

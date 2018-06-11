@@ -87,8 +87,8 @@ AppDialog::AppDialog(GuiHelper * nguiHelper, QWidget *parent) :
     logger = guiHelper->getLogger();
     savedVisibleState = isVisible();
     attachedAction = nullptr;
-    connect(guiHelper, SIGNAL(appGoesIntoHidding()), SLOT(onMainHiding()));
-    connect(guiHelper, SIGNAL(appIsRising()), SLOT(onMainRising()));
+    connect(guiHelper, &GuiHelper::appGoesIntoHidding, this, &AppDialog::onMainHiding);
+    connect(guiHelper, &GuiHelper::appIsRising, this, &AppDialog::onMainRising);
     const QRect screen = QApplication::desktop()->screenGeometry();
     move(screen.center() - this->rect().center());
     //qDebug() << "created" << this;

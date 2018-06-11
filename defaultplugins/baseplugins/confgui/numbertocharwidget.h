@@ -27,7 +27,7 @@ class NumberToCharWidget : public QWidget
         ~NumberToCharWidget();
 
     private slots:
-        void onSeparatorChanged(QString val);
+        void onSeparatorChanged(const QString &val);
         
     private:
         Ui::NumberToCharWidget *ui;

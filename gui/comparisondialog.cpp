@@ -32,11 +32,9 @@ CompareWorker::CompareWorker(ByteSourceAbstract *sA, ByteSourceAbstract *sB, QOb
     QObject(parent)
 {
     sourceA = sA;
-    connect(this, SIGNAL(newMarkingsA(BytesRangeList *)),
-            sourceA, SLOT(setNewMarkings(BytesRangeList *)),Qt::QueuedConnection);
+    connect(this, &CompareWorker::newMarkingsA, sourceA, &ByteSourceAbstract::setNewMarkings, Qt::QueuedConnection);
     sourceB = sB;
-    connect(this, SIGNAL(newMarkingsB(BytesRangeList *)),
-            sourceB, SLOT(setNewMarkings(BytesRangeList *)), Qt::QueuedConnection);
+    connect(this, &CompareWorker::newMarkingsB, sourceB, &ByteSourceAbstract::setNewMarkings, Qt::QueuedConnection);
     startA = 0;
     startB = 0;
     sizeA = sourceA->size();
@@ -330,15 +328,20 @@ ComparisonDialog::ComparisonDialog(GuiHelper *nguiHelper, QWidget *parent) :
 
     ui->advancedWidget->hide();
 
-    connect(guiHelper, SIGNAL(tabsUpdated()), SLOT(loadTabs()), Qt::QueuedConnection);
-    connect(ui->tabAComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onTabSelection(int)));
-    connect(ui->tabBComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onTabSelection(int)));
-    connect(ui->entryAComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onEntrySelected(int)));
-    connect(ui->entryBComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onEntrySelected(int)));
-    connect(this, SIGNAL(finished(int)), this, SLOT(hide()));
-    connect(ui->acceptPushButton, SIGNAL(clicked()), SLOT(onCompare()));
-    connect(ui->colorPushButton, SIGNAL(clicked()), SLOT(oncolorChange()));
-    connect(ui->advancedPushButton, SIGNAL(toggled(bool)), SLOT(onAdvancedClicked(bool)));
+    connect(guiHelper, &GuiHelper::tabsUpdated, this, &ComparisonDialog::loadTabs, Qt::QueuedConnection);
+    //connect(ui->tabAComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ComparisonDialog::onTabSelection);
+    connect(ui->tabAComboBox, SIGNAL(currentIndexChanged(int)),this,SLOT(onTabSelection(int)));
+    //connect(ui->tabBComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ComparisonDialog::onTabSelection);
+    connect(ui->tabBComboBox, SIGNAL(currentIndexChanged(int)),this,SLOT(onTabSelection(int)));
+    //connect(ui->entryAComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ComparisonDialog::onEntrySelected);
+    connect(ui->entryAComboBox, SIGNAL(currentIndexChanged(int)),this,SLOT(onEntrySelected(int)));
+    //connect(ui->entryBComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ComparisonDialog::onEntrySelected);
+    connect(ui->entryBComboBox, SIGNAL(currentIndexChanged(int)),this,SLOT(onEntrySelected(int)));
+    connect(ui->tabBComboBox, SIGNAL(currentIndexChanged(int)),this,SLOT(onTabSelection(int)));
+    connect(this, &ComparisonDialog::finished, this, &ComparisonDialog::hide);
+    connect(ui->acceptPushButton, &QPushButton::clicked, this, &ComparisonDialog::onCompare);
+    connect(ui->colorPushButton, &QPushButton::clicked, this, &ComparisonDialog::oncolorChange);
+    connect(ui->advancedPushButton, &QPushButton::toggled, this, &ComparisonDialog::onAdvancedClicked);
     loadTabs();
 
     //qDebug() << "Created" << this;
@@ -414,7 +417,7 @@ void ComparisonDialog::onTabSelection(int index)
             entryCombo = ui->entryBComboBox;
         }
         refreshEntries(entryCombo, tabs.at(index)->getBlockCount());
-        connect(tabs.at(index),SIGNAL(entriesChanged()), SLOT(onTabEntriesChanged()),Qt::UniqueConnection);
+        connect(tabs.at(index), &TabAbstract::entriesChanged, this, &ComparisonDialog::onTabEntriesChanged,Qt::UniqueConnection);
 
     } else {
         guiHelper->getLogger()->logError(tr("Invalid index for tabs %1").arg(index));
@@ -487,10 +490,9 @@ void ComparisonDialog::onCompare()
         qFatal("Cannot allocate memory for workerThread X{");
     }
     worker->moveToThread(workerThread);
-    connect(workerThread, SIGNAL(started()), worker, SLOT(compare()));
-  //  connect(workerThread, SIGNAL(finished()), worker,SLOT(deleteLater()));
-    connect(worker,SIGNAL(progress(int)), ui->progressBar, SLOT(setValue(int)));
-    connect(worker,SIGNAL(finishComparing(int)), SLOT(endOfComparison(int)));
+    connect(workerThread, &QThread::started, worker, &CompareWorker::compare);
+    connect(worker, &CompareWorker::progress, ui->progressBar, &QProgressBar::setValue);
+    connect(worker, &CompareWorker::finishComparing, this, &ComparisonDialog::endOfComparison);
 
     ui->stackedWidget->setCurrentIndex(1);
     compareTimer.restart();
@@ -600,7 +602,7 @@ void ComparisonDialog::refreshTabs(QComboBox *tabBox)
             index = i;
     }
     if (tabs.size() > 0) {
-        connect(tabs.at(tabBox->currentIndex()),SIGNAL(entriesChanged()), SLOT(onTabEntriesChanged()),Qt::UniqueConnection);
+        connect(tabs.at(tabBox->currentIndex()), &TabAbstract::entriesChanged, this, &ComparisonDialog::onTabEntriesChanged,Qt::UniqueConnection);
     }
     tabBox->setCurrentIndex(index);
     tabBox->blockSignals(false);

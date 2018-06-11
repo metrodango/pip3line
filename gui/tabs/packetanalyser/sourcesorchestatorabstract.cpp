@@ -30,7 +30,7 @@ bool SourcesOrchestatorAbstract::isForwarder() const
     return forwarder;
 }
 
-void SourcesOrchestatorAbstract::sourceReflexionChanged(bool value)
+void SourcesOrchestatorAbstract::sourceReflexionChanged(const bool &value)
 {
     if (forwarder != value) {
         forwarder = value;
@@ -45,12 +45,12 @@ QWidget *SourcesOrchestatorAbstract::requestControlGui(QWidget * parent)
         qFatal("Cannot allocate memory for DefaultControlGui X{");
     }
 
-    connect(wid, SIGNAL(start()), this, SLOT(start()),Qt::QueuedConnection);
-    connect(wid, SIGNAL(stop()), this, SLOT(stop()),Qt::QueuedConnection);
-    connect(wid, SIGNAL(reset()), this, SLOT(restart()),Qt::QueuedConnection);
-    connect(this, SIGNAL(started()), wid, SLOT(receiveStart()), Qt::QueuedConnection);
-    connect(this, SIGNAL(stopped()), wid, SLOT(receiveStop()), Qt::QueuedConnection);
-    connect(wid, SIGNAL(requestConfPanel()), this, SIGNAL(guiRequested()));
+    connect(wid, &DefaultControlGui::start, this, &SourcesOrchestatorAbstract::start,Qt::QueuedConnection);
+    connect(wid, &DefaultControlGui::stop, this, &SourcesOrchestatorAbstract::stop,Qt::QueuedConnection);
+    connect(wid, &DefaultControlGui::reset, this, &SourcesOrchestatorAbstract::restart,Qt::QueuedConnection);
+    connect(this, &SourcesOrchestatorAbstract::started, wid, &DefaultControlGui::receiveStart, Qt::QueuedConnection);
+    connect(this, &SourcesOrchestatorAbstract::stopped, wid, &DefaultControlGui::receiveStop, Qt::QueuedConnection);
+    connect(wid, &DefaultControlGui::requestConfPanel, this, &SourcesOrchestatorAbstract::guiRequested);
 
     return wid;
 }
@@ -102,7 +102,7 @@ void SourcesOrchestatorAbstract::setConfiguration(QHash<QString, QString> conf)
     qDebug() << "Configuration size" << conf.size();
 }
 
-void SourcesOrchestatorAbstract::postPacket(Packet *packet)
+void SourcesOrchestatorAbstract::postPacket(QSharedPointer<Packet> packet)
 {
     if (packet->isInjected())
         emit packetInjected(packet);
@@ -120,7 +120,7 @@ QWidget *SourcesOrchestatorAbstract::getControlGui(QWidget *parent)
     if (controlGui == nullptr) {
         controlGui = requestControlGui(parent);
         if (controlGui != nullptr)
-            connect(controlGui, SIGNAL(destroyed(QObject*)), this, SLOT(onControlGuiDestroyed()));
+            connect(controlGui, &QWidget::destroyed, this, &SourcesOrchestatorAbstract::onControlGuiDestroyed);
     }
     return controlGui;
 }
@@ -130,7 +130,7 @@ QWidget *SourcesOrchestatorAbstract::getConfGui(QWidget *parent)
     if (confgui == nullptr) {
         confgui = requestConfGui(parent);
         if (confgui != nullptr)
-            connect(confgui, SIGNAL(destroyed(QObject*)), this, SLOT(onConfigGuiDestroyed()));
+            connect(confgui, &QWidget::destroyed, this, &SourcesOrchestatorAbstract::onConfigGuiDestroyed);
     }
 
     return confgui;
@@ -176,7 +176,7 @@ bool SourcesOrchestatorAbstract::restart()
 
 void SourcesOrchestatorAbstract::onBlockReceived(Block *block)
 {
-    Packet * pac = new(std::nothrow) Packet(block);
+    QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet(block));
     if (pac == nullptr) {
         qFatal("Cannot allocate Packet X{");
     }
@@ -205,8 +205,12 @@ QStringList SourcesOrchestatorAbstract::initSourcesStrings()
          << "UDP proxy"
          << "External Proxy (TCP)"
          << "External Proxy (UDP)"
-         << "SOCKS 5 Proxy";
-
+         << "SOCKS 5 Proxy"
+#if defined(Q_OS_WIN32)
+         << "Named Pipe client";
+#else
+         << "UNIX Local socket client";
+#endif
     return list;
 }
 

@@ -23,8 +23,9 @@ XorWidget::XorWidget(Xor *ntransform, QWidget *parent) :
     ui->setupUi(this);
     ui->typeComboBox->setFocusPolicy(Qt::StrongFocus);
     ui->typeComboBox->installEventFilter(this);
-    connect(ui->keyPlainTextEdit,SIGNAL(textChanged()),this,SLOT(onKeyChange()));
-    connect(ui->fromHexcheckBox,SIGNAL(toggled(bool)),this,SLOT(onFromHexChange(bool)));
+    connect(ui->keyPlainTextEdit, &QPlainTextEdit::textChanged,this, &XorWidget::onKeyChange);
+    connect(ui->fromHexcheckBox, &QCheckBox::toggled, this, &XorWidget::onFromHexChange);
+    //connect(ui->typeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &XorWidget::onTypeChange);
     connect(ui->typeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onTypeChange(int)));
     ui->keyPlainTextEdit->appendPlainText(transform->getKey());
     ui->fromHexcheckBox->setChecked(transform->isFromHex());
@@ -76,6 +77,5 @@ bool XorWidget::eventFilter(QObject *o, QEvent *e)
 
 void XorWidget::focusOutEvent(QFocusEvent *event)
 {
-    qDebug() << "focusOutEvent" << event->lostFocus();
     QWidget::focusOutEvent(event);
 }

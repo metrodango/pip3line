@@ -1,4 +1,5 @@
 *.o
+build-*
 *.so
 *.txt.user
 *.pro.user*

@@ -58,6 +58,8 @@ Released under AGPL see LICENSE for more information
 #include "byterot.h"
 #include "hmactransform.h"
 #include "crc32.h"
+#include "findandreplace.h"
+#include "tds7_enc.h"
 #include "../../version.h"
 
 #if QT_VERSION >= 0x050000
@@ -370,6 +372,16 @@ TransformAbstract *BasePlugins::getTransform(QString name)
         if (ta == nullptr) {
             qFatal("Cannot allocate memory for XmlQuery X{");
         }
+    } else if (name == FindAndReplace::id) {
+        ta = new(std::nothrow) FindAndReplace();
+        if (ta == nullptr) {
+            qFatal("Cannot allocate memory for FindAndReplace X{");
+        }
+    } else if (name == TDS7_ENC::id) {
+        ta = new(std::nothrow) TDS7_ENC();
+        if (ta == nullptr) {
+            qFatal("Cannot allocate memory for TDS7_ENC X{");
+        }
     }
 
     return ta;
@@ -414,6 +426,7 @@ const QStringList BasePlugins::getTransformList(QString typeName)
         enclist.append(Substitution::id);
         enclist.append(ByteRot::id);
         enclist.append(HMACTransform::id);
+        enclist.append(TDS7_ENC::id);
     } else if (typeName == DEFAULT_TYPE_HACKING) {
         enclist.append(Hieroglyphy::id);
         enclist.append(RandomCase::id);
@@ -432,6 +445,7 @@ const QStringList BasePlugins::getTransformList(QString typeName)
         enclist.append(Cut::id);
         enclist.append(Split::id);
         enclist.append(RegularExp::id);
+        enclist.append(FindAndReplace::id);
         enclist.append(XmlQuery::id);
         enclist.append(NetworkMaskIPv4::id);
         enclist.append(NetworkMaskIPv6::id);

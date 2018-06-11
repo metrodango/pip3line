@@ -26,6 +26,7 @@ class NewViewMenu : public QMenu
         QAction * newHexViewAction;
         QAction * newTextViewAction;
         QAction * newDefaultTextViewAction;
+        QAction * newJsonViewAction;
         TabAbstract::ViewTab viewData;
         GuiHelper *guiHelper;
 };

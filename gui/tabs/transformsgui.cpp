@@ -76,14 +76,15 @@ TransformsGui::TransformsGui(GuiHelper *guiHelper, QWidget *parent) :
     ui->savedComboBox->installEventFilter(guiHelper);
     buildSavedCombo();
 
-    connect(ui->savedComboBox, SIGNAL(currentIndexChanged(QString)), SLOT(onSavedSelected(QString)));
-    connect(ui->loadPushButton, SIGNAL(clicked()), SLOT(onLoadState()));
-    connect(ui->savePushButton, SIGNAL(clicked()), SLOT(onSaveState()));
-    connect(ui->resetPushButton, SIGNAL(clicked()), SLOT(resetAll()));
-    connect(ui->registerPushButton,SIGNAL(clicked()), SLOT(onRegisterChain()));
-    connect(ui->massProcessingPushButton, SIGNAL(clicked()), SLOT(onMassProcessing()));
-    connect(transformFactory, SIGNAL(savedUpdated()), SLOT(buildSavedCombo()));
-    connect(ui->autoCopyLastPushButton, SIGNAL(toggled(bool)), this, SLOT(onAutoCopychanged(bool)));
+    //connect(ui->savedComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &TransformsGui::onSavedSelected);
+    connect(ui->savedComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onSavedSelected(QString)));
+    connect(ui->loadPushButton, &QPushButton::clicked, this, &TransformsGui::onLoadState);
+    connect(ui->savePushButton, &QPushButton::clicked, this, &TransformsGui::onSaveState);
+    connect(ui->resetPushButton, &QPushButton::clicked, this, &TransformsGui::resetAll);
+    connect(ui->registerPushButton, &QPushButton::clicked, this, &TransformsGui::onRegisterChain);
+    connect(ui->massProcessingPushButton, &QPushButton::clicked, this, &TransformsGui::onMassProcessing);
+    connect(transformFactory, &TransformMgmt::savedUpdated, this, &TransformsGui::buildSavedCombo);
+    connect(ui->autoCopyLastPushButton, &QPushButton::toggled, this, &TransformsGui::onAutoCopychanged);
 }
 
 TransformsGui::~TransformsGui()
@@ -123,7 +124,7 @@ void TransformsGui::setCurrentChainConf(const QString &conf, bool ignoreErrors)
         return;
 
     MessageDialog errorDialog(guiHelper);
-    connect(transformFactory, SIGNAL(error(QString,QString)), &errorDialog, SLOT(logError(QString)));
+    connect(transformFactory, &TransformMgmt::error, &errorDialog, &MessageDialog::logError);
     QXmlStreamReader reader(conf);
 
     TransformChain talist = transformFactory->loadConfFromXML(&reader);
@@ -304,7 +305,7 @@ void TransformsGui::processDeletionRequest()
             TransformWidget *suiv = transformWidgetList.at(i + 1);
             transformWidgetList.takeAt(i);
             delete transformWidget;
-            connect(prev,SIGNAL(updated()),suiv,SLOT(updatingFrom()));
+            connect(prev, &TransformWidget::updated, suiv, &TransformWidget::updatingFrom);
             prev->forceUpdating();
         }
 
@@ -339,7 +340,7 @@ void TransformsGui::addWidget(TransformWidget *transformWidget)
     if (!transformWidgetList.isEmpty()) { // only if there is already another TransformWidget
         TransformWidget *previousTw = transformWidgetList.last();
         previousTw->setAutoCopyTextToClipboard(false);
-        connect(previousTw,SIGNAL(updated()),transformWidget,SLOT(updatingFrom()));
+        connect(previousTw, &TransformWidget::updated,transformWidget, &TransformWidget::updatingFrom);
     }
 
     transformWidget->setAutoCopyTextToClipboard(ui->autoCopyLastPushButton->isChecked());
@@ -354,15 +355,15 @@ void TransformsGui::addWidget(TransformWidget *transformWidget)
 
 void TransformsGui::baseTransformWidgetconfiguration(TransformWidget *transformWidget)
 {
-    connect(transformWidget, SIGNAL(error(QString,QString)),logger, SLOT(logError(QString,QString)));
-    connect(transformWidget, SIGNAL(warning(QString,QString)),logger, SLOT(logWarning(QString,QString)));
-    connect(transformWidget, SIGNAL(status(QString,QString)),logger, SLOT(logStatus(QString,QString)));
-    connect(transformWidget, SIGNAL(transfoRequest()),this,SLOT(processNewTransformation()));
-    connect(transformWidget, SIGNAL(deletionRequest()), this, SLOT(processDeletionRequest()));
-    connect(transformWidget, SIGNAL(transformChanged()), this, SLOT(onTransformChanged()),Qt::QueuedConnection);
-    connect(transformWidget, SIGNAL(tryNewName(QString)), this, SLOT(onNameChangeRequest(QString)));
-    connect(transformWidget, SIGNAL(foldRequest()), this, SLOT(onFoldRequest()));
-    connect(transformWidget, SIGNAL(insertRequest()), this, SLOT(onInsertRequest()));
+    connect(transformWidget, &TransformWidget::error,logger, &LoggerWidget::logError);
+    connect(transformWidget, &TransformWidget::warning,logger, &LoggerWidget::logWarning);
+    connect(transformWidget, &TransformWidget::status,logger, &LoggerWidget::logStatus);
+    connect(transformWidget, &TransformWidget::transfoRequest,this,&TransformsGui::processNewTransformation);
+    connect(transformWidget, &TransformWidget::deletionRequest, this, &TransformsGui::processDeletionRequest);
+    connect(transformWidget, &TransformWidget::transformChanged, this, &TransformsGui::onTransformChanged,Qt::QueuedConnection);
+    connect(transformWidget, &TransformWidget::tryNewName, this, &TransformsGui::onNameChangeRequest);
+    connect(transformWidget, &TransformWidget::foldRequest, this, &TransformsGui::onFoldRequest);
+    connect(transformWidget, &TransformWidget::insertRequest, this, &TransformsGui::onInsertRequest);
 }
 
 void TransformsGui::onSaveState()
@@ -374,7 +375,7 @@ void TransformsGui::onSaveState()
 
     MessageDialog errorDialog(guiHelper);
     errorDialog.setJustShowMessages(true);
-    connect(transformFactory, SIGNAL(error(QString,QString)), &errorDialog, SLOT(logError(QString)));
+    connect(transformFactory, &TransformMgmt::error, &errorDialog, &MessageDialog::logError);
 
     TransformChain transformList = getCurrentTransformChain();
 
@@ -399,7 +400,7 @@ void TransformsGui::onSaveState()
 void TransformsGui::onLoadState()
 {
     MessageDialog errorDialog(guiHelper);
-    connect(transformFactory, SIGNAL(error(QString,QString)), &errorDialog, SLOT(logError(QString)));
+    connect(transformFactory, &TransformMgmt::error, &errorDialog, &MessageDialog::logError);
 
     QString fileName = QFileDialog::getOpenFileName(this,tr("Choose state file to load from"),GuiConst::GLOBAL_LAST_PATH,tr("XML documents (*.xml);; All (*)"));
 
@@ -456,7 +457,7 @@ void TransformsGui::onRegisterChain()
     }
 }
 
-void TransformsGui::onSavedSelected(QString name)
+void TransformsGui::onSavedSelected(const QString &name)
 {
     if (name.isEmpty()) {
         QMessageBox::critical(this,tr("Error"),tr("The selected name is empty T_T"),QMessageBox::Ok);
@@ -542,7 +543,7 @@ void TransformsGui::onFoldRequest()
 
             fv->enableDelete(transformWidgetList.last() != requester);
 
-            connect(fv, SIGNAL(unfoldRequested()), this, SLOT(onUnfoldRequest()));
+            connect(fv, &FoldedView::unfoldRequested, this, &TransformsGui::onUnfoldRequest);
 
             ui->mainLayout->insertWidget(index,fv,0, Qt::AlignTop);
             bool allFolded = true;
@@ -613,16 +614,16 @@ void TransformsGui::onInsertRequest()
 
             baseTransformWidgetconfiguration(newtw);
 
-            connect(newtw,SIGNAL(updated()),requester,SLOT(updatingFrom())); // connect the new one to the requester
+            connect(newtw, &TransformWidget::updated,requester, &TransformWidget::updatingFrom); // connect the new one to the requester
 
             if (index == 0) {
                 firstTransformWidget = newtw;
             } else if (index < transformWidgetList.size() - 1) {
                 TransformWidget *prev = transformWidgetList.at(index - 1);
 
-                disconnect(prev, SIGNAL(updated()), requester, SLOT(updatingFrom())); // disconnect the link between the previous and the requester
+                disconnect(prev, &TransformWidget::updated, requester, &TransformWidget::updatingFrom); // disconnect the link between the previous and the requester
 
-                connect(prev,SIGNAL(updated()),newtw,SLOT(updatingFrom()));
+                connect(prev, &TransformWidget::updated, newtw, &TransformWidget::updatingFrom);
 
                 prev->forceUpdating();
             }

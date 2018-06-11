@@ -39,11 +39,13 @@ class TabAbstract : public QWidget
         virtual ByteTableView *getHexTableView(int blockIndex) = 0;
         virtual void setData(const QByteArray &data) = 0;
         virtual bool canReceiveData();
+        virtual void registerToGlobal();
+        virtual void unregisterFromGlobal();
         GuiConst::AVAILABLE_PRETABS getPreTabType() const;
         void setPreTabType(const GuiConst::AVAILABLE_PRETABS &value);
         virtual BaseStateAbstract *getStateMngtObj() = 0;
         GuiHelper * getHelper();
-        enum ViewType {UNDEFINED = 0, HEXVIEW = 1, TEXTVIEW = 2, DEFAULTTEXT = 3};
+        enum ViewType {UNDEFINED = 0, HEXVIEW = 1, TEXTVIEW = 2, DEFAULTTEXT = 3, JSONVIEW = 4};
         struct ViewTab {
                 ViewTab() : transform(nullptr), type(UNDEFINED),tabName(GuiConst::UNDEFINED_TEXT) {}
                 TransformAbstract * transform;
@@ -54,7 +56,6 @@ class TabAbstract : public QWidget
         static const int WINDOWED_TAB;
     public slots:
         virtual void setName(const QString & name);
-    protected slots:
         virtual void onDetach();
 
     signals:

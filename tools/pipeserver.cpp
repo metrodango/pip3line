@@ -41,7 +41,7 @@ void LocalSocketProcessor::run()
 
         emit status(tr("New Client for %1").arg(socketDescriptor), PIPE_SOCKET);
 
-        connect(socket, SIGNAL(disconnected()), this, SLOT(stop()));
+        connect(socket, &QLocalSocket::disconnected, this, &LocalSocketProcessor::stop);
         in  = socket;
         if (out == nullptr)
             out = in;
@@ -59,7 +59,7 @@ PipeServer::PipeServer(TransformMgmt *tFactory, QObject *parent) :
 {
     pipeServer = new(std::nothrow) InternalLocalSocketServer(parent);
     if (pipeServer != nullptr) {
-        connect(pipeServer, SIGNAL(newClient(quintptr)), this, SLOT(processingNewClient(quintptr)));
+        connect(pipeServer, &InternalLocalSocketServer::newClient, this, &PipeServer::processingNewClient);
     }  else {
         qFatal("Cannot allocate memory pipe server X{");
     }
@@ -112,9 +112,10 @@ void PipeServer::processingNewClient(quintptr socketDescriptor)
 {
     LocalSocketProcessor * processor = new(std::nothrow) LocalSocketProcessor(transformFactory, socketDescriptor,this);
     if (processor != nullptr) {
-        connect(processor,SIGNAL(finished(LocalSocketProcessor *)), this, SLOT(processorFinished(LocalSocketProcessor *)), Qt::QueuedConnection);
-        connect(processor,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-        connect(processor,SIGNAL(status(QString,QString)), this, SLOT(logStatus(QString,QString)));
+        connect(processor, &LocalSocketProcessor::finished, this, &PipeServer::processorFinished, Qt::QueuedConnection);
+        connect(processor, &LocalSocketProcessor::error, this, &PipeServer::logError);
+        connect(processor, &LocalSocketProcessor::status, this, &PipeServer::logStatus);
+        //connect(this, &PipeServer::newTransformChain, processor, qOverload<const QString &>(&LocalSocketProcessor::setTransformsChain));
         connect(this, SIGNAL(newTransformChain(QString)), processor, SLOT(setTransformsChain(QString)));
 
         processor->setOutput(output);

@@ -16,16 +16,12 @@ class ConnectionDetails {
         bool operator==(const ConnectionDetails& other) const;
         ConnectionDetails& operator=(const ConnectionDetails& other);
         QDateTime getCreationTimeStamp() const;
-
         int getSid() const;
         void setSid(int value);
-
         bool isTlsEnabled() const;
         void setTlsEnabled(bool value);
-
         QString getHostname() const;
         void setHostname(const QString &value);
-
     private:
         QHostAddress adress;
         quint16 port;

@@ -27,6 +27,7 @@ Released under AGPL see LICENSE for more information
 #include "shared/guiconst.h"
 #include "state/basestateabstract.h"
 #include "state/closingstate.h"
+#include "tabs/packetanalyser/packet.h"
 
 class QAction;
 
@@ -34,7 +35,7 @@ class MainTabs : public QTabWidget
 {
         Q_OBJECT
     public:
-        explicit MainTabs(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit MainTabs(GuiHelper *guiHelper);
         ~MainTabs();
         void askForRenaming(int index);
         void clearTabs();
@@ -49,7 +50,7 @@ class MainTabs : public QTabWidget
         TabAbstract *newFileTab(QString fileName = QString());
         TabAbstract *newHexEditorTab(QByteArray data = QByteArray());
         TabAbstract *newCurrentMemTab();
-        TabAbstract *newPacketAnalyserTab();
+        TabAbstract *newPacketAnalyserTab(QList<QSharedPointer<Packet> > packets = QList<QSharedPointer<Packet> >());
         int integrateTab(TabAbstract * newTab);
         void onDeleteTab(int index);
         void showLogs();
@@ -70,6 +71,7 @@ class MainTabs : public QTabWidget
         bool eventFilter(QObject * receiver, QEvent * event);
         void clearFloatingWindows();
         void changeEvent(QEvent * event);
+        QString generateUniqueName(const QString & name);
 
         QTabBar * tabBarRef;
         GuiHelper *guiHelper;

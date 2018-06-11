@@ -11,7 +11,6 @@ Released under AGPL see LICENSE for more information
 #include "massprocessingdialog.h"
 #include "ui_massprocessingdialog.h"
 #include "../tools/textprocessor.h"
-#include "../tools/binaryprocessor.h"
 #include "tabs/transformsgui.h"
 #include "../tools/processor.h"
 #include "../tools/tcpserver.h"
@@ -78,22 +77,24 @@ MassProcessingDialog::MassProcessingDialog(GuiHelper *helper, TransformsGui *ntG
 
 
 
-    connect(&statTimer, SIGNAL(timeout()), SLOT(stats()));
-    connect(ui->inputComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onInputChanged(int)));
-    connect(ui->outputComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onOutputChanged(int)));
-    connect(ui->refreshIPsPushButton, SIGNAL(clicked()), SLOT(refreshIPs()));
-    connect(ui->clearPushButton, SIGNAL(clicked()), SLOT(clearOnScreenOutput()));
-    connect(ui->inputFilePushButton, SIGNAL(clicked()), SLOT(selectInputFile()));
-    connect(ui->outputFileButton, SIGNAL(clicked()), SLOT(selectOutputFile()));
-    connect(ui->stopPushButton, SIGNAL(clicked()), SLOT(stopCurrentServer()));
-    connect(ui->restartPushButton, SIGNAL(clicked()), SLOT(restartCurrentServer()));
-    connect(ui->separatorLineEdit, SIGNAL(textChanged(QString)), SLOT(onSeparatorChanged(QString)));
-    connect(ui->useSocketForOutputcheckBox, SIGNAL(toggled(bool)), SLOT(onUseSocketForOutput(bool)));
-    connect(ui->keepSynchronizedCheckBox, SIGNAL(toggled(bool)), SLOT(onKeepSynchronize(bool)));
-    connect(ui->refreshConfPushButton, SIGNAL(clicked()), SLOT(refreshTransformConf()));
-    connect(ui->logsCheckBox, SIGNAL(toggled(bool)), SLOT(onLogsEnabled(bool)));
+    connect(&statTimer, &QTimer::timeout, this, &MassProcessingDialog::stats);
+    //connect(ui->inputComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &MassProcessingDialog::onInputChanged);
+    connect(ui->inputComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onInputChanged(int)));
+    //connect(ui->outputComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &MassProcessingDialog::onOutputChanged);
+    connect(ui->outputComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onOutputChanged(int)));
+    connect(ui->refreshIPsPushButton, &QPushButton::clicked, this, &MassProcessingDialog::refreshIPs);
+    connect(ui->clearPushButton, &QPushButton::clicked, this, &MassProcessingDialog::clearOnScreenOutput);
+    connect(ui->inputFilePushButton, &QPushButton::clicked, this, &MassProcessingDialog::selectInputFile);
+    connect(ui->outputFileButton, &QPushButton::clicked, this, &MassProcessingDialog::selectOutputFile);
+    connect(ui->stopPushButton, &QPushButton::clicked, this, &MassProcessingDialog::stopCurrentServer);
+    connect(ui->restartPushButton, &QPushButton::clicked, this, &MassProcessingDialog::restartCurrentServer);
+    connect(ui->separatorLineEdit, &QLineEdit::textChanged, this, &MassProcessingDialog::onSeparatorChanged);
+    connect(ui->useSocketForOutputcheckBox, &QCheckBox::toggled, this, &MassProcessingDialog::onUseSocketForOutput);
+    connect(ui->keepSynchronizedCheckBox, &QCheckBox::toggled, this, &MassProcessingDialog::onKeepSynchronize);
+    connect(ui->refreshConfPushButton, &QPushButton::clicked, this, &MassProcessingDialog::refreshTransformConf);
+    connect(ui->logsCheckBox, &QCheckBox::toggled, this, &MassProcessingDialog::onLogsEnabled);
 
-    connect(tGui, SIGNAL(chainChanged(QString)), this, SLOT(setTranformChain(QString)), Qt::QueuedConnection);
+    connect(tGui, &TransformsGui::chainChanged, this, &MassProcessingDialog::setTranformChain, Qt::QueuedConnection);
 
   //  ui->outputComboBox->setCurrentIndex(0);
   //  ui->outputFileLineEdit->setText("/dev/null");
@@ -186,9 +187,9 @@ void MassProcessingDialog::on_processingPushButton_clicked()
             processor->setDecoding(ui->decodeCheckBox->isChecked());
             processor->setEncoding(ui->encodeCheckBox->isChecked());
 
-            connect(processor, SIGNAL(error(QString,QString)), logger, SLOT(logError(QString,QString)),Qt::QueuedConnection);
-            connect(processor, SIGNAL(status(QString,QString)), logger, SLOT(logStatus(QString,QString)),Qt::QueuedConnection);
-            connect(processor,SIGNAL(finished()),this,SLOT(releasingThread()));
+            connect(processor, &Processor::error, logger, &LoggerWidget::logError,Qt::QueuedConnection);
+            connect(processor, &Processor::status, logger, &LoggerWidget::logStatus ,Qt::QueuedConnection);
+            connect(processor, &Processor::finished, this, &MassProcessingDialog::releasingThread);
 
             processor->start();
             statTimer.start(1000);
@@ -211,7 +212,9 @@ void MassProcessingDialog::on_processingPushButton_clicked()
             if (tcpServer != nullptr) {
                 tcpServer->setIP(ui->ipsComboBox->currentText());
                 tcpServer->setPort(ui->portSpinBox->value());
-                connect(ui->portSpinBox, SIGNAL(valueChanged(int)), tcpServer,SLOT(setPort(int)));
+                //connect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), tcpServer, &TcpServer::setPort);
+                connect(ui->portSpinBox, SIGNAL(valueChanged(int)), tcpServer, SLOT(setPort(int)));
+                //connect(ui->ipsComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), tcpServer, &TcpServer::setIP);
                 connect(ui->ipsComboBox, SIGNAL(currentIndexChanged(QString)), tcpServer, SLOT(setIP(QString)));
             } else {
                 qFatal("Cannot allocate memory for tcpServer X{");
@@ -222,7 +225,7 @@ void MassProcessingDialog::on_processingPushButton_clicked()
             PipeServer * pipeServer = new(std::nothrow) PipeServer(transformFactory,this);
             if (pipeServer != nullptr) {
                 pipeServer->setPipeName(ui->pipeNameLineEdit->text());
-                connect(ui->pipeNameLineEdit, SIGNAL(textChanged(QString)), pipeServer, SLOT(setPipeName(QString)));
+                connect(ui->pipeNameLineEdit, &QLineEdit::textChanged, pipeServer, &PipeServer::setPipeName);
                 server = pipeServer;
             } else {
                 qFatal("Cannot allocate memory for pipeServer X{");
@@ -230,11 +233,11 @@ void MassProcessingDialog::on_processingPushButton_clicked()
         }
 
         if (server != nullptr) {
-            connect(server, SIGNAL(error(QString,QString)), logger,SLOT(logError(QString,QString)),Qt::QueuedConnection);
-            connect(server, SIGNAL(status(QString,QString)), logger,SLOT(logStatus(QString,QString)),Qt::QueuedConnection);
-            connect(ui->encodeCheckBox, SIGNAL(toggled(bool)), server,SLOT(setEncoding(bool)));
-            connect(ui->decodeCheckBox, SIGNAL(toggled(bool)), server,SLOT(setDecoding(bool)));
-            connect(this, SIGNAL(newServerTransformChain(QString)), server,SLOT(setTransformations(QString)), Qt::QueuedConnection);
+            connect(server, &ServerAbstract::error, logger, &LoggerWidget::logError,Qt::QueuedConnection);
+            connect(server, &ServerAbstract::status, logger, &LoggerWidget::logStatus,Qt::QueuedConnection);
+            connect(ui->encodeCheckBox, &QCheckBox::toggled, server, &ServerAbstract::setEncoding);
+            connect(ui->decodeCheckBox, &QCheckBox::toggled, server, &ServerAbstract::setDecoding);
+            connect(this, &MassProcessingDialog::newServerTransformChain, server, &ServerAbstract::setTransformations, Qt::QueuedConnection);
 
             server->setOutput(output);
             server->setTransformations(tGui->getCurrentChainConf());
@@ -443,10 +446,10 @@ void MassProcessingDialog::onKeepSynchronize(bool checked)
 {
     if (checked) {
         refreshTransformConf();
-        connect(tGui, SIGNAL(chainChanged(QString)), this, SLOT(setTranformChain(QString)), Qt::QueuedConnection);
+        connect(tGui, &TransformsGui::chainChanged, this, &MassProcessingDialog::setTranformChain, Qt::QueuedConnection);
         ui->refreshConfPushButton->setEnabled(false);
     } else {
-        disconnect(tGui, SIGNAL(chainChanged(QString)), this, SLOT(setTranformChain(QString)));
+        disconnect(tGui, &TransformsGui::chainChanged, this, &MassProcessingDialog::setTranformChain);
         ui->refreshConfPushButton->setEnabled(true);
     }
 }

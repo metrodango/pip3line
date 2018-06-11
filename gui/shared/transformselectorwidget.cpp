@@ -17,6 +17,7 @@ TransformSelectorWidget::TransformSelectorWidget(GuiHelper *guiHelper, QWidget *
     guiHelper->buildTransformComboBox(ui->transformComboBox);
     ui->directionGroupBox->setVisible(false);
 
+    //connect(ui->transformComboBox, qOverload<const QString &>(&QComboBox::currentIndexChanged), this, &TransformSelectorWidget::onTransformSelected);
     connect(ui->transformComboBox, SIGNAL(currentIndexChanged(QString)), this, SLOT(onTransformSelected(QString)));
 }
 
@@ -25,7 +26,7 @@ TransformSelectorWidget::~TransformSelectorWidget()
     delete ui;
 }
 
-void TransformSelectorWidget::onTransformSelected(QString name)
+void TransformSelectorWidget::onTransformSelected(const QString &name)
 {
     if (confGui != nullptr)
         ui->mainLayout->removeWidget(confGui);
@@ -36,7 +37,7 @@ void TransformSelectorWidget::onTransformSelected(QString name)
         currentTransform = transformFactory->getTransform(name);
 
         if (currentTransform != nullptr) {
-            connect(currentTransform, SIGNAL(destroyed()), this, SLOT(onTransformDelete()));
+            connect(currentTransform, &TransformAbstract::destroyed, this, &TransformSelectorWidget::onTransformDelete);
             if (currentTransform->isTwoWays()) {
                 ui->inboundRadioButton->setText(currentTransform->inboundString());
                 ui->outboundRadioButton->setText(currentTransform->outboundString());

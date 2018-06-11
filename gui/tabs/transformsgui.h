@@ -55,7 +55,7 @@ class TransformsGui : public TabAbstract
         void onSaveState();
         void onLoadState();
         void onRegisterChain();
-        void onSavedSelected(QString name);
+        void onSavedSelected(const QString &name);
         void buildSavedCombo();
         void onTransformChanged();
         void onNameChangeRequest(QString name);

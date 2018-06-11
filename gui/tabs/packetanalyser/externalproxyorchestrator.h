@@ -13,7 +13,7 @@ class ExternalProxyOrchestrator : public SourcesOrchestatorAbstract
         BlocksSource * getBlockSource(int index);
         int blockSourceCount() const;
     public slots:
-        void postPacket(Packet * packet);
+        void postPacket(QSharedPointer<Packet> packet);
         bool start();
     private slots:
         void onBlockReceived(Block *block);

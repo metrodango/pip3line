@@ -12,7 +12,7 @@ class IPBlocksSources : public BlocksSource
 {
         Q_OBJECT
     public:
-        explicit IPBlocksSources(QHostAddress hostAddress = QHostAddress::LocalHost, quint16 hostPort = 443, QObject *parent = 0);
+        explicit IPBlocksSources(QHostAddress hostAddress = QHostAddress::LocalHost, quint16 hostPort = 443, QObject *parent = nullptr);
         virtual ~IPBlocksSources();
         virtual QHostAddress getHostAddress() const;
         virtual quint16 getHostPort() const;

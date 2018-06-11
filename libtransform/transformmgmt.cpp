@@ -58,6 +58,8 @@ TransformMgmt::~TransformMgmt()
 {
     unloadTransforms();
     unloadPlugins();
+
+    qDebug() << "deleting settings";
     if (settings != nullptr)
         delete settings;
 
@@ -70,6 +72,8 @@ TransformMgmt::~TransformMgmt()
          while (i.hasNext())
              cout << " => " << i.next() << endl;
     }
+
+    qDebug() << "end of destructor";
 }
 
 TransformMgmt *TransformMgmt::getGlobalInstance()
@@ -151,7 +155,7 @@ bool TransformMgmt::loadTransforms(bool verbose) {
     typesSet.insert(DEFAULT_TYPE_USER);
 
     typesList = typesSet.toList();
-    qSort(typesList);
+    typesList.sort(Qt::CaseInsensitive);
 
     // loading transforms from plugins
     QStringList enclist;
@@ -219,7 +223,7 @@ void TransformMgmt::saveInstance(TransformAbstract *ta)
     }
     else {
         transformInstances.insert(ta);
-        connect(ta,SIGNAL(destroyed()), this, SLOT(OnTransformDelete()));
+        connect(ta, &TransformAbstract::destroyed, this, &TransformMgmt::OnTransformDelete);
     }
     deletedLock.unlock();
 }
@@ -270,9 +274,8 @@ bool TransformMgmt::loadPlugins()
 
 #if defined(Q_OS_UNIX)
         filters << "*.so";
-#if defined(Q_OS_MAC)
+#elif defined(Q_OS_MAC)
         filters << "*.dylib";
-#endif
 #elif defined(Q_OS_WIN)
         filters << "*.dll";
 #endif
@@ -346,6 +349,8 @@ void TransformMgmt::unloadPlugins()
         loader->unload();
         delete loader;
     }
+
+    qDebug() << "all plugins unloaded";
 }
 
 void TransformMgmt::unloadTransforms() {
@@ -504,8 +509,8 @@ TransformChain TransformMgmt::loadConfFromXML(QXmlStreamReader *stream)
         if (ok) {
           ntw = getTransform(name);
           if (ntw != nullptr) {
-              connect(ntw,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-              connect(ntw,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
+              connect(ntw, &TransformAbstract::error, this, &TransformMgmt::logError);
+              connect(ntw, &TransformAbstract::warning, this, &TransformMgmt::logError);
 
               QXmlStreamAttributes attrs = stream->attributes();
 
@@ -519,8 +524,8 @@ TransformChain TransformMgmt::loadConfFromXML(QXmlStreamReader *stream)
                   delete ntw;
               } else {
                   transformChildren[order] = ntw;
-                  disconnect(ntw,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-                  disconnect(ntw,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
+                  disconnect(ntw, &TransformAbstract::error, this, &TransformMgmt::logError);
+                  disconnect(ntw, &TransformAbstract::warning, this, &TransformMgmt::logError);
               }
           }
         } else {
@@ -589,11 +594,11 @@ TransformAbstract *TransformMgmt::loadTransformFromConf(const QHash<QString, QSt
     if (confEle.contains(PROP_NAME)) {
         transf = getTransform(confEle.value(PROP_NAME));
         if (transf != nullptr) {
-            connect(transf,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-            connect(transf,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
+            connect(transf, &TransformAbstract::error, this, &TransformMgmt::logError);
+            connect(transf, &TransformAbstract::warning, this, &TransformMgmt::logError);
             transf->setConfiguration(confEle);
-            disconnect(transf,SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-            disconnect(transf,SIGNAL(warning(QString,QString)), this, SLOT(logError(QString,QString)));
+            disconnect(transf, &TransformAbstract::error, this, &TransformMgmt::logError);
+            disconnect(transf, &TransformAbstract::warning, this, &TransformMgmt::logError);
         }
     } else {
         emit error (tr("Missing property \"%1\" in the configuration").arg(PROP_NAME),id);
@@ -655,7 +660,7 @@ bool TransformMgmt::registerChainConf(const TransformChain &transfChain, bool pe
         QStringList userList = transformTypesList.value(DEFAULT_TYPE_USER, QStringList());
         if (!userList.contains(name)) {
             userList.append(name);
-            qSort(userList);
+            userList.sort(Qt::CaseInsensitive);
             transformTypesList.insert(DEFAULT_TYPE_USER, userList);
         }
         listLocker.unlock();
@@ -809,14 +814,14 @@ void TransformMgmt::registerPlugin(TransformFactoryPluginInterface *plugin)
         return;
     }
 
-    connect(callback, SIGNAL(error(QString,QString)), this, SLOT(logError(QString,QString)));
-    connect(callback, SIGNAL(warning(QString,QString)), this, SLOT(logWarning(QString,QString)));
-    connect(callback, SIGNAL(status(QString,QString)), this, SLOT(logStatus(QString,QString)));
+    connect(callback, &Pip3lineCallback::error, this, &TransformMgmt::logError);
+    connect(callback, &Pip3lineCallback::warning, this, &TransformMgmt::logWarning);
+    connect(callback, &Pip3lineCallback::status, this, &TransformMgmt::logStatus);
     callbackList.insert(plugin, callback);
     plugin->setCallBack(callback);
     // placed here to avoid locking the gui if some transformed are created dynamically during initialisation
     // and the signal gets emitted
-    connect(callback, SIGNAL(newTransform()), this, SLOT(loadTransforms()), Qt::QueuedConnection);
+    connect(callback, &Pip3lineCallback::newTransform, this, [=](void) { loadTransforms();}, Qt::QueuedConnection);
 }
 
 QSettings *TransformMgmt::getSettingsObj()

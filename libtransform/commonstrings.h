@@ -13,7 +13,7 @@ Released under AGPL see LICENSE for more information
 #include <QString>
 #include "libtransform_global.h"
 
-#define LIB_TRANSFORM_VERSION 16
+#define LIB_TRANSFORM_VERSION 17
 
 namespace Pip3lineConst {
     // Default types

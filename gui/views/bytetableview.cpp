@@ -75,7 +75,7 @@ HexLineEdit::HexLineEdit(QWidget *parent) : QLineEdit(parent)
     } else {
         setValidator(validator);
     }
-    connect(this, SIGNAL(textEdited(QString)), this, SLOT(onInputChanged()));
+    connect(this, &HexLineEdit::textEdited, this, &HexLineEdit::onInputChanged);
 }
 
 void HexLineEdit::onInputChanged()
@@ -119,7 +119,7 @@ QWidget *HexDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &
     if (editor == nullptr) {
         qFatal("Cannot allocate memory for delegate editor X{");
     }
-    connect(editor, SIGNAL(inputValid()), this, SLOT(onEditorValid()));
+    connect(editor, &HexLineEdit::inputValid, this, &HexDelegate::onEditorValid);
     return editor;
 }
 
@@ -368,7 +368,7 @@ ByteTableView::ByteTableView(QWidget *parent) :
     }
     setSelectionMode(QAbstractItemView::ContiguousSelection);
 
-    connect(this, SIGNAL(delayedSelection(int,int)), this, SLOT(selectBytes(int,int)),Qt::QueuedConnection);
+    connect(this, &ByteTableView::delayedSelection, this, &ByteTableView::selectBytes,Qt::QueuedConnection);
 
     // Do not touch the resize mode policy !!!
     // Fixed is the only one that has good performance
@@ -407,7 +407,7 @@ void ByteTableView::setModel(ByteItemModel *nmodel)
     currentModel = nmodel;
     searchObject = currentModel->getSource()->getSearchObject();
     if (searchObject != nullptr) {
-        connect(searchObject, SIGNAL(jumpRequest(quint64,quint64)), SLOT(gotoSearch(quint64,quint64)), Qt::QueuedConnection);
+        connect(searchObject, &SearchAbstract::jumpRequest, this, &ByteTableView::gotoSearch, Qt::QueuedConnection);
     }
 
     currentModel->setHexColumnCount(hexColumncount);
@@ -420,10 +420,7 @@ void ByteTableView::setModel(ByteItemModel *nmodel)
 
         currentSelectionModel->setDelegate(delegate);
 
-        connect(currentSelectionModel,
-                SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-                this ,
-                SLOT(onSelectionChanged(QItemSelection,QItemSelection)));
+        connect(currentSelectionModel, &HexSelectionModel::selectionChanged, this, &ByteTableView::onSelectionChanged);
 
         QItemSelectionModel *sm = QTableView::selectionModel();
         QTableView::setSelectionModel(currentSelectionModel);

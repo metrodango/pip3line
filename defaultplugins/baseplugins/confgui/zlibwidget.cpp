@@ -23,6 +23,13 @@ ZlibWidget::ZlibWidget(Zlib *ntransform, QWidget *parent) :
     ui->setupUi(this);
     ui->compressionSpinBox->setValue(transform->getCompression());
     ui->removeHeaderCheckBox->setChecked(transform->doRemoveHeader());
+
+    connect(ui->removeHeaderCheckBox, &QCheckBox::toggled, this, [=](bool checked) {
+        transform->setRemoveHeader(checked);
+    });
+
+    //connect(ui->compressionSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ZlibWidget::onCompressionChanged);
+    connect(ui->compressionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onCompressionChanged(int)));
 }
 
 ZlibWidget::~ZlibWidget()
@@ -30,14 +37,9 @@ ZlibWidget::~ZlibWidget()
     delete ui;
 }
 
-void ZlibWidget::on_compressionSpinBox_valueChanged(int value)
+void ZlibWidget::onCompressionChanged(int value)
 {
     if (!transform->setCompression(value)) {
         ui->compressionSpinBox->setValue(transform->getCompression());
     }
-}
-
-void ZlibWidget::on_removeHeaderCheckBox_toggled(bool checked)
-{
-    transform->setRemoveHeader(checked);
 }

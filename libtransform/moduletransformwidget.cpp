@@ -44,7 +44,7 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
 #endif
 
     ui->parameterstableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->parameterstableView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
+    connect(ui->parameterstableView, &QTableView::customContextMenuRequested, this, &ModuleTransformWidget::customMenuRequested);
 
     model  = new(std::nothrow) ParametersItemModel();
     if (model == nullptr) {
@@ -58,8 +58,8 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
     // for now
     //ui->autoReloadCheckBox->setVisible(false);
 
-    connect(model, SIGNAL(parametersChanged()), this, SLOT(onParametersUpdated()));
-    connect(transform, SIGNAL(confUpdated()), this, SLOT(reloadConf()));
+    connect(model, &ParametersItemModel::parametersChanged, this, &ModuleTransformWidget::onParametersUpdated);
+    connect(transform, &ScriptTransformAbstract::confUpdated, this, &ModuleTransformWidget::reloadConf);
 
     ui->parameterstableView->installEventFilter(this);
     ui->fileLineEdit->setText(transform->getModuleFileName());
@@ -75,11 +75,11 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
     }
     ui->tabWidget->setTabText(0,tr("%1 script").arg(transform->getScriptDescr()));
 
-    connect(ui->choosePushButton, SIGNAL(clicked()), this, SLOT(onChooseFile()));
-    connect(ui->makePersistentCheckBox, SIGNAL(toggled(bool)), this, SLOT(onMakePersistent(bool)));
-    connect(ui->addParamPushButton, SIGNAL(clicked()), this, SLOT(onAddParameter()));
-    connect(ui->autoReloadCheckBox, SIGNAL(toggled(bool)), SLOT(onAutoReload(bool)));
-    connect(ui->forceReloadPushButton, SIGNAL(clicked()), transform,SLOT(loadModule()));
+    connect(ui->choosePushButton, &QPushButton::clicked, this, &ModuleTransformWidget::onChooseFile);
+    connect(ui->makePersistentCheckBox, &QCheckBox::toggled, this, &ModuleTransformWidget::onMakePersistent);
+    connect(ui->addParamPushButton, &QPushButton::clicked, this, &ModuleTransformWidget::onAddParameter);
+    connect(ui->autoReloadCheckBox, &QCheckBox::toggled, this, &ModuleTransformWidget::onAutoReload);
+    connect(ui->forceReloadPushButton, &QPushButton::clicked, transform, &ScriptTransformAbstract::loadModule);
 
 }
 
@@ -130,7 +130,7 @@ void ModuleTransformWidget::customMenuRequested(QPoint pos)
         if (tableMenu == nullptr) {
         tableMenu = new QMenu(this);
         tableMenu->addAction(new QAction(MENU_DELETE, tableMenu));
-        connect(tableMenu, SIGNAL(triggered(QAction*)), SLOT(onMenuAction(QAction*)));
+        connect(tableMenu, &QMenu::triggered, this, &ModuleTransformWidget::onMenuAction);
         }
         tableMenu->popup(ui->parameterstableView->mapToGlobal(pos));
     }

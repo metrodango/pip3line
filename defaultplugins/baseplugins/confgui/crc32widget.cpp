@@ -24,27 +24,12 @@ Crc32Widget::Crc32Widget(Crc32 *ntransform, QWidget *parent) :
     ui->littleendianRadioButton->setChecked(transform->isLittleendian());
     ui->hexaRadioButton->setChecked(transform->isHexOutput());
     ui->appendCheckBox->setChecked(transform->getAppendToInput());
-    connect(ui->littleendianRadioButton, SIGNAL(toggled(bool)), SLOT(onLittleendianToggled(bool)));
-    connect(ui->hexaRadioButton, SIGNAL(toggled(bool)), SLOT(onHexaRadioButtonToggled(bool)));
-    connect(ui->appendCheckBox, SIGNAL(toggled(bool)), SLOT(onAppendCheckBoxToggled(bool)));
+    connect(ui->littleendianRadioButton, &QRadioButton::toggled, this, [=](bool checked){transform->setLittleendian(checked);});
+    connect(ui->hexaRadioButton, &QRadioButton::toggled, this, [=](bool checked) {transform->setHexOutput(checked);});
+    connect(ui->appendCheckBox, &QCheckBox::toggled, this, [=](bool checked) {transform->setAppendToInput(checked);});
 }
 
 Crc32Widget::~Crc32Widget()
 {
     delete ui;
-}
-
-void Crc32Widget::onLittleendianToggled(bool checked)
-{
-    transform->setLittleendian(checked);
-}
-
-void Crc32Widget::onHexaRadioButtonToggled(bool checked)
-{
-    transform->setHexOutput(checked);
-}
-
-void Crc32Widget::onAppendCheckBoxToggled(bool checked)
-{
-    transform->setAppendToInput(checked);
 }

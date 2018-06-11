@@ -19,5 +19,5 @@ DetachTabButton::DetachTabButton(TabAbstract * tab) :
     setFlat(true);
     setMaximumWidth(25);
     setToolTip(tr("Detach/attach tab"));
-    connect(this, SIGNAL(clicked()), curtab, SLOT(onDetach()));
+    connect(this, &DetachTabButton::clicked, curtab, &TabAbstract::onDetach);
 }

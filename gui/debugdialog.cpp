@@ -55,12 +55,13 @@ DebugDialog::DebugDialog(GuiHelper *helper, QWidget *parent) :
 
     refreshTransformInstances();
 
-    connect(ui->viewSizeSpinBox, SIGNAL(valueChanged(int)),source, SLOT(setViewSize(int)));
-    connect(ui->addressLineEdit,SIGNAL(returnPressed()), SLOT(onLoad()));
-    connect(ui->previousPushButton, SIGNAL(clicked()), source,SLOT(historyBackward()));
-    connect(ui->nextPushButton, SIGNAL(clicked()), source, SLOT(historyForward()));
-    connect(ui->refreshPushButton, SIGNAL(clicked()), SLOT(refreshTransformInstances()));
-    connect(ui->transformListWidget, SIGNAL(doubleClicked(QModelIndex)),SLOT(onInstanceClick(QModelIndex)));
+    //connect(ui->viewSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged),source, &CurrentMemorysource::setViewSize);
+    connect(ui->viewSizeSpinBox, SIGNAL(valueChanged(int)), source, SLOT(setViewSize(int)));
+    connect(ui->addressLineEdit, &QLineEdit::returnPressed, this, &DebugDialog::onLoad);
+    connect(ui->previousPushButton, &QPushButton::clicked, source, &CurrentMemorysource::historyBackward);
+    connect(ui->nextPushButton, &QPushButton::clicked, source, &CurrentMemorysource::historyForward);
+    connect(ui->refreshPushButton, &QPushButton::clicked, this, &DebugDialog::refreshTransformInstances);
+    connect(ui->transformListWidget, &QListWidget::doubleClicked, this, &DebugDialog::onInstanceClick);
 }
 
 DebugDialog::~DebugDialog()

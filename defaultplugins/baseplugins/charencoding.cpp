@@ -23,7 +23,7 @@ const QString CharEncoding::CONVERT_INVALID_TO_NULL_XML = "InvalidToNull";
 CharEncoding::CharEncoding()
 {
     QList<QByteArray> codecs =  QTextCodec::availableCodecs();
-    qSort(codecs);
+    std::sort(codecs.begin(), codecs.end());
     codecName = codecs.at(0);
     includeHeader = false;
     convertInvalidToNull = true;

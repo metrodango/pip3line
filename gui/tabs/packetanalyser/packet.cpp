@@ -45,6 +45,27 @@ Packet::~Packet()
     sourceid = Block::INVALID_ID;
 }
 
+Packet *Packet::clone()
+{
+    Packet * pac = new(std::nothrow) Packet();
+    if (pac != nullptr) {
+        pac->originalData = originalData;
+        pac->data = data;
+        pac->history = history;
+        pac->sourceid = sourceid;
+        pac->sourceString = sourceString;
+        pac->timestamp = timestamp;
+        pac->microsec = microsec;
+        pac->direction = direction;
+        pac->comment = comment;
+        pac->foreground = foreground;
+        pac->background = background;
+        pac->injected = injected;
+        pac->additionalFields = additionalFields;
+    }
+    return pac;
+}
+
 QByteArray Packet::getOriginalData() const
 {
     return originalData;
@@ -210,6 +231,14 @@ bool Packet::isInjected() const
 void Packet::setInjected(bool value)
 {
     injected = value;
+}
+
+bool Packet::lessThanFunc(QSharedPointer<Packet> or1, QSharedPointer<Packet> or2)
+{
+    if (or1->getTimestamp() == or2->getTimestamp())
+        return or1->getMicrosec() < or2->getMicrosec();
+    else
+        return or1->getTimestamp() < or2->getTimestamp();
 }
 
 

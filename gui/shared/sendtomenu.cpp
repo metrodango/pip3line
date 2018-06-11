@@ -20,9 +20,9 @@ SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
 
     update();
 
-    connect(guiHelper, SIGNAL(tabsUpdated()), this, SLOT(update()),Qt::QueuedConnection);
-    connect(guiHelper, SIGNAL(registeredBlockSourcesUpdated()), this, SLOT(update()),Qt::QueuedConnection);
-    connect(guiHelper, SIGNAL(registeredOrchestratorsUpdated()), this, SLOT(update()), Qt::QueuedConnection);
+    connect(guiHelper, &GuiHelper::tabsUpdated, this, &SendToMenu::update,Qt::QueuedConnection);
+    connect(guiHelper, &GuiHelper::registeredBlockSourcesUpdated, this, &SendToMenu::update,Qt::QueuedConnection);
+    connect(guiHelper, &GuiHelper::registeredOrchestratorsUpdated, this, &SendToMenu::update, Qt::QueuedConnection);
 }
 
 SendToMenu::~SendToMenu()
@@ -155,14 +155,14 @@ void SendToMenu::processingAction(QAction *action, const QByteArray &data)
             tg->bringFront();
         } else if (sendToBlockSourceMapping.contains(action)) {
             Target<BlocksSource *> ta = sendToBlockSourceMapping.value(action);
-            qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
+         //   qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
             Block * datab = new(std::nothrow) Block(data,ta.getConnectionID());
             if (datab == nullptr) qFatal("Cannot allocate Block for sendTo X{");
             ta.getSource()->postBlockForSending(datab);
         } else if (sendToOrchestratorMapping.contains(action)) {
             Target<SourcesOrchestatorAbstract *> ta = sendToOrchestratorMapping.value(action);
-            qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
-            Packet * datap = new(std::nothrow) Packet(data,ta.getConnectionID());
+        //    qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
+            QSharedPointer<Packet> datap = QSharedPointer<Packet> (new(std::nothrow) Packet(data,ta.getConnectionID()));
             if (datap == nullptr) qFatal("Cannot allocate Packet for sendTo X{");
             datap->setInjected(true);
             ta.getSource()->postPacket(datap);

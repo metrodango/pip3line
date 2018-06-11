@@ -678,7 +678,7 @@ SearchAbstract *ByteSourceAbstract::getSearchObject(QObject * parent, bool singl
         if (searchObj == nullptr) {
             searchObj = requestSearchObject(parent);
             if (searchObj != nullptr)
-                connect(this, SIGNAL(reset()), searchObj, SIGNAL(dataReset()));
+                connect(this, &ByteSourceAbstract::reset, searchObj, &SearchAbstract::dataReset);
         }
         return searchObj;
     }
@@ -708,7 +708,7 @@ void ByteSourceAbstract::markNoUpdate(quint64 start, quint64 end, const QColor &
         if (userMarkingsRanges == nullptr) {
             qFatal("Cannot allocate memory for BytesRangeList X{");
         }
-        connect(userMarkingsRanges, SIGNAL(destroyed()), SLOT(onMarkingsListDeleted()));
+        connect(userMarkingsRanges, &BytesRangeList::destroyed, this, &ByteSourceAbstract::onMarkingsListDeleted);
     }
     // at this point we know for sure that userMarkingsRanges != nullptr
     BytesRange::addMarkToList(userMarkingsRanges,start,end,bgcolor, fgColor, toolTip);
@@ -736,7 +736,7 @@ void ByteSourceAbstract::clearMarking(quint64 start, quint64 end)
 void ByteSourceAbstract::setNewMarkings(BytesRangeList *newUserMarkingsRanges)
 {
     if (newUserMarkingsRanges != nullptr) {
-        connect(newUserMarkingsRanges, SIGNAL(destroyed()), SLOT(onMarkingsListDeleted()));
+        connect(newUserMarkingsRanges, &BytesRangeList::destroyed, this, &ByteSourceAbstract::onMarkingsListDeleted);
         clearAllMarkingsNoUpdate();// implicitely the two lists HAVE to contain different objects pointer, otherwise crash (double free).
         userMarkingsRanges = newUserMarkingsRanges;
         emit minorUpdate(0,size());
@@ -754,7 +754,7 @@ void ByteSourceAbstract::clearAllMarkingsNoUpdate()
 {
     cachedRange.clear();
     if (userMarkingsRanges != nullptr) {
-        disconnect(userMarkingsRanges, SIGNAL(destroyed()), this, SLOT(onMarkingsListDeleted()));
+        disconnect(userMarkingsRanges, &BytesRangeList::destroyed, this, &ByteSourceAbstract::onMarkingsListDeleted);
         while(!userMarkingsRanges->isEmpty())
             userMarkingsRanges->takeFirst().clear();
         delete userMarkingsRanges;
@@ -948,7 +948,7 @@ QWidget *ByteSourceAbstract::getGui(QWidget *parent,ByteSourceAbstract::GUI_TYPE
     if ((*requestedGui) == nullptr) {
         (*requestedGui) = requestGui(parent, type);
         if ((*requestedGui) != nullptr) {
-            connect((*requestedGui), SIGNAL(destroyed()), this, SLOT(onGuiDestroyed()), Qt::UniqueConnection);
+            connect((*requestedGui), &QWidget::destroyed, this, &ByteSourceAbstract::onGuiDestroyed, Qt::UniqueConnection);
         }
     }
     return (*requestedGui);

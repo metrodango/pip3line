@@ -27,9 +27,10 @@ Base32Widget::Base32Widget(Base32 *ntransform, QWidget *parent) :
     ui->variantComboBox->setCurrentIndex(transform->getVariant());
     ui->charsetDisplay->setText(QString(transform->getCharTable()));
 
-    connect(ui->variantComboBox,SIGNAL(currentIndexChanged(int)), this, SLOT(onVariantchange(int)));
-    connect(ui->paddingCheckBox,SIGNAL(toggled(bool)), this, SLOT(onIncludePaddingToggled(bool)));
-    connect(ui->paddingLineEdit, SIGNAL(textEdited(QString)), this, SLOT(onPaddingChange(QString)));
+    //connect(ui->variantComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &Base32Widget::onVariantchange);
+    connect(ui->variantComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onVariantchange(int)));
+    connect(ui->paddingCheckBox, &QCheckBox::toggled, this, [=] (bool val) { transform->setIncludePadding(val);});
+    connect(ui->paddingLineEdit, &QLineEdit::textEdited, this, &Base32Widget::onPaddingChange);
 }
 
 Base32Widget::~Base32Widget()
@@ -64,7 +65,3 @@ void Base32Widget::onPaddingChange(QString val)
     }
 }
 
-void Base32Widget::onIncludePaddingToggled(bool val)
-{
-    transform->setIncludePadding(val);
-}

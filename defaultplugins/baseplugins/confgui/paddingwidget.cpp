@@ -27,9 +27,11 @@ PaddingWidget::PaddingWidget(Padding *ntransform, QWidget *parent) :
     ui->blockSizeSpinBox->setValue(transform->getBlocksize());
     ui->charWidget->setChar(transform->getPadChar());
 
-    connect(ui->typeComboBox,SIGNAL(currentIndexChanged(int)), this,SLOT(onTypeChange(int)));
-    connect(ui->blockSizeSpinBox,SIGNAL(valueChanged(int)), this, SLOT(onBlockSizeChange(int)));
-    connect(ui->charWidget,SIGNAL(charChanged(char)), this, SLOT(onPaddingCharChange(char)));
+    //connect(ui->typeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [=](int index){transform->setVariant((Padding::PaddingVariant)index);});
+    connect(ui->typeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onVariantChanged(int)));
+    //connect(ui->blockSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, [=](int size) {transform->setBlockSize(size);});
+    connect(ui->blockSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onBlockSizeChanged(int)));
+    connect(ui->charWidget, &HexWidget::charChanged, this, &PaddingWidget::onPaddingCharChange);
 }
 
 PaddingWidget::~PaddingWidget()
@@ -37,8 +39,14 @@ PaddingWidget::~PaddingWidget()
     delete ui;
 }
 
-void PaddingWidget::onTypeChange(int index) {
-    transform->setVariant((Padding::PaddingVariant)index);
+void PaddingWidget::onVariantChanged(int val)
+{
+    transform->setVariant((Padding::PaddingVariant)val);
+}
+
+void PaddingWidget::onBlockSizeChanged(int val)
+{
+    transform->setBlockSize(val);
 }
 
 void PaddingWidget::onPaddingCharChange(char value) {
@@ -46,9 +54,4 @@ void PaddingWidget::onPaddingCharChange(char value) {
     ui->typeComboBox->blockSignals(true);
     ui->typeComboBox->setCurrentIndex((int)Padding::CUSTOM);
     ui->typeComboBox->blockSignals(false);
-}
-
-void PaddingWidget::onBlockSizeChange(int size)
-{
-    transform->setBlockSize(size);
 }

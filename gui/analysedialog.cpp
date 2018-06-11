@@ -37,14 +37,14 @@ AnalyseDialog::AnalyseDialog(GuiHelper *guiHelper, QWidget *parent) :
     dim.setWidth(600);
     dim.setHeight(300);
     this->setGeometry(dim);
-    connect(ui->cleanPushButton, SIGNAL(clicked()), this, SLOT(cleaning()));
-    connect(ui->inputPlainTextEdit,SIGNAL(customContextMenuRequested(QPoint)), this , SLOT(onInputRightClick(QPoint)));
-    connect(this,SIGNAL(rejected()),this,SLOT(hide()));
-    connect (this, SIGNAL(results(QString)), this, SLOT(gatheringResults(QString)));
-    connect(ui->charsetPushButton, SIGNAL(clicked()), this, SLOT(onCharsetAnalysis()));
-    connect(ui->charFrequencyPushButton,SIGNAL(clicked()), this, SLOT(onCharFrequencyAnalysis()));
-    connect(ui->guessHashpushButton,SIGNAL(clicked()), this, SLOT(onHashGuess()));
-    connect(ui->clearInputPushButton, SIGNAL(clicked()), ui->inputPlainTextEdit, SLOT(clear()));
+    connect(ui->cleanPushButton, &QPushButton::clicked, this, &AnalyseDialog::cleaning);
+    connect(ui->inputPlainTextEdit, &QPlainTextEdit::customContextMenuRequested, this , &AnalyseDialog::onInputRightClick);
+    connect(this, &AnalyseDialog::rejected, this, &AnalyseDialog::hide);
+    connect (this, &AnalyseDialog::results, this, &AnalyseDialog::gatheringResults);
+    connect(ui->charsetPushButton, &QPushButton::clicked, this, &AnalyseDialog::onCharsetAnalysis);
+    connect(ui->charFrequencyPushButton, &QPushButton::clicked, this, &AnalyseDialog::onCharFrequencyAnalysis);
+    connect(ui->guessHashpushButton, &QPushButton::clicked, this, &AnalyseDialog::onHashGuess);
+    connect(ui->clearInputPushButton, &QPushButton::clicked, ui->inputPlainTextEdit, &QPlainTextEdit::clear);
 }
 
 AnalyseDialog::~AnalyseDialog()

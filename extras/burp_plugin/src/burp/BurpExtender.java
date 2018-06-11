@@ -14,10 +14,10 @@ import java.io.PrintWriter;
 
 public class BurpExtender implements IBurpExtender {
 	private Pip3lineTab tab;
-	private static IBurpExtenderCallbacks burp;
+	private static IBurpExtenderCallbacks burp = null;
 	private PayloadProcessor processor;
-	private static PrintWriter errOut;
-	private static PrintWriter stdOut;
+	private static PrintWriter errOut = null;
+	private static PrintWriter stdOut = null;
 	private Pip3lineContextMenu contextMenuFactory;
 	private StateListener stateListener;
 	
@@ -30,10 +30,7 @@ public class BurpExtender implements IBurpExtender {
 
 		tab = null;
 		contextMenuFactory = null;
-		burp = null;
 		processor = null;
-		errOut = null;
-		stdOut = null;
 	}
 
 

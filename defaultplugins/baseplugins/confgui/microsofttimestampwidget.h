@@ -27,9 +27,7 @@ class MicrosoftTimestampWidget : public QWidget
         ~MicrosoftTimestampWidget();
 
     private slots:
-        void formatChanged(QString format);
         void onNSChanged(QString nsString);
-        void localTzToggled(bool checked);
         
     private:
         Ui::MicrosoftTimestampWidget *ui;

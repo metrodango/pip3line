@@ -8,10 +8,10 @@ FoldedView::FoldedView(TransformWidget * transformWidget, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->descLabel->setText(transformWidget->getDescription());
-    connect(ui->deletePushButton, SIGNAL(clicked(bool)), transformWidget, SIGNAL(deletionRequest()));
-    connect(transformWidget, SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
-    connect(ui->insertPushButton, SIGNAL(clicked(bool)), transformWidget, SIGNAL(insertRequest()));
-    connect(transformWidget, SIGNAL(resetDone()), this, SIGNAL(unfoldRequested()));
+    connect(ui->deletePushButton, &QPushButton::clicked, transformWidget, &TransformWidget::deletionRequest);
+    connect(transformWidget, &TransformWidget::destroyed, this, &FoldedView::deleteLater);
+    connect(ui->insertPushButton, &QPushButton::clicked, transformWidget, &TransformWidget::insertRequest);
+    connect(transformWidget, &TransformWidget::resetDone, this, &FoldedView::unfoldRequested);
 }
 
 FoldedView::~FoldedView()

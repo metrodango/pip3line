@@ -16,7 +16,7 @@ UdpServerListener::UdpServerListener(QHostAddress hostAddress, quint16 hostPort,
     flags |= REFLEXION_OPTIONS ;
     type = SERVER;
     udpSocket = nullptr;
-    connect(&connectionsTimer, SIGNAL(timeout()), this, SLOT(checkTimeouts()));
+    connect(&connectionsTimer, &QTimer::timeout, this, &UdpServerListener::checkTimeouts);
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&serverThread);
     updateTimer.moveToThread(&serverThread);
@@ -95,7 +95,7 @@ bool UdpServerListener::startListening()
 
     udpSocket->moveToThread(&serverThread);
 
-    connect(udpSocket, SIGNAL(readyRead()), this, SLOT(packetReceived()));
+    connect(udpSocket, &QUdpSocket::readyRead, this, &UdpServerListener::packetReceived);
 
     if (!udpSocket->bind(hostAddress, hostPort)) {
         emit log(tr("UDP server error: %1").arg(udpSocket->errorString()),ID,Pip3lineConst::LERROR);

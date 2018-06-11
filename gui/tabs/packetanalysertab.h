@@ -52,12 +52,15 @@ class PacketAnalyserTab : public TabAbstract
         ByteSourceAbstract *getSource(int blockIndex);
         ByteTableView *getHexTableView(int blockIndex);
         void setData(const QByteArray &data);
+        void addPackets(const QList<QSharedPointer<Packet> >  &packets);
         BaseStateAbstract *getStateMngtObj();
         bool canReceiveData();
         bool getForwarding() const;
         bool getIntercepting() const;
         bool isTrackingLast() const;
         void setAutoMerge(bool value);
+        void registerToGlobal();
+        void unregisterFromGlobal();
     private slots:
         void onAddNewColumn();
         void onImport();
@@ -65,6 +68,7 @@ class PacketAnalyserTab : public TabAbstract
         void onModelReseted();
         void clearCurrentPacket();
         void copyAsUpdate();
+        void sendPacketsToUpdate();
         void onSelectionChanged(const QItemSelection &selection);
         void onContextMenuAction(QAction *action);
         void onRightClick(QPoint pos);
@@ -73,7 +77,7 @@ class PacketAnalyserTab : public TabAbstract
         void onOptionsClicked();
         void onOptionDialogClosed();
         void setOrchestrator(SourcesOrchestatorAbstract *orch);
-        void receiveNewPacket(Packet * packet);
+        void receiveNewPacket(QSharedPointer<Packet> packet);
         void onForwardPressed();
         void onInterceptClicked();
         void onOrchestratorConnectionsChanged();
@@ -86,6 +90,7 @@ class PacketAnalyserTab : public TabAbstract
         void onSendToTriggered(QAction* action);
         void onClearListClicked();
         void onCopyAs(QAction* action);
+        void onSendPackets(QAction* action);
         void setIntercepting(bool value);
         void setForwarding(bool value);
         void onAutoMergeRequested();
@@ -121,6 +126,8 @@ class PacketAnalyserTab : public TabAbstract
         SendToMenu * sendToMenu;
         QMenu *autoMergeMenu;
         QMenu * copyAsMenu;
+        QMenu * sendPacketsMenu;
+        QAction * sendPacketsToNew;
         QAction * merge;
         QAction * deleteColumn;
         QAction * split;
@@ -133,7 +140,7 @@ class PacketAnalyserTab : public TabAbstract
         quint32 pcapLinkType;
         bool exportFormattedXML;
         bool exportFormattedJson;
-        Packet * currentPacket;
+        QSharedPointer<Packet> currentPacket;
         NewViewMenu * tabHeaderViewsContextMenu;
         QTabBar *tabBarRef;
         QList<ViewTab> tabData;
@@ -144,7 +151,7 @@ class PacketAnalyserTab : public TabAbstract
         bool trackingLast;
         QTimer updateTimer;
         bool intercepting;
-        QQueue<Packet *> packetQueue;
+        QQueue<QSharedPointer<Packet> > packetQueue;
 
         friend class PacketAnalyserTabStateObj;
 };

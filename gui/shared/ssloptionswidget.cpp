@@ -139,7 +139,7 @@ SSLCipherModel::SSLCipherModel(const QList<QSslCipher> &cipherlist, QObject *par
     QAbstractTableModel(parent),
     cipherList(cipherlist)
 {
-    qStableSort(cipherList.begin(),cipherList.end(), cipherLessThan);
+    std::stable_sort(cipherList.begin(),cipherList.end(), cipherLessThan);
 }
 
 SSLCipherModel::~SSLCipherModel()
@@ -311,7 +311,7 @@ SSLCurvesModel::SSLCurvesModel(const QVector<QSslEllipticCurve> &curvesList, QOb
     QAbstractTableModel(parent),
     fullCurvesList(curvesList)
 {
-    qStableSort(fullCurvesList.begin(),fullCurvesList.end(), curvesLessThan);
+    std::stable_sort(fullCurvesList.begin(),fullCurvesList.end(), curvesLessThan);
 }
 
 SSLCurvesModel::~SSLCurvesModel()
@@ -463,7 +463,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     sslConfiguration = defaultconf;
     ui->setupUi(this);
 
-    connect(ui->stackedWidget, SIGNAL(currentChanged(int)), this, SLOT(testCheckCurrentPage(int)));
+    connect(ui->stackedWidget, &QStackedWidget::currentChanged, this, &SSLOptionsWidget::testCheckCurrentPage);
     ui->stackedWidget->setCurrentWidget(ui->certConfBlankPage); // white page by default
 
     allowedNextProtocols = defaultconf.allowedNextProtocols();
@@ -473,7 +473,8 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     clientCertLoaded = setLocalCert(sslConfiguration.localCertificate());
     clientPrivateKeyLoaded = setLocalPrivateKey(sslConfiguration.privateKey()) ;
 
-    QList<QSslCipher> clist = QSslSocket::supportedCiphers();
+    QSslConfiguration defconf = QSslConfiguration::defaultConfiguration();
+    QList<QSslCipher> clist = defconf.supportedCiphers();
     cipherModel = new(std::nothrow) SSLCipherModel(clist);
     if (cipherModel == nullptr) {
         qFatal("Cannot allocate SSLCipherModel");
@@ -572,42 +573,43 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     ui->sessionTicketCheckBox->setChecked(sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionTickets));
 
     ui->legacyRenegociationCheckBox->setChecked(sslConfiguration.testSslOption(QSsl::SslOptionDisableLegacyRenegotiation));
-    connect(ui->compressionCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableCompression(bool)));
-    connect(ui->emptyFragmentsCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableEmptyFragments(bool)));
-    connect(ui->sessionTicketCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableSessionTickets(bool)));
-    connect(ui->legacyRenegociationCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableLegacyRenegotiation(bool)));
+    connect(ui->compressionCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableCompression);
+    connect(ui->emptyFragmentsCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableEmptyFragments);
+    connect(ui->sessionTicketCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableSessionTickets);
+    connect(ui->legacyRenegociationCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableLegacyRenegotiation);
 
     ui->sessionCharingCheckBox->setChecked(sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionSharing));
     ui->sessionPersistenceCheckBox->setChecked(sslConfiguration.testSslOption(QSsl::SslOptionDisableSessionPersistence));
-    connect(ui->sessionCharingCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableSessionSharing(bool)));
-    connect(ui->sessionPersistenceCheckBox, SIGNAL(toggled(bool)), this, SIGNAL(disableSessionPersistence(bool)));
+    connect(ui->sessionCharingCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableSessionSharing);
+    connect(ui->sessionPersistenceCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::disableSessionPersistence);
 
-    connect(cipherModel,SIGNAL(ciphersListUpdated(QList<QSslCipher>)), this, SIGNAL(sslCiphersUpdated(QList<QSslCipher>)));
-    connect(ui->resetCiphersPushButton, SIGNAL(clicked(bool)), this, SLOT(onResetCiphers()));
-    connect(ui->allCiphersPushButton, SIGNAL(clicked(bool)), this, SLOT(onSelectAllCiphers()));
-    connect(ui->clearAllCiphersPushButton, SIGNAL(clicked(bool)), this, SLOT(onSelectNoneCipher()));
-    connect(ui->loadClientCertPushButton, SIGNAL(clicked(bool)), SLOT(onClientCertLoad()));
-    connect(ui->systemCACheckBox, SIGNAL(toggled(bool)), this, SIGNAL(useOfSystemCAUpdated(bool)));
+    connect(cipherModel, &SSLCipherModel::ciphersListUpdated, this, &SSLOptionsWidget::sslCiphersUpdated);
+    connect(ui->resetCiphersPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onResetCiphers);
+    connect(ui->allCiphersPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onSelectAllCiphers);
+    connect(ui->clearAllCiphersPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onSelectNoneCipher);
+    connect(ui->loadClientCertPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onClientCertLoad);
+    connect(ui->systemCACheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::useOfSystemCAUpdated);
 
-    connect(ui->noneECPushButton, SIGNAL(clicked(bool)), this, SLOT(onSelectNoneCurves()));
-    connect(curvesModel, SIGNAL(selectedCurvesListUpdated(QVector<QSslEllipticCurve>)), this , SIGNAL(selectedCurvesListUpdated(QVector<QSslEllipticCurve>)));
+    connect(ui->noneECPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onSelectNoneCurves);
+    connect(curvesModel, &SSLCurvesModel::selectedCurvesListUpdated, this , &SSLOptionsWidget::selectedCurvesListUpdated);
 
-    connect(caCertModel, SIGNAL(certListUpdated(QList<QSslCertificate>)), this, SIGNAL(caListUpdated(QList<QSslCertificate>)));
-    connect(ui->clearAllCAPushButton, SIGNAL(clicked(bool)), caCertModel, SLOT(clearCertsList()));
-    connect(ui->loadCAPushButton, SIGNAL(clicked(bool)), this, SLOT(onCALoad()));
+    connect(caCertModel, &CertificatesModel::certListUpdated, this, &SSLOptionsWidget::caListUpdated);
+    connect(ui->clearAllCAPushButton, &QPushButton::clicked, caCertModel, &CertificatesModel::clearCertsList);
+    connect(ui->loadCAPushButton, &QPushButton::clicked, this, &SSLOptionsWidget::onCALoad);
 
-    connect(ui->sniCheckBox, SIGNAL(toggled(bool)), this, SLOT(onSniEnabled(bool)));
-    connect(ui->sniLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onSNIUpdated(QString)));
-    connect(ui->sslVerifModeComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onSSLVerifModeChanged(int)));
+    connect(ui->sniCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSniEnabled);
+    connect(ui->sniLineEdit, &QLineEdit::textChanged, this, &SSLOptionsWidget::onSNIUpdated);
+    //connect(ui->sslVerifModeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [=](int index) {onSSLVerifModeChanged(index);});
+    connect(ui->sslVerifModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSSLVerifModeChanged(int)));
 
-    connect(ui->sslv2checkBox, SIGNAL(toggled(bool)), this, SLOT(onSSLv2Toggled(bool)));
-    connect(ui->sslv3checkBox, SIGNAL(toggled(bool)), this, SLOT(onSSLv3Toggled(bool)));
-    connect(ui->tlsv10checkBox, SIGNAL(toggled(bool)), this, SLOT(onTLsv10Toggled(bool)));
-    connect(ui->tlsv11checkBox, SIGNAL(toggled(bool)), this, SLOT(onTLsv11Toggled(bool)));
-    connect(ui->tlsv12checkBox, SIGNAL(toggled(bool)), this, SLOT(onTLsv12Toggled(bool)));
+    connect(ui->sslv2checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSSLv2Toggled);
+    connect(ui->sslv3checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSSLv3Toggled);
+    connect(ui->tlsv10checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv10Toggled);
+    connect(ui->tlsv11checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv11Toggled);
+    connect(ui->tlsv12checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv12Toggled);
 
-    connect(ui->http11CheckBox, SIGNAL(toggled(bool)), this, SLOT(onHTTP11NextProtocolToggled(bool)));
-    connect(ui->sdpyCheckBox, SIGNAL(toggled(bool)), this, SLOT(onSDPYNextProtocolToggled(bool)));
+    connect(ui->http11CheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onHTTP11NextProtocolToggled);
+    connect(ui->sdpyCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSDPYNextProtocolToggled);
 }
 
 SSLOptionsWidget::~SSLOptionsWidget()
@@ -622,7 +624,8 @@ void SSLOptionsWidget::setSNIValue(QString value)
 
 void SSLOptionsWidget::onResetCiphers()
 {
-    QList<QSslCipher> clist = QSslSocket::defaultCiphers();
+    QSslConfiguration defconf = QSslConfiguration::defaultConfiguration();
+    QList<QSslCipher> clist = defconf.ciphers();
     cipherModel->setEnabledCipherList(clist);
     if (ui->sslv2checkBox->isEnabled()) {
         ui->sslv2checkBox->blockSignals(true);

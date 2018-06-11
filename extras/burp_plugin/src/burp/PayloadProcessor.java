@@ -147,7 +147,7 @@ public class PayloadProcessor implements IIntruderPayloadProcessor {
 				returnValue = new byte[returnedVals.size()];
 				
 				for (int i = 0; i < returnedVals.size(); i++) {
-					returnValue[i] = returnedVals.get(i).byteValue();
+					returnValue[i] = returnedVals.get(i);
 				}
 				
 			//	System.out.println("Data block read: ".concat(helpers.bytesToString(returnValue)));

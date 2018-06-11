@@ -25,12 +25,6 @@ class IPTranslateIPv4Widget : public QWidget
     public:
         explicit IPTranslateIPv4Widget(IPTranslateIPv4 *transform, QWidget *parent = 0);
         ~IPTranslateIPv4Widget();
-
-    private slots:
-        void endianChanged();
-        void caseChanged();
-        void baseChanged();
-
     private:
         Ui::IPTranslateIPv4Widget *ui;
         IPTranslateIPv4 *transform;

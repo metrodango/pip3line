@@ -59,8 +59,9 @@ void SslConf::setSslCiphers(const QList<QSslCipher> &value)
 QSslConfiguration SslConf::getSslConfiguration()
 {
     QList<QSslCertificate> CAs = otherCAs;
-    if (usesSystemCAs)
-        CAs.append(QSslSocket::systemCaCertificates());
+    if (usesSystemCAs) {
+        CAs.append(QSslConfiguration::systemCaCertificates());
+    }
     sslConfiguration.setCaCertificates(CAs);
     sslConfiguration.setCiphers(sslCiphers);
     sslConfiguration.setLocalCertificate(localCert);
@@ -284,7 +285,9 @@ void SslConf::setSslConfiguration(const QSslConfiguration &value)
     if (!key.isNull())
         localKey = key;
 
-    QList<QSslCertificate> defaultCerts = QSslSocket::defaultCaCertificates();
+    //QSslConfiguration defConf = QSslConfiguration::defaultConfiguration();
+
+    QList<QSslCertificate> defaultCerts = QSslConfiguration::systemCaCertificates();
     QList<QSslCertificate> current = sslConfiguration.caCertificates();
     for (int i = 0; i < defaultCerts.size(); i++) {
         if (current.contains(defaultCerts.at(i)))
@@ -397,23 +400,25 @@ QWidget *SslConf::getGui(QWidget *parent)
             qFatal("Cannot allocate memory for SSLOptionsWidget X{");
         }
 
-        connect(guiConf, SIGNAL(caListUpdated(QList<QSslCertificate>)), SLOT(setOtherCAs(QList<QSslCertificate>)));
-        connect(guiConf, SIGNAL(disableCompression(bool)), SLOT(setDisableCompression(bool)));
-        connect(guiConf, SIGNAL(disableEmptyFragments(bool)), SLOT(setDisableEmptyFragments(bool)));
-        connect(guiConf, SIGNAL(disableLegacyRenegotiation(bool)), SLOT(setDisableLegacyRenegotiation(bool)));
-        connect(guiConf, SIGNAL(disableSessionPersistence(bool)), SLOT(setDisableSessionPersistence(bool)));
-        connect(guiConf, SIGNAL(disableSessionSharing(bool)), SLOT(setDisableSessionSharing(bool)));
-        connect(guiConf, SIGNAL(disableSessionTickets(bool)), SLOT(setDisableSessionTickets(bool)));
-        connect(guiConf, SIGNAL(sslCiphersUpdated(QList<QSslCipher>)), SLOT(setSslCiphers(QList<QSslCipher>)));
-        connect(guiConf, SIGNAL(sslLocalCertUpdated(QSslCertificate)), SLOT(setLocalCert(QSslCertificate)));
-        connect(guiConf, SIGNAL(sslLocalKeyUpdated(QSslKey)), SLOT(setLocalKey(QSslKey)));
-        connect(guiConf, SIGNAL(useOfSystemCAUpdated(bool)), SLOT(setUseSystemCAs(bool)));
-        connect(guiConf, SIGNAL(peerVerificationModeChanged(QSslSocket::PeerVerifyMode)), SLOT(setSslVerificationMode(QSslSocket::PeerVerifyMode)));
-        connect(guiConf, SIGNAL(peerVerificationNameChanged(QString)), SLOT(setSslPeerNameSNI(QString)));
-        connect(guiConf, SIGNAL(sniEnabled(bool)), SLOT(setUseSNI(bool)));
-        connect(guiConf, SIGNAL(allowedNextProtocolsUpdated(QList<QByteArray>)), this, SLOT(setAllowedNextProtocols(QList<QByteArray>)));
-        connect(guiConf, SIGNAL(selectedCurvesListUpdated(QVector<QSslEllipticCurve>)), this , SLOT(setEllipticCurves(QVector<QSslEllipticCurve>)));
-        connect(guiConf, SIGNAL(destroyed(QObject*)), SLOT(onGuiDeleted()));
+        connect(guiConf, &SSLOptionsWidget::caListUpdated, this, &SslConf::setOtherCAs);
+        connect(guiConf, &SSLOptionsWidget::disableCompression, this, &SslConf::setDisableCompression);
+        connect(guiConf, &SSLOptionsWidget::disableEmptyFragments, this, &SslConf::setDisableEmptyFragments);
+        connect(guiConf, &SSLOptionsWidget::disableLegacyRenegotiation, this, &SslConf::setDisableLegacyRenegotiation);
+        connect(guiConf, &SSLOptionsWidget::disableSessionPersistence, this, &SslConf::setDisableSessionPersistence);
+        connect(guiConf, &SSLOptionsWidget::disableSessionSharing, this, &SslConf::setDisableSessionSharing);
+        connect(guiConf, &SSLOptionsWidget::disableSessionTickets, this, &SslConf::setDisableSessionTickets);
+        connect(guiConf, &SSLOptionsWidget::sslCiphersUpdated, this, &SslConf::setSslCiphers);
+        //connect(guiConf, &SSLOptionsWidget::sslLocalCertUpdated, this, qOverload<const QSslCertificate &>(&SslConf::setLocalCert));
+        connect(guiConf, SIGNAL(sslLocalCertUpdated(QSslCertificate)), this, SLOT(setLocalCert(QSslCertificate)));
+        //connect(guiConf, &SSLOptionsWidget::sslLocalKeyUpdated, this, qOverload<const QSslKey &>(&SslConf::setLocalKey));
+        connect(guiConf, SIGNAL(sslLocalKeyUpdated(QSslKey)), this, SLOT(setLocalKey(QSslKey)));
+        connect(guiConf, &SSLOptionsWidget::useOfSystemCAUpdated, this, &SslConf::setUseSystemCAs);
+        connect(guiConf, &SSLOptionsWidget::peerVerificationModeChanged, this, &SslConf::setSslVerificationMode);
+        connect(guiConf, &SSLOptionsWidget::peerVerificationNameChanged, this, &SslConf::setSslPeerNameSNI);
+        connect(guiConf, &SSLOptionsWidget::sniEnabled, this, &SslConf::setUseSNI);
+        connect(guiConf, &SSLOptionsWidget::allowedNextProtocolsUpdated, this, &SslConf::setAllowedNextProtocols);
+        connect(guiConf, &SSLOptionsWidget::selectedCurvesListUpdated, this , &SslConf::setEllipticCurves);
+        connect(guiConf, &SSLOptionsWidget::destroyed, [=](QObject *) { onGuiDeleted();});
     }
 
     return guiConf;

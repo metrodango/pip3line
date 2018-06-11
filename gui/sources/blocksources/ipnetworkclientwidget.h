@@ -25,7 +25,7 @@ class IPNetworkClientWidget : public QWidget
         void onTlsToggled(bool enabled);
     private slots:
         void onPortChanged(int value);
-        void onIPChanged(QString value);
+        void onIPChanged(const QString &value);
         void onTargetchanged();
         void onResolutionTimerExpired();
         void lookupFinished(QHostInfo info);

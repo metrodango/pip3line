@@ -25,7 +25,7 @@ LargeRandomAccessSource::LargeRandomAccessSource(QObject *parent) :
     chunksize = DEFAULT_CHUNKSIZE;
     sem.release(10);
     intervalMSec = 2000; // 2 sec of interval for the timer
-    connect(&refreshTimer, SIGNAL(timeout()), SLOT(refreshData()));
+    connect(&refreshTimer, &QTimer::timeout, this, [=](void) {refreshData();});
 }
 
 LargeRandomAccessSource::~LargeRandomAccessSource()

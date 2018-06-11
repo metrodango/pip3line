@@ -40,8 +40,8 @@ ByteSourceGuiButton::ByteSourceGuiButton(ByteSourceAbstract *bytesource, GuiHelp
     setFlat(true);
     gui = byteSource->getGui();
     if (gui != nullptr) {
-        connect(localAction, SIGNAL(toggled(bool)), SLOT(onToggle(bool)),Qt::UniqueConnection);
-        connect(this, SIGNAL(toggled(bool)), SLOT(onToggle(bool)),Qt::UniqueConnection);
+        connect(localAction, &QAction::toggled, this, &ByteSourceGuiButton::onToggle,Qt::UniqueConnection);
+        connect(this, &ByteSourceGuiButton::toggled, this, &ByteSourceGuiButton::onToggle,Qt::UniqueConnection);
     } else {
         localAction->setToolTip(tr("No settings available for this source"));
         setDisabled(true);
@@ -61,8 +61,8 @@ void ByteSourceGuiButton::refreshState()
     if (gui != nullptr) {
         setDisabled(false);
         setVisible(true);
-        connect(localAction, SIGNAL(toggled(bool)), SLOT(onToggle(bool)),Qt::UniqueConnection);
-        connect(this, SIGNAL(toggled(bool)), SLOT(onToggle(bool)),Qt::UniqueConnection);
+        connect(localAction, &QAction::toggled, this, &ByteSourceGuiButton::onToggle, Qt::UniqueConnection);
+        connect(this, &ByteSourceGuiButton::toggled, this, &ByteSourceGuiButton::onToggle, Qt::UniqueConnection);
     } else {
         qDebug() << tr("No gui available for this source %1").arg(byteSource->metaObject()->className());
         setDisabled(true);
@@ -94,8 +94,8 @@ void ByteSourceGuiButton::onToggle(bool enabled)
                 guidia->resize(gui->sizeHint());
                 guidia->raise();
                 guidia->show();
-                connect(gui, SIGNAL(destroyed()), SLOT(onGuiDelete()));
-                connect(guidia, SIGNAL(hiding()), SLOT(onGuiHiding()));
+                connect(gui, &QWidget::destroyed, this, &ByteSourceGuiButton::onGuiDelete);
+                connect(guidia, &FloatingDialog::hiding, this, &ByteSourceGuiButton::onGuiHiding);
             }
         } else {
             guidia->raise();

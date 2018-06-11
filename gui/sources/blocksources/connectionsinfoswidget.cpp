@@ -55,8 +55,8 @@ ConnectionsInfosWidget::ConnectionsInfosWidget(BlocksSource *listener , QWidget 
     }
     onConnectionUpdated();
 
-    connect(listener, SIGNAL(updated()), this, SLOT(onConnectionUpdated()));
-    connect(listener, SIGNAL(connectionClosed(int)), this, SLOT(deleteLater()));
+    connect(listener, &BlocksSource::updated, this, &ConnectionsInfosWidget::onConnectionUpdated);
+    connect(listener, &BlocksSource::connectionClosed, this, &ConnectionsInfosWidget::deleteLater);
 }
 
 ConnectionsInfosWidget::~ConnectionsInfosWidget()
