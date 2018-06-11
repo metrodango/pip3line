@@ -78,7 +78,6 @@ class Pip3line:
 
 		return rdata
 
-	
 	def process(self,data):
 		if isinstance(data, b''):
 			print("Need array of bytes")
