@@ -34,7 +34,13 @@ void NetworkMaskIPv4::transform(const QByteArray &input, QByteArray &output)
     if (wayValue == TransformAbstract::INBOUND) {
         int num = input.toInt(&ok,10);
         if (ok && num >= 0 && num < 33 ) {
-            quint32 ipVal = 0xFFFFFFFF << (32 - num);
+            quint32 ipVal = 0;
+            if (num == 0)
+                ipVal = 0;
+            else if (num == 32)
+                ipVal = 0xFFFFFFFF;
+            else
+                ipVal  = 0xFFFFFFFF << (32 - num);
             ip.setAddress(ipVal);
             output.append(ip.toString());
         } else {

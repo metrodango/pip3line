@@ -61,7 +61,7 @@ class Pip3line:
 	def __sending(self,data):
 		if self.base64inUse:
 			data = base64.b64encode(data)
-		
+
 		self.conn.send(data)
 		self.conn.send(b'\n')
 		

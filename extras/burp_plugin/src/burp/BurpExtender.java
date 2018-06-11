@@ -19,7 +19,6 @@ public class BurpExtender implements IBurpExtender {
 	private static PrintWriter errOut = null;
 	private static PrintWriter stdOut = null;
 	private Pip3lineContextMenu contextMenuFactory;
-	private StateListener stateListener;
 	
 	public static String PROCESSOR_PORT = "ProcessorPort";
 	public static String PROCESSOR_ADDRESS = "ProcessorAddress";
@@ -41,7 +40,7 @@ public class BurpExtender implements IBurpExtender {
 		stdOut = new PrintWriter(callbacks.getStdout());
 		processor = new PayloadProcessor(tab, callbacks);
 		contextMenuFactory = new Pip3lineContextMenu(callbacks);
-		stateListener = new StateListener(this);
+		StateListener stateListener = new StateListener(this);
 		tab = new Pip3lineTab(processor,contextMenuFactory);
 		callbacks.registerIntruderPayloadProcessor(processor);
 		callbacks.registerContextMenuFactory(contextMenuFactory);
