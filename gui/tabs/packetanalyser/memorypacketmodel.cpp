@@ -93,7 +93,7 @@ QSharedPointer<Packet> MemoryPacketModel::getPacket(qint64 index)
         qCritical() << tr("[MemoryPacketModel::getPacket] index out-of-bound");
     }
 
-    return nullptr;
+    return QSharedPointer<Packet>();
 }
 
 void MemoryPacketModel::removePacket(qint64 index)
@@ -334,7 +334,7 @@ QVariant MemoryPacketModel::data(const QModelIndex &index, int role) const
 
     int row = index.row();
     int column = index.column();
-    const QSharedPointer<Packet> packet = packetsList.value(row,nullptr);
+    const QSharedPointer<Packet> packet = packetsList.value(row,QSharedPointer<Packet>());
 
     return payloadData(packet,column, role);
 }
