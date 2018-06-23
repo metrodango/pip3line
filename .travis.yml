@@ -1,13 +1,15 @@
 language: cpp
 sudo: required
-dist: 
-  - xenial
-compiler:
-  - clang
-  - gcc
-os:
-  - linux
 
+matrix:
+  include:
+    - os: linux
+      dist: 
+        - xenial
+      compiler:
+        - clang
+        - gcc
+    
 before_install:
   - sudo apt-get -qq update
 
