@@ -20,19 +20,19 @@ matrix:
       
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update
-      brew install cmake qt5 python qscintilla2 openssl git
+      brew update;
+      brew install cmake qt5 python qscintilla2 openssl git;
     else
-      sudo apt-get -qq update
+      sudo apt-get -qq update;
     fi
 
 before_script:
   - mkdir build
   - cd build
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      cmake .. -DALL=ON -DWITH_DISTORM=OFF -DWITH_SCINTILLA=ON
+      cmake .. -DALL=ON -DWITH_DISTORM=OFF -DWITH_SCINTILLA=ON;
     else
-      cmake .. -DALL=ON -DWITH_SCINTILLA=ON
+      cmake .. -DALL=ON -DWITH_SCINTILLA=ON;
     fi
 
 script: make
