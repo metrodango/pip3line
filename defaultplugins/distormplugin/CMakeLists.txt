@@ -17,19 +17,13 @@ add_definitions ( -Wall -DDISTORM_LIBRARY )
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-else(WITH_QT5)
-        find_package ( Qt4 REQUIRED QtCore QtGui QtSvg)
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
 
 include_directories (
 	${DISTORM3_INCLUDE_PATH}
 	../../libtransform
-	../../../distorm/include
 	/usr/include/distorm3
 	/usr/lib/include/distorm3
 	)
@@ -37,7 +31,6 @@ include_directories (
 link_directories (
 	${DISTORM3_LIB_PATH}
 	${PROJECT_SOURCE_DIR}/../../lib
-	#	../../../distorm/build/lib/distorm3
 	)
 
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
@@ -46,16 +39,18 @@ set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
 if (WIN32)
 	include_directories (
 		${DISTORM3_INCLUDE_PATH}
-		..\\..\\..\\distorm\\include
+		..\\..\\ext\\distorm\\include
 		)
 	link_directories (
 		${DISTORM3_LIB_PATH}
-		..\\..\\..\\distorm
+		..\\..\\ext\\distorm
 		)
 elseif(APPLE)
-	link_directories ( ../../../distorm/make/mac )
+        include_directories ( ../../ext/distorm/include)
+	link_directories ( ../../ext/distorm/make/mac )
 elseif(UNIX)
-	#link_directories ( ../../../distorm/make/linux )
+        include_directories ( ../../ext/distorm/include)
+	link_directories ( ../../ext/distorm/make/linux )
 endif ()
 
 set ( EXTERN_LIBS transform distorm3 )
