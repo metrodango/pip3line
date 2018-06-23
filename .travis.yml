@@ -24,9 +24,9 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
       brew reinstall cmake qt5 python3 qscintilla2 openssl git;
-      cd ext
-      ./gen_distorm.sh
-      cd ..
+      cd ext;
+      ./gen_distorm.sh;
+      cd ..;
     else
       sudo apt-get -qq update;
     fi
