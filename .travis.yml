@@ -8,6 +8,11 @@ matrix:
         - xenial
       compiler:
         - gcc
+    - os: linux
+      dist: 
+        - xenial
+      compiler:
+        - clang
     
 before_install:
   - sudo apt-get -qq update
