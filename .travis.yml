@@ -4,13 +4,11 @@ sudo: required
 matrix:
   include:
     - os: linux
-      dist: 
-        - xenial
+      dist: xenial
       compiler:
         - gcc
     - os: linux
-      dist: 
-        - xenial
+      dist: xenial
       compiler:
         - clang
     - os: osx
