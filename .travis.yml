@@ -11,6 +11,12 @@ matrix:
       compiler: clang
     - os: osx
       compiler: clang
+      osx_image: xcode9.4
+      env:
+        - CMAKE_PREFIX_PATH=/usr/local/opt/qt5:/usr/local/opt/openssl
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3
       env:
         - CMAKE_PREFIX_PATH=/usr/local/opt/qt5:/usr/local/opt/openssl
       
