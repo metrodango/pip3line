@@ -5,12 +5,10 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      compiler:
-        - gcc
+      compiler: gcc
     - os: linux
       dist: xenial
-      compiler:
-        - clang
+      compiler: clang
     - os: osx
       compiler: clang
       env:
