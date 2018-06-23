@@ -7,6 +7,7 @@ case "${unameOut}" in
     *)          echo "Unamanaged platform: ${unameOut}" || exit -1;
 esac
 
+git clone https://github.com/gdabah/distorm.git
 echo "Entering ${basePath}"
 
 cd ${basePath}
