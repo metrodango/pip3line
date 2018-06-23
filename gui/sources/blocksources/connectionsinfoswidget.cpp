@@ -2,6 +2,7 @@
 #include "ui_connectionsinfoswidget.h"
 #include "shared/ssloptionswidget.h"
 #include <QAbstractItemModel>
+#include <QHeaderView>
 #include "blockssource.h"
 #include "ipblockssources.h"
 #include <QTableView>

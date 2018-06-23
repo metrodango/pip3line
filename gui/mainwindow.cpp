@@ -35,6 +35,7 @@ Released under AGPL see LICENSE for more information
 #include <QFileDialog>
 #include <QPalette>
 #include <QTemporaryFile>
+#include <QItemSelection>
 #include <QDebug>
 #include "sources/currentmemorysource.h"
 #include "sources/largefile.h"
