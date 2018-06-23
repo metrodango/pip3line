@@ -80,8 +80,6 @@ libssl-dev
 libdistorm3-dev
 libqt5scintilla2-dev
 
-and the QScintilla library for Qt5
-
 ## Windows specific
 Brace yourself, the build process on a Windows platform can be quite tricky.
 
@@ -130,17 +128,17 @@ win_package.bat 2015_64
 
 The compilation on OS X is pretty much the same as for Linux.
 
-Just make sure to set up the CMAKE_PREFIX_PATH to the Qt base dir. For a default install it should be as follow:
+Install dependencies with brew :
 
-> export CMAKE_PREFIX_PATH=[$HOME]/Qt/[version]/clang_64/
+> shell$ brew install cmake qt5 python3 qscintilla2 openssl git
 
-for example
+Just make sure to set up the CMAKE_PREFIX_PATH to the Qt & OpenSSL base dir. For a default install it should be as follow:
 
-> export CMAKE_PREFIX_PATH=/Users/user1/Qt/5.9.2/clang_64/
+> shell$ export CMAKE_PREFIX_PATH=/usr/local/opt/qt5:/usr/local/opt/openssl
 
-Then the rest is exactly the same as on Linux platform. 
+Then the rest is exactly the same as on Linux platform.
 
-The **OpenSSL plugin** has been disabled on this platform though.
+**Distorm** still needs to be installed manually as it is not in the brew packages.
 
 **Python plugins** make Pip3line crash (well the Python 3 one does) when both plugins (2.7 & 3) are loaded at the same time, so you can only use one at time on OSX/MacOS. It may be because I am compiling against the stock Python2.7 and the Brew version of Python 3, but who knows, when it comes to Python everything is possible.
 
@@ -151,7 +149,6 @@ The **OpenSSL plugin** has been disabled on this platform though.
 Defaults path for the libraries and headers have been hardcoded in the cmake configuration file on Windows  for easier use. (i.e. C:\OpenSSL-Win32 and C:\OpenSSL-Win64)
 
 Note: the OpenSSL plugin is less relevant with QT 5, as the built-in QT 5 hashes can replace the most common hashes offered by OpenSSL.
-As cited earlier the OpenSSL plugin has been disabled on MacOS for various build issues reasons.
 
 ## Python27 and Python3 plugins
 
@@ -192,6 +189,8 @@ It is relatively easy to compile (compare to OpenSSL for instance), even on Wind
 
 > -DWITH_SCINTILLA=ON
 
-Some defaults libraries path have been hard-coded, on the basis that the QScintilla source tree is at the same level as the Pip3line source directory.
+Most targets should be working fine with the usual packages manager version of QScintilla (apt / brew / emerge).
+
+But some defaults libraries path have been hard-coded, on the basis that the QScintilla source tree is at the same level as the Pip3line source directory.
 
 QScintilla can be found here https://www.riverbankcomputing.com/software/qscintilla/intro. Use the latest released version.
