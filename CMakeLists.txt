@@ -97,12 +97,6 @@ else()
         	${project_source_dir}/bin/plugins
 		)
 endif()
-if (WITH_QT5 STREQUAL "OFF")
-	message(SEND_ERROR "Qt4 support has been dropped")
-else()
-	message(STATUS "Compiling for QT5")
-        SET (WITH_QT5 ON)
-endif()
 
 if (ALL)
 	message ( STATUS  "Selecting all packages")

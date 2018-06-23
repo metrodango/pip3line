@@ -17,17 +17,11 @@ add_definitions ( -Wall -DBASEPLUGINS_LIBRARY)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-        find_package(Qt5Network)
-        find_package(Qt5XmlPatterns)
-else(WITH_QT5)
-	find_package ( Qt4 REQUIRED QtCore QtGui QtSvg QtNetwork QtXmlPatterns)
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
-
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
+find_package(Qt5Network)
+find_package(Qt5XmlPatterns)
 
 include_directories (
 	../../libtransform/)
@@ -235,52 +229,42 @@ set ( baseplugins_UIS
 	confgui/findandreplacewidget.ui
 	)
 
-if(WITH_QT5)
-	set ( baseplugins_HDRS
-		${baseplugins_HDRS}
-		sha224.h
-		sha256.h
-		sha384.h
-		sha512.h
-		sha3_224.h
-		sha3_256.h
-		sha3_384.h
-		sha3_512.h
-	)
-	
-	set ( baseplugins_SRCS
-		${baseplugins_SRCS}
-		sha224.cpp
-		sha256.cpp
-		sha384.cpp
-		sha512.cpp
-		sha3_224.cpp
-		sha3_256.cpp
-		sha3_384.cpp
-		sha3_512.cpp
-	)
-endif(WITH_QT5)
+set ( baseplugins_HDRS
+    ${baseplugins_HDRS}
+    sha224.h
+    sha256.h
+    sha384.h
+    sha512.h
+    sha3_224.h
+    sha3_256.h
+    sha3_384.h
+    sha3_512.h
+)
+
+set ( baseplugins_SRCS
+    ${baseplugins_SRCS}
+    sha224.cpp
+    sha256.cpp
+    sha384.cpp
+    sha512.cpp
+    sha3_224.cpp
+    sha3_256.cpp
+    sha3_384.cpp
+    sha3_512.cpp
+)
 	
 set ( baseplugins_RSCS
 	baseplugins_res.qrc
 	)
 
-if(WITH_QT5)
-        qt5_wrap_ui(UIS ${baseplugins_UIS})
-	QT5_ADD_RESOURCES(RSCS ${baseplugins_RSCS})
-else(WITH_QT5)
-        QT4_WRAP_UI(UIS ${baseplugins_UIS})
-	QT4_ADD_RESOURCES(RSCS ${baseplugins_RSCS})
-endif(WITH_QT5)
+qt5_wrap_ui(UIS ${baseplugins_UIS})
+QT5_ADD_RESOURCES(RSCS ${baseplugins_RSCS})
 
 set ( EXTERN_LIB transform )
 
 add_library ( baseplugins MODULE ${baseplugins_SRCS} ${UIS} ${RSCS} )
-if(WITH_QT5)
-        qt5_use_modules( baseplugins Widgets Svg Network XmlPatterns )
-else(WITH_QT5)
-	target_link_libraries ( baseplugins ${QT_LIBRARIES} )
-endif(WITH_QT5)
+
+qt5_use_modules( baseplugins Widgets Svg Network XmlPatterns )
 
 target_link_libraries ( baseplugins ${EXTERN_LIB} )
 

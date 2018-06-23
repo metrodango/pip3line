@@ -17,14 +17,9 @@ add_definitions ( -Wall -DOPENSSLPLUGIN_LIBRARY)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-else(WITH_QT5)
-        find_package ( Qt4 REQUIRED QtCore QtGui QtSvg)
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
 
 include_directories (
 	../../libtransform/
@@ -56,11 +51,7 @@ if (OPENSSL_FOUND)
 		)
 	
 	add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
-	if(WITH_QT5)
-        	qt5_use_modules(opensslplugin Widgets Svg)
-	else(WITH_QT5)
-		target_link_libraries ( opensslplugin  ${QT_LIBRARIES} )
-	endif(WITH_QT5)
+        qt5_use_modules(opensslplugin Widgets Svg)
 
 	target_link_libraries ( opensslplugin  ${EXTERN_LIBS} )
 

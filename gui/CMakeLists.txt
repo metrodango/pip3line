@@ -32,16 +32,11 @@ if (WITH_SCINTILLA)
     endif()
 endif(WITH_SCINTILLA)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-        find_package(Qt5Network)
-	find_package(Qt5Concurrent)
-else(WITH_QT5)
-	find_package ( Qt4 REQUIRED QtCore QtGui QtSvg QtNetwork QtMain )
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
+find_package(Qt5Network)
+find_package(Qt5Concurrent)
 
 include_directories (
 	../libtransform)
@@ -375,24 +370,16 @@ set ( pip3line_RSCS
 	gui_res.qrc
 	)
 
-if(WITH_QT5)
-        qt5_wrap_ui(UIS ${pip3line_UIS})
-	qt5_add_resources(RSCS ${pip3line_RSCS})
-else(WITH_QT5)
-        QT4_WRAP_UI(UIS ${pip3line_UIS})
-	QT4_ADD_RESOURCES(RSCS ${pip3line_RSCS})
-endif(WITH_QT5)
+qt5_wrap_ui(UIS ${pip3line_UIS})
+qt5_add_resources(RSCS ${pip3line_RSCS})
 
 add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
 
-if(WITH_QT5)
-        qt5_use_modules(pip3line Widgets Svg Network Concurrent)
-	if(WIN32)
-		target_link_libraries ( pip3line Qt5::WinMain )
-	endif(WIN32)
-else(WITH_QT5)
-       	target_link_libraries ( pip3line  ${QT_LIBRARIES} )
-endif(WITH_QT5)
+qt5_use_modules(pip3line Widgets Svg Network Concurrent)
+if(WIN32)
+    target_link_libraries ( pip3line Qt5::WinMain )
+endif(WIN32)
+
 
 target_link_libraries ( pip3line ${EXTERN_LIBS} )
 

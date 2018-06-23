@@ -17,14 +17,9 @@ add_definitions ( -Wall -DPYTHONPLUGIN_LIBRARY -DQT_NO_KEYWORDS -DBUILD_PYTHON_3
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-else(WITH_QT5)
-        find_package ( Qt4 REQUIRED QtCore QtGui QtSvg)
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
 
 # hardcoded paths, in case none are supplied or found
 
@@ -66,50 +61,41 @@ endif()
 
 
 #if(PYTHONLIBS_FOUND)
-       include_directories (
-               ${PYTHON_INCLUDE_DIRS}
-               ../../libtransform/)
+include_directories (
+        ${PYTHON_INCLUDE_DIRS}
+        ../../libtransform/)
 
-	link_directories (
-		${PYTHON_LIBRARIES}
-		${PROJECT_SOURCE_DIR}/../../lib
-		)
+link_directories (
+    ${PYTHON_LIBRARIES}
+    ${PROJECT_SOURCE_DIR}/../../lib
+    )
 
-	set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
+set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
 
-	set ( pythonplugin_HDRS
-		pythonplugin_global.h
-		pythontransform.h
-		pythonmodules.h
-		pythonplugin.h
-		)
+set ( pythonplugin_HDRS
+    pythonplugin_global.h
+    pythontransform.h
+    pythonmodules.h
+    pythonplugin.h
+    )
 
-	set ( pythonplugin_SRCS
-		pythonmodules.cpp
-		pythontransform.cpp
-		pythonplugin.cpp
-		)
-	set ( EXTERN_LIB transform )
-	# if(WIN32)
-		# set ( EXTERN_LIB ${EXTERN_LIB} python34 )
-	# else()
-		# set ( EXTERN_LIB ${EXTERN_LIB} python3.3 )
-	# endif()
+set ( pythonplugin_SRCS
+    pythonmodules.cpp
+    pythontransform.cpp
+    pythonplugin.cpp
+    )
+set ( EXTERN_LIB transform )
 
-	add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
+add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
 
-	if(WITH_QT5)
-		qt5_use_modules( python3plugin  Widgets Svg )
-	else(WITH_QT5)
-		target_link_libraries ( python3plugin ${QT_LIBRARIES} )
-	endif(WITH_QT5)
+qt5_use_modules( python3plugin  Widgets Svg )
 
-	target_link_libraries ( python3plugin ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
+target_link_libraries ( python3plugin ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
 
-	IF(UNIX)
-		install (TARGETS python3plugin DESTINATION lib/pip3line/
-			PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-			GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-	ENDIF(UNIX)
+IF(UNIX)
+    install (TARGETS python3plugin DESTINATION lib/pip3line/
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+ENDIF(UNIX)
 
 #endif(PYTHONLIBS_FOUND)

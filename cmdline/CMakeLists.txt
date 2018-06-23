@@ -24,14 +24,9 @@ add_definitions ( -Wall )
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(WITH_QT5)
-        find_package(Qt5Widgets)
-        find_package(Qt5Core)
-        find_package(Qt5Svg)
-else(WITH_QT5)
-	find_package ( Qt4 REQUIRED QtCore QtGui QtSvg QtMain)
-	include ( ${QT_USE_FILE} )
-endif(WITH_QT5)
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+find_package(Qt5Svg)
 
 include_directories (
 	../libtransform
@@ -65,14 +60,10 @@ set ( pip3linecmd_SRCS
 
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
-if(WITH_QT5)
-	qt5_use_modules(pip3linecmd Widgets Svg)
-	if(WIN32)		
-		target_link_libraries ( pip3linecmd  Qt5::WinMain)
-	endif(WIN32)
-else(WITH_QT5)
-	target_link_libraries ( pip3linecmd  ${QT_LIBRARIES} )
-endif(WITH_QT5)
+qt5_use_modules(pip3linecmd Widgets Svg)
+if(WIN32)
+    target_link_libraries ( pip3linecmd  Qt5::WinMain)
+endif(WIN32)
 
 target_link_libraries ( pip3linecmd  ${EXTERN_LIBS} )
 

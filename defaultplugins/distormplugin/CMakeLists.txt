@@ -71,18 +71,11 @@ set ( distormplugin_UIS
 	distormwidget.ui
 	)
 
-if(WITH_QT5)
-       	qt5_wrap_ui(UIS ${distormplugin_UIS})
-else(WITH_QT5)
-       	QT4_WRAP_UI(UIS ${distormplugin_UIS})
-endif(WITH_QT5)
+qt5_wrap_ui(UIS ${distormplugin_UIS})
 	
 add_library ( distormplugin MODULE ${distormplugin_SRCS} ${UIS} )
-if(WITH_QT5)
-       	qt5_use_modules(distormplugin Widgets Svg)
-else(WITH_QT5)
-	target_link_libraries ( distormplugin  ${QT_LIBRARIES} )
-endif(WITH_QT5)
+
+qt5_use_modules(distormplugin Widgets Svg)
 
 target_link_libraries ( distormplugin  ${EXTERN_LIBS} )
 
