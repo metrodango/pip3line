@@ -19,15 +19,15 @@ if (WITH_SCINTILLA)
     message ( STATUS "-- Enabling QScintilla support --" )
     add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
-        ..\\..\\QScintilla\\Qt4Qt5
+        ..\\ext\\QScintilla\\Qt4Qt5
     )
     if (WIN32)
         link_directories (
-             ..\\..\\QScintilla\\Qt4Qt5\\release
+             ..\\ext\\QScintilla\\Qt4Qt5\\release
         )
     else()
         link_directories (
-             ..\\..\\QScintilla\\Qt4Qt5
+             ..\\ext\\QScintilla\\Qt4Qt5
         )
     endif()
 endif(WITH_SCINTILLA)
