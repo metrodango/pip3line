@@ -10,14 +10,27 @@ environment:
       config: Release
 
 install:
-- git submodule update --init --recursive
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+- git submodule update --init --recursive
+- appveyor DownloadFile https://sourceforge.net/projects/pyqt/files/QScintilla2/QScintilla-2.10.6/QScintilla_gpl-2.10.6.zip
+- 7z x .\QScintilla_gpl-2.10.6.zip -o.\ext\
+- ps: ren .\ext\QScintilla_gpl-2.10.6 .\ext\QScintilla_gpl
+- ps: pushd ext\QScintilla_gpl\Qt4Qt5
+- qmake
+- nmake
+- ps: popd
+- ps: popd
+- ps: popd
 
 before_build:
 - mkdir build
 - cd build
-- cmake ../ -DBASIC=ON -DWITH_OPENSSL=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
+- cmake ../ -DALL=ON -DWITH_DISTORM=OFF -DWITH_SCINTILLA=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
 
 build_script:
 - nmake
+- cd ..
+
+after_build:
+- win_package.bat 2017_64
 
