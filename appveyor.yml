@@ -1,0 +1,20 @@
+version: 3.4.1.{build}
+
+environment:
+  matrix:
+    - compiler: vs2017
+      platform: x64
+      config: Release
+
+install:
+- git submodule update --init --recursive
+- powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64"
+
+before_build:
+- mkdir build
+- cd build
+- cmake ../ -DBASIC=ON -DWITH_OPENSSL=ON -DWITH_DISTORM=ON -G "NMake Makefiles"
+
+build_script:
+- nmake
+
