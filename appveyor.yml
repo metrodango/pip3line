@@ -5,6 +5,7 @@ environment:
     - compiler: vs2017
       platform: x64
       config: Release
+      image: Visual Studio 2017
 
 install:
 - git submodule update --init --recursive
