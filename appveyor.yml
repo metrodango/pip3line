@@ -2,18 +2,21 @@ version: 3.4.1.{build}
 
 environment:
   matrix:
-    - compiler: vs2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      QTDIR: 'C:\Qt\5.11.0\msvc2017_64'
+      PATH: '%QTDIR%\bin;%PATH%'
+      compiler: vs2017
       platform: x64
       config: Release
 
 install:
 - git submodule update --init --recursive
-- powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64"
+- call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 before_build:
 - mkdir build
 - cd build
-- cmake ../ -DBASIC=ON -DWITH_OPENSSL=ON -DWITH_DISTORM=ON -G "NMake Makefiles"
+- cmake ../ -DBASIC=ON -DWITH_OPENSSL=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
 
 build_script:
 - nmake
