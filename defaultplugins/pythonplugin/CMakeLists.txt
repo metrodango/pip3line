@@ -24,8 +24,14 @@ find_package(Qt5Svg)
 # hardcoded paths, in case none are supplied or found
 
 if (WIN32)
-  set (PYTHON_HARDCODED_INCLUDE "C:\\Program Files\\Python36\\include")
-  set (PYTHON_HARDCODED_LIBS "C:\\Program Files\\Python36\\libs\\python36.lib")
+  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "4")
+    set (PYTHON_HARDCODED_INCLUDE "C:\\Python36\\include")
+    set (PYTHON_HARDCODED_LIBS "C:\\Python36\\libs\\python36.lib")
+  else ()
+    set (PYTHON_HARDCODED_INCLUDE "C:\\Python36-x64\\include")
+    set (PYTHON_HARDCODED_LIBS "C:\\Python36-x64\\libs\\python36.lib")
+  endif() 
+
 elseif(APPLE)
   list(APPEND CMAKE_PREFIX_PATH "/usr/local")
   set (PYTHON_HARDCODED_INCLUDE "/usr/local/Frameworks/Python.framework/Versions/3.5/include/python3.5m")

@@ -9,13 +9,14 @@ IF "%GOTVERSION%"=="false" GOTO Usage
 
 SET VSVERSION=%1
 REM Default Qt dir
-SET "BASE_DIR_QT=C:\Qt\5.10.1"
+SET "BASE_DIR_QT=C:\Qt\5.11.0"
 
 IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 IF "%VSVERSION%"=="2017_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2017_64"
 
 REM Openssl lib
-SET "OPENSSL_PATH=C:\OpenSSL"
+IF "%VSVERSION%"=="2015_32" set "OPENSSL_PATH=C:\OpenSSL-Win32"
+IF "%VSVERSION%"=="2017_64" set "OPENSSL_PATH=C:\OpenSSL-Win64"
 
 REM needed to copy the necessary Angle libs
 SET ANGLEUSE=false
@@ -60,17 +61,18 @@ copy %QT_LIBS%"\plugins\platforms\qwindows.dll" ".\platforms"
 
 echo [4] Copying distorm lib (if present)
 REM Distorm3 lib
-SET "DISTORM_PATH=..\..\distorm"
+SET "DISTORM_PATH=..\ext\distorm"
 IF NOT EXIST %DISTORM_PATH% GOTO Nonexistentdistorm
 copy %DISTORM_PATH%"\distorm3.dll"
 
 echo [5] Copying OpenSSL lib (if present)
 IF NOT EXIST "%OPENSSL_PATH%" GOTO NonexistentOpenssl
-IF "%VSVERSION%"=="2017_64" copy "%OPENSSL_PATH%\bin\*.dll"
+
+copy "%OPENSSL_PATH%\bin\*.dll"
 
 echo [6] Copying QScintilla lib (if present)
 REM Qscintilla lib
-SET "QSCINTILLA_PATH=..\..\QScintilla\Qt4Qt5\release"
+SET "QSCINTILLA_PATH=..\ext\QScintilla_gpl\Qt4Qt5\release"
 IF NOT EXIST %QSCINTILLA_PATH% GOTO Nonexistentqscintilla
 copy %QSCINTILLA_PATH%"\qscintilla2_qt5.dll"
 
