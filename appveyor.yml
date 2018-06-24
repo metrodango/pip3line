@@ -14,7 +14,7 @@ install:
 - git submodule update --init --recursive
 - appveyor DownloadFile https://sourceforge.net/projects/pyqt/files/QScintilla2/QScintilla-2.10.6/QScintilla_gpl-2.10.6.zip
 - 7z x .\QScintilla_gpl-2.10.6.zip -o.\ext\
-- ps: ren .\ext\QScintilla_gpl-2.10.6 .\ext\QScintilla_gpl
+- ps: ren ext\QScintilla_gpl-2.10.6 ext\QScintilla_gpl
 - ps: pushd ext\QScintilla_gpl\Qt4Qt5
 - qmake
 - nmake
