@@ -16,18 +16,19 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (WITH_SCINTILLA)
+	set (QSCINTILLA_HOME "..\\ext\\QScintilla_gpl")
     message ( STATUS "-- Enabling QScintilla support --" )
     add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
-        ..\\ext\\QScintilla\\Qt4Qt5
+        ${QSCINTILLA_HOME}\\Qt4Qt5
     )
     if (WIN32)
         link_directories (
-             ..\\ext\\QScintilla\\Qt4Qt5\\release
+             ${QSCINTILLA_HOME}\\Qt4Qt5\\release
         )
     else()
         link_directories (
-             ..\\ext\\QScintilla\\Qt4Qt5
+             ${QSCINTILLA_HOME}\\Qt4Qt5
         )
     endif()
 endif(WITH_SCINTILLA)
