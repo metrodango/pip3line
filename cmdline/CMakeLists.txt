@@ -60,12 +60,11 @@ set ( pip3linecmd_SRCS
 
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
-qt5_use_modules(pip3linecmd Widgets Svg)
 if(WIN32)
-    target_link_libraries ( pip3linecmd  Qt5::WinMain)
+    target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg Qt5::WinMain)
 endif(WIN32)
 
-target_link_libraries ( pip3linecmd  ${EXTERN_LIBS} )
+target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 if(UNIX)
 	install (TARGETS pip3linecmd DESTINATION bin)

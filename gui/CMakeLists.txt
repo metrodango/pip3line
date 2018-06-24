@@ -375,13 +375,12 @@ qt5_add_resources(RSCS ${pip3line_RSCS})
 
 add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
 
-qt5_use_modules(pip3line Widgets Svg Network Concurrent)
 if(WIN32)
-    target_link_libraries ( pip3line Qt5::WinMain )
+    target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent Qt5::WinMain )
 endif(WIN32)
 
 
-target_link_libraries ( pip3line ${EXTERN_LIBS} )
+target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent ${EXTERN_LIBS} )
 
 if(UNIX)
 	install (TARGETS pip3line DESTINATION bin)

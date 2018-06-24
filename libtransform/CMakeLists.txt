@@ -83,7 +83,7 @@ if (UNIX)
 		SOVERSION ${LIBTRANSFORM_VERSION_MAJOR})
 endif(UNIX)
 
-qt5_use_modules(transform Widgets Svg Concurrent)
+target_link_libraries(transform Qt5::Widgets Qt5::Svg Qt5::Concurrent)
 
 IF(UNIX)
 	install (TARGETS transform DESTINATION lib)

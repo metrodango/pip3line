@@ -88,9 +88,7 @@ set ( EXTERN_LIB transform )
 
 add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
 
-qt5_use_modules( python3plugin  Widgets Svg )
-
-target_link_libraries ( python3plugin ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
+target_link_libraries ( python3plugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
 
 IF(UNIX)
     install (TARGETS python3plugin DESTINATION lib/pip3line/

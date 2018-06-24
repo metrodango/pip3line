@@ -51,9 +51,7 @@ if (OPENSSL_FOUND)
 		)
 	
 	add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
-        qt5_use_modules(opensslplugin Widgets Svg)
-
-	target_link_libraries ( opensslplugin  ${EXTERN_LIBS} )
+	target_link_libraries ( opensslplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 	IF(UNIX)
 		install (TARGETS opensslplugin DESTINATION lib/pip3line/

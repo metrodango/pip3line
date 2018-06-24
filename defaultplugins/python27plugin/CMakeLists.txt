@@ -95,9 +95,7 @@ endif(WIN32)
 
 add_library ( python27plugin MODULE ${pythonplugin_SRCS} )
 
-qt5_use_modules( python27plugin  Widgets Svg )
-
-target_link_libraries ( python27plugin ${EXTERN_LIB} )
+target_link_libraries ( python27plugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
 
 
 IF(UNIX)

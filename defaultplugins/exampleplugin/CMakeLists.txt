@@ -45,9 +45,7 @@ set ( EXTERN_LIB transform )
 
 add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 
-qt5_use_modules( exampleplugin Widgets Svg )
-
-target_link_libraries ( exampleplugin ${EXTERN_LIB} )
+target_link_libraries ( exampleplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
 
 IF(UNIX)
 	install (TARGETS exampleplugin DESTINATION lib/pip3line/

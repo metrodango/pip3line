@@ -75,9 +75,7 @@ qt5_wrap_ui(UIS ${distormplugin_UIS})
 	
 add_library ( distormplugin MODULE ${distormplugin_SRCS} ${UIS} )
 
-qt5_use_modules(distormplugin Widgets Svg)
-
-target_link_libraries ( distormplugin  ${EXTERN_LIBS} )
+target_link_libraries ( distormplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 IF(UNIX)
 	install (TARGETS distormplugin DESTINATION lib/pip3line/

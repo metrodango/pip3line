@@ -264,9 +264,7 @@ set ( EXTERN_LIB transform )
 
 add_library ( baseplugins MODULE ${baseplugins_SRCS} ${UIS} ${RSCS} )
 
-qt5_use_modules( baseplugins Widgets Svg Network XmlPatterns )
-
-target_link_libraries ( baseplugins ${EXTERN_LIB} )
+target_link_libraries ( baseplugins Qt5::Widgets Qt5::Svg Qt5::Network Qt5::XmlPatterns ${EXTERN_LIB} )
 
 IF(UNIX)
 	install (TARGETS baseplugins DESTINATION lib/pip3line/
