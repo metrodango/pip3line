@@ -3,6 +3,7 @@ pip3line
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/570b18ced7044b7193d49fc1c9409316)](https://www.codacy.com/app/metrodango/pip3line?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metrodango/pip3line&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/metrodango/pip3line.svg?branch=master)](https://travis-ci.org/metrodango/pip3line)
+[![Build status](https://ci.appveyor.com/api/projects/status/5ck7rc2sq4py9u39/branch/master?svg=true)](https://ci.appveyor.com/project/metrodango/pip3line/branch/master)
 
 Raw bytes manipulation utility, able to apply well known and less well known transformations.
 
