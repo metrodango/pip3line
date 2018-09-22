@@ -34,8 +34,8 @@ build_script:
 
 after_build:
 - win_package.bat 2017_64
-- ps: ren package "pip3line_$env:APPVEYOR_BUILD_VERSION_win_x64"
-- 7z a pip3line_$(appveyor_build_version)_win_x64.zip pip3line_$(appveyor_build_version)_win_x64
+- ps: ren package "pip3line_$($env:APPVEYOR_BUILD_VERSION)_win_x64"
+- 7z a pip3line_%APPVEYOR_BUILD_VERSION%_win_x64.zip pip3line_%APPVEYOR_BUILD_VERSION%_win_x64
 
 artifacts:
 - path: pip3line_$(appveyor_build_version)_win_x64.zip
