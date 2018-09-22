@@ -12,6 +12,7 @@ environment:
 install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
+- powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
 - appveyor DownloadFile https://sourceforge.net/projects/pyqt/files/QScintilla2/QScintilla-2.10.6/QScintilla_gpl-2.10.6.zip
 - 7z x .\QScintilla_gpl-2.10.6.zip -o.\ext\
 - ps: ren ext\QScintilla_gpl-2.10.6 QScintilla_gpl
@@ -25,7 +26,7 @@ install:
 before_build:
 - mkdir build
 - cd build
-- cmake ../ -DALL=ON -DWITH_DISTORM=OFF -DWITH_SCINTILLA=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
+- cmake ../ -DALL=ON -DWITH_SCINTILLA=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
 
 build_script:
 - nmake
