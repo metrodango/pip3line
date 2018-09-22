@@ -3,7 +3,7 @@ version: 3.4.1.{build}
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      QTDIR: 'C:\Qt\5.11.0\msvc2017_64'
+      QTDIR: 'C:\Qt\5.11.1\msvc2017_64'
       PATH: '%QTDIR%\bin;%PATH%'
       compiler: vs2017
       platform: x64
