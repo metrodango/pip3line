@@ -15,7 +15,7 @@ install:
 - git submodule update --init --recursive
 - powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
 - appveyor DownloadFile https://sourceforge.net/projects/pyqt/files/QScintilla2/QScintilla-%QSCINTILLA_VERSION%/QScintilla_gpl-%QSCINTILLA_VERSION%.zip
-- 7z x .\QScintilla_gpl-%QSCINTILLA_VERSION:%.zip -o.\ext\
+- 7z x .\QScintilla_gpl-%QSCINTILLA_VERSION%.zip -o.\ext\
 - ps: ren "ext\QScintilla_gpl-$($env:QSCINTILLA_VERSION)" QScintilla_gpl
 - ps: pushd ext\QScintilla_gpl\Qt4Qt5
 - qmake
