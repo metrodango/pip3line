@@ -10,9 +10,8 @@
 		<name>Proxy Maintainers</name>
 	</maintainer>
 	<use>
+		<flag name='distorm'>Compile the Distorm plugin</flag>
+		<flag name='qscintilla'>Use QScintilla for more efficient text display</flag>
 		<flag name='ssl'>Compile the plugin adding miscellaneous hashes from OpenSSL</flag>
-		<flag name='python2'>Compile the Python 2.7 plugin</flag>
-		<flag name='python3'>Compile the Python 3.x plugin</flag>
-		<flag name='qscintilla'>Use QScintilla for advanced text display</flag>
 	</use>
 </pkgmetadata>

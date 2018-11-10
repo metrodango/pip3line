@@ -31,8 +31,6 @@ SharedMemorySource::SharedMemorySource(QObject *parent) : BlocksSource(parent)
     updateConnectionsTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
     workerThread.start();
-
-    qInfo() << tr("checking data init") << currentData.size();
 }
 
 SharedMemorySource::~SharedMemorySource()
@@ -154,7 +152,6 @@ void SharedMemorySource::sendBlock(Block *block)
         if (!extsources.contains(sid)) {
             extsources.append(sid);
         }
-        qInfo() << tr("checking data write") << currentData.size();
         memConn->writeData(block->getData());
         currentData = block->getData();
     } else {
@@ -170,7 +167,6 @@ void SharedMemorySource::checkData()
     if (running && memConn != nullptr) {
         QByteArray data;
         if (memConn->readData(data)) {
-            qInfo() << tr("checking data") << data.size() << currentData.size();
             if (currentData != data) {
                 currentData = data;
                 Block * bl = new(std::nothrow) Block(data,Block::INVALID_ID);

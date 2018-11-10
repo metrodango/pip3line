@@ -705,7 +705,7 @@ void JsonView::buildContextMenus()
         qFatal("Cannot allocate memory for globalContextMenu X{");
     }
 
-    QAction * action = new(std::nothrow)QAction(QString("Expand All"));
+    QAction * action = new(std::nothrow) QAction(QString("Expand All"), this);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for expandAllAction X{");
     }
@@ -720,7 +720,7 @@ void JsonView::buildContextMenus()
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(copyMenu);
 
-    action = new(std::nothrow)QAction(QString("Collapse All"));
+    action = new(std::nothrow) QAction(QString("Collapse All"), this);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for collapseAllAction X{");
     }
