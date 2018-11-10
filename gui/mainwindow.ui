@@ -51,7 +51,7 @@
      <x>0</x>
      <y>0</y>
      <width>865</width>
-     <height>20</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -251,6 +251,11 @@
    </property>
    <property name="text">
     <string>Save as &amp;Default</string>
+   </property>
+  </action>
+  <action name="actionRecal_Hex_tables_size">
+   <property name="text">
+    <string>Recal &amp;Hex tables size</string>
    </property>
   </action>
  </widget>

@@ -23,7 +23,7 @@ class PaddingWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit PaddingWidget(Padding *ntransform, QWidget *parent = 0);
+        explicit PaddingWidget(Padding *ntransform, QWidget *parent = nullptr);
         ~PaddingWidget();
     public slots:
         void onVariantChanged(int val);

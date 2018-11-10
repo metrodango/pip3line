@@ -9,7 +9,7 @@ class TargetModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit TargetModel(BlocksSource * source, QObject *parent = 0);
+        explicit TargetModel(BlocksSource * source, QObject *parent = nullptr);
         ~TargetModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -19,6 +19,7 @@ class TargetModel : public QAbstractTableModel
         int size();
 
     private:
+        Q_DISABLE_COPY(TargetModel)
         static const int COLUMN_COUNT;
         static const QStringList headersList;
         QList<Target<BlocksSource *> > targetList;
@@ -34,11 +35,12 @@ class ConnectionsWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit ConnectionsWidget(BlocksSource * source, QWidget *parent = 0);
+        explicit ConnectionsWidget(BlocksSource * source, QWidget *parent = nullptr);
         ~ConnectionsWidget();
     public slots:
         void connectionsUpdated();
     private:
+        Q_DISABLE_COPY(ConnectionsWidget)
         Ui::ConnectionsWidget *ui;
         BlocksSource * source;
         TargetModel *model;

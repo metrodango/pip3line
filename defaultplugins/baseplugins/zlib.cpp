@@ -53,7 +53,7 @@ bool Zlib::isTwoWays()
 QHash<QString, QString> Zlib::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLLEVEL,QString::number((int)compressionLevel));
+    properties.insert(XMLLEVEL,QString::number(static_cast<int>(compressionLevel)));
     properties.insert(XMLREMOVEHEADER,QString::number(removeHeader ? 1 : 0));
 
     return properties;

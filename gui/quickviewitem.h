@@ -32,7 +32,7 @@ class QuickViewItem : public QWidget
         Q_OBJECT
         
     public:
-        explicit QuickViewItem(GuiHelper * guiHelper, QWidget *parent = 0, const QString &guiConfig = QString());
+        explicit QuickViewItem(GuiHelper * guiHelper, QWidget *parent = nullptr, const QString &guiConfig = QString());
         ~QuickViewItem();
         bool configure();
         QString getXmlConf();

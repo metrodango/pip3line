@@ -102,7 +102,7 @@ void DebugDialog::refreshTransformInstances()
     QList<TransformAbstract *> list = guiHelper->getTransformFactory()->getTransformInstances();
     QStringList slist;
     for (int i = 0; i < list.size(); i++) {
-        QString value = QString("0x%1").arg(QString::number((quintptr)list.at(i),16));
+        QString value = QString("0x%1").arg(QString::number(reinterpret_cast<quintptr>(list.at(i)),16));
         slist.append(value);
     }
 
@@ -114,7 +114,7 @@ void DebugDialog::onInstanceClick(QModelIndex index)
 {
     ui->addressLineEdit->setText(index.data().toString());
     onLoad();
-    loadQObject((QObject *)index.data().toString().toULongLong(0,16));
+    loadQObject(reinterpret_cast<QObject *>(index.data().toString().toULongLong(nullptr,16)));
 }
 
 void DebugDialog::loadQObject(QObject *obj)
@@ -151,7 +151,7 @@ void DebugDialog::loadQObject(QObject *obj)
     if (parentObj == nullptr)
         ui->parentValLabel->setText(tr("None"));
     else
-        ui->parentValLabel->setText(tr("0x%1 %2").arg(QString::number((quint64) parentObj, 16)).arg(parentObj->metaObject()->className()));
+        ui->parentValLabel->setText(tr("0x%1 %2").arg(QString::number(reinterpret_cast<quint64>(parentObj), 16)).arg(parentObj->metaObject()->className()));
 
     obj->dumpObjectInfo();
     obj->dumpObjectTree();

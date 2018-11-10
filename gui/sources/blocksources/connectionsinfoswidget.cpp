@@ -21,7 +21,7 @@ ConnectionsInfosWidget::ConnectionsInfosWidget(BlocksSource *listener , QWidget 
 
     if (listener->metaObject()->superClass()->className() == QString("IPBlocksSources")) {
         IPBlocksSources * ipbs = static_cast<IPBlocksSources *>(listener);
-        if (ipbs->isTLSEnable()) {
+        if (ipbs->isTLSEnabled()) {
             certTable = new(std::nothrow) QTableView();
             if (certTable == nullptr) {
                 qFatal("Cannot allocate QTableView");

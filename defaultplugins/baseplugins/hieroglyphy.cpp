@@ -60,7 +60,7 @@ bool Hieroglyphy::isTwoWays()
 QHash<QString, QString> Hieroglyphy::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLBTOAINUSE,QString::number((int)btoaInUse));
+    properties.insert(XMLBTOAINUSE,QString::number(static_cast<int>(btoaInUse)));
 
     return properties;
 }

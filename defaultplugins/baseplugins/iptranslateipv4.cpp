@@ -76,7 +76,7 @@ bool IPTranslateIPv4::isTwoWays()
 QHash<QString, QString> IPTranslateIPv4::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLBASE,QString::number((int)base));
+    properties.insert(XMLBASE,QString::number(static_cast<int>(base)));
     properties.insert(XMLUPPERCASE,QString::number(toUpper ? 1 : 0));
     properties.insert(XMLLITTLEENDIAN,QString::number(littleEndian ? 1 : 0));
 

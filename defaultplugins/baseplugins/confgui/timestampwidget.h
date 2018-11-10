@@ -23,7 +23,7 @@ class TimestampWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit TimestampWidget(TimeStamp *transform, QWidget *parent = 0);
+        explicit TimestampWidget(TimeStamp *transform, QWidget *parent = nullptr);
         ~TimestampWidget();
         
     private:

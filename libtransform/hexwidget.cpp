@@ -73,7 +73,7 @@ void HexWidget::setChar(char c)
     QString charData;
     QString hex = QString::fromUtf8(QByteArray(1,c).toHex());
 
-    if (TransformAbstract::isPrintable((qint32)c)) {
+    if (TransformAbstract::isPrintable(static_cast<qint32>(c))) {
         data = QString::fromUtf8(&c, 1);
         charData = data;
     } else {
@@ -110,7 +110,7 @@ void HexWidget::onHexChanged()
 
     if (!input.isEmpty()) {
         char c = input.at(0);
-        if (TransformAbstract::isPrintable((qint32)c)) {
+        if (TransformAbstract::isPrintable(static_cast<qint32>(c))) {
             data = QString::fromUtf8(&c, 1);
             charData = data;
         } else {

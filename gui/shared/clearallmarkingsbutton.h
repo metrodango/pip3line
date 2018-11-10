@@ -18,9 +18,10 @@ class ClearAllMarkingsButton : public QPushButton
 {
         Q_OBJECT
     public:
-        explicit ClearAllMarkingsButton(ByteSourceAbstract *bytesource, QWidget *parent = 0);
+        explicit ClearAllMarkingsButton(ByteSourceAbstract *bytesource, QWidget *parent = nullptr);
 
     private:
+        Q_DISABLE_COPY(ClearAllMarkingsButton)
         ByteSourceAbstract *byteSource;
 
 };

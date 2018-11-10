@@ -27,7 +27,6 @@ FileWidget::FileWidget(LargeFile *fsource, QWidget *parent) :
         qFatal("Cannot allocate memory for Ui::FileWidget X{");
     }
     source = fsource;
-    ui = new(std::nothrow) Ui::FileWidget;
     ui->setupUi(this);
 
     refresh();

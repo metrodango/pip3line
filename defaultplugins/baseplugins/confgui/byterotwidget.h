@@ -24,7 +24,7 @@ class ByteRotWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit ByteRotWidget(ByteRot * transf, QWidget *parent = 0);
+        explicit ByteRotWidget(ByteRot * transf, QWidget *parent = nullptr);
         ~ByteRotWidget();
     public slots:
         void onRotationChanged(int val);

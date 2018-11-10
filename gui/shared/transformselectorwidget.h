@@ -15,7 +15,7 @@ class TransformSelectorWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit TransformSelectorWidget(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit TransformSelectorWidget(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~TransformSelectorWidget();
     signals:
         void newTransform(TransformAbstract * transform);
@@ -23,6 +23,7 @@ class TransformSelectorWidget : public QWidget
         void onTransformSelected(const QString &name);
         void onTransformDelete();
     private:
+        Q_DISABLE_COPY(TransformSelectorWidget)
         Ui::TransformSelectorWidget *ui;
         GuiHelper *guiHelper;
         TransformAbstract * currentTransform;

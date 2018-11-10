@@ -20,7 +20,7 @@ class LargeRandomAccessSource : public ByteSourceAbstract
 {
         Q_OBJECT
     public:
-        explicit LargeRandomAccessSource(QObject *parent = 0);
+        explicit LargeRandomAccessSource(QObject *parent = nullptr);
         virtual ~LargeRandomAccessSource();
         virtual void setData(QByteArray data, quintptr source = INVALID_SOURCE);
         virtual QByteArray getRawData(); // not always possible
@@ -85,6 +85,8 @@ class LargeRandomAccessSource : public ByteSourceAbstract
         int intervalMSec;
         QTime dtimer;
         QSemaphore sem;
+    private:
+        Q_DISABLE_COPY(LargeRandomAccessSource)
 
 };
 
@@ -96,6 +98,8 @@ class LargeRandomAccessSourceStateObj : public ByteSourceStateObj
         virtual ~LargeRandomAccessSourceStateObj();
     protected:
         virtual void internalRun();
+    private:
+        Q_DISABLE_COPY(LargeRandomAccessSourceStateObj)
 };
 
 #endif // LARGERANDOMACCESSSOURCE_H

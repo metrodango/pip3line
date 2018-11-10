@@ -52,7 +52,7 @@ void NumberToChar::transform(const QByteArray &input, QByteArray &output)
                 val = num.toInt(&ok);
 
                 if (ok && !(val <  SCHAR_MIN || val > SCHAR_MAX )) {
-                    output.append((char)val);
+                    output.append(static_cast<char>(val));
                 } else {
                     emit error(tr("Invalid number"),id);
                 }
@@ -64,9 +64,9 @@ void NumberToChar::transform(const QByteArray &input, QByteArray &output)
     } else {
         for (int i = 0; i < input.size(); i++) {
             if (signedShort)
-                output.append(QByteArray::number((qint8)input.at(i)));
+                output.append(QByteArray::number(static_cast<qint8>(input.at(i))));
             else
-                output.append(QByteArray::number((quint8)input.at(i)));
+                output.append(QByteArray::number(static_cast<quint8>(input.at(i))));
             output.append(separator);
         }
         output.chop(1);

@@ -62,10 +62,10 @@ QString Crc32::description() const
 
 void Crc32::transform(const QByteArray &input, QByteArray &output)
 {
-    quint32 crc = ~0;
+    quint32 crc = ~static_cast<quint32>(0);
 
     for(int i = 0; i < input.length(); ++i) {
-       crc = crctable[(crc ^ input[i]) & 0xff] ^ (crc >> 8);
+       crc = crctable[(crc ^ static_cast<quint32>(input[i])) & 0xff] ^ (crc >> 8);
     }
     crc = ~crc;
 

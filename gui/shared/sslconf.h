@@ -32,7 +32,7 @@ class SslConf : public QObject
         static const QString CONF_SSL_ALLOWED_NEXT_PROTOCOLS;
         static const QString CONF_SSL_ELLIPTICS_CURVES;
 
-        explicit SslConf(QObject *parent = 0);
+        explicit SslConf(QObject *parent = nullptr);
         ~SslConf();
         QList<QSslCipher> getSslCiphers() const;
         QSslKey getLocalKey() const;
@@ -46,7 +46,7 @@ class SslConf : public QObject
         bool getDisableLegacyRenegotiation() const;
         bool getDisableSessionSharing() const;
         bool getDisableSessionPersistence() const;
-        QWidget *getGui(QWidget *parent = 0);
+        QWidget *getGui(QWidget *parent = nullptr);
         QSslSocket::PeerVerifyMode getSslVerificationMode() const;
         QString getSslPeerNameSNI() const;
         bool isUsingSNI() const;
@@ -83,6 +83,7 @@ class SslConf : public QObject
     private slots:
         void onGuiDeleted();
     private:
+        Q_DISABLE_COPY(SslConf)
         static const QList<QSsl::KeyAlgorithm> keyAlgos;
         static const QString CONF_SSL_CIPHER_SEPARATOR;
         QString concat(const QStringList &list);

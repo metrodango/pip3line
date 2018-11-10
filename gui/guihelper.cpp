@@ -34,6 +34,7 @@ Released under AGPL see LICENSE for more information
 #include <QNetworkProxy>
 #include <QTimer>
 #include <QFontMetrics>
+#include <QDesktopWidget>
 #include "tabs/generictab.h"
 #include "tabs/transformsgui.h"
 #include "tabs/packetanalysertab.h"
@@ -131,12 +132,17 @@ QNetworkAccessManager *GuiHelper::getNetworkManager()
 
 void GuiHelper::sendNewSelection(const QByteArray &selection)
 {
-    emit newSelection(selection);
+    emit newDataSelection(selection);
 }
 
 void GuiHelper::sendToNewTab(const QByteArray &initialValue)
 {
     emit newTabRequested(initialValue);
+}
+
+void GuiHelper::sendToNewHexEditor(const QByteArray &initialValue)
+{
+    emit newHexEditorRequested(initialValue);
 }
 
 void GuiHelper::setUniveralReceiver(TabAbstract *tab)
@@ -542,6 +548,22 @@ void GuiHelper::refreshAutoSaveTimer()
     }
 }
 
+QColor GuiHelper::getColorFromSetting(const QString &key, const QColor &defaultcolor)
+{
+    QColor ret;
+    bool ok = false;
+    uint val = settings->value(key,defaultcolor.toRgb()).toUInt(&ok);
+
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            ret = color;
+        }
+    }
+
+    return ret;
+}
+
 void GuiHelper::registerPacketsAnalyser(PacketAnalyserTab *paTab)
 {
     if (registeredPacketsAnalysers.contains(paTab)) {
@@ -649,12 +671,71 @@ void GuiHelper::loadEqualityPacketColors()
 
     val = settings->value(SETTINGS_EQUALITY_PACKETS_FOREGROUND,GuiStyles::DEFAULT_EQUAL_PACKETS_FOREGROUND.toRgb()).toUInt(&ok);
 
-        if (ok) {
-            QColor color(val);
-            if (color.isValid()) {
-                GlobalsValues::EqualsPacketsForeground = color;
-            }
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            GlobalsValues::EqualsPacketsForeground = color;
         }
+    }
+}
+
+void GuiHelper::saveJsonColor()
+{
+    settings->setValue(SETTINGS_JSON_TYPE_COLOR, GlobalsValues::JSON_TYPE_COLOR.rgb());
+    settings->setValue(SETTINGS_JSON_KEY_COLOR, GlobalsValues::JSON_KEY_COLOR.rgb());
+    settings->setValue(SETTINGS_JSON_VALUE_COLOR, GlobalsValues::JSON_VALUE_COLOR.rgb());
+}
+
+void GuiHelper::loadJsonColors()
+{
+    bool ok = false;
+    uint val = settings->value(SETTINGS_JSON_TYPE_COLOR,GuiStyles::DEFAULT_JSON_TYPE_COLOR.toRgb()).toUInt(&ok);
+
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            GlobalsValues::JSON_TYPE_COLOR = color;
+        }
+    }
+
+    val = settings->value(SETTINGS_JSON_KEY_COLOR,GuiStyles::DEFAULT_JSON_KEY_COLOR.toRgb()).toUInt(&ok);
+
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            GlobalsValues::JSON_KEY_COLOR = color;
+        }
+    }
+
+    val = settings->value(SETTINGS_JSON_VALUE_COLOR,GuiStyles::DEFAULT_JSON_VALUE_COLOR.toRgb()).toUInt(&ok);
+
+    if (ok) {
+        QColor color(val);
+        if (color.isValid()) {
+            GlobalsValues::JSON_VALUE_COLOR = color;
+        }
+    }
+}
+
+void GuiHelper::saveSearchColors()
+{
+    settings->setValue(SETTINGS_SEARCH_BG_COLOR, GlobalsValues::SEARCH_BG_COLOR.rgb());
+    settings->setValue(SETTINGS_SEARCH_FG_COLOR, GlobalsValues::SEARCH_FG_COLOR.rgb());
+}
+
+void GuiHelper::loadSearchColors()
+{
+    QColor temp = getColorFromSetting(SETTINGS_SEARCH_BG_COLOR, GuiStyles::DEFAULT_SEARCH_BG_COLOR);
+
+    if (temp.isValid()) {
+        GlobalsValues::SEARCH_BG_COLOR = temp;
+    }
+
+    temp = getColorFromSetting(SETTINGS_SEARCH_FG_COLOR, GuiStyles::DEFAULT_SEARCH_FG_COLOR);
+
+    if (temp.isValid()) {
+        GlobalsValues::SEARCH_FG_COLOR = temp;
+    }
 }
 
 void GuiHelper::registerBlockSource(BlocksSource *bs)
@@ -914,10 +995,14 @@ void GuiHelper::logMessage(const QString &message, const QString &source, Pip3li
 void GuiHelper::calculatingHexTableSizes()
 {
     QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
-    GlobalsValues::HEXCOLUMNWIDTH = calculateStringWidthWithGlobalFont(" FF ");
-    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFF ");
+    GlobalsValues::HEXCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFF");
+    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFFFF");
+//    qDebug() << tr("height") << fm.height() << fm.capHeight() << QString("%1, %2px %3f")
+//                .arg(GlobalsValues::GLOBAL_REGULAR_FONT.family())
+//                .arg(GlobalsValues::GLOBAL_REGULAR_FONT.pointSize())
+//                .arg(GlobalsValues::GLOBAL_REGULAR_FONT.pointSizeF());
 #if QT_VERSION >= 0x050800
-    GlobalsValues::ROWSHEIGHT = qMax(fm.height(), fm.capHeight()) + 2; // random value for some "special" cases
+    GlobalsValues::ROWSHEIGHT = qMax(fm.height(), fm.capHeight()) + 2; // arbitrary value .. not sure why it is needed
 #else
     GlobalsValues::ROWSHEIGHT = fm.height() + 2; // random value for some "special" cases
 #endif
@@ -1001,7 +1086,7 @@ void GuiHelper::refreshAll()
     int vl = settings->value(GuiConst::SETTINGS_DEFAULT_TAB, GuiConst::TRANSFORM_PRETAB).toInt(&ok);
 
     if (ok && vl >= 0 && vl < GuiConst::AVAILABLE_TAB_STRINGS.size()) {
-        defaultNewTab = (GuiConst::AVAILABLE_PRETABS)vl;
+        defaultNewTab = static_cast<GuiConst::AVAILABLE_PRETABS>(vl);
     }
 
     defaultServerPort = settings->value(GuiConst::SETTINGS_SERVER_PORT,GuiConst::DEFAULT_PORT).toInt(&ok);
@@ -1010,7 +1095,7 @@ void GuiHelper::refreshAll()
 
     regularFont = QFont();
     regularFont.fromString(settings->value(GuiConst::SETTINGS_REGULAR_FONT,GuiStyles::DEFAULT_REGULAR_FONT).toString());
-    GlobalsValues::GLOBAL_REGULAR_FONT.fromString(regularFont.toString());
+    GlobalsValues::GLOBAL_REGULAR_FONT = regularFont;
     calculatingHexTableSizes();
 
     QByteArray temp = settings->value(GuiConst::SETTINGS_SERVER_SEPARATOR,QByteArray()).toByteArray();
@@ -1034,10 +1119,12 @@ void GuiHelper::refreshAll()
 
     enableNetworkProxy = settings->value(GuiConst::SETTINGS_ENABLE_NETWORK_PROXY, GuiConst::DEFAULT_PROXY_ENABLE).toBool();
     proxyInterface = settings->value(GuiConst::SETTINGS_GLOBAL_PROXY_IP, GuiConst::DEFAULT_GLOBAL_PROXY_IP).toString();
-    proxyPort = settings->value(GuiConst::SETTINGS_GLOBAL_PROXY_PORT, GuiConst::DEFAULT_GLOBAL_PROXY_PORT).toUInt(&ok);
-    if (!ok)
+    uint tempui = settings->value(GuiConst::SETTINGS_GLOBAL_PROXY_PORT, GuiConst::DEFAULT_GLOBAL_PROXY_PORT).toUInt(&ok);
+    if (ok && tempui < USHRT_MAX  ) {
+        proxyPort = static_cast<quint16>(tempui);
+    } else {
         proxyPort = GuiConst::DEFAULT_GLOBAL_PROXY_PORT;
-
+    }
     refreshNetworkProxySettings();
 
     autoCopyTextTransformGui = settings->value(GuiConst::SETTINGS_AUTO_COPY_TRANSFORM, GuiConst::DEFAULT_AUTO_COPY_TEXT).toBool();
@@ -1059,7 +1146,7 @@ void GuiHelper::refreshAll()
     maxSizeForFuzzingExport = settings->value(GuiConst::SETTINGS_FUZZING_EXPORT_MAX_SIZE, GuiConst::DEFAULT_FUZZING_EXPORT_MAX_SIZE).toULongLong();
     vl = settings->value(GuiConst::SETTINGS_FUZZING_EXPORT_FORMAT, GuiConst::DEFAULT_FUZZING_EXPORT_FORMAT).toInt(&ok);
     if (ok && (vl == QJsonDocument::Indented || vl == QJsonDocument::Compact)) {
-        fuzzingExportFormat = (QJsonDocument::JsonFormat) vl;
+        fuzzingExportFormat = static_cast<QJsonDocument::JsonFormat>(vl);
     } else {
         fuzzingExportFormat = GuiConst::DEFAULT_FUZZING_EXPORT_FORMAT;
     }
@@ -1089,6 +1176,8 @@ void GuiHelper::refreshAll()
     }
 
     loadEqualityPacketColors();
+    loadJsonColors();
+    loadSearchColors();
 
     deleteImportExportFuncs();
     loadImportExportFunctions();
@@ -1104,7 +1193,7 @@ void GuiHelper::setDefaultNewTab(AVAILABLE_PRETABS value)
 {
     if (value != defaultNewTab) {
         defaultNewTab = value;
-        settings->setValue(SETTINGS_DEFAULT_TAB, QVariant((int)value));
+        settings->setValue(SETTINGS_DEFAULT_TAB, QVariant(static_cast<int>(value)));
     }
 }
 
@@ -1221,7 +1310,6 @@ void GuiHelper::requestDownload(QUrl url, ByteSourceAbstract *byteSource, Downlo
             downloadManager = new(std::nothrow) DownloadManager(url, this);
             if (downloadManager == nullptr) {
                 qFatal("Cannot allocate memory for setDownload downloadManager X{");
-                return;
             }
             if (byteSource != nullptr) {
                 connect(downloadManager, &DownloadManager::finished, byteSource, [=](QByteArray data) { byteSource->setData(data);});
@@ -1344,7 +1432,6 @@ void GuiHelper::updateCopyContextMenu(QMenu *copyMenu)
     QAction * action = new(std::nothrow) QAction(UTF8_STRING_ACTION, copyMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus UTF8 X{");
-        return;
     }
     copyMenu->addAction(action);
 
@@ -1354,7 +1441,6 @@ void GuiHelper::updateCopyContextMenu(QMenu *copyMenu)
         action = new(std::nothrow) QAction(list.at(i), copyMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus copyMenu X{");
-            return;
         }
         copyMenu->addAction(action);
     }
@@ -1366,7 +1452,6 @@ void GuiHelper::updateLoadContextMenu(QMenu *loadMenu)
     QAction * action = new(std::nothrow) QAction(UTF8_STRING_ACTION, loadMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus loadMenu UTF8 X{");
-        return;
     }
     loadMenu->addAction(action);
 
@@ -1376,7 +1461,6 @@ void GuiHelper::updateLoadContextMenu(QMenu *loadMenu)
         action = new(std::nothrow) QAction(list.at(i), loadMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus loadMenu user's X{");
-            return;
         }
         loadMenu->addAction(action);
     }
@@ -1390,7 +1474,6 @@ void GuiHelper::loadAction(QString action, ByteSourceAbstract *byteSource)
         NewByteDialog *dialog = new(std::nothrow) NewByteDialog(this);
         if (dialog == nullptr) {
             qFatal("Cannot allocate memory for action NewByteDialog X{");
-            return;
         }
         dialog->setModal(true);
         int ret = dialog->exec();
@@ -1453,12 +1536,12 @@ const QString GuiHelper::getXMLfromRes(const QString &res)
 void GuiHelper::onFilterChanged(const QModelIndex &topLeft, const QModelIndex &)
 {
     QString item = topLeft.data().toString();
-    Qt::CheckState state = (Qt::CheckState) topLeft.data(Qt::CheckStateRole).toInt();
+    Qt::CheckState state = static_cast<Qt::CheckState>(topLeft.data(Qt::CheckStateRole).toInt());
     if (state == Qt::Unchecked) {
         typesBlacklist.insert(item);
     } else {
         typesBlacklist.remove(item);
     }
-    settings->setValue(SETTINGS_FILTER_BLACKLIST, (QStringList)typesBlacklist.toList());
+    settings->setValue(SETTINGS_FILTER_BLACKLIST, static_cast<QStringList>(typesBlacklist.toList()));
     emit filterChanged();
 }

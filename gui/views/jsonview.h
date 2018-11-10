@@ -33,6 +33,7 @@ class JsonItem
         QString getName() const;
         JsonItem::Type getValueType() const;
     private:
+        Q_DISABLE_COPY(JsonItem)
         static const QString OBJECT_STR;
         static const QString ARRAY_STR;
         static const QString NULL_STR;
@@ -49,7 +50,7 @@ class JsonModel : public QAbstractItemModel
         Q_OBJECT
     public:
         explicit JsonModel(const QJsonDocument &jsonDoc = QJsonDocument(), QObject *parent = nullptr);
-        ~JsonModel();
+        ~JsonModel() override;
         int	columnCount(const QModelIndex &parent = QModelIndex()) const override;
         int	rowCount(const QModelIndex &parent = QModelIndex()) const override;
         QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -57,33 +58,50 @@ class JsonModel : public QAbstractItemModel
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
         QModelIndex	parent(const QModelIndex &index) const override;
+        bool setData(const QModelIndex &index, const QVariant &value, int role) override;
         QJsonDocument getJsonDoc() const;
         void setJsonDoc(const QJsonDocument &jsonDoc);
+        bool isNull();
+    public slots:
+        void setReadonly(bool value);
+    signals:
+        void jsonUpdated();
     private:
+        Q_DISABLE_COPY(JsonModel)
         static const QString ROOT_STR;
         JsonItem *root;
+        bool readonly;
 };
 
 class JsonView : public SingleViewAbstract
 {
         Q_OBJECT
     public:
-        explicit JsonView(ByteSourceAbstract *byteSource, GuiHelper *guiHelper, QWidget *parent = 0, bool takeByteSourceOwnership = false);
-        ~JsonView();
+        explicit JsonView(ByteSourceAbstract *byteSource, GuiHelper *guiHelper, QWidget *parent = nullptr, bool takeByteSourceOwnership = false);
+        ~JsonView() override;
+        QJsonDocument getTreeSavedState() const;
+        void restoreTreeState(const QJsonDocument &doc);
+        QHash<QString, QString> getConfiguration() override;
+        void setConfiguration(QHash<QString, QString> conf) override;
     public slots:
         void sourceUpdated(quintptr source = 0);
         void onRightClick(QPoint pos);
-        void search(QByteArray item, QBitArray mask);
+        void search(QByteArray item, QBitArray mask) override;
         bool isJsonValid();
         void updateImportExportMenus();
         void onCopy(QAction * action);
         void onReplace(QAction * action);
         void onSendToTriggered(QAction * action);
-
+        void onManualUpdate();
+        void onTreeChanges();
     signals:
         void hide();
         void visible();
     private:
+        Q_DISABLE_COPY(JsonView)
+        QJsonDocument getTreeState();
+        QJsonObject getState(const QModelIndex &index);
+        void restoreState(const QJsonObject &obj, const QModelIndex &index);
         void buildContextMenus();
         QByteArray getCurrentIndexValue();
         QMenu * globalContextMenu;
@@ -92,6 +110,7 @@ class JsonView : public SingleViewAbstract
         SendToMenu * sendToMenu;
         QTreeView *tree;
         JsonModel *model;
+        QJsonDocument treeSavedState;
 };
 
 #endif // JSONVIEW_H

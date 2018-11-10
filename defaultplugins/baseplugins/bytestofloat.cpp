@@ -75,7 +75,7 @@ void BytesToFloat::transform(const QByteArray &input, QByteArray &output)
             case F32bits: {
                     float val = 0;
                     memcpy(&val, temp.data(), floatSize);
-                    output.append(QByteArray::number(val,'g',precision));
+                    output.append(QByteArray::number(static_cast<double>(val),'g',precision));
                     break;
             }
             case F64bits: {
@@ -172,7 +172,7 @@ bool BytesToFloat::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLLENGTH),id);
     } else {
-        setFloatSize((FloatSize)val);
+        setFloatSize(static_cast<FloatSize>(val));
     }
 
     return res;

@@ -54,7 +54,7 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
         int index = 0;
         while (index < input.size() || bitsRest != 0) {
             if (bitsRest == 0) {
-                newchar = (uchar)input.at(index);
+                newchar = static_cast<uchar>(input.at(index));
                 index++;
                 bitsRest = ByteSize;
             } else {
@@ -68,14 +68,14 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
             needMore = needMore - bitsToRead;
             bitsRest -= bitsToRead;
             if (needMore == 0) {
-                output.append(charTable.at((uint)current));
+                output.append(charTable.at(static_cast<int>(current)));
                 needMore = BlockSize;
                 current = 0;
             }
         }
 
         if (needMore != BlockSize) {
-            output.append(charTable.at((uint)current));
+            output.append(charTable.at(static_cast<int>(current)));
         }
 
         // padding
@@ -104,7 +104,7 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
 
         int index = 0;
         uchar current = 0;
-        uchar newchar = (uchar)charTable.indexOf(temp.at(index));;
+        uchar newchar = static_cast<uchar>(charTable.indexOf(temp.at(index)));
         int bitsRest = BlockSize;
         int needMore = ByteSize;
 
@@ -116,7 +116,7 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
             needMore = needMore - bitsToRead;
             bitsRest -= bitsToRead;
             if (needMore == 0) {
-                output.append((char)current);
+                output.append(static_cast<char>(current));
                 needMore = ByteSize;
                 current = 0;
             }
@@ -125,7 +125,7 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
                 while (++index < temp.size() && !charTable.contains(temp.at(index)));
                 if (index >= temp.size())
                     break;
-                newchar = (uchar)charTable.indexOf(temp.at(index));
+                newchar = static_cast<uchar>(charTable.indexOf(temp.at(index)));
                 bitsRest = BlockSize;
             } else {
                 newchar = (newchar << (ByteSize - bitsRest)) >> (ByteSize - bitsRest);
@@ -133,7 +133,7 @@ void Base32::transform(const QByteArray &input, QByteArray &output)
         }
 
         if (bitsRest != 0) {
-            output.append((char)current);
+            output.append(static_cast<char>(current));
         }
     }
 }
@@ -145,7 +145,7 @@ bool Base32::isTwoWays() {
 QHash<QString, QString> Base32::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLVARIANT,QString::number((int)variant));
+    properties.insert(XMLVARIANT,QString::number(static_cast<int>(variant)));
     properties.insert(XMLPADDINGCHAR, saveChar(paddingChar));
     properties.insert(XMLINCLUDEPADDING,QString::number(includePadding ? 1 : 0));
 
@@ -164,7 +164,7 @@ bool Base32::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLVARIANT),id);
     } else {
-        setVariant((CharSetVariant) val);
+        setVariant(static_cast<CharSetVariant>(val));
     }
 
 
@@ -208,16 +208,20 @@ QString Base32::help() const
 
 QByteArray Base32::getCharTable()
 {
+    QByteArray ret = CharTableRFC4648;
     switch (variant) {
         case RFC4648:
-            return CharTableRFC4648;
+            ret = CharTableRFC4648;
+            break;
         case CROCKFORD:
-            return CharTableCrockford;
+            ret = CharTableCrockford;
+            break;
         case BASE32HEX:
-            return CharTableBase32Hex;
-        default:
-            return CharTableRFC4648;
+            ret = CharTableBase32Hex;
+            break;
     }
+
+    return ret;
 }
 
 bool Base32::isPaddingIncluded()

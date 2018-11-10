@@ -34,7 +34,7 @@ class TransformsGui : public TabAbstract
         Q_OBJECT
 
     public:
-        explicit TransformsGui(GuiHelper *guiHelper , QWidget *parent = 0);
+        explicit TransformsGui(GuiHelper *guiHelper , QWidget *parent = nullptr);
         ~TransformsGui();
         QString getCurrentChainConf();
         void setCurrentChainConf(const QString &conf, bool ignoreErrors = false);
@@ -45,6 +45,8 @@ class TransformsGui : public TabAbstract
         ByteSourceAbstract *getSource(int blockIndex);
         ByteTableView *getHexTableView(int blockIndex);
         BaseStateAbstract *getStateMngtObj();
+        bool isTrackingChanges();
+        void setTrackChanges(bool enable);
     signals:
         void chainChanged(QString newConf);
 
@@ -64,6 +66,7 @@ class TransformsGui : public TabAbstract
         void onFoldRequest();
         void onUnfoldRequest();
         void onInsertRequest();
+        void onTrackChangesToggled(bool enable);
     private:
         Q_DISABLE_COPY(TransformsGui)
         void setCurrentTransformChain(TransformChain list);
@@ -89,6 +92,8 @@ class TransformGuiStateObj : public TabStateObj
         explicit TransformGuiStateObj(TransformsGui *tg);
         ~TransformGuiStateObj();
         void run();
+    private:
+        Q_DISABLE_COPY(TransformGuiStateObj)
 };
 
 #endif // TRANSFORMSGUI_H

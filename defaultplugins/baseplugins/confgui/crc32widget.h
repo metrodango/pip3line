@@ -13,7 +13,7 @@ class Crc32Widget : public QWidget
         Q_OBJECT
 
     public:
-        explicit Crc32Widget(Crc32 *transform, QWidget *parent = 0);
+        explicit Crc32Widget(Crc32 *transform, QWidget *parent = nullptr);
         ~Crc32Widget();
     private:
         Ui::Crc32Widget *ui;

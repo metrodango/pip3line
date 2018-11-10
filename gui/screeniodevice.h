@@ -18,7 +18,7 @@ class ScreenIODevice : public QIODevice
 {
         Q_OBJECT
     public:
-        explicit ScreenIODevice(QPlainTextEdit *outWidget, QObject *parent = 0);
+        explicit ScreenIODevice(QPlainTextEdit *outWidget, QObject *parent = nullptr);
         
         bool atEnd() const;
         qint64 bytesAvailable() const;

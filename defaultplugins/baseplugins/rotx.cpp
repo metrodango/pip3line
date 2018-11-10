@@ -74,7 +74,7 @@ bool Rotx::isTwoWays() {
 QHash<QString, QString> Rotx::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLVARIANT,QString::number((int)choosenVariant));
+    properties.insert(XMLVARIANT,QString::number(static_cast<int>(choosenVariant)));
 
     return properties;
 }
@@ -89,7 +89,7 @@ bool Rotx::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLVARIANT),id);
     }
-    setRotVariant((Rotx::RotVariant)val);
+    setRotVariant(static_cast<Rotx::RotVariant>(val));
     return res;
 }
 

@@ -26,6 +26,8 @@ LoggerWidget::LoggerWidget(QWidget *parent) :
     }
     ui->setupUi(this);
 
+    ui->messagesTextEdit->setTextBackgroundColor(QApplication::palette().base().color());
+
     uncheckedError = false;
 }
 
@@ -58,7 +60,7 @@ void LoggerWidget::logWarning(const QString &message, const QString &source)
 
 void LoggerWidget::logStatus(const QString &message, const QString &source)
 {
-    addMessage(message,source,LSTATUS);
+    addMessage(message,source,PLSTATUS);
 }
 
 void LoggerWidget::logMessage(const QString &message, const QString &source, Pip3lineConst::LOGLEVEL level)
@@ -92,7 +94,7 @@ void LoggerWidget::addMessage(const QString &message, const QString &source, LOG
             qWarning() << fmess;
             break;
         default:
-            color = QApplication::palette().windowText().color();
+            color = QApplication::palette().text().color();
 #if QT_VERSION >= 0x050500
             qInfo() << fmess;
 #else
@@ -102,6 +104,7 @@ void LoggerWidget::addMessage(const QString &message, const QString &source, LOG
             break;
 
     }
+
 
     ui->messagesTextEdit->setTextColor(color);
     ui->messagesTextEdit->append(fmess.prepend(QString("[%1]").arg(QTime::currentTime().toString())));

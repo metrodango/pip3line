@@ -22,7 +22,7 @@ class UrlEncodeWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit UrlEncodeWidget(UrlEncode *ntransform, QWidget *parent = 0);
+        explicit UrlEncodeWidget(UrlEncode *ntransform, QWidget *parent = nullptr);
         ~UrlEncodeWidget();
     private slots:
         void onIncludeAll();

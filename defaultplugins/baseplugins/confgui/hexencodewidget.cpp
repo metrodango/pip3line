@@ -36,8 +36,6 @@ HexEncodeWidget::HexEncodeWidget(HexEncode *ntransform, QWidget *parent) :
         case HexEncode::CSV:
             ui->csvRadioButton->setChecked(true);
             break;
-        default:
-            ui->normalRadioButton->setChecked(true);
     }
 
     ui->addPrefixCheckBox->setChecked(transform->getAddHexPrefix());

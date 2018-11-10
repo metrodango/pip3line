@@ -22,7 +22,7 @@ class RegExpHelpDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit RegExpHelpDialog(GuiHelper *nguiHelper, QWidget *parent = 0);
+        explicit RegExpHelpDialog(GuiHelper *nguiHelper, QWidget *parent = nullptr);
         ~RegExpHelpDialog();
         
     private:

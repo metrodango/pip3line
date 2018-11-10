@@ -162,7 +162,7 @@ void PythonTransform::transform(const QByteArray &input, QByteArray &output)
                     }
 
                     char * buffer = PyByteArray_AsString(returnValue); // never to be deleted
-                    output.append(QByteArray(buffer,templength));
+                    output.append(QByteArray(buffer,static_cast<int>(templength))); // safe cast as value was checked earlier
                 } else {
                     Q_EMIT error(tr("The Python object returned is not a bytearray"), id);
                 }

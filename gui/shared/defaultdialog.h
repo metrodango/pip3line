@@ -12,10 +12,11 @@ class DefaultDialog : public QDialog
         Q_OBJECT
 
     public:
-        explicit DefaultDialog(QWidget *parent = 0);
+        explicit DefaultDialog(QWidget *parent = nullptr);
         ~DefaultDialog();
         void setMainWidget(QWidget * widget);
     private:
+        Q_DISABLE_COPY(DefaultDialog)
         Ui::DefaultDialog *ui;
 };
 

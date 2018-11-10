@@ -18,7 +18,7 @@ MemoryPacketModel::~MemoryPacketModel()
 
 qint64 MemoryPacketModel::addPacket(const QSharedPointer<Packet> & packet)
 {
-    quint64 ret = PacketModelAbstract::INVALID_POS;
+    qint64 ret = PacketModelAbstract::INVALID_POS;
     if (packet != nullptr) {
         if (autoMergeConsecutivePackets && packetsList.size() > 0) {
             QSharedPointer<Packet> last = packetsList.last();
@@ -54,7 +54,7 @@ qint64 MemoryPacketModel::addPacket(const QSharedPointer<Packet> & packet)
 
 qint64 MemoryPacketModel::addPackets(const QList<QSharedPointer<Packet> > &packets)
 {
-    quint64 ret = PacketModelAbstract::INVALID_POS;
+    qint64 ret = PacketModelAbstract::INVALID_POS;
     if (packets.size() > 0) {
         int first = packetsList.size();
         int last = first < INT_MAX - packets.size() ? first + packets.size() : INT_MAX;
@@ -87,8 +87,8 @@ qint64 MemoryPacketModel::addPackets(const QList<QSharedPointer<Packet> > &packe
 
 QSharedPointer<Packet> MemoryPacketModel::getPacket(qint64 index)
 {
-    if (index < (qint64)packetsList.size() && index >= 0) {
-        return packetsList.at((int)index);
+    if (index < static_cast<qint64>(packetsList.size()) && index >= 0) {
+        return packetsList.at(static_cast<int>(index));
     } else {
         qCritical() << tr("[MemoryPacketModel::getPacket] index out-of-bound");
     }
@@ -96,11 +96,33 @@ QSharedPointer<Packet> MemoryPacketModel::getPacket(qint64 index)
     return QSharedPointer<Packet>();
 }
 
+QSharedPointer<Packet> MemoryPacketModel::getPreviousPacket(qint64 index, Packet::Direction direction)
+{
+    QSharedPointer<Packet> ret = QSharedPointer<Packet>();
+    if (index > 0 // there is not packet before the first one
+            && index < static_cast<qint64>(packetsList.size())) {
+        index--;
+        if (direction == Packet::NODIRECTION) { // just the previous one then
+            ret = packetsList.at(static_cast<int>(index));
+        } else {
+            while (index >=0) {
+                QSharedPointer<Packet> current = packetsList.at(static_cast<int>(index));
+                if (current->getDirection() == direction) {
+                    ret = current;
+                    break;
+                }
+                index--;
+            }
+        }
+    }
+    return ret;
+}
+
 void MemoryPacketModel::removePacket(qint64 index)
 {
-    if (index < (qint64)packetsList.size() && index >= 0) {
-        beginRemoveRows(QModelIndex(), (int)index, (int)index);
-        QSharedPointer<Packet> packet = packetsList.takeAt((int)index);
+    if (index < static_cast<qint64>(packetsList.size()) && index >= 0) {
+        beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
+        QSharedPointer<Packet> packet = packetsList.takeAt(static_cast<int>(index));
         packet.clear();
         endRemoveRows();
         emit updated();
@@ -117,10 +139,10 @@ void MemoryPacketModel::removePackets(QList<qint64> &indexes)
     std::sort(indexes.begin(),indexes.end(), std::less<qint64>());
 
     // get all the payloads to be deleted
-    for (qint64 i = 0; i < (qint64)indexes.size(); i++) {
+    for (int i = 0; i < indexes.size(); i++) {
         qint64 index = indexes.at(i);
-        if (index >= 0 && index < (qint64)packetsList.size()) {
-            toBeDeleted.append(packetsList.at((int)index));
+        if (index >= 0 && index < static_cast<qint64>(packetsList.size())) {
+            toBeDeleted.append(packetsList.at(static_cast<int>(index)));
         }
     }
 
@@ -155,7 +177,7 @@ qint64 MemoryPacketModel::merge(QList<qint64> &list)
 
         QSharedPointer<Packet> newp;
         if (pindex > -1 && pindex < packetsList.size()) {
-            newp = packetsList.at((int)pindex);
+            newp = packetsList.at(static_cast<int>(pindex));
             temp.append(newp->getData());
         }
         else {
@@ -168,10 +190,10 @@ qint64 MemoryPacketModel::merge(QList<qint64> &list)
         qint64 first = list.at(1); // list.size > 1
         // get the last
         qint64 last = list.last();
-        for (qint64 i = 1; i < list.size(); i++) {
+        for (int i = 1; i < list.size(); i++) {
             qint64 index = list.at(i);
             if (index > -1 && index < packetsList.size()) {
-                QSharedPointer<Packet> p = packetsList.at((int)index);
+                QSharedPointer<Packet> p = packetsList.at(static_cast<int>(index));
 
                 toBeDeleted.append(p);
                 temp.append(p->getData());
@@ -228,7 +250,7 @@ void MemoryPacketModel::clear()
 
 void MemoryPacketModel::transformRequestFinished(QList<QByteArray> dataList, Messages messages)
 {
-    quintptr senderID = (quintptr)sender();
+    quintptr senderID = reinterpret_cast<quintptr>(sender());
     if (transformRequests.contains(senderID)) {
         QPair<int,int> target = transformRequests.take(senderID);
         if (target.second > lastPredefinedColumn && target.second < columnNames.size()) {
@@ -385,7 +407,7 @@ void MemoryPacketModel::launchUpdate(TransformAbstract *transform, int row, int 
         //connect(tr, qOverload<QList<QByteArray>,Messages >(&TransformRequest::finishedProcessing), this, &MemoryPacketModel::transformRequestFinished);
         connect(tr, SIGNAL(finishedProcessing(QList<QByteArray>,Messages)), this, SLOT(transformRequestFinished(QList<QByteArray>,Messages)));
         QPair<int,int> coordinate(row, column);
-        transformRequests.insert((quintptr)tr, coordinate);
+        transformRequests.insert(reinterpret_cast<quintptr>(tr), coordinate);
         emit readOnlyStateChanged(true);
         emit sendRequest(tr);
     }

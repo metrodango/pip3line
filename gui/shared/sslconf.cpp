@@ -108,7 +108,7 @@ QHash<QString, QString> SslConf::getConfiguration()
     }
     if (!cipherSTRList.isEmpty())
         conf.insert(CONF_SSL_CIPHERS, cipherSTRList);
-    QString privValue = QString::number((int)localKey.algorithm());
+    QString privValue = QString::number(static_cast<int>(localKey.algorithm()));
     privValue.append(GuiConst::STATE_FIELD_SEPARATOR);
     privValue.append(QString::fromUtf8(localKey.toPem()));
     conf.insert(CONF_SSL_LOCAL_PRIVATE_KEY, privValue);
@@ -215,7 +215,7 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
                            protoVal == QSsl::TlsV1_0 ||
                            protoVal == QSsl::TlsV1_1 ||
                            protoVal == QSsl::TlsV1_2)) {
-                    QSslCipher ciph = QSslCipher(compoCipher.at(1), (QSsl::SslProtocol)protoVal);
+                    QSslCipher ciph = QSslCipher(compoCipher.at(1), static_cast<QSsl::SslProtocol>(protoVal));
                     if (!ciph.isNull()) {
                         sslCiphers.append(ciph);
                     } else {
@@ -234,7 +234,7 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
         if (index == 1) {
             int algoval = valraw.left(1).toInt(&ok);
             if (ok && (algoval == QSsl::Rsa || algoval == QSsl::Dsa || algoval == QSsl::Ec)) {
-                localKey = QSslKey(valraw.mid(2).toUtf8(), (QSsl::KeyAlgorithm)algoval, QSsl::Pem);
+                localKey = QSslKey(valraw.mid(2).toUtf8(), static_cast<QSsl::KeyAlgorithm>(algoval), QSsl::Pem);
                 qDebug() << tr("Private key loaded");
             }
         }
@@ -539,41 +539,41 @@ void SslConf::setLocalCert(const QString filename)
 
                 localCert = list.at(0);
 
-                emit log(tr("Local Cert loaded : %1").arg(concat(localCert.subjectInfo(QSslCertificate::CommonName))), metaObject()->className(), Pip3lineConst::LSTATUS);
-                emit log(tr("== Issuer: %1").arg(concat(localCert.issuerInfo(QSslCertificate::CommonName))), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("Local Cert loaded : %1").arg(concat(localCert.subjectInfo(QSslCertificate::CommonName))), metaObject()->className(), Pip3lineConst::PLSTATUS);
+                emit log(tr("== Issuer: %1").arg(concat(localCert.issuerInfo(QSslCertificate::CommonName))), metaObject()->className(), Pip3lineConst::PLSTATUS);
 
-                emit log(tr("   From  :%1").arg(localCert.effectiveDate().toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
-                emit log(tr("   Until :%1").arg(localCert.expiryDate().toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("   From  :%1").arg(localCert.effectiveDate().toString()), metaObject()->className(), Pip3lineConst::PLSTATUS);
+                emit log(tr("   Until :%1").arg(localCert.expiryDate().toString()), metaObject()->className(), Pip3lineConst::PLSTATUS);
 
                 QList<QSslCertificateExtension> list = localCert.extensions();
-                emit log(tr("   Extensions :%1").arg(list.size()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("   Extensions :%1").arg(list.size()), metaObject()->className(), Pip3lineConst::PLSTATUS);
                 for (int i = 0; i < list.size(); i++) {
                     QSslCertificateExtension ext = list.at(i);
                     QVariant val = ext.value();
                     switch (val.type()) {
                         case QVariant::String:
-                            emit log(tr("    %1 %2").arg(ext.name()).arg(val.toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                            emit log(tr("    %1 %2").arg(ext.name()).arg(val.toString()), metaObject()->className(), Pip3lineConst::PLSTATUS);
                             break;
                         case QVariant::Map:
                             {
-                                emit log(tr("    %1").arg(ext.name()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                                emit log(tr("    %1").arg(ext.name()), metaObject()->className(), Pip3lineConst::PLSTATUS);
 
                                 QVariantMap map = val.toMap();
                                 QMapIterator<QString, QVariant> i(map);
                                 while (i.hasNext()) {
                                     i.next();
-                                    emit log(tr("    %1 => %2").arg(i.key()).arg(i.value().toString()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                                    emit log(tr("    %1 => %2").arg(i.key()).arg(i.value().toString()), metaObject()->className(), Pip3lineConst::PLSTATUS);
                                 }
                             }
                             break;
                         default:
-                            emit log(tr("    %1 %2").arg(ext.name()).arg(val.type()), metaObject()->className(), Pip3lineConst::LSTATUS);
+                            emit log(tr("    %1 %2").arg(ext.name()).arg(val.type()), metaObject()->className(), Pip3lineConst::PLSTATUS);
                     }
                 }
 
-                emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha1).toHex())), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha1).toHex())), metaObject()->className(), Pip3lineConst::PLSTATUS);
 
-                emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha256).toHex())), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("   %1").arg(QString::fromUtf8(localCert.digest(QCryptographicHash::Sha256).toHex())), metaObject()->className(), Pip3lineConst::PLSTATUS);
 
                 setLocalCert(localCert);
             } else {
@@ -611,7 +611,7 @@ void SslConf::setLocalKey(const QString filename)
         for (int j = 0; j < keyAlgos.size(); ++j) {
             localKey = QSslKey(&keyFile,keyAlgos.at(j),QSsl::Pem,QSsl::PrivateKey);
             if (!localKey.isNull()) {
-                emit log(tr("  => Got private key :->"), metaObject()->className(), Pip3lineConst::LSTATUS);
+                emit log(tr("  => Got private key :->"), metaObject()->className(), Pip3lineConst::PLSTATUS);
                 break;
             }
         }

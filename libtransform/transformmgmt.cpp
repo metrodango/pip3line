@@ -161,7 +161,7 @@ bool TransformMgmt::loadTransforms(bool verbose) {
     QStringList enclist;
     for (int i = 0; i < typesList.size(); i++) {
         if (verbose)
-            emit status(tr("Loading Transforms type \"%1\"").arg(typesList.at(i)),id);
+            emit status(tr("Loading Transforms type {%1}").arg(typesList.at(i)),id);
         QHashIterator<QString, TransformFactoryPluginInterface *> j(pluginsList);
          while (j.hasNext()) {
              j.next();
@@ -173,11 +173,11 @@ bool TransformMgmt::loadTransforms(bool verbose) {
                      transformNameList.insert(nameList.at(k), j.value());
                      count++;
                  } else {
-                     emit warning(tr("Duplicate: a transformation named \"%1\" is already in use from \"%2\", ignoring the one from \"%3\"").arg(nameList.at(k)).arg(transformNameList.value(nameList.at(k))->pluginName()).arg(j.key()),id);
+                     emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from {%3}").arg(nameList.at(k)).arg(transformNameList.value(nameList.at(k))->pluginName()).arg(j.key()),id);
                  }
              }
              if (count != 0 && verbose)
-                 emit status(tr("%1 transform(s) loaded for \"%2\"").arg(count).arg(j.key()),id);
+                 emit status(tr("%1 transform(s) loaded for {%2}").arg(count).arg(j.key()),id);
          }
         transformTypesList.insert(typesList.at(i), enclist);
         enclist.clear();
@@ -193,7 +193,7 @@ bool TransformMgmt::loadTransforms(bool verbose) {
         if (conf.isEmpty()) {
             logError(tr("The saved configuration %1 returned an empty configuration").arg(name), id);
         } else if (transformNameList.contains(name)) {
-            emit warning(tr("Duplicate: a transformation named \"%1\" is already in use from \"%2\", ignoring the one from the persistent store").arg(name).arg(transformNameList.value(name)->pluginName()),id);
+            emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from the persistent store").arg(name).arg(transformNameList.value(name)->pluginName()),id);
         } else {
             savedConf.insert(name, conf);
             enclist.append(name);
@@ -259,7 +259,7 @@ bool TransformMgmt::loadPlugins()
         TransformFactoryPluginInterface *tro = qobject_cast<TransformFactoryPluginInterface *>(plugin);
         if (tro != nullptr) {
            registerPlugin(tro);
-           emit status(tr("Loaded static plugin: \"%1\" version %2 (compiled with Qt %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
+           emit status(tr("Loaded static plugin: {%1} version %2 (compiled with Qt %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
         } else {
             emit error(tr("Static plugin is using the wrong interface"),id);
             noError = false;
@@ -268,7 +268,7 @@ bool TransformMgmt::loadPlugins()
 
     // then loading dynamic plugins
     for (int i = 0; i < pluginsDirectories.size(); i++) {
-        emit status(tr("Looking for plugins in %1").arg(pluginsDirectories.at(i)),id);
+        emit status(tr("Looking for plugins in {%1}").arg(pluginsDirectories.at(i)),id);
         QDir pluginsDir = QDir(pluginsDirectories.at(i));
         QStringList filters;
 
@@ -288,7 +288,6 @@ bool TransformMgmt::loadPlugins()
              QPluginLoader *loader = new(std::nothrow) QPluginLoader(absName);
              if (loader == nullptr) {
                  qFatal("Cannot allocate memory for QPluginLoader X{");
-                 return false;
              }
              QObject *plugin = loader->instance();
              if (plugin) {
@@ -298,7 +297,7 @@ bool TransformMgmt::loadPlugins()
                         if (!pluginsList.contains(tro->pluginName())) {
                             registerPlugin(tro);
                             pluginLibs.append(loader);
-                            emit status(tr("Loaded plugin: \"%1\" version %2 (compiled with %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
+                            emit status(tr("Loaded plugin: {%1} version %2 (compiled with %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
                         } else {
                             emit error(tr("Another plugin with the name %1 has already been loaded, skipping this one.").arg(tro->pluginName()),id);
                             delete loader;
@@ -306,20 +305,20 @@ bool TransformMgmt::loadPlugins()
                         }
 
                     } else {
-                        emit error(tr("The plugin \"%1\" use a different version (v.%2) of libtransform than the current executable (v.%3), skipping.").arg(tro->pluginName()).arg(tro->getLibTransformVersion()).arg(LIB_TRANSFORM_VERSION),id);
+                        emit error(tr("The plugin {%1} use a different version (v.%2) of libtransform than the current executable (v.%3), skipping.").arg(tro->pluginName()).arg(tro->getLibTransformVersion()).arg(LIB_TRANSFORM_VERSION),id);
                         delete plugin;
                         delete loader;
                         noError = false;
                     }
                  } else {
-                     emit error(tr("Plugin %1 is using a different Factory interface, skipping.").arg(pluginsDir.absoluteFilePath(fileName)),id);
+                     emit error(tr("Plugin {%1} is using a different Factory interface, skipping.").arg(pluginsDir.absoluteFilePath(fileName)),id);
                      delete plugin;
                      delete loader;
                      noError = false;
                  }
 
              } else {
-                 emit error(tr("Could not load %1: %2 [This usually happens when some dependencies are missing/could not be found, for instance in case of the Python plugins, this usually means the adequate Python binaries are not installed]")
+                 emit error(tr("Could not load {%1}: %2 [This usually happens when some dependencies are missing/could not be found, for instance in case of the Python plugins, this usually means the adequate Python binaries are not installed]")
                             .arg(pluginsDir.absoluteFilePath(fileName)).arg(loader->errorString()),id);
                  delete loader;
                  noError = false;
@@ -377,7 +376,7 @@ TransformAbstract * TransformMgmt::getTransform(QString name) {
         ta = plugin->getTransform(name);
 
         if (ta == nullptr)
-            emit error(tr("The plugin could not instanciate the transformation object named \"%1\" v_v").arg(name),id);
+            emit error(tr("The plugin could not instanciate the transformation object named [%1] v_v").arg(name),id);
     } else if (savedConf.contains(name)) {
         listLocker.unlock();
 
@@ -391,7 +390,7 @@ TransformAbstract * TransformMgmt::getTransform(QString name) {
     }else {
         qDebug() << transformNameList;
         listLocker.unlock();
-        emit error(tr("No transformation named \"%1\" was found in the current plugins and the persistent storage").arg(name),id);
+        emit error(tr("No transformation named [%1] was found in the current plugins and the persistent storage").arg(name),id);
     }
 #ifdef QT_DEBUG
     saveInstance(ta);
@@ -428,7 +427,7 @@ bool TransformMgmt::saveConfToXML(const TransformChain &chain, QXmlStreamWriter 
         if (chain.at(i) != nullptr) {
             properties = chain.at(i)->getConfiguration();
             properties.insert(PROP_NAME, chain.at(i)->name());
-            properties.insert(PROP_WAY, QString::number((int)chain.at(i)->way()));
+            properties.insert(PROP_WAY, QString::number(static_cast<int>(chain.at(i)->way())));
             properties.insert(XMLORDER, QString::number(i));
 
             stream->writeStartElement(XMLTRANSFORM);
@@ -531,7 +530,7 @@ TransformChain TransformMgmt::loadConfFromXML(QXmlStreamReader *stream)
         } else {
             if (name.isEmpty())
                 name = tr("(Could not find the Name attribute)");
-            emit error(tr("\"%1\": Error while parsing the order \"%2\"").arg(name).arg(stream->attributes().value(XMLORDER).toString()),id);
+            emit error(tr("[%1]: Error while parsing the order [%2]").arg(name).arg(stream->attributes().value(XMLORDER).toString()),id);
         }
     }
     final.append(transformChildren.values());
@@ -601,7 +600,7 @@ TransformAbstract *TransformMgmt::loadTransformFromConf(const QHash<QString, QSt
             disconnect(transf, &TransformAbstract::warning, this, &TransformMgmt::logError);
         }
     } else {
-        emit error (tr("Missing property \"%1\" in the configuration").arg(PROP_NAME),id);
+        emit error (tr("Missing property (%1) in the configuration").arg(PROP_NAME),id);
     }
     return transf;
 }
@@ -650,7 +649,7 @@ bool TransformMgmt::registerChainConf(const TransformChain &transfChain, bool pe
     listLocker.lock();
     if (transformNameList.contains(name)) {
         listLocker.unlock();
-        logError(tr("Cannot register this transformation, the name \"%1\" is already taken").arg(transformNameList.value(name)->pluginName()),id);
+        logError(tr("Cannot register this transformation, the name [%1] is already taken").arg(transformNameList.value(name)->pluginName()),id);
         return false;
     }
     QString conf;
@@ -697,7 +696,7 @@ bool TransformMgmt::unregisterChainConf(const QString &name)
         return true;
     } else {
         listLocker.unlock();
-        logError(tr("\"%1\" not found in the saved chains").arg(name),id);
+        logError(tr("[%1] not found in the saved chains").arg(name),id);
     }
     return false;
 }
@@ -723,7 +722,7 @@ void TransformMgmt::setPersistance(const QString &name, bool persistent)
         }
     } else {
         listLocker.unlock();
-        logError(tr("\"%1\" not found in the saved chains, ignoring").arg(name),id);
+        logError(tr("[%1] not found in the saved chains, ignoring").arg(name),id);
     }
 }
 
@@ -777,7 +776,7 @@ TransformChain TransformMgmt::loadChainFromSaved(const QString &name)
         }
     } else {
         listLocker.unlock();
-        logError(tr("\"%1\" not found in the saved chains, ignoring").arg(name),id);
+        logError(tr("[%1] not found in the saved chains, ignoring").arg(name),id);
     }
     return tc;
 }
@@ -811,7 +810,6 @@ void TransformMgmt::registerPlugin(TransformFactoryPluginInterface *plugin)
     Pip3lineCallback * callback = new(std::nothrow) Pip3lineCallback(this, fileConf, plugin->pluginName());
     if (callback == nullptr) {
         qFatal("Cannot allocate memory for Pip3lineCallback X{");
-        return;
     }
 
     connect(callback, &Pip3lineCallback::error, this, &TransformMgmt::logError);

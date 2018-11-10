@@ -56,7 +56,7 @@ DistormWidget::~DistormWidget()
 
 void DistormWidget::onMaxInstruc(int val)
 {
-    transform->setMaxInstruction((uint)val);
+    transform->setMaxInstruction(static_cast<uint>(val));
 }
 
 void DistormWidget::onOffset(QString val)

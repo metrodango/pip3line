@@ -23,7 +23,7 @@ class IPTranslateIPv4Widget : public QWidget
         Q_OBJECT
         
     public:
-        explicit IPTranslateIPv4Widget(IPTranslateIPv4 *transform, QWidget *parent = 0);
+        explicit IPTranslateIPv4Widget(IPTranslateIPv4 *transform, QWidget *parent = nullptr);
         ~IPTranslateIPv4Widget();
     private:
         Ui::IPTranslateIPv4Widget *ui;

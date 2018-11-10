@@ -61,8 +61,8 @@ QByteArray LargeRandomAccessSource::extract(quint64 offset, int length)
 
 char LargeRandomAccessSource::extract(quint64 offset)
 {
-    if (offset >= currentStartingOffset && offset < currentStartingOffset + dataChunk.size()) {
-        return dataChunk.at(offset - currentStartingOffset);
+    if (offset >= currentStartingOffset && offset < currentStartingOffset + static_cast<quint64>(dataChunk.size())) {
+        return dataChunk.at(static_cast<int>(offset - currentStartingOffset));
     }
     QByteArray temp;
     char c = '\00';
@@ -108,7 +108,7 @@ void LargeRandomAccessSource::replace(quint64 offset, int length, QByteArray rep
 void LargeRandomAccessSource::viewReplace(int offset, int length, QByteArray repData, quintptr source)
 {
     if (validateViewOffsetAndSize(offset, length)) { // if valid
-        replace(currentStartingOffset + (quint64)offset, length,repData,source);
+        replace(currentStartingOffset + static_cast<quint64>(offset), length,repData,source);
     }
 }
 
@@ -139,11 +139,11 @@ void LargeRandomAccessSource::viewMark(int start, int end, const QColor &bgcolor
         return;
     }
 
-    if (ULLONG_MAX - start < currentStartingOffset || ULLONG_MAX - end < currentStartingOffset) {
+    if (ULLONG_MAX - static_cast<quint64>(start) < currentStartingOffset || ULLONG_MAX - static_cast<quint64>(end) < currentStartingOffset) {
         return;
     }
 
-    mark(currentStartingOffset + (quint64) start, currentStartingOffset + (quint64) end, bgcolor, fgColor, toolTip);
+    mark(currentStartingOffset + static_cast<quint64>(start), currentStartingOffset + static_cast<quint64>(end), bgcolor, fgColor, toolTip);
 }
 
 void LargeRandomAccessSource::viewClearMarking(int start, int end)
@@ -152,38 +152,38 @@ void LargeRandomAccessSource::viewClearMarking(int start, int end)
         return;
     }
 
-    if (ULLONG_MAX - start < currentStartingOffset || ULLONG_MAX - end < currentStartingOffset) {
+    if (ULLONG_MAX - static_cast<quint64>(start) < currentStartingOffset || ULLONG_MAX - static_cast<quint64>(end) < currentStartingOffset) {
         return;
     }
 
-    clearMarking(currentStartingOffset + (quint64) start, currentStartingOffset + (quint64) end);
+    clearMarking(currentStartingOffset + static_cast<quint64>(start), currentStartingOffset + static_cast<quint64>(end));
 }
 
 QColor LargeRandomAccessSource::getBgViewColor(int pos)
 {
-    if (pos < 0 || ULLONG_MAX - pos < currentStartingOffset) {
+    if (pos < 0 || ULLONG_MAX - static_cast<quint64>(pos) < currentStartingOffset) {
         return QColor();
     }
 
-    return getBgColor(currentStartingOffset + (quint64) pos);
+    return getBgColor(currentStartingOffset + static_cast<quint64>(pos));
 }
 
 QColor LargeRandomAccessSource::getFgViewColor(int pos)
 {
-    if (pos < 0 || ULLONG_MAX - pos < currentStartingOffset) {
+    if (pos < 0 || ULLONG_MAX - static_cast<quint64>(pos) < currentStartingOffset) {
         return QColor();
     }
 
-    return getFgColor(currentStartingOffset + (quint64) pos);
+    return getFgColor(currentStartingOffset + static_cast<quint64>(pos));
 }
 
 QString LargeRandomAccessSource::getViewToolTip(int pos)
 {
-    if (pos < 0 || ULLONG_MAX - pos < currentStartingOffset) {
+    if (pos < 0 || ULLONG_MAX - static_cast<quint64>(pos) < currentStartingOffset) {
         return QString();
     }
 
-    return getToolTip(currentStartingOffset + (quint64) pos);
+    return getToolTip(currentStartingOffset + static_cast<quint64>(pos));
 }
 
 int LargeRandomAccessSource::getViewOffset(quint64 realoffset)
@@ -195,10 +195,10 @@ int LargeRandomAccessSource::getViewOffset(quint64 realoffset)
     int ret = 0;
     int end = chunksize > 1 ? chunksize - 1 : 0;
     if (isOffsetValid(realoffset)) {
-        if (realoffset >= currentStartingOffset && realoffset <= (currentStartingOffset + dataChunk.size())) {
+        if (realoffset >= currentStartingOffset && realoffset <= (currentStartingOffset + static_cast<quint64>(dataChunk.size()))) {
             realoffset = realoffset - currentStartingOffset;
             if (realoffset <= INT_MAX) {
-                ret = (int) realoffset;
+                ret = static_cast<int>(realoffset);
             } else {
                 emit log(tr("Real offset too big %1 T_T").arg(QString::number(realoffset,16)),metaObject()->className(), Pip3lineConst::LERROR);
                 ret = end;
@@ -224,10 +224,10 @@ quint64 LargeRandomAccessSource::getRealOffset(int viewOffset)
     if (viewOffset < 0) {
         emit log(tr("View Offset is negative, returning zero"),metaObject()->className(),Pip3lineConst::LERROR);
     } else {
-        if (ULLONG_MAX - viewOffset < currentStartingOffset) {
+        if (ULLONG_MAX - static_cast<quint64>(viewOffset) < currentStartingOffset) {
             emit log(tr("View Offset is invalid (too large), returning zero"),metaObject()->className(),Pip3lineConst::LERROR);
         } else {
-            ret = (quint64)viewOffset + currentStartingOffset;
+            ret = static_cast<quint64>(viewOffset) + currentStartingOffset;
         }
 
     }
@@ -332,13 +332,13 @@ void LargeRandomAccessSource::refreshData(bool compare)
                         if (selectionStart == -1)
                             selectionStart = i;
                     } else if (selectionStart > -1) {
-                        markNoUpdate(currentStartingOffset + selectionStart,currentStartingOffset + i - 1,QColor(212,137,255));
+                        markNoUpdate(currentStartingOffset + static_cast<quint64>(selectionStart),currentStartingOffset + static_cast<quint64>(i) - 1, QColor(212,137,255));
                         selectionStart = -1;
                     }
                 }
 
                 if (selectionStart > -1) {
-                    markNoUpdate(currentStartingOffset + selectionStart,currentStartingOffset + i,QColor(212,137,255));
+                    markNoUpdate(currentStartingOffset + static_cast<quint64>(selectionStart),currentStartingOffset + static_cast<quint64>(i), QColor(212,137,255));
                 }
             }
 
@@ -346,7 +346,7 @@ void LargeRandomAccessSource::refreshData(bool compare)
             if (hasSizeChanged)
                 emit sizeChanged();
         }
-        emit minorUpdate(0,dataChunk.size());
+        emit minorUpdate(0,static_cast<quint64>(dataChunk.size()));
     }
 }
 
@@ -376,17 +376,17 @@ bool LargeRandomAccessSource::setStartingOffset(quint64 offset)
         emit log(tr("Out-of-bound offset: 0x%1").arg(QString::number(newOffset,16)),metaObject()->className(), Pip3lineConst::LERROR);
         newOffset = rsize == 0 ? 0 : rsize - 1; // out-of-bound
     }
-    if (rsize < (quint64)chunksize) // if the total size is inferior to the chunksize
+    if (rsize < static_cast<quint64>(chunksize)) // if the total size is inferior to the chunksize
         newOffset = 0;
 
-    if (rsize - newOffset < (quint64)chunksize) { // if the data size between offset and the end is inferior to chunksize
-        newOffset = rsize - (quint64)chunksize - 1; // then starting offset is put back
+    if (rsize - newOffset < static_cast<quint64>(chunksize)) { // if the data size between offset and the end is inferior to chunksize
+        newOffset = rsize - static_cast<quint64>(chunksize) - 1; // then starting offset is put back
        // qDebug() << "Putting back offset" << QString::number(newOffset,16);
 
     }
 
     if (newOffset % 16 != 0) {
-        newOffset = newOffset - newOffset % 16 + (offset >= newOffset + chunksize ? 16 : 0);
+        newOffset = newOffset - newOffset % 16 + (offset >= newOffset + static_cast<quint64>(chunksize) ? 16 : 0);
        // qDebug() << "...And aligning it" << QString::number(newOffset,16);
     }
 

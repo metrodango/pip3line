@@ -22,6 +22,7 @@ Released under AGPL see LICENSE for more information
 #include <transformmgmt.h>
 #include <QListWidgetItem>
 #include <QFileDialog>
+#include <QColorDialog>
 #include "guihelper.h"
 #include <QSettings>
 #include <QStandardItemModel>
@@ -90,6 +91,12 @@ SettingsDialog::SettingsDialog(GuiHelper *nhelper, QWidget *parent) :
     connect(ui->fileSavePushButton, &QPushButton::clicked, this , &SettingsDialog::onAutoSaveFileButtonclicked);
     connect(ui->customFontPushButton, &QPushButton::clicked, this, &SettingsDialog::onCustomFontClicked);
     connect(ui->saveNowPushButton, &QPushButton::clicked, this, &SettingsDialog::onSaveNowClicked);
+    connect(ui->jsonKeyColorPushButton, &QPushButton::clicked, this, &SettingsDialog::onJsonColorChanges);
+    connect(ui->jsonTypeColorPushButton, &QPushButton::clicked, this, &SettingsDialog::onJsonColorChanges);
+    connect(ui->jsonValueColorPushButton, &QPushButton::clicked, this, &SettingsDialog::onJsonColorChanges);
+    connect(ui->searchBgPushButton, &QPushButton::clicked, this, &SettingsDialog::onSearchColorsChanges);
+    connect(ui->searchFgPushButton, &QPushButton::clicked, this, &SettingsDialog::onSearchColorsChanges);
+    connect(ui->resetAppearancePushButton, &QPushButton::clicked, this, &SettingsDialog::onResetAppearance);
     ui->titleListWidget->setCurrentRow(0);
 }
 
@@ -172,6 +179,21 @@ void SettingsDialog::initializeConf()
     ui->saveOnExitCheckBox->setChecked(guiHelper->getAutoSaveOnExit());
     ui->timerSaveCheckBox->setChecked(guiHelper->getAutoSaveTimerEnable());
     ui->timerSaveSpinBox->setValue(guiHelper->getAutoSaveTimerInterval());
+
+    QPalette palette;
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_KEY_COLOR);
+    ui->jsonKeyColorPushButton->setPalette(palette);
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_TYPE_COLOR);
+    ui->jsonTypeColorPushButton->setPalette(palette);
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_VALUE_COLOR);
+    ui->jsonValueColorPushButton->setPalette(palette);
+
+
+    palette.setColor(QPalette::WindowText, GlobalsValues::SEARCH_FG_COLOR);
+    palette.setColor(QPalette::Window, GlobalsValues::SEARCH_BG_COLOR);
+    ui->searchColorLabel->setAutoFillBackground(true);
+    ui->searchColorLabel->setPalette(palette);
+
     //once finished we reconnect everything
     connectUpdateSignals();
 }
@@ -310,10 +332,9 @@ void SettingsDialog::updateMisc()
 void SettingsDialog::updateFilter()
 {
     QStringList typesList = tManager->getTypesList();
-    QStandardItemModel *model = new(std::nothrow) QStandardItemModel(typesList.size(), 1);
+    QStandardItemModel *model = new(std::nothrow) QStandardItemModel(typesList.size(), 1, ui->filterListView);
     if (model == nullptr ) {
         qFatal("Cannot allocate memory for QStandardItemModel X{");
-        return;
     }
     QSet<QString> typesBlacklist = guiHelper->getTypesBlacklist();
 
@@ -382,7 +403,7 @@ void SettingsDialog::onDeletedTabsDoubleClicked(QModelIndex index)
 
     int row = index.row();
     QListWidgetItem * item = ui->deletedTabsListWidget->item(row);
-    DeleteableListItem *itemWid = (DeleteableListItem *)ui->deletedTabsListWidget->itemWidget(item);
+    DeleteableListItem *itemWid = static_cast<DeleteableListItem *>(ui->deletedTabsListWidget->itemWidget(item));
     itemWid->deleteLater();
 
     guiHelper->reviveTab(row);
@@ -471,7 +492,7 @@ void SettingsDialog::onPluginClicked(QModelIndex index)
 
 void SettingsDialog::onSavedClicked(QListWidgetItem * item)
 {
-    DeleteableListItem *itemWid = (DeleteableListItem *)ui->savedListWidget->itemWidget(item);
+    DeleteableListItem *itemWid = static_cast<DeleteableListItem *>(ui->savedListWidget->itemWidget(item));
 
     QString name = itemWid->getName();
 
@@ -554,13 +575,13 @@ void SettingsDialog::onProxyIPChanged(QString ipString)
 
 void SettingsDialog::onProxyPortChanged(int port)
 {
-    guiHelper->setProxyPort((quint16)port);
+    guiHelper->setProxyPort(static_cast<quint16>(port));
 }
 
 void SettingsDialog::onDefaultTabChanged(int index)
 {
     if (index >= 0 && index < GuiConst::AVAILABLE_TAB_STRINGS.size())
-        guiHelper->setDefaultNewTab((GuiConst::AVAILABLE_PRETABS)ui->defaultTabComboBox->itemData(index).toInt()); // don't need to check if this is an actual int
+        guiHelper->setDefaultNewTab(static_cast<GuiConst::AVAILABLE_PRETABS>(ui->defaultTabComboBox->itemData(index).toInt())); // don't need to check if this is an actual int
     else if (index != -1) {
         qWarning() << "[SettingsDialog::onDefaultTabChanged] Invalid index value" << index;
     }
@@ -695,6 +716,104 @@ void SettingsDialog::onHexSizesValuesChanged()
     GlobalsValues::HEXCOLUMNWIDTH = ui->hexadecimalTableWidthSpinBox->value();
     GlobalsValues::TEXTCOLUMNWIDTH = ui->hexadecimalTableTextWidthSpinBox->value();
     GlobalsValues::ROWSHEIGHT = ui->hexadecimalTableRowsHeightSpinBox->value();
+}
+
+void SettingsDialog::onJsonColorChanges()
+{
+    QColor initialColor;
+    QObject * obj = sender();
+    if (obj == ui->jsonKeyColorPushButton) {
+        initialColor = GlobalsValues::JSON_KEY_COLOR;
+    } else if (obj == ui->jsonTypeColorPushButton) {
+        initialColor = GlobalsValues::JSON_TYPE_COLOR;
+    } else if (obj == ui->jsonValueColorPushButton) {
+        initialColor = GlobalsValues::JSON_VALUE_COLOR;
+    } else {
+        // WTF ??
+        qCritical() << tr("[SettingsDialog::onJsonColorChanges] Unknown object T_T");
+        return;
+    }
+
+    QColor choosenColor = QColorDialog::getColor(initialColor, this);
+    if (choosenColor.isValid()) {
+        QPalette palette;
+        palette.setColor(QPalette::ButtonText, choosenColor);
+        if (obj == ui->jsonKeyColorPushButton) {
+            GlobalsValues::JSON_KEY_COLOR = choosenColor;
+            ui->jsonKeyColorPushButton->setPalette(palette);
+        } else if (obj == ui->jsonTypeColorPushButton) {
+            GlobalsValues::JSON_TYPE_COLOR = choosenColor;
+            ui->jsonTypeColorPushButton->setPalette(palette);
+        } else if (obj == ui->jsonValueColorPushButton) {
+            GlobalsValues::JSON_VALUE_COLOR = choosenColor;
+            ui->jsonValueColorPushButton->setPalette(palette);
+        }
+
+        guiHelper->saveJsonColor();
+    }
+}
+
+void SettingsDialog::onSearchColorsChanges()
+{
+    QColor initialColor;
+    QObject * obj = sender();
+    if (obj == ui->searchBgPushButton) {
+        initialColor = GlobalsValues::SEARCH_BG_COLOR;
+    } else if (obj == ui->searchFgPushButton) {
+        initialColor = GlobalsValues::SEARCH_FG_COLOR;
+    } else {
+        // WTF ??
+        qCritical() << tr("[SettingsDialog::onSearchColorsChanges] Unknown object T_T");
+        return;
+    }
+
+    QColor choosenColor = QColorDialog::getColor(initialColor, this);
+    if (choosenColor.isValid()) {
+        QPalette palette;
+        if (obj == ui->searchBgPushButton) {
+            palette.setColor(QPalette::Window, choosenColor);
+            palette.setColor(QPalette::WindowText, GlobalsValues::SEARCH_FG_COLOR);
+            GlobalsValues::SEARCH_BG_COLOR = choosenColor;
+        } else if (obj == ui->searchFgPushButton) {
+            palette.setColor(QPalette::Window, GlobalsValues::SEARCH_BG_COLOR);
+            palette.setColor(QPalette::WindowText, choosenColor);
+            GlobalsValues::SEARCH_FG_COLOR = choosenColor;
+        }
+
+        ui->searchColorLabel->setPalette(palette);
+
+        guiHelper->saveSearchColors();
+    }
+}
+
+void SettingsDialog::onResetAppearance()
+{
+    GlobalsValues::JSON_KEY_COLOR = GuiStyles::DEFAULT_JSON_KEY_COLOR;
+    GlobalsValues::JSON_TYPE_COLOR = GuiStyles::DEFAULT_JSON_TYPE_COLOR;
+    GlobalsValues::JSON_VALUE_COLOR = GuiStyles::DEFAULT_JSON_VALUE_COLOR;
+    guiHelper->saveJsonColor();
+
+    QPalette palette;
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_KEY_COLOR);
+    ui->jsonKeyColorPushButton->setPalette(palette);
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_TYPE_COLOR);
+    ui->jsonTypeColorPushButton->setPalette(palette);
+    palette.setColor(QPalette::ButtonText, GlobalsValues::JSON_VALUE_COLOR);
+    ui->jsonValueColorPushButton->setPalette(palette);
+
+    guiHelper->setRegularFont(GuiStyles::DEFAULT_REGULAR_FONT);
+    ui->customFontName->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+    ui->customFontName->setText(QString("%1, %2px").arg(GlobalsValues::GLOBAL_REGULAR_FONT.family()).arg(GlobalsValues::GLOBAL_REGULAR_FONT.pointSize()));
+    ui->hexadecimalTableWidthSpinBox->blockSignals(true);
+    ui->hexadecimalTableWidthSpinBox->setValue(GlobalsValues::HEXCOLUMNWIDTH);
+    ui->hexadecimalTableWidthSpinBox->blockSignals(false);
+    ui->hexadecimalTableTextWidthSpinBox->blockSignals(true);
+    ui->hexadecimalTableTextWidthSpinBox->setValue(GlobalsValues::TEXTCOLUMNWIDTH);
+    ui->hexadecimalTableTextWidthSpinBox->blockSignals(false);
+    ui->hexadecimalTableRowsHeightSpinBox->blockSignals(true);
+    ui->hexadecimalTableRowsHeightSpinBox->setValue(GlobalsValues::ROWSHEIGHT);
+    ui->hexadecimalTableRowsHeightSpinBox->blockSignals(false);
+
 }
 
 void SettingsDialog::connectUpdateSignals()

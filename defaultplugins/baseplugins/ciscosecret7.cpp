@@ -50,7 +50,7 @@ void CiscoSecret7::transform(const QByteArray &input, QByteArray &output)
             return;
         }
         bool k = true;
-        seed = encrypted.mid(0,2).toInt(&k);
+        seed = static_cast<uint>(encrypted.mid(0,2).toInt(&k));
         if (!k || seed > MAXSEED) {
             emit error(tr("Invalid seed, it must be an unsigned integer <= %1").arg(MAXSEED),id);
             return;
@@ -96,6 +96,6 @@ bool CiscoSecret7::setSeed(unsigned int nseed)
 void CiscoSecret7::cipher(unsigned int seed, const QByteArray &data, QByteArray &output)
 {
     for (int i = 0; i < data.size(); i ++) {
-        output.append(data.at(i) ^ ckey.at((seed + i) % ckey.size()));
+        output.append(data.at(i) ^ ckey.at(static_cast<int>(seed + static_cast<unsigned int>(i)) % ckey.size()));
     }
 }

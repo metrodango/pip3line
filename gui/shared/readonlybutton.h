@@ -19,7 +19,7 @@ class ReadOnlyButton : public QPushButton
 {
         Q_OBJECT
     public:
-        explicit ReadOnlyButton(ByteSourceAbstract * bytesource, QWidget *parent = 0);
+        explicit ReadOnlyButton(ByteSourceAbstract * bytesource, QWidget *parent = nullptr);
     signals:
         void logError(QString message);
     public slots:
@@ -27,6 +27,7 @@ class ReadOnlyButton : public QPushButton
         void onToggle(bool val);
 
     private:
+        Q_DISABLE_COPY(ReadOnlyButton)
         ByteSourceAbstract *byteSource;
         static const QString ReadWrite;
         static const QString ReadOnly;

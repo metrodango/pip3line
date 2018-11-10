@@ -58,6 +58,7 @@ class GuiHelper : public QObject
 
         void sendNewSelection(const QByteArray &selection);
         void sendToNewTab(const QByteArray &initialValue = QByteArray());
+        void sendToNewHexEditor(const QByteArray &initialValue = QByteArray());
 
         void setUniveralReceiver(TabAbstract * tab);
 
@@ -89,7 +90,7 @@ class GuiHelper : public QObject
         void updateLoadContextMenu(QMenu *loadMenu);
         void loadAction(QString action, ByteSourceAbstract * byteSource);
         void copyAction(QString action, QByteArray value);
-        void saveToFileAction(QByteArray value, QWidget *parent = 0);
+        void saveToFileAction(QByteArray value, QWidget *parent = nullptr);
 
         void setDefaultServerPort(int port);
         int getDefaultPort() const;
@@ -172,6 +173,12 @@ class GuiHelper : public QObject
         void saveEqualityPacketColors();
         void loadEqualityPacketColors();
 
+        void saveJsonColor();
+        void loadJsonColors();
+
+        void saveSearchColors();
+        void loadSearchColors();
+
         void registerBlockSource(BlocksSource * bs);
         void unregisterBlockSource(BlocksSource * bs);
         QList<BlocksSource *> getRegisteredBlockSources();
@@ -205,13 +212,14 @@ class GuiHelper : public QObject
         void logError(const QString &message, const QString &source = QString());
         void logWarning(const QString &message,const QString &source = QString());
         void logStatus(const QString &message,const QString &source = QString());
-        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
+        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::PLSTATUS);
         void calculatingHexTableSizes();
         void onFilterChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
         void onTabDestroyed();
     signals:
-        void newSelection(QByteArray selection);
+        void newDataSelection(QByteArray selection);
         void newTabRequested(QByteArray initialValue);
+        void newHexEditorRequested(const QByteArray &initialValue);
         void newPacketAnalyserRequested(QList<QSharedPointer<Packet> >);
         void filterChanged();
         void markingsUpdated();
@@ -240,6 +248,7 @@ class GuiHelper : public QObject
         void refreshNetworkProxySettings();
         void refreshIgnoreSSLSetting();
         void refreshAutoSaveTimer();
+        QColor getColorFromSetting(const QString &key, const QColor &defaultcolor);
         TransformMgmt *transformFactory;
         QNetworkAccessManager *networkManager;
         LoggerWidget *logger;

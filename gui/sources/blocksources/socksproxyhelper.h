@@ -15,6 +15,7 @@ class SocksProxyHelper
         QHostAddress getHost() const;
         quint16 getPort() const;
     private:
+        Q_DISABLE_COPY(SocksProxyHelper)
         CONNECTION_STATE connectionState;
         QHostAddress host;
         quint16 port;

@@ -35,6 +35,7 @@ class Block {
         int getSourceid() const;
         void setSourceid(int value);
     private:
+        Q_DISABLE_COPY(Block)
         QByteArray data;
         int sourceid;
 };
@@ -43,11 +44,13 @@ class BlocksSource : public QObject
 {
         Q_OBJECT
     public:
-        enum BSOURCETYPE {CLIENT          = 0x0001,
-                          SERVER          = 0x0002,
-                          INVALID_TYPE = 0x0010};
+        enum BSOURCETYPE {
+            CLIENT        = 0x0001,
+            SERVER        = 0x0002,
+            INVALID_TYPE  = 0x0010
+        };
 
-        enum Flags {
+        enum Flags: unsigned long {
             TLS_OPTIONS         = 0x1,
             TLS_ENABLED         = 0x2,
             REFLEXION_OPTIONS   = 0x20,
@@ -55,7 +58,8 @@ class BlocksSource : public QObject
             READ_ONLY           = 0x80,
             B64BLOCKS_OPTIONS   = 0x100,
             B64BLOCKS_ENABLED   = 0x200,
-            IP_OPTIONS          = 0x400
+            GEN_IP_OPTIONS      = 0x400,
+            WANTS_TRACKING      = 0x800
         };
 
         static const QString NEW_CONNECTION_STRING;
@@ -65,7 +69,7 @@ class BlocksSource : public QObject
         static void releaseID(int id);
         static BlocksSource * getSourceObject(int id);
 
-        explicit BlocksSource(QObject *parent = 0);
+        explicit BlocksSource(QObject *parent = nullptr);
         virtual ~BlocksSource();
         QWidget *getGui(QWidget * parent = nullptr);
         virtual QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
@@ -77,16 +81,15 @@ class BlocksSource : public QObject
         virtual QString getDescription() = 0;
         virtual QList<Target<BlocksSource *> > getAvailableConnections();
         int getSid() const;
-        bool isTLSEnable() const;
+        bool isTLSEnabled() const;
         bool isReflexive() const;
         quint64 getFlags() const;
         void setFlags(const quint64 &value);
         virtual bool isStarted() = 0;
         virtual QHash<QString, QString> getConfiguration();
-        virtual void setConfiguration(QHash<QString, QString> conf);
+        virtual void setConfiguration(const  QHash<QString, QString> &conf);
         int getB64MaxBlockLength() const;
         char getB64BlocksSeparator() const;
-
         TransformAbstract *getInboundTranform() const;
         void setInboundTranform(TransformAbstract *transform);
         TransformAbstract *getOutboundTranform() const;
@@ -128,7 +131,7 @@ class BlocksSource : public QObject
         void updateConnectionsInfo();
         virtual void internalUpdateConnectionsInfo();
         QList<Target<BlocksSource *>> connectionsInfo;
-        QTimer updateTimer;
+        QTimer updateConnectionsTimer;
 
         char b64BlocksSeparator;
         int b64MaxBlockLength;
@@ -143,6 +146,7 @@ class BlocksSource : public QObject
     private slots:
         void onGuiDestroyed();
     private:
+        Q_DISABLE_COPY(BlocksSource)
         QReadWriteLock infoLocker;
         QWidget * gui;
         static int currentid;

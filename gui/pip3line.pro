@@ -7,7 +7,7 @@
 # Released under AGPL see LICENSE for more information
 
 QT       += core gui xml network concurrent widgets
-CONFIG += debug WITH_THREAD c++14 warn_on
+CONFIG += debug c++14 warn_on
 
 CONFIG += CONF_SCINTILLA
 #CONFIG += CONF_ADDR_SANITIZER
@@ -29,20 +29,22 @@ unix {
     }
 
     CONF_ADDR_SANITIZER {
-        QMAKE_CXXFLAGS += -fsanitize=address
+        QMAKE_CXXFLAGS += -g -O1 -fsanitize=address -fno-omit-frame-pointer
         QMAKE_LDFLAGS += -fsanitize=address
-        LIBS += -L"/usr/lib/clang/5.0.0/lib/linux" -shared -fPIC -lclang_rt.asan_cxx-x86_64 -lclang_rt.asan-x86_64 -L "/usr/lib/llvm/5/lib" -lclangAnalysis
+        LIBS += -L"/usr/lib/clang/6.0.1/lib/linux" -shared -fPIC -lclang_rt.asan-x86_64
   }
 
     CONF_THREAD_SANITIZER {
         QMAKE_CXXFLAGS += -fsanitize=thread
         LIBS += -ltsan
     }
-    LIBS += -L"../bin" -ltransform
+    LIBS += -L"../bin" -ltransform -lssl -lcrypto
 }
 
 win32 {
-    LIBS += -L"../lib" -ltransform
+    LIBS += -L"../lib" -ltransform -L"C:\\OpenSSL-Win64\\lib\\" -llibeay32
+    INCLUDEPATH +="C:\\OpenSSL-Win64\\include\\"
+
     CONF_SCINTILLA {
         DEFINES += SCINTILLA QSCINTILLA_DLL
         INCLUDEPATH +="../../QScintilla/Qt4Qt5"
@@ -163,7 +165,16 @@ SOURCES += main.cpp\
     sources/blocksources/pipeclientlistener.cpp \
     sources/blocksources/pipeclientwidget.cpp \
     views/jsonview.cpp \
-    shared/newconnectionbutton.cpp
+    shared/newconnectionbutton.cpp \
+    sources/blocksources/sharedmemorysource.cpp \
+    tabs/packetanalyser/myoproxy.cpp \
+    tabs/packetanalyser/myoproxywidget.cpp \
+    sources/blocksources/shmtypes/sharedmemorysourcebasewidget.cpp \
+    sources/blocksources/shmtypes/sharedmemconnector.cpp \
+    sources/blocksources/shmtypes/sysv_shm.cpp \
+    sources/blocksources/shmtypes/shmsysvwidget.cpp \
+    sources/blocksources/shmtypes/sharedmemposix.cpp \
+    sources/blocksources/shmtypes/sharedmemposixwidget.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -277,7 +288,16 @@ HEADERS  += mainwindow.h \
     sources/blocksources/pipeclientlistener.h \
     sources/blocksources/pipeclientwidget.h \
     views/jsonview.h \
-    shared/newconnectionbutton.h
+    shared/newconnectionbutton.h \
+    sources/blocksources/sharedmemorysource.h \
+    tabs/packetanalyser/myoproxy.h \
+    tabs/packetanalyser/myoproxywidget.h \
+    sources/blocksources/shmtypes/sharedmemorysourcebasewidget.h \
+    sources/blocksources/shmtypes/sharedmemconnector.h \
+    sources/blocksources/shmtypes/sysv_shm.h \
+    sources/blocksources/shmtypes/shmsysvwidget.h \
+    sources/blocksources/shmtypes/sharedmemposix.h \
+    sources/blocksources/shmtypes/sharedmemposixwidget.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \
@@ -324,7 +344,11 @@ FORMS    += mainwindow.ui \
     sources/blocksources/baseblocksourcewidget.ui \
     shared/transformselectorwidget.ui \
     tabs/packetanalyser/filterdialog.ui \
-    sources/blocksources/pipeclientwidget.ui
+    sources/blocksources/pipeclientwidget.ui \
+    tabs/packetanalyser/myoproxywidget.ui \
+    sources/blocksources/shmtypes/sharedmemorysourcebasewidget.ui \
+    sources/blocksources/shmtypes/shmsysvwidget.ui \
+    sources/blocksources/shmtypes/sharedmemposixwidget.ui
 
 OTHER_FILES += icons/pip3line.png \
     win.rc \

@@ -23,7 +23,7 @@ class HexEncodeWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit HexEncodeWidget(HexEncode *ntransform, QWidget *parent = 0);
+        explicit HexEncodeWidget(HexEncode *ntransform, QWidget *parent = nullptr);
         ~HexEncodeWidget();
     private slots:
         void onTypeChange();

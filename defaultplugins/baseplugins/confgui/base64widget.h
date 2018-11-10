@@ -23,7 +23,7 @@ class Base64Widget : public QWidget
         Q_OBJECT
         
     public:
-        explicit Base64Widget(Base64 *transform, QWidget *parent = 0);
+        explicit Base64Widget(Base64 *transform, QWidget *parent = nullptr);
         ~Base64Widget();
 
     private slots:

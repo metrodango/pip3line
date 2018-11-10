@@ -10,6 +10,7 @@ Released under AGPL see LICENSE for more information
 
 #include "screeniodevice.h"
 #include <QDebug>
+#include <QtGlobal>
 
 ScreenIODevice::ScreenIODevice(QPlainTextEdit *outWidget, QObject *parent) :
     QIODevice(parent)
@@ -74,17 +75,17 @@ qint64 ScreenIODevice::readData(char *dest, qint64 maxSize)
     if ( maxSize < 1)
         return 0;
 
-    int position = pos();
+    int position = static_cast<int>(pos()); // cannot have data size greater than INT_MAX
     int byteToRead = 0;
     if (position + maxSize > size())
-        byteToRead = size() - position;
+        byteToRead = static_cast<int>(size()) - position;
     else {
-        byteToRead = maxSize;
+        byteToRead = static_cast<int>(qMin(maxSize, static_cast<qint64>(INT_MAX)));
     }
     QByteArray rdata = widget->toPlainText().toUtf8().mid(position,byteToRead);
     seek(position + byteToRead);
 
-    memcpy(dest,rdata.constData(), byteToRead);
+    memcpy(dest,rdata.constData(), static_cast<size_t>(byteToRead));
 
     return byteToRead;
 }
@@ -98,7 +99,8 @@ qint64 ScreenIODevice::writeData(const char *src, qint64 maxSize)
     if ( maxSize < 1)
         return 0;
 
-    QByteArray rdata(src,maxSize);
+    int sizeToRead = static_cast<int>(qMin(maxSize, static_cast<qint64>(INT_MAX)));
+    QByteArray rdata(src,sizeToRead);
     emit packet(QString::fromUtf8(rdata));
 
     return maxSize;

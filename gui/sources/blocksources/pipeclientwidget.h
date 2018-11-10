@@ -18,6 +18,7 @@ class PipesModel : public QAbstractTableModel
     public slots:
         void refresh();
     private:
+        Q_DISABLE_COPY(PipesModel)
         struct PipePropperties {
             QString path;
             QString perms;
@@ -48,7 +49,7 @@ class PipeClientWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit PipeClientWidget(QWidget *parent = 0);
+        explicit PipeClientWidget(QWidget *parent = nullptr);
         ~PipeClientWidget();
     signals:
         void newPipeName(const QString &mess);
@@ -58,6 +59,7 @@ class PipeClientWidget : public QWidget
         void onSelectionChanged(const QItemSelection &selection);
         void onNamedPipeChanged(const QString &value);
     private:
+        Q_DISABLE_COPY(PipeClientWidget)
         Ui::PipeClientWidget *ui;
         PipesModel * model;
         QSortFilterProxyModel *proxyModel;

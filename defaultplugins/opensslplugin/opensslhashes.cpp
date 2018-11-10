@@ -97,14 +97,18 @@ void OpenSSLHashes::transform(const QByteArray &input, QByteArray &output)
 
     const EVP_MD *md = EVP_get_digestbyname(hashName.toUtf8().data());
     if (!md) {
-        emit error(tr("OpenSSL: Unknown hash %1").arg(hashName),id);
+        emit error(tr("Unknown hash %1").arg(hashName),id);
         return;
     }
     EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
     EVP_DigestInit_ex(mdctx, md, nullptr);
-    EVP_DigestUpdate(mdctx, input.data(), input.size());
+    EVP_DigestUpdate(mdctx, input.data(), static_cast<size_t>(input.size()));
     EVP_DigestFinal_ex(mdctx, md_value, &md_len);
-    output.append((char *)md_value,md_len);
+    if (md_len >= INT_MAX) {
+        emit error(tr("Invalid return size for hash %1").arg(hashName),id);
+        md_len = 0;
+    }
+    output.append(reinterpret_cast<char *>(md_value),static_cast<int>(md_len));
     EVP_MD_CTX_destroy(mdctx);
 }
 
@@ -116,7 +120,7 @@ QString OpenSSLHashes::getHashName()
 bool OpenSSLHashes::setHashName(QString name)
 {
     if (!hashList.contains(name)) {
-        emit error(tr("OpenSSL: Unknown hash %1").arg(name),id);
+        emit error(tr("Unknown hash %1").arg(name),id);
         return false;
     }
     hashName = name;

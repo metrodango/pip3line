@@ -23,7 +23,7 @@ class ByteIntegerWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit ByteIntegerWidget(BytesInteger * transform,QWidget *parent = 0);
+        explicit ByteIntegerWidget(BytesInteger * transform,QWidget *parent = nullptr);
         ~ByteIntegerWidget();
 
     private slots:

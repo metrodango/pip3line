@@ -23,7 +23,7 @@ class ReverseWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit ReverseWidget(Reverse *transform, QWidget *parent = 0);
+        explicit ReverseWidget(Reverse *transform, QWidget *parent = nullptr);
         ~ReverseWidget();
     private slots:
         void  onBlockSizeChange(int);

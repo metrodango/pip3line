@@ -32,5 +32,5 @@ RotXWidget::~RotXWidget()
 
 void RotXWidget::onVariantChanged(int index)
 {
-    transform->setRotVariant((Rotx::RotVariant)index);
+    transform->setRotVariant(static_cast<Rotx::RotVariant>(index));
 }

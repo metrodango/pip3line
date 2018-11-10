@@ -37,7 +37,7 @@ void LocalSocketProcessor::run()
 {
     QLocalSocket *socket = new(std::nothrow) QLocalSocket();
     if (socket != nullptr) {
-        socket->setSocketDescriptor(socketDescriptor);
+        socket->setSocketDescriptor(static_cast<qintptr>(socketDescriptor));
 
         emit status(tr("New Client for %1").arg(socketDescriptor), PIPE_SOCKET);
 

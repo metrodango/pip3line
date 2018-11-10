@@ -17,6 +17,7 @@ Released under AGPL see LICENSE for more information
 #include <QBitArray>
 #include <QAbstractListModel>
 #include <QTime>
+#include <QBasicTimer>
 #include "../sources/bytesourceabstract.h"
 
 class GuiHelper;
@@ -34,7 +35,7 @@ class FoundOffsetsModel : public QAbstractListModel
         Q_OBJECT
     public:
         static const int INVALID_POS;
-        explicit FoundOffsetsModel(QObject * parent = 0);
+        explicit FoundOffsetsModel(QObject * parent = nullptr);
         ~FoundOffsetsModel();
         void setSearchDelegate(SearchAbstract * searchDelegate);
         SearchAbstract *getSearchObject() const;
@@ -59,6 +60,7 @@ class FoundOffsetsModel : public QAbstractListModel
         void setNewList(BytesRangeList *list);
         void onRangeDestroyed();
     private:
+        Q_DISABLE_COPY(FoundOffsetsModel)
         BytesRangeList * ranges;
         SearchAbstract * searchDelegate;
         QTime searchTimer;
@@ -69,20 +71,19 @@ class SearchLine : public QLineEdit
 {
         Q_OBJECT
     public:
-        explicit SearchLine(ByteSourceAbstract *source, QWidget *parent = 0);
+        explicit SearchLine(ByteSourceAbstract *source, QWidget *parent = nullptr);
         ~SearchLine();
         ByteSourceAbstract *getBytesource() const;
         void setBytesource(ByteSourceAbstract *source);
-
+        void updateProgress(quint64 val);
     public slots:
         void setError(bool val);
-        void updateProgress(double val);
         void onSearchStarted();
         void onSearchEnded();
     private slots:
         void onSourceUpdated(quintptr);
     signals:
-        void newSearch(QString val, int modifiers);
+        void newSearch(QString val, unsigned int modifiers);
         void requestJumpToNext();
     private:
         static const int MAX_TEXT_SIZE;
@@ -92,7 +93,6 @@ class SearchLine : public QLineEdit
         double progress;
         bool searching;
         quint64 sourceSize;
-        QTime timer;
         ByteSourceAbstract *bytesource;
         static const QColor LOADING_COLOR;
 };
@@ -101,7 +101,7 @@ class SearchWidget : public QWidget
 {
         Q_OBJECT
     public:
-        explicit SearchWidget(ByteSourceAbstract *source, GuiHelper *nguiHelper, QWidget *parent = 0);
+        explicit SearchWidget(ByteSourceAbstract *source, GuiHelper *nguiHelper, QWidget *parent = nullptr);
         ~SearchWidget();
         QString text();
         void setText(QString data);
@@ -119,11 +119,10 @@ class SearchWidget : public QWidget
         void setError(bool val);
         void onSearchStarted();
         void onSearchEnded();
-        void updateStatusProgress(double val);
         void clearSearch();
         void nextFind(quint64 pos = 0);
     private slots:
-        void onSearch(QString val, int modifiers);
+        void onSearch(QString val, unsigned int modifiers);
         void onAdvanced();
         void processJump(quint64 start, quint64 end);
         void onRequestNext();
@@ -132,6 +131,7 @@ class SearchWidget : public QWidget
         void stopSearch();
         void jumpTo(quint64 start, quint64 end);
     private:
+        void timerEvent(QTimerEvent *event);
         static const QString FIND_PLACEHOLDER_TEXT;
         static const QString TOOLTIP_TEXT;
         static const QString PLACEHOLDER_DISABLED_TEXT;
@@ -146,6 +146,7 @@ class SearchWidget : public QWidget
         FloatingDialog *advancedSearchDialog;
         quint64 lastJumpStart;
         bool viewIsText;
+        QBasicTimer statsTimer;
 };
 
 #endif // SEARCHWIDGET_H

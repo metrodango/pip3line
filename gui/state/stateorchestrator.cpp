@@ -62,7 +62,7 @@ StateOrchestrator::~StateOrchestrator()
 bool StateOrchestrator::start()
 {
     timer.start();
-    emit log(tr("%1 state: %2").arg(actionName).arg(fileName),metaObject()->className(), Pip3lineConst::LSTATUS);
+    emit log(tr("%1 state: %2").arg(actionName).arg(fileName),metaObject()->className(), Pip3lineConst::PLSTATUS);
     execNext();
 
     return true;
@@ -104,7 +104,7 @@ void StateOrchestrator::execNext()
         // emit log(tr("%1 %2").arg(actionName).arg(stateobj->getName()),metaObject()->className() , Pip3lineConst::LSTATUS);
         QTimer::singleShot(50, stateobj, SLOT(start()));
     } else {
-        emit log(tr("%1 state performed in %2ms").arg(actionName).arg(timer.restart()),metaObject()->className() , Pip3lineConst::LSTATUS);
+        emit log(tr("%1 state performed in %2ms").arg(actionName).arg(timer.restart()),metaObject()->className() , Pip3lineConst::PLSTATUS);
         if (writer != nullptr) {
             writer->writeEndElement();
             writer->writeEndDocument();
@@ -118,13 +118,14 @@ void StateOrchestrator::onFinished()
     if (isSaving()) {
         // committing any data left;
         file->flush();
+        if (file->size() > 0) {
+            if (QFile::exists(fileName)) { // removing destination file if already exist
+                QFile::remove(fileName);
+            }
 
-        if (QFile::exists(fileName)) { // removing destination file if already exist
-            QFile::remove(fileName);
-        }
-
-        if (!file->copy(fileName)) { // copying the temp file into the actual file
-            emit log(tr("Error while copying the temp file to the final state file: %1").arg(file->errorString()), metaObject()->className(), Pip3lineConst::LERROR);
+            if (!file->copy(fileName)) { // copying the temp file into the actual file
+                emit log(tr("Error while copying the temp file to the final state file: %1").arg(file->errorString()), metaObject()->className(), Pip3lineConst::LERROR);
+            }
         }
     }
     emit finished();

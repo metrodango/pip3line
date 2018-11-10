@@ -19,6 +19,7 @@ class TransformGuiButton : public QPushButton
         void onTransformDeleted();
         void onGuiRequested();
     private:
+        Q_DISABLE_COPY(TransformGuiButton)
         TransformAbstract * transform;
         QDialog * confDialog;
 };

@@ -23,7 +23,7 @@ class Base32Widget : public QWidget
         Q_OBJECT
         
     public:
-        explicit Base32Widget(Base32 *transform, QWidget *parent = 0);
+        explicit Base32Widget(Base32 *transform, QWidget *parent = nullptr);
         ~Base32Widget();
 
     private slots:

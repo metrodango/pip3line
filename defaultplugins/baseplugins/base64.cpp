@@ -47,12 +47,12 @@ QHash<QString, QString> Base64::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
 
-    properties.insert(XMLVARIANT,QString::number((int)choosenVariation));
+    properties.insert(XMLVARIANT,QString::number(static_cast<int>(choosenVariation)));
     if (choosenVariation == CUSTOM) {
         properties.insert(XMLPADDINGCHAR,saveChar(paddingChar));
         properties.insert(XMLCHAR62,saveChar(char62));
         properties.insert(XMLCHAR63,saveChar(char63));
-        properties.insert(XMLPADDINGTYPE,QString::number((int)paddingType));
+        properties.insert(XMLPADDINGTYPE,QString::number(static_cast<int>(paddingType)));
     }
     return properties;
 }
@@ -69,7 +69,7 @@ bool Base64::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLVARIANT),id);
     } else {
-        setChoosenVariation((Variation) val);
+        setChoosenVariation(static_cast<Variation>(val));
     }
 
     if (choosenVariation == CUSTOM) {
@@ -103,7 +103,7 @@ bool Base64::setConfiguration(QHash<QString, QString> propertiesList)
             res = false;
             emit error(tr("Invalid value for %1").arg(XMLPADDINGTYPE),id);
         } else {
-            setPaddingType((PaddingType)val);
+            setPaddingType(static_cast<PaddingType>(val));
         }
     }
     return res;

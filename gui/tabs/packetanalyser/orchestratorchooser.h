@@ -15,14 +15,16 @@ class OrchestratorChooser : public QComboBox
         ~OrchestratorChooser();
         void setType(int type);
         SourcesOrchestatorAbstract *getOrchestrator();
+        int showConfPanel(SourcesOrchestatorAbstract *targetOrchestrator, bool blocking = false);
     signals:
         void newOrchestrator(SourcesOrchestatorAbstract * orchestrator);
     public slots:
-        int showConfPanel(bool blocking = false);
+        void onGuiRequested();
     private slots:
         void onOrchestratorDeleted();
         void onSelection(int index);
     private:
+        Q_DISABLE_COPY(OrchestratorChooser)
         SourcesOrchestatorAbstract *createOrchestratorFromType(int type);
         SourcesOrchestatorAbstract *orchestrator{nullptr};
         GuiHelper *guiHelper;

@@ -23,7 +23,7 @@ class ZlibWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit ZlibWidget(Zlib * transform, QWidget *parent = 0);
+        explicit ZlibWidget(Zlib * transform, QWidget *parent = nullptr);
         ~ZlibWidget();
         
     private slots:

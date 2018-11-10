@@ -23,7 +23,7 @@ class MicrosoftTimestampWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit MicrosoftTimestampWidget(MicrosoftTimestamp * transform, QWidget *parent = 0);
+        explicit MicrosoftTimestampWidget(MicrosoftTimestamp * transform, QWidget *parent = nullptr);
         ~MicrosoftTimestampWidget();
 
     private slots:

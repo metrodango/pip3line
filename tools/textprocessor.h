@@ -17,7 +17,7 @@ class TextProcessor: public Processor
 {
         Q_OBJECT
     public:
-        explicit TextProcessor(TransformMgmt *tFactory, QObject * parent = 0);
+        explicit TextProcessor(TransformMgmt *tFactory, QObject * parent = nullptr);
         ~TextProcessor();
         void run();
     protected:

@@ -23,7 +23,7 @@ class BytesToFloatWdiget : public QWidget
         Q_OBJECT
         
     public:
-        explicit BytesToFloatWdiget(BytesToFloat *transform,QWidget *parent = 0);
+        explicit BytesToFloatWdiget(BytesToFloat *transform,QWidget *parent = nullptr);
         ~BytesToFloatWdiget();
     public slots:
         void onPrecisionChanged(int val);

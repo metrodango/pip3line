@@ -86,7 +86,7 @@ bool ComposedTransform::isTwoWays()
 
 QWidget *ComposedTransform::getGui(QWidget * /* parent */)
 {
-    return 0;
+    return nullptr;
 }
 
 QString ComposedTransform::help() const

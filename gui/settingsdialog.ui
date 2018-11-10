@@ -15,8 +15,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>576</height>
+    <width>870</width>
+    <height>849</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1193,7 +1193,7 @@
         <widget class="QWidget" name="DeletedTabs">
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="clearTabsLabel">
             <property name="text">
              <string>Deleted tabs still in memory. Available for recovery either via double click on the below list or right click on the tab bar.</string>
             </property>
@@ -1222,6 +1222,25 @@
              <string>Font used for regular text</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_20">
+             <item>
+              <widget class="QPushButton" name="resetAppearancePushButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Reset to Default Values</string>
+               </property>
+               <property name="text">
+                <string>Reset to Default</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QLabel" name="regularFontDocLabel">
                <property name="sizePolicy">
@@ -1347,6 +1366,63 @@
                  <widget class="QSpinBox" name="hexadecimalTableRowsHeightSpinBox">
                   <property name="minimum">
                    <number>20</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QPushButton" name="jsonKeyColorPushButton">
+                  <property name="text">
+                   <string>modify Json Key Color</string>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="1">
+                 <widget class="QPushButton" name="jsonValueColorPushButton">
+                  <property name="text">
+                   <string>modify Json Type Color</string>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QPushButton" name="jsonTypeColorPushButton">
+                  <property name="text">
+                   <string>modify Json Value Color</string>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="1">
+                 <widget class="QPushButton" name="searchBgPushButton">
+                  <property name="text">
+                   <string>modify search bg Color</string>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QPushButton" name="searchFgPushButton">
+                  <property name="text">
+                   <string>modify search fg Color</string>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QLabel" name="searchColorLabel">
+                  <property name="text">
+                   <string>Search Colors</string>
                   </property>
                  </widget>
                 </item>

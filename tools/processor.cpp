@@ -166,21 +166,27 @@ void Processor::writeBlock(const QByteArray &data)
         if (encode)
             *outputval = outputval->toBase64();
         outputval->append(separator);
-        if (outputLock != 0)
+        if (outputLock != nullptr)
             outputLock->lock();
 
         while (outputval->size() > 0) {
-            int whatHasBeenDone = out->write(*outputval);
+            qint64 whatHasBeenDone = out->write(*outputval);
             if (whatHasBeenDone < 0) {
                 logError(out->errorString(), this->metaObject()->className());
                 break;
             }
 
-            *outputval = outputval->remove(0,whatHasBeenDone);
+            if (whatHasBeenDone < outputval->size()) {
+                *outputval = outputval->remove(0,static_cast<int>(whatHasBeenDone));
+            } else {
+                qCritical() << tr("[Processor::writeBlock] bytes written ");
+                outputval->clear();
+            }
+
 
         }
 
-        if (outputLock != 0)
+        if (outputLock != nullptr)
             outputLock->unlock();
         statsLock.lock();
         stats.incrOutBlocks();

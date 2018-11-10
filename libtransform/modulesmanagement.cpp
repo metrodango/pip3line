@@ -175,7 +175,6 @@ bool ModulesManagement::modulesContains(const QString &name)
     } else {
         return false;
     }
-    return modulesList.contains(name);
 }
 
 bool ModulesManagement::isRegistered(const QString &name)

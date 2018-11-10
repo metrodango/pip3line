@@ -13,6 +13,8 @@ IPNetworkServerWidget::IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget
     ui->setupUi(this);
     refreshIPs();
 
+    ui->portSpinBox->setMinimum(0);
+    ui->portSpinBox->setMaximum(USHRT_MAX);
     ui->portSpinBox->setValue(listener->getHostPort());
     QString addr = listener->getHostAddress().toString();
     int index = ui->bindToComboBox->findText(addr);
@@ -60,7 +62,7 @@ void IPNetworkServerWidget::refreshIPs()
 
 void IPNetworkServerWidget::onPortChanged(int port)
 {
-    listener->setHostPort((quint16) port);
+    listener->setHostPort(static_cast<quint16>(port));
 }
 
 void IPNetworkServerWidget::onIPChanged(const QString &value)

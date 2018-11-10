@@ -22,7 +22,7 @@ class FloatingDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit FloatingDialog(GuiHelper * guiHelper, QWidget *widget, QWidget *parent = 0);
+        explicit FloatingDialog(GuiHelper * guiHelper, QWidget *widget, QWidget *parent = nullptr);
         ~FloatingDialog();
         void setAllowReject(bool val);
     public slots:

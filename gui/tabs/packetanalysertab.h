@@ -45,7 +45,7 @@ class PacketAnalyserTab : public TabAbstract
 {
         Q_OBJECT
     public:
-        explicit PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~PacketAnalyserTab();
         void loadFromFile(QString fileName);
         int getBlockCount() const;
@@ -61,6 +61,8 @@ class PacketAnalyserTab : public TabAbstract
         void setAutoMerge(bool value);
         void registerToGlobal();
         void unregisterFromGlobal();
+        bool getTrackChanges() const;
+        void setTrackChanges(bool value);
     private slots:
         void onAddNewColumn();
         void onImport();
@@ -101,10 +103,11 @@ class PacketAnalyserTab : public TabAbstract
         void onFilter();
         void onFilterDialogClosed();
         void onDeleteColumn();
-        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
+        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::PLSTATUS);
         void onFontUpdated();
-
+        void onTrackingToggled(bool checked);
     private:
+        Q_DISABLE_COPY(PacketAnalyserTab)
         void selectLastPacket();
         void checkIfOriginalTabNeeded();
         void removeTabButton(int index);
@@ -151,6 +154,7 @@ class PacketAnalyserTab : public TabAbstract
         bool trackingLast;
         QTimer updateTimer;
         bool intercepting;
+        bool trackChanges;
         QQueue<QSharedPointer<Packet> > packetQueue;
 
         friend class PacketAnalyserTabStateObj;
@@ -163,6 +167,8 @@ class PacketAnalyserTabStateObj : public TabStateObj
         explicit PacketAnalyserTabStateObj(PacketAnalyserTab *tab);
         ~PacketAnalyserTabStateObj();
         void run();
+    private:
+        Q_DISABLE_COPY(PacketAnalyserTabStateObj)
 };
 
 class PacketAnalyserTabClosingStateObj : public BaseStateAbstract
@@ -175,6 +181,8 @@ class PacketAnalyserTabClosingStateObj : public BaseStateAbstract
 
     protected:
         PacketAnalyserTab *tab;
+    private:
+        Q_DISABLE_COPY(PacketAnalyserTabClosingStateObj)
 };
 
 #endif // PACKETANALYSERTAB_H

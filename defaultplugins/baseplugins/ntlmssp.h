@@ -39,7 +39,7 @@ class Ntlmssp : public TransformAbstract
         void setDecodeBase64(bool val);
 
     private:
-        QByteArray extractFlags(int flags);
+        QByteArray extractFlags(quint32 flags);
         QByteArray extractTargetInfo(QByteArray &data);
         QByteArray extractOSVersion(QBuffer &input);
         QByteArray extractNTLM(QByteArray &data);
@@ -49,7 +49,7 @@ class Ntlmssp : public TransformAbstract
         QByteArray toTimeStamp(const QByteArray &data);
         bool readSecurityBuffer(QBuffer &input, quint16 *length, quint16 *maxLength, quint32 *offset, quint32 maxsize);
         bool readFlags(QBuffer &input, quint32 *flags );
-        QHash<int, QString> NTMLSSP_TYPE;
+        QHash<quint32, QString> NTMLSSP_TYPE;
         QMap<quint32, QString> FLAGS_VAL;
         QMap<quint16, QString> TARGET_INFO;
 

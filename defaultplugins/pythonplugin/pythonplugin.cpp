@@ -48,7 +48,6 @@ void PythonPlugin::setCallBack(Pip3lineCallback *ncallback)
 
     if (modules == nullptr) {
        qFatal("Cannot allocate memory for ModulesManagement (PythonPlugin) X{");
-       return;
     }
     modules->initialize();
 }

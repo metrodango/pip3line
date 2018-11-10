@@ -20,6 +20,8 @@ Released under AGPL see LICENSE for more information
 #include <QRect>
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QGuiApplication>
+#include <QScreen>
 
 using namespace GuiConst;
 
@@ -89,8 +91,11 @@ AppDialog::AppDialog(GuiHelper * nguiHelper, QWidget *parent) :
     attachedAction = nullptr;
     connect(guiHelper, &GuiHelper::appGoesIntoHidding, this, &AppDialog::onMainHiding);
     connect(guiHelper, &GuiHelper::appIsRising, this, &AppDialog::onMainRising);
-    const QRect screen = QApplication::desktop()->screenGeometry();
+
+    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
     move(screen.center() - this->rect().center());
+//    const QRect screen = QApplication::desktop()->screenGeometry();
+//    move(screen.center() - this->rect().center());
     //qDebug() << "created" << this;
 }
 

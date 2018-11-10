@@ -147,7 +147,7 @@ void BytesInteger::transform(const QByteArray &input, QByteArray &output)
             case I8bits: {
                     qint16 val16 = input.toShort(&ok);
                     if (ok && val16 > -129 && val16 < 128) {
-                        qint8 val8 = (qint8)val16;
+                        qint8 val8 = static_cast<qint8>(val16);
                         memcpy(data, &val8, I8bits);
                     } else {
                         emit error(tr("Invalid 8bits signed Integer"),id);
@@ -186,16 +186,17 @@ void BytesInteger::transform(const QByteArray &input, QByteArray &output)
         } else {
                 switch (integerSize) {
                 case I8bits: {
-                        quint16 val16 = input.toShort(&ok);
+                        quint16 val16 = input.toUShort(&ok);
                         if (ok && val16 < 256) {
-                            quint8 val8 = (qint8)val16;
+                            quint8 val8 = static_cast<quint8>(val16);
                             memcpy(data, &val8, I8bits);
                         } else {
                             emit error(tr("Invalid 8bits unsigned Integer"),id);
                         }
+                        break;
                 }
                 case I16bits: {
-                        quint16 val16 = input.toShort(&ok);
+                        quint16 val16 = input.toUShort(&ok);
                         if (ok) {
                             memcpy(data, &val16, I16bits);
                         } else {
@@ -204,7 +205,7 @@ void BytesInteger::transform(const QByteArray &input, QByteArray &output)
                         break;
                 }
                 case I32bits: {
-                        quint32 val32 = input.toInt(&ok);
+                        quint32 val32 = input.toUInt(&ok);
                         if (ok) {
                             memcpy(data, &val32, I32bits);
                         } else {
@@ -213,7 +214,7 @@ void BytesInteger::transform(const QByteArray &input, QByteArray &output)
                         break;
                 }
                 case I64bits: {
-                        quint64 val64 = input.toInt(&ok);
+                        quint64 val64 = input.toUInt(&ok);
                         if (ok) {
                             memcpy(data, &val64, I64bits);
                         } else {
@@ -243,7 +244,7 @@ QHash<QString, QString> BytesInteger::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
     properties.insert(PROP_ENDIAN,QString::number(littleendian ? 1 : 0));
-    properties.insert(PROP_INTEGERSIZE,QString::number((int)integerSize));
+    properties.insert(PROP_INTEGERSIZE,QString::number(static_cast<int>(integerSize)));
     properties.insert(PROP_SIGNEDINTEGER,QString::number(signedInteger ? 1 : 0));
 
     return properties;
@@ -270,7 +271,7 @@ bool BytesInteger::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(PROP_INTEGERSIZE),id);
     } else {
-        setIntegerSize((IntSize)val);
+        setIntegerSize(static_cast<IntSize>(val));
     }
 
     val = propertiesList.value(PROP_SIGNEDINTEGER).toInt(&ok);

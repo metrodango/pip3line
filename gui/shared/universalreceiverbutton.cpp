@@ -61,7 +61,7 @@ void UniversalReceiverButton::onClicked(bool checked)
 
 
 CommonUniversalReceiverListener::CommonUniversalReceiverListener():
-    QObject(0)
+    QObject(nullptr)
 {
 
 }

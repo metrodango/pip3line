@@ -59,7 +59,6 @@ MainTabs::MainTabs(GuiHelper *nguiHelper) :
     tabHeaderContextMenu = new(std::nothrow) QMenu();
     if (tabHeaderContextMenu == nullptr) {
         qFatal("Cannot allocate memory for deletedTabContextMenu X{");
-        return;
     }
     updateTabHeaderMenu();
     connect(guiHelper, &GuiHelper::deletedTabsUpdated, this, &MainTabs::updateTabHeaderMenu,Qt::QueuedConnection);
@@ -591,7 +590,6 @@ void MainTabs::updateTabHeaderMenu()
         QAction * action = new(std::nothrow) QAction(tr("Deleted Tabs"), tabHeaderContextMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action for \"deleted tab\" X{");
-            return;
         }
         action->setDisabled(true);
         tabHeaderContextMenu->addAction(action);
@@ -600,7 +598,6 @@ void MainTabs::updateTabHeaderMenu()
             action = new(std::nothrow) QAction(list.at(i)->getName(), tabHeaderContextMenu);
             if (action == nullptr) {
                 qFatal("Cannot allocate memory for action for deletedTabContextMenu X{");
-                return;
             }
             tabHeaderContextMenu->addAction(action);
         }
@@ -760,7 +757,7 @@ void InitTabStateObj::run()
             bool ok = false;
             int pretype = readInt(attrList.value(GuiConst::STATE_PRETAB_TYPE), &ok);
             if (ok && pretype >= 0 && pretype < GuiConst::AVAILABLE_TAB_STRINGS.size()) {
-                TabAbstract *tab = mtabs->newPreTab((GuiConst::AVAILABLE_PRETABS)pretype);
+                TabAbstract *tab = mtabs->newPreTab(static_cast<GuiConst::AVAILABLE_PRETABS>(pretype));
                 if (tab != nullptr) {
                     emit newTab(tab);
                     BaseStateAbstract *tabstate = tab->getStateMngtObj();

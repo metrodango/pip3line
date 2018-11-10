@@ -23,7 +23,7 @@ class CharValidator : public QValidator
 {
         Q_OBJECT
     public:
-        explicit CharValidator(QObject *parent = 0);
+        explicit CharValidator(QObject *parent = nullptr);
         QValidator::State validate(QString & input, int & pos) const;
 };
 
@@ -32,7 +32,7 @@ class LIBTRANSFORMSHARED_EXPORT HexWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit HexWidget(QWidget *parent = 0);
+        explicit HexWidget(QWidget *parent = nullptr);
         ~HexWidget();
         char getChar();
         void setChar(char c);

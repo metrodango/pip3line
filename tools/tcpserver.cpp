@@ -11,6 +11,7 @@ Released under AGPL see LICENSE for more information
 #include "tcpserver.h"
 #include <QHostAddress>
 #include <commonstrings.h>
+#include <climits>
 #include "shared/guiconst.h"
 using namespace GuiConst;
 
@@ -73,7 +74,8 @@ void TcpSocketProcessor::run()
 }
 
 TcpServer::TcpServer(TransformMgmt * tFactory, QObject *parent) :
-    ServerAbstract(tFactory)
+    ServerAbstract(tFactory),
+    port(0)
 {
     tcpServer = new(std::nothrow) InternalTcpServer(parent);
     if (tcpServer != nullptr)
@@ -176,6 +178,10 @@ void TcpServer::processorFinished(TcpSocketProcessor * target)
 
 void TcpServer::setPort(int nport)
 {
-    port = nport;
+    if (nport < USHRT_MAX) {
+        port = static_cast<quint16>(nport);
+    } else {
+        qWarning("[TcpServer::setPort] Invalid port value T_T");
+    }
 }
 

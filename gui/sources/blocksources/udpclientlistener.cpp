@@ -13,12 +13,13 @@ UdpClientListener::UdpClientListener(QHostAddress hostAddress, quint16 hostPort,
     IPBlocksSources(hostAddress,hostPort, parent),
     running(false)
 {
-    flags |= REFLEXION_OPTIONS;
+    flags = REFLEXION_OPTIONS | GEN_IP_OPTIONS;
     type = CLIENT;
     connect(&connectionsTimer, &QTimer::timeout, this, &UdpClientListener::checkTimeouts);
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&workerThread);
-    updateTimer.moveToThread(&workerThread);
+
+    updateConnectionsTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
     workerThread.start();
 }
@@ -68,7 +69,7 @@ void UdpClientListener::sendBlock(Block *block)
         while (i.hasNext()) {
             i.next();
             int suid = i.value().getSid();
-            if (bid ==  suid || sid == suid) { // either this we are sending directly to the blocksource or getting the block from another one
+            if (bid == suid || sid == suid) { // either we are sending directly to the blocksource or getting the block from another one
                 qint64 bwritten = i.key()->writeDatagram(data,hostAddress,hostPort);
                 if (bwritten != data.size()) {
                     emit log(tr("The UDP packet was not send entirely '-_-"),ID,Pip3lineConst::LWARNING);
@@ -92,7 +93,7 @@ void UdpClientListener::sendBlock(Block *block)
             if (udpSockets.size() > 1000000)
                 emit log(tr("The number of UDP client \"connections\" as reached 1 Millions. Dude for real ?"),ID, Pip3lineConst::LERROR);
             mapExtSourcesToLocal.insert(bid, sid);
-            emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::LSTATUS);
+            emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::PLSTATUS);
 
             if (socket->writeDatagram(data,hostAddress,hostPort) != data.size()) {
                 emit log(tr("The UDP packet was not send entirely '-_-"),ID,Pip3lineConst::LWARNING);
@@ -105,7 +106,6 @@ void UdpClientListener::sendBlock(Block *block)
     }
 
     delete block;
-
 }
 
 bool UdpClientListener::startListening()
@@ -161,7 +161,13 @@ void UdpClientListener::dataReceived()
         quint16 senderPort;
 
         qint64 datagramSize = socket->pendingDatagramSize();
-        data.resize(datagramSize);
+        if (datagramSize < INT_MAX) {
+            data.resize(static_cast<int>(datagramSize));
+        } else {
+            qCritical() << tr("[UdpClientListener::dataReceived] datagramSize invalid T_T");
+            return;
+        }
+
         qint64 bread = 0;
 
         bread = socket->readDatagram(data.data(), data.size(), &sender, &senderPort);

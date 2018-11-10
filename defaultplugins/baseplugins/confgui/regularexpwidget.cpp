@@ -52,8 +52,8 @@ RegularExpWidget::~RegularExpWidget()
 
 void RegularExpWidget::onActionTypeChange(int val)
 {
-    transform->setActionType((RegularExp::Actions)val);
-    ui->actionStackedWidget->setCurrentIndex((RegularExp::Actions)val);
+    transform->setActionType(static_cast<RegularExp::Actions>(val));
+    ui->actionStackedWidget->setCurrentIndex(static_cast<RegularExp::Actions>(val));
 }
 
 void RegularExpWidget::onGreedyChange(bool val)

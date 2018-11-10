@@ -103,7 +103,7 @@ void QuickViewItem::processingFinished(QByteArray output, Messages messages)
         outputWidget = outputBlock;
     }
 
-    LOGLEVEL level = LSTATUS;
+    LOGLEVEL level = PLSTATUS;
     for (int i = 0; i < messages.size() ; i++) {
         toolTipMess.append(messages.at(i).message);
         if (messages.at(i).level > level) {
@@ -120,7 +120,7 @@ void QuickViewItem::processingFinished(QByteArray output, Messages messages)
         case (LWARNING):
             color = "orange";
             break;
-        case (LSTATUS):
+        case (PLSTATUS):
         default:
             color = "gray";
     }
@@ -139,7 +139,7 @@ void QuickViewItem::processData(const QByteArray &data)
         TransformRequest *tr = new(std::nothrow) TransformRequest(
                     currentTransform,
                     data,
-                    (quintptr) this,
+                    reinterpret_cast<quintptr>(this),
                     false
                                    );
         if (tr == nullptr) {

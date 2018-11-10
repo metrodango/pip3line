@@ -22,7 +22,7 @@ class NewByteDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit NewByteDialog(GuiHelper * guiHelper, QWidget *parent = 0, bool isSimple = false);
+        explicit NewByteDialog(GuiHelper * guiHelper, QWidget *parent = nullptr, bool isSimple = false);
         ~NewByteDialog();
         int byteCount();
         char getChar();

@@ -81,9 +81,9 @@ void QuickViewDialog::itemDeleted()
     int i = itemList.removeAll(item);
 
     if (i == 0) { // something is wrong
-        guiHelper->getLogger()->logError(tr("QuickView item not found 0x%1").arg(QString::number((quintptr)item,16)),"QuickView");
+        guiHelper->getLogger()->logError(tr("QuickView item not found 0x%1").arg(QString::number(reinterpret_cast<quintptr>(item),16)),"QuickView");
     } else if (i > 1) { // something is really wrong
-        guiHelper->getLogger()->logError(tr("Multiple QuickView item found 0x%1: %2").arg(QString::number((quintptr)item,16)).arg(i),"QuickView");
+        guiHelper->getLogger()->logError(tr("Multiple QuickView item found 0x%1: %2").arg(QString::number(reinterpret_cast<quintptr>(item),16)).arg(i),"QuickView");
     }
 }
 

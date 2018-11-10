@@ -21,9 +21,9 @@ class PacketSortFilterProxyModel : public QSortFilterProxyModel
         };
 
         explicit PacketSortFilterProxyModel(QObject *parent = nullptr);
-        ~PacketSortFilterProxyModel();
+        ~PacketSortFilterProxyModel() override;
 
-        QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+        QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
         void setPacketSourceModel ( PacketModelAbstract * originalModel );
 
         qint64 getSelectedPacket() const;
@@ -46,11 +46,12 @@ class PacketSortFilterProxyModel : public QSortFilterProxyModel
         void setFilterEngine(FilterEngine *value);
 
     protected:
-        bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
+        bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
     private slots:
         void onModelUpdated();
         void onFitlersUpdated();
     private:
+        Q_DISABLE_COPY(PacketSortFilterProxyModel)
         //        bool lessThan(const QModelIndex & left, const QModelIndex & right) const;
         void emitGlobalDataChanged();
         QSet<int> equalityColumns;
@@ -72,6 +73,8 @@ class SortFilterProxyStateObj : public BaseStateAbstract
         virtual void run();
     protected:
         PacketSortFilterProxyModel *proxyModel;
+    private:
+        Q_DISABLE_COPY(SortFilterProxyStateObj)
 };
 
 #endif // PACKETSORTFILTERPROXYMODEL_H

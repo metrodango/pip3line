@@ -10,8 +10,8 @@ PcapPacket::PcapPacket(QByteArray data) :
 {
     microsec = 0;
     setTimestamp(QDateTime::currentDateTime());
-    originalSize = data.size();
-    capturedSize = data.size();
+    originalSize = static_cast<quint32>(data.size());
+    capturedSize = static_cast<quint32>(data.size());
 }
 quint32 PcapPacket::getTimestampRaw() const
 {
@@ -23,7 +23,7 @@ QDateTime PcapPacket::getTimestamp() const {
     QDateTime val = QDateTime::fromTime_t(timestamp);
 
     // loosing precision here as QDateTime does not go down to microseconds.
-    val = val.addMSecs((qint64) microsec / 1000);
+    val = val.addMSecs(static_cast<qint64>(microsec) / 1000);
     return val;
 }
 
@@ -42,7 +42,7 @@ void PcapPacket::setTimestamp(const QDateTime &value)
         qCritical() << QObject::tr("QDateTime::time().msec() returned an incorrect value: %1 T_T").arg(msec);
         msec = 0;
     }
-    microsec  = (quint32) msec * 1000;
+    microsec  = static_cast<quint32>(msec) * 1000;
 }
 quint32 PcapPacket::getMicrosec() const
 {
@@ -79,7 +79,7 @@ QByteArray PcapPacket::getData() const
 void PcapPacket::setData(const QByteArray &value)
 {
     data = value;
-    originalSize = data.size();
+    originalSize = static_cast<quint32>(data.size());
 }
 
 const QByteArray PcapIO::PCAP_MAGIC_LE = "\xd4\xc3\xb2\xa1";
@@ -417,7 +417,14 @@ bool PcapIO::readByteArray(QByteArray *temp, qint64 length, QString field)
         return false;
     }
 
-    temp->resize(length);
+    if (length < INT_MAX) {
+        temp->resize(static_cast<int>(length));
+    } else {
+        errorString = tr("Invalid pcap file, bytearray: %1").arg(field);
+        qCritical() << "[PcapIO::readByteArray]" << errorString;
+        return false;
+    }
+
 
     qint64 read = file->read(temp->data(), length);
     if (read != length) {
@@ -448,9 +455,9 @@ QByteArray PcapIO::packetToBytes(PcapPacket *packet)
     // data
 
     QByteArray data = packet->getData();
-    if ((quint32)data.size() > maxSnapshotlenght) { // checking if the data is not too large for the current file
+    if (static_cast<quint32>(data.size()) > maxSnapshotlenght) { // checking if the data is not too large for the current file
         qWarning() << "[PcapIO::packetToBytes] Data is larger than the max snapshot size => Truncating.";
-        data = data.mid(0,maxSnapshotlenght);
+        data = data.mid(0,static_cast<qint32>(maxSnapshotlenght));
         packet->setCapturedSize(maxSnapshotlenght);
     }
 
@@ -592,13 +599,13 @@ bool PcapIO::readExistingFile()
         return false;
     }
 
-    if (!PcapDef::LINK_TYPES.contains(temp)) {
+    if (!PcapDef::LINK_TYPES.contains(static_cast<int>(temp))) {
         errorString = tr("Unknown pcap layer type: %1").arg(temp);
         qCritical() << "[PcapIO::readExistingFile]" << errorString;
         return false;
     }
 
-    linkLayerType = (PcapDef::Link_Type)temp;
+    linkLayerType = static_cast<PcapDef::Link_Type>(temp);
 
     qDebug() << QString("Link Layer: %1").arg(PcapDef::LINK_TYPES.value(linkLayerType));
 

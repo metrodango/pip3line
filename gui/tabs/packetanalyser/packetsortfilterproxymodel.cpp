@@ -73,7 +73,7 @@ QVariant PacketSortFilterProxyModel::data(const QModelIndex &index, int role) co
                         if (!areEquals)
                             break;
                     } else {
-                        QVariant selectedv = packetModel->data(packetModel->createIndex((int)selectedPacket, col),Qt::DisplayRole);
+                        QVariant selectedv = packetModel->data(packetModel->createIndex(static_cast<int>(selectedPacket), col),Qt::DisplayRole);
                         QVariant currentv = packetModel->data(packetModel->createIndex(ori.row(),col), Qt::DisplayRole);
                         areEquals = (selectedv.isValid() && currentv.isValid() && selectedv == currentv);
                         if (!areEquals)
@@ -205,7 +205,7 @@ QHash<QString, QString> PacketSortFilterProxyModel::getConfiguration()
     }
 
     ret.insert(GuiConst::STATE_PACKET_PROXY_SORTING_TARGET_COLUMN, QString::number(sortColumn()));
-    ret.insert(GuiConst::STATE_PACKET_PROXY_SORTING_ORDER, QString::number((int)sortOrder()));
+    ret.insert(GuiConst::STATE_PACKET_PROXY_SORTING_ORDER, QString::number(static_cast<int>(sortOrder())));
 
     return ret;
 }
@@ -245,8 +245,8 @@ void PacketSortFilterProxyModel::setConfiguration(const QHash<QString, QString> 
         if (ok && val >= 0) {
             if (conf.contains(GuiConst::STATE_PACKET_PROXY_SORTING_ORDER)) {
                 int order = conf.value(GuiConst::STATE_PACKET_PROXY_SORTING_ORDER).toInt(&ok);
-                if (ok && (order == (int)Qt::AscendingOrder || order == (int)Qt::DescendingOrder)) {
-                    sort(val, (Qt::SortOrder) order);
+                if (ok && (order == static_cast<int>(Qt::AscendingOrder) || order == static_cast<int>(Qt::DescendingOrder))) {
+                    sort(val, static_cast<Qt::SortOrder>(order));
                 }
             }
         }

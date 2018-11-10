@@ -97,7 +97,7 @@ QString TransformAbstract::credits() const
 QHash<QString, QString> TransformAbstract::getConfiguration()
 {
     QHash<QString, QString> propertiesList;
-    propertiesList.insert(PROP_WAY, QString::number((int)wayValue));
+    propertiesList.insert(PROP_WAY, QString::number(static_cast<int>(wayValue)));
     propertiesList.insert(PROP_NAME, name());
     return propertiesList;
 }
@@ -111,7 +111,7 @@ bool TransformAbstract::setConfiguration(QHash<QString, QString> propertiesList)
         ok = false;
     }
     else {
-        wayValue = (Way) val;
+        wayValue = static_cast<Way>(val);
     }
 
     return ok;
@@ -185,7 +185,7 @@ QByteArray TransformAbstract::toPrintableString(const QByteArray &val, bool stri
     QByteArray ret;
     for (int i = 0; i < val.size(); i++) {
         char c = val.at(i);
-        if (isPrintable((quint32)c)) {
+        if (isPrintable(static_cast<qint32>(c))) {
             ret.append(c);
         } else if (strict) {
             ret.append("\\x").append(QByteArray(1,c).toHex());

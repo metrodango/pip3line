@@ -59,7 +59,7 @@ void MicrosoftTimestamp::transform(const QByteArray &input, QByteArray &output)
             quint64 rest = val2 % 10000;
             timestamp.setTimeSpec(Qt::UTC);
             timestamp.setDate(QDate(1601,1,1));
-            timestamp = timestamp.addMSecs(val1 > LONG_MAX ? LONG_MAX : (qint64) val1);
+            timestamp = timestamp.addMSecs(val1 > LONG_MAX ? LONG_MAX : static_cast<qint64>(val1));
             if (tz == TZ_LOCAL)
                 timestamp = timestamp.addMSecs(getTimeZoneOffset());
             output = timestamp.toString(dateFormat).toUtf8();
@@ -80,7 +80,7 @@ void MicrosoftTimestamp::transform(const QByteArray &input, QByteArray &output)
         QByteArray temp = input;
         timestamp.setTimeSpec(Qt::UTC);
         timestamp.setDate(QDate(1601,1,1));
-        val2 = qAbs(timestamp.toMSecsSinceEpoch());
+        val2 = static_cast<quint64>(qAbs(timestamp.toMSecsSinceEpoch()));
         do  {
             timestamp = QDateTime::fromString(QString::fromUtf8(temp,temp.size()), dateFormat);
             timestamp.setTimeSpec(getTimeSpec());
@@ -91,7 +91,7 @@ void MicrosoftTimestamp::transform(const QByteArray &input, QByteArray &output)
             emit error(tr("Cannot parse the input"),id);
             return;
         }
-        val2 = ((val2 + timestamp.toMSecsSinceEpoch()) * 10000) + outNS;
+        val2 = ((val2 + static_cast<quint64>(timestamp.toMSecsSinceEpoch())) * 10000) + static_cast<quint64>(outNS);
 
         output = QByteArray::number(val2);
     }
@@ -139,7 +139,7 @@ bool MicrosoftTimestamp::setConfiguration(QHash<QString, QString> propertiesList
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLTZ),id);
     } else {
-        setTZ((MicrosoftTimestamp::TZ) val);
+        setTZ(static_cast<MicrosoftTimestamp::TZ>(val));
     }
 
     val = propertiesList.value(PROP_ADD_OUT_NS).toInt(&ok);

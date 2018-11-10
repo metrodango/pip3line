@@ -20,7 +20,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
 {
     QByteArray ret;
     char byteRead[1] = { '\0' };
-    int bread = 0;
+    qint64 bread = 0;
     QBuffer buff;
 
     buff.setBuffer(&data);
@@ -46,7 +46,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
         return ret;
     }
 
-    quint8 version = (quint8)byteRead[0];
+    quint8 version = static_cast<quint8>(byteRead[0]);
 
     if (version != 0x05 ) {
         qWarning() << "SOCKS 5 [base] only support version 5";
@@ -59,8 +59,8 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
             qCritical() << "SOCKS cannot read buffer T_T";
             return ret;
         }
-        quint8 auth_method_count = (quint8)byteRead[0];
-        if (data.size() < (int)auth_method_count + 2) {
+        quint8 auth_method_count = static_cast<quint8>(byteRead[0]);
+        if (data.size() < static_cast<int>(auth_method_count) + 2) {
             qWarning() << "SOCKS 5 [init] connection invalid (auth_method_count)";
         } else if (auth_method_count < 5) {
             bread = buff.read(byteRead, 1);
@@ -68,20 +68,20 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
                 qCritical() << "SOCKS 5 [init] cannot read auth_choosen buffer T_T";
                 return ret;
             }
-            quint8 auth_choosen = (quint8)byteRead[0];
+            quint8 auth_choosen = static_cast<quint8>(byteRead[0]);
             for (quint8 i = 1; i < auth_method_count ; i++) {
                 bread = buff.read(byteRead, 1);
                 if (bread != 1) {
                     qCritical() << "SOCKS 5 [init] cannot read auth_choosen buffer T_T";
                     return ret;
                 }
-                quint8 value = (quint8)byteRead[0];
+                quint8 value = static_cast<quint8>(byteRead[0]);
                 qDebug() << QString("SOCKS 5: [auth method requested] 0x%1").arg(QString::number(auth_choosen,16));
                 if (value < auth_choosen) {
                     auth_choosen = value;
                 }
             }
-            ret[1] = (char)auth_choosen;
+            ret[1] = static_cast<char>(auth_choosen);
             if (auth_choosen == 0)
                 connectionState = AUTHENTICATED;
             else
@@ -104,7 +104,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
                 connectionState = REJECTED;
                 return ret;
             }
-            quint8 type = (quint8) byteRead[0];
+            quint8 type = static_cast<quint8>(byteRead[0]);
             if (type == 1) { // TCP stream, we're good
                 ret[1] = '\00';
                 ret.append('\00'); //reserved
@@ -114,9 +114,9 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
                     connectionState = REJECTED;
                     return ret;
                 }
-                quint8 reserved = (quint8)byteRead[0];
+                quint8 reserved = static_cast<quint8>(byteRead[0]);
                 if (reserved != '\x00') {
-                    qWarning() << "SOCKS 5 [setup] weird the reserved field is not null: " << (quint8)data.at(2) ;
+                    qWarning() << "SOCKS 5 [setup] weird the reserved field is not null: " << static_cast<quint8>(data.at(2)) ;
                 }
 
                 bread = buff.read(byteRead, 1);
@@ -125,7 +125,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
                     connectionState = REJECTED;
                     return ret;
                 }
-                quint8 addr_type = (quint8)byteRead[0];
+                quint8 addr_type = static_cast<quint8>(byteRead[0]);
                 QByteArray addr_data;
                 if (addr_type == 1) { // IPv4
                     addr_data.resize(sizeof(quint32)); // 4 bytes for IPv4 (surprisingly)
@@ -146,7 +146,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
                         connectionState = REJECTED;
                         return ret;
                     }
-                    quint8 nameSize = (quint8)byteRead[0];
+                    quint8 nameSize = static_cast<quint8>(byteRead[0]);
                     addr_data.resize(nameSize); // does not really matter if this is zero
                     bread = buff.read(addr_data.data(), nameSize);
                     if (bread != nameSize) {

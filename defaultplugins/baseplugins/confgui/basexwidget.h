@@ -23,7 +23,7 @@ class BaseXWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit BaseXWidget(BaseX *transform, QWidget *parent = 0);
+        explicit BaseXWidget(BaseX *transform, QWidget *parent = nullptr);
         ~BaseXWidget();
     public slots:
         void onBaseChanged(int val);

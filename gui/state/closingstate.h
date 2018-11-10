@@ -29,6 +29,7 @@ class ClosingState : public BaseStateAbstract
         virtual ~ClosingState();
         virtual void run();
     private:
+        Q_DISABLE_COPY(ClosingState)
         QString closingTokenExpected;
 };
 

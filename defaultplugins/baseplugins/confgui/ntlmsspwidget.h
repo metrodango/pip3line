@@ -23,7 +23,7 @@ class NtlmsspWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit NtlmsspWidget(Ntlmssp * transform, QWidget *parent = 0);
+        explicit NtlmsspWidget(Ntlmssp * transform, QWidget *parent = nullptr);
         ~NtlmsspWidget();
     private:
         Ui::NtlmsspWidget *ui;

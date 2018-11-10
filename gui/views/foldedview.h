@@ -15,7 +15,7 @@ class FoldedView : public QFrame
         Q_OBJECT
 
     public:
-        explicit FoldedView(TransformWidget * transformWidget, QWidget *parent = 0);
+        explicit FoldedView(TransformWidget * transformWidget, QWidget *parent = nullptr);
         ~FoldedView();
         TransformWidget *getTransformWidget() const;
         void enableDelete(bool enable);
@@ -24,6 +24,7 @@ class FoldedView : public QFrame
         void deleteRequested();
         void indertRequested();
     private:
+        Q_DISABLE_COPY(FoldedView)
         void mouseDoubleClickEvent(QMouseEvent * event);
         Ui::FoldedView *ui;
         TransformWidget * transformWidget;

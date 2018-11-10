@@ -23,7 +23,7 @@ class HtmlWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit HtmlWidget(Html *ntransform, QWidget *parent = 0);
+        explicit HtmlWidget(Html *ntransform, QWidget *parent = nullptr);
         ~HtmlWidget();
     private:
         Ui::HtmlWidget *ui;

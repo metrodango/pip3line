@@ -28,7 +28,7 @@ BaseBlockSourceWidget::BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent) 
         ui->reflexionCheckBox->setVisible(false);
     }
 
-    ui->tlsCheckBox->setChecked(bsource->isTLSEnable());
+    ui->tlsCheckBox->setChecked(bsource->isTLSEnabled());
 
     if (bsource->getFlags() & BlocksSource::TLS_OPTIONS) {
         connect(ui->tlsCheckBox, &QCheckBox::toggled, bsource, &BlocksSource::setTlsEnable);

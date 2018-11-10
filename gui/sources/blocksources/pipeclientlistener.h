@@ -20,7 +20,7 @@ class PipeClientListener : public BlocksSource
         QString getDescription();
         bool isStarted();
         QHash<QString, QString> getConfiguration();
-        void setConfiguration(QHash<QString, QString> conf);
+        void setConfiguration(const  QHash<QString, QString> &conf);
         QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
     public slots:
         void sendBlock(Block * block);
@@ -33,6 +33,7 @@ class PipeClientListener : public BlocksSource
         void onSocketError(QLocalSocket::LocalSocketError socketError);
         void onClientDeconnection();
     private:
+        Q_DISABLE_COPY(PipeClientListener)
         virtual QWidget *requestGui(QWidget * parent = nullptr);
         void internalUpdateConnectionsInfo();
         QString pipeName;

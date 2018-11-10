@@ -23,9 +23,11 @@ class NameValidator : public QValidator
 {
         Q_OBJECT
     public:
-        explicit NameValidator(QObject *parent = Q_NULLPTR);
+        explicit NameValidator(QObject *parent = nullptr);
         ~NameValidator();
         QValidator::State validate(QString &input, int &pos) const;
+    private:
+        Q_DISABLE_COPY(NameValidator)
 };
 
 class CIDValidator : public QValidator
@@ -35,6 +37,8 @@ class CIDValidator : public QValidator
         explicit CIDValidator(QObject *parent = Q_NULLPTR);
         ~CIDValidator();
         QValidator::State validate(QString &input, int &pos) const;
+    private:
+        Q_DISABLE_COPY(CIDValidator)
 };
 
 class FilterDialog : public QDialog
@@ -42,7 +46,7 @@ class FilterDialog : public QDialog
         Q_OBJECT
 
     public:
-        explicit FilterDialog(PacketSortFilterProxyModel *sortFilterProxyModel, QWidget *parent = 0);
+        explicit FilterDialog(PacketSortFilterProxyModel *sortFilterProxyModel, QWidget *parent = nullptr);
         ~FilterDialog();
     public slots:
         void updatedList();
@@ -57,6 +61,7 @@ class FilterDialog : public QDialog
         void onColumnsUpdated();
         void onColumnSelected(int index);
     private:
+        Q_DISABLE_COPY(FilterDialog)
         void initUi();
         QSharedPointer<FilterItem> getCurrentConfItem();
         bool eventFilter(QObject *obj, QEvent *event);

@@ -13,13 +13,14 @@ class StateStatusWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit StateStatusWidget(QWidget *parent = 0);
+        explicit StateStatusWidget(QWidget *parent = nullptr);
         ~StateStatusWidget();
     public slots:
         void log(QString, QString, Pip3lineConst::LOGLEVEL);
         void update();
         void setMessage(QString message);
     private:
+        Q_DISABLE_COPY(StateStatusWidget)
         Ui::StateStatusWidget *ui;
 };
 

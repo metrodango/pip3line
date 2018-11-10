@@ -40,7 +40,7 @@ class GenericTab : public TabAbstract
         Q_OBJECT
     public:
 
-        explicit GenericTab(ByteSourceAbstract *bytesource, GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit GenericTab(ByteSourceAbstract *bytesource, GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~GenericTab();
         void loadFromFile(QString fileName);
         int getBlockCount() const;
@@ -62,7 +62,6 @@ class GenericTab : public TabAbstract
         void onHistoryForward();
         void onDeleteTab(int index);
         void onNewTabRequested();
-
     private:
         Q_DISABLE_COPY(GenericTab)
         bool eventFilter(QObject *receiver, QEvent *event);
@@ -97,6 +96,8 @@ class GenericTabStateObj : public TabStateObj
         explicit GenericTabStateObj(GenericTab *tab);
         ~GenericTabStateObj();
         void run();
+    private:
+        Q_DISABLE_COPY(GenericTabStateObj)
 };
 
 class GenericTabClosingStateObj : public BaseStateAbstract
@@ -113,6 +114,8 @@ class GenericTabClosingStateObj : public BaseStateAbstract
         GenericTab *tab;
         int scrollIndex;
         int currentIndex;
+    private:
+        Q_DISABLE_COPY(GenericTabClosingStateObj)
 };
 
 #endif // GENERICTAB_H

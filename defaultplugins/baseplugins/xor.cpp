@@ -65,7 +65,7 @@ bool Xor::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLXORALGORITHM),id);
     } else {
-        setType((Xor::Type)val);
+        setType(static_cast<Xor::Type>(val));
     }
 
     setKey(QByteArray::fromBase64(propertiesList.value(XMLKEY).toUtf8()));

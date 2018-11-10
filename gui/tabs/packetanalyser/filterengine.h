@@ -30,6 +30,8 @@ class BasicToken
     protected:
         TokenType type;
         QSharedPointer<BasicToken> parent;
+    private:
+        Q_DISABLE_COPY(BasicToken)
 };
 
 class BinaryOperator : public BasicToken
@@ -51,6 +53,7 @@ class BinaryOperator : public BasicToken
         bool evaluate(QSharedPointer<Packet> packet);
         QString toStr();
     private:
+        Q_DISABLE_COPY(BinaryOperator)
         BinaryOps op;
         QSharedPointer<BasicToken> loperand;
         QSharedPointer<BasicToken> roperand;
@@ -65,6 +68,7 @@ class NotOperator : public BasicToken
         void setOperand(QSharedPointer<BasicToken> value);
         QSharedPointer<BasicToken> getUoperand() const;
     private:
+        Q_DISABLE_COPY(NotOperator)
         QSharedPointer<BasicToken> uoperand;
 };
 
@@ -77,6 +81,7 @@ class Operand : public BasicToken
         QSharedPointer<FilterItem> getFitem() const;
         QString toStr();
     private:
+        Q_DISABLE_COPY(Operand)
         QSharedPointer<FilterItem> fitem;
 };
 
@@ -92,6 +97,7 @@ class Parenthesis : public BasicToken
         QSharedPointer<BasicToken> getChild() const;
         void setChild(QSharedPointer<BasicToken> value);
     private:
+        Q_DISABLE_COPY(Parenthesis)
         QSharedPointer<BasicToken> child;
 };
 
@@ -111,6 +117,7 @@ class FilterEngine : public QObject
     signals:
         void updated();
     private:
+        Q_DISABLE_COPY(FilterEngine)
         QSharedPointer<BasicToken> buildTree(QList<QSharedPointer<BasicToken>> tokens);
         bool consolidateStacks(QStack<QSharedPointer<BasicToken> > &operands, QStack<QSharedPointer<BasicToken> > &operators);
         void debugprintstrlist(QStringList list);

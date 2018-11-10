@@ -13,7 +13,7 @@ class NewViewMenu : public QMenu
 {
         Q_OBJECT
     public:
-        explicit NewViewMenu(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit NewViewMenu(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~NewViewMenu();
         SingleViewAbstract *getView(ByteSourceAbstract *bytesource, QWidget *parent);
         TabAbstract::ViewTab getTabData() const;
@@ -23,6 +23,7 @@ class NewViewMenu : public QMenu
     private slots:
         void onNewViewTab(QAction * action);
     private:
+        Q_DISABLE_COPY(NewViewMenu)
         QAction * newHexViewAction;
         QAction * newTextViewAction;
         QAction * newDefaultTextViewAction;

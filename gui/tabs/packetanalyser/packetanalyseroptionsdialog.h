@@ -35,7 +35,7 @@ class ColumnModel : public QAbstractTableModel
                              PacketModelAbstract *mainModel,
                              PacketSortFilterProxyModel *proxyModel,
                              QTableView *tableView,
-                             QObject *parent = 0);
+                             QObject *parent = nullptr);
         ~ColumnModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -47,7 +47,7 @@ class ColumnModel : public QAbstractTableModel
     public slots:
         void onColumnsUpdated();
     private:
-
+        Q_DISABLE_COPY(ColumnModel)
         static const QStringList colNames;
         GuiHelper *guiHelper;
         PacketModelAbstract *mainModel;
@@ -64,7 +64,7 @@ class PacketAnalyserOptionsDialog : public QDialog
                                              PacketModelAbstract *mainModel,
                                              PacketSortFilterProxyModel *proxyModel,
                                              QTableView *tableView,
-                                             QWidget *parent = 0);
+                                             QWidget *parent = nullptr);
         ~PacketAnalyserOptionsDialog();
     private slots:
         void onItemSelected(QItemSelection index);
@@ -80,8 +80,8 @@ class PacketAnalyserOptionsDialog : public QDialog
     signals:
         void setEqualityColumn(int index, bool equalityOps);
     private:
+        Q_DISABLE_COPY(PacketAnalyserOptionsDialog)
         void setFormatVisible(bool visible, Pip3lineConst::OutputFormat format = Pip3lineConst::TEXTFORMAT);
-
         PacketModelAbstract *mainModel;
         PacketSortFilterProxyModel *proxyModel;
         QTableView *tableView;

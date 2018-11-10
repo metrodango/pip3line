@@ -106,7 +106,7 @@ void SubstitutionWidget::on_importPushButton_clicked()
 SubstitutionTables::SubstitutionTables(): highlight(S_ARRAY_SIZE)
 {
     for (quint16 i = 0; i < S_ARRAY_SIZE; i++) {
-        array.append((char)i);
+        array.append(static_cast<char>(i));
         highlight[i] = false;
     }
 }
@@ -147,7 +147,6 @@ QVariant SubstitutionTables::data(const QModelIndex &index, int role) const
             else
                 return QVariant(QColor(Qt::white));
         }
-            break;
     }
     return QVariant();
 }
@@ -157,10 +156,10 @@ bool SubstitutionTables::setData(const QModelIndex &index, const QVariant &value
     if (index.isValid() && role == Qt::EditRole) {
         QByteArray hexVal = QByteArray::fromHex(value.toByteArray());
 
-        quint32 pos = S_TABLE_SIZE * index.row() + index.column();
-        if (pos <  (quint32)S_ARRAY_SIZE) {
+        quint32 pos = static_cast<quint32>(S_TABLE_SIZE) * static_cast<quint32>(index.row()) + static_cast<quint32>(index.column());
+        if (pos <  static_cast<quint32>(S_ARRAY_SIZE)) {
             if (hexVal.isEmpty())
-                array[pos] = (char)pos;
+                array[pos] = static_cast<char>(pos);
             else
                 array[pos] = hexVal.at(0);
             highlighting();

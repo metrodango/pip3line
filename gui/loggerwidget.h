@@ -26,7 +26,7 @@ class LoggerWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit LoggerWidget(QWidget *parent = 0);
+        explicit LoggerWidget(QWidget *parent = nullptr);
         ~LoggerWidget();
         void showEvent ( QShowEvent * event );
         bool hasUncheckedError() const;
@@ -37,7 +37,7 @@ class LoggerWidget : public QWidget
         void logError(const QString &message, const QString &source = QString());
         void logWarning(const QString &message,const QString &source = QString());
         void logStatus(const QString &message,const QString &source = QString());
-        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::LSTATUS);
+        void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::PLSTATUS);
     private:
         Q_DISABLE_COPY(LoggerWidget)
         void addMessage(const QString &message, const QString &source, Pip3lineConst::LOGLEVEL level);

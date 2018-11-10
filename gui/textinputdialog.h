@@ -23,7 +23,7 @@ class TextInputDialog : public QDialog
         Q_OBJECT
         
     public:
-        explicit TextInputDialog(QWidget *parent = 0);
+        explicit TextInputDialog(QWidget *parent = nullptr);
         ~TextInputDialog();
         void setTextLabel(QString text);
         void setPixLabel(QPixmap pix);

@@ -25,10 +25,12 @@ class SourcesOrchestatorAbstract : public QObject
             BLOCKS_EXTERNAL_PROXY_TCP = 7,
             BLOCKS_EXTERNAL_PROXY_UDP = 8,
             SOCKS5_PROXY = 9,
-            PIPE_CLIENT = 10
+            PIPE_CLIENT = 10,
+            MYO_PROXY = 11,
+            SHARED_MEM = 12
         };
 
-        explicit SourcesOrchestatorAbstract(QObject *parent = 0);
+        explicit SourcesOrchestatorAbstract(QObject *parent = nullptr);
         virtual ~SourcesOrchestatorAbstract();
         bool isForwarder() const;
         QString getName() const;
@@ -45,6 +47,7 @@ class SourcesOrchestatorAbstract : public QObject
         bool getHasDirection() const;
         virtual QHash<QString, QString> getConfiguration();
         virtual void setConfiguration(QHash<QString, QString> conf);
+        virtual bool isTrackingChanges();
     public slots:
         virtual void postPacket(QSharedPointer<Packet> packet);
         virtual bool start();
@@ -81,6 +84,7 @@ class SourcesOrchestatorAbstract : public QObject
         QWidget *controlGui{nullptr};
         OrchestratorType type;
     private:
+        Q_DISABLE_COPY(SourcesOrchestatorAbstract)
         static QStringList initSourcesStrings();
 };
 

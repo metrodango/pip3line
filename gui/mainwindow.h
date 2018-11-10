@@ -53,7 +53,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
     public:
-        explicit MainWindow(bool debug = false, QWidget *parent = 0);
+        explicit MainWindow(bool debug = false, QWidget *parent = nullptr);
         ~MainWindow();
         void loadFile(QString fileName);
 
@@ -93,6 +93,7 @@ class MainWindow : public QMainWindow
         void onDebugDestroyed();
         void onNewAction(QAction * action);
         void onNewDefault(QByteArray initialData = QByteArray());
+        void onNewHexeditor(const QByteArray &initialData = QByteArray());
         void showWindow();
         void onExternalBlockReceived(Block *block);
         void onSaveState();
@@ -170,6 +171,7 @@ class MainWinStateObj : public BaseStateAbstract
         ~MainWinStateObj();
         void run();
     private:
+        Q_DISABLE_COPY(MainWinStateObj)
         MainWindow *mwin;
         static const QString NAME;
 };
@@ -185,6 +187,7 @@ class GlobalConfStateObj : public BaseStateAbstract
     signals:
         void settingsUpdated();
     private :
+        Q_DISABLE_COPY(GlobalConfStateObj)
         TransformMgmt *transformMgmt;
 };
 
@@ -196,6 +199,7 @@ class ClearAllStateObj : public BaseStateAbstract
         ~ClearAllStateObj();
         void run();
     private :
+        Q_DISABLE_COPY(ClearAllStateObj)
         MainWindow *mwin;
 };
 

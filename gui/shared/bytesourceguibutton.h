@@ -23,7 +23,7 @@ class ByteSourceGuiButton : public QPushButton
 {
         Q_OBJECT
     public:
-        explicit ByteSourceGuiButton(ByteSourceAbstract *bytesource,GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit ByteSourceGuiButton(ByteSourceAbstract *bytesource,GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~ByteSourceGuiButton();
 
     public slots:
@@ -34,6 +34,7 @@ class ByteSourceGuiButton : public QPushButton
         void onToggle(bool val);
         void onGuiHiding();
     private:
+        Q_DISABLE_COPY(ByteSourceGuiButton)
         ByteSourceAbstract *byteSource;
         GuiHelper *guiHelper;
         QWidget * gui;

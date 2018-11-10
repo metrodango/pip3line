@@ -23,7 +23,7 @@ class HMACTransformWidget : public QWidget
 {
         Q_OBJECT
     public:
-        explicit HMACTransformWidget(HMACTransform *transform, QWidget *parent = 0);
+        explicit HMACTransformWidget(HMACTransform *transform, QWidget *parent = nullptr);
         ~HMACTransformWidget();
     public slots:
         void onHashChanged(int val);

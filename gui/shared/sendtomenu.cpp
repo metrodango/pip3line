@@ -18,6 +18,11 @@ SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
         qFatal("Cannot allocate memory for sendToNewTabAction X{");
     }
 
+    sendToNewHexEditorAction = new(std::nothrow) QAction("Send to New Hex Editor", nullptr);
+    if (sendToNewHexEditorAction == nullptr) {
+        qFatal("Cannot allocate memory for sendToNewHexEditorAction X{");
+    }
+
     update();
 
     connect(guiHelper, &GuiHelper::tabsUpdated, this, &SendToMenu::update,Qt::QueuedConnection);
@@ -28,7 +33,7 @@ SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
 SendToMenu::~SendToMenu()
 {
     delete sendToNewTabAction;
-
+    delete sendToNewHexEditorAction;
 }
 
 void SendToMenu::update()
@@ -45,6 +50,7 @@ void SendToMenu::update()
     sendToBlockSourceMapping.clear();
     sendToOrchestratorMapping.clear();
     addAction(sendToNewTabAction);
+    addAction(sendToNewHexEditorAction);
 
     QList<TabAbstract *> list = guiHelper->getTabs();
     addSeparator();
@@ -56,7 +62,6 @@ void SendToMenu::update()
                     action = new(std::nothrow) QAction(tab->getName().trimmed(),this);
                     if (action == nullptr) {
                         qFatal("Cannot allocate memory for action updateSendToMenu X{");
-                        return;
                     }
                     sendToTabMapping.insert(action, tab);
                     addAction(action);
@@ -79,7 +84,6 @@ void SendToMenu::update()
                 action = new(std::nothrow) QAction(single.getDescription(),this);
                 if (action == nullptr) {
                     qFatal("Cannot allocate memory for action updateSendToMenu X{");
-                    return;
                 }
 
                 sendToBlockSourceMapping.insert(action,single);
@@ -88,14 +92,12 @@ void SendToMenu::update()
                 QMenu * newMenu = new(std::nothrow) QMenu(bs->getName(),this);
                 if (newMenu == nullptr) {
                     qFatal("Cannot allocate memory for QMenu Orchestrator X{");
-                    return;
                 }
 
                 for (int i = 0; i < conns.size(); i++) {
                     action = new(std::nothrow) QAction(conns.at(i).getDescription(),this);
                     if (action == nullptr) {
                         qFatal("Cannot allocate memory for action updateSendToMenu X{");
-                        return;
                     }
 
                     sendToBlockSourceMapping.insert(action,conns.at(i));
@@ -120,14 +122,12 @@ void SendToMenu::update()
             QMenu * newMenu = new(std::nothrow) QMenu(orch->getName(),this);
             if (newMenu == nullptr) {
                 qFatal("Cannot allocate memory for QMenu Orchestrator X{");
-                return;
             }
 
             for (int i = 0; i < conns.size(); i++) {
                 action = new(std::nothrow) QAction(conns.at(i).getDescription(),this);
                 if (action == nullptr) {
                     qFatal("Cannot allocate memory for action updateSendToMenu X{");
-                    return;
                 }
 
                 sendToOrchestratorMapping.insert(action,conns.at(i));
@@ -148,6 +148,8 @@ void SendToMenu::processingAction(QAction *action, const QByteArray &data)
 {
     if (action == sendToNewTabAction) {
         guiHelper->sendToNewTab(data);
+    } else if (action == sendToNewHexEditorAction) {
+        guiHelper->sendToNewHexEditor(data);
     } else {
         if (sendToTabMapping.contains(action)) {
             TabAbstract * tg = sendToTabMapping.value(action);

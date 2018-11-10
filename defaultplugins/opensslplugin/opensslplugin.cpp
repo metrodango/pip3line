@@ -18,12 +18,8 @@ Released under AGPL see LICENSE for more information
 #include <openssl/evp.h>
 #include <openssl/crypto.h>
 
-#if QT_VERSION >= 0x050000
 const QStringList OpensslPlugin::blacklistHash = QStringList() << "ecdsa-with-SHA1" << "DSA" << "DSA-SHA" << "MD5" << "MD4" << "SHA1" << "SHA"
                                                                << "SHA224" << "SHA256" << "SHA384" << "SHA512";
-#else
-const QStringList OpensslPlugin::blacklistHash = QStringList() << "ecdsa-with-SHA1" << "DSA" << "DSA-SHA" << "MD5" << "MD4" << "SHA1" << "SHA";
-#endif
 QMutex OpensslPlugin::hashListLocker;
 
 extern "C" {
@@ -55,7 +51,7 @@ OpensslPlugin::OpensslPlugin()
     hashListLocker.lock();
     if (OpenSSLHashes::hashList.isEmpty()) {
         OpenSSL_add_all_digests();
-        EVP_MD_do_all_sorted(list_md_fn_OpenSSLHashes, 0);
+        EVP_MD_do_all_sorted(list_md_fn_OpenSSLHashes, nullptr);
     }
     hashListLocker.unlock();
     gui = nullptr;
@@ -120,7 +116,6 @@ QWidget *OpensslPlugin::getConfGui(QWidget * /* parent */)
         QLabel * label = new(std::nothrow) QLabel(info);
         if (label == nullptr) {
             qFatal("Cannot allocate memory for QLabel (openssl gui) X{");
-            return nullptr;
         }
         label->setWordWrap(true);
         gui = label;

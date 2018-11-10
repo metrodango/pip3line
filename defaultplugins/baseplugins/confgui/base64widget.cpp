@@ -63,7 +63,7 @@ void Base64Widget::onChangeVariant(int variant) {
     ui->netPaddingRadioButton->blockSignals(true);
     ui->noPaddingRadioButton->blockSignals(true);
 
-    transform->setChoosenVariation((Base64::Variation) variant);
+    transform->setChoosenVariation(static_cast<Base64::Variation>(variant));
     if (variant != Base64::CUSTOM) {
         if (variant == Base64::STANDARD) {
             ui->inclPaddingRadioButton->setChecked(true);

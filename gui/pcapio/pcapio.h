@@ -32,6 +32,7 @@ public:
     void setData(const QByteArray &value);
 
     private:
+    Q_DISABLE_COPY(PcapPacket)
     quint32 timestamp;
     quint32 microsec;
     quint32 originalSize;
@@ -47,8 +48,8 @@ class PcapIO : public QObject
     public:
         static const QByteArray PCAP_MAGIC_LE;
         static const QByteArray PCAP_MAGIC_BE;
-        explicit PcapIO(QString filename = QString(), QObject *parent = 0);
-        explicit PcapIO(QIODevice * device, QObject *parent = 0);
+        explicit PcapIO(QString filename = QString(), QObject *parent = nullptr);
+        explicit PcapIO(QIODevice * device, QObject *parent = nullptr);
         ~PcapIO();
         bool openExistingFile(QIODevice::OpenModeFlag mode);
         bool createAndOpenFile();
@@ -81,6 +82,7 @@ class PcapIO : public QObject
         QString getErrorString() const;
 
     private:
+        Q_DISABLE_COPY(PcapIO)
         static  QHash<int, QString> initTypeList();
         void initAttributes();
         bool readUInt32(quint32 *temp, QString field = QString("Unknown"));

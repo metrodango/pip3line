@@ -326,7 +326,7 @@ CurrentMemorysource::CurrentMemorysource(QObject *parent) :
 
     refreshTimer.start(intervalMSec);
 
-    quintptr pwritedata = (quintptr)this;
+    quintptr pwritedata = reinterpret_cast<quintptr>(this);
     setStartingOffset(pwritedata);
 //    qDebug() << "writeData" << QString::number((quintptr)&writeData,16);
 //    qDebug() << "memcpy" << QString::number((quintptr)&memcpy,16);
@@ -391,8 +391,8 @@ void CurrentMemorysource::mapMemory()
         if (entries.size() > 6) {
 
             QList<QByteArray> range = entries.at(0).split('-');
-            QSharedPointer<MemRange> memrange(new(std::nothrow) MemRange(range.at(0).toULongLong(0,16),
-                                                                         range.at(1).toULongLong(0,16) - 1,
+            QSharedPointer<MemRange> memrange(new(std::nothrow) MemRange(range.at(0).toULongLong(nullptr,16),
+                                                                         range.at(1).toULongLong(nullptr,16) - 1,
                                                                          QString::fromUtf8(entries.last())));
             if (memrange == nullptr) {
                 qFatal("Cannot allocate memory for MemRange X{");
@@ -526,30 +526,30 @@ bool CurrentMemorysource::tryMoveView(int sizeToMove)
     if (sizeToMove < 0) {
         if (currentStartingOffset == 0)
             return false; // already at the beginning, nothing to see here
-        if (currentStartingOffset < (quint64)(-1 * sizeToMove)) { // checking how much we can go up
+        if (currentStartingOffset < static_cast<quint64>(-1 * sizeToMove)) { // checking how much we can go up
             newOffset = 0;
         } else {
-            newOffset = currentStartingOffset + sizeToMove;
+            newOffset = currentStartingOffset + static_cast<quint64>(sizeToMove);
         }
 
     } else {
-        if (ULLONG_MAX - (quint64)sizeToMove - (quint64)chunksize< currentStartingOffset)
+        if (ULLONG_MAX - static_cast<quint64>(sizeToMove) - static_cast<quint64>(chunksize)< currentStartingOffset)
             return false; // checking overflow
 
-        if (currentStartingOffset + (quint64)sizeToMove + (quint64)chunksize > upperBound) {
+        if (currentStartingOffset + static_cast<quint64>(sizeToMove) + static_cast<quint64>(chunksize) > upperBound) {
             return false; // no more data
         }
 
-        newOffset = currentStartingOffset + sizeToMove;
+        newOffset = currentStartingOffset + static_cast<quint64>(sizeToMove);
     }
 
     if (!isOffsetValid(newOffset))
         return false; // just return if the offset is not accessible
 
-    if (!isOffsetValid(newOffset +  chunksize - 1))
+    if (!isOffsetValid(newOffset +  static_cast<quint64>(chunksize) - 1))
         return false; // just return if the offset is not accessible
 
-    int readsize = qMin(upperBound - newOffset,(quint64)chunksize);
+    int readsize = static_cast<int>(qMin(upperBound - newOffset,static_cast<quint64>(chunksize)));
     QByteArray temp;
     if (!readData(newOffset, temp,readsize)) {
         return false;
@@ -581,12 +581,12 @@ bool CurrentMemorysource::setStartingOffset(quint64 offset)
             quint64 newOffset = offset;
             quint64 segupper = currentRange->getUpperVal() + 1;
 
-            if (segupper - newOffset < (quint64)chunksize) { // if the data size between offset and the end is inferior to chunksize
-                newOffset = segupper - (quint64)chunksize; // then starting offset is put back
+            if (segupper - newOffset < static_cast<quint64>(chunksize)) { // if the data size between offset and the end is inferior to chunksize
+                newOffset = segupper - static_cast<quint64>(chunksize); // then starting offset is put back
             }
 
             if (newOffset % 16 != 0) { // aligning on a 16 bytes boundary
-                newOffset = newOffset - newOffset % 16 + (offset >= newOffset + chunksize ? 16 : 0);
+                newOffset = newOffset - newOffset % 16 + (offset >= newOffset + static_cast<quint64>(chunksize) ? 16 : 0);
             }
             if (readData(newOffset,temp,chunksize)) {
                 dataChunk = temp;
@@ -624,8 +624,8 @@ bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
         if (curRange->isInRange(offset)) {
             if (curRange->isRead()) {
                 valid = true;
-                if (!curRange->isInRange(offset + size - 1)) {
-                    size = curRange->getUpperVal() - offset;
+                if (!curRange->isInRange(offset + static_cast<quint64>(size) - 1)) {
+                    size = static_cast<int>(curRange->getUpperVal() - offset);
                 }
             } else {
                 qDebug() << "not readable" << offset;
@@ -651,7 +651,7 @@ bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
         return false;
     }
 
-    ssize_t ret2 = write(pipefd[1],(void *)offset,size);
+    ssize_t ret2 = write(pipefd[1],reinterpret_cast<void *>(offset),static_cast<size_t>(size));
     if (ret2 < 0 && errno != 0) {
         emit log(tr("Cannot access the address 0x%1 for reading [%1]").arg(errorString(errno)),metaObject()->className(), Pip3lineConst::LERROR);
         close(pipefd[0]);
@@ -659,16 +659,16 @@ bool CurrentMemorysource::readData(quint64 offset, QByteArray &data, int size)
         return false;
     } else if (ret2 < size) {
         emit log(tr("Could only read %1 bytes from 0x%2").arg(ret2).arg(QString::number(offset,16)),metaObject()->className(), Pip3lineConst::LERROR);
-        size = ret2;
+        size = static_cast<int>(ret2);
     }
 
     close(pipefd[0]);
     close(pipefd[1]);
 #endif
     data.resize(size);
-    void *dest = memcpy(data.data(), (void *)offset, size);
+    void *dest = memcpy(data.data(), reinterpret_cast<void *>(offset), static_cast<size_t>(size));
 
-    if (dest != (void *)data.data()) {
+    if (dest != reinterpret_cast<void *>(data.data())) {
         emit log(tr("Uuuh??"),metaObject()->className(), Pip3lineConst::LERROR);
     }
 
@@ -690,10 +690,10 @@ bool CurrentMemorysource::writeData(quint64 offset, int length,  const QByteArra
         if (curRange->isInRange(offset)) {
             if (curRange->isWrite()) {
                 valid = true;
-                if (!curRange->isInRange(offset + length - 1)) {
-                    length = curRange->getUpperVal() - offset;
+                if (!curRange->isInRange(offset + static_cast<quint64>(length) - 1)) {
+                    length = static_cast<int>(curRange->getUpperVal() - offset);
 #ifdef Q_OS_UNIX
-                    memcpy((void *)&offset,(void *)data.data(), length);
+                    memcpy(reinterpret_cast<void *>(&offset),reinterpret_cast<const void *>(data.data()), static_cast<quint64>(length));
                     emit updated(source);
 #elif defined(Q_OS_WIN)
                     qCritical() << tr("writeData not implemented") << data.size() << source;
@@ -734,8 +734,7 @@ QString CurrentMemorysource::errorString(int errnoVal)
     default:
         return QString("Unmanaged [%1]").arg(errnoVal);
     }
-
-#endif
-
+#else
     return QString("Unmanaged [%1]").arg(errnoVal);
+#endif
 }

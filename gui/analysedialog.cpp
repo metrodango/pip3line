@@ -197,7 +197,7 @@ void AnalyseDialog::charFrequencyAnalysis()
     QList<ulong> vals = QList<ulong>::fromSet(charAnalysis.values().toSet());
     std::sort(vals.begin(),vals.end(), std::greater<ulong>());
     for (int i = 0; i < vals.size(); i++) {
-        double percent = ((double)vals.at(i) * 100) / (double)totalChar;
+        double percent = (static_cast<double>(vals.at(i)) * 100) / double(totalChar);
         QList<QChar> list = charAnalysis.keys(vals.at(i));
         for (int j = 0; j < list.size(); j++)
             mess.append(QString("    \'%1\': %2 (%3%)\n").arg(list.at(j)).arg(vals.at(i)).arg(percent));

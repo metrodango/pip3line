@@ -46,7 +46,7 @@ class SubstitutionWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit SubstitutionWidget(Substitution * transform, QWidget *parent = 0);
+        explicit SubstitutionWidget(Substitution * transform, QWidget *parent = nullptr);
         ~SubstitutionWidget();
     private slots:
         void onModify();

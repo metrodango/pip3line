@@ -77,7 +77,6 @@ QWidget *DistormPlugin::getConfGui(QWidget *)
         QLabel * label = new(std::nothrow) QLabel(info);
         if (label == nullptr) {
             qFatal("Cannot allocate memory for QLabel (diStorm gui) X{");
-            return nullptr;
         }
         label->setWordWrap(true);
         label->setAlignment(Qt::AlignCenter | Qt::AlignHCenter);

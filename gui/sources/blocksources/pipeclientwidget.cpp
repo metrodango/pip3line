@@ -269,9 +269,8 @@ void PipesModel::refresh()
         pp.path = fdi.baseName();
         pipesList.append(pp);
     }
-    qCritical() << tr("[PipesModel::refresh] Not implemented on Windows platform");
 #elif defined(Q_OS_OSX)
-    qCritical() << tr("[PipesModel::refresh] Not implemented on Mac platform");
+    qCritical() << tr("[PipesModel::refresh] Not implemented on Mac platform, if someone knows how to get the global list if UNIX socket on OSX, please give me a shout.");
 #endif
     endResetModel();
 }
@@ -286,7 +285,7 @@ QHash<quint64, PipesModel::ProcessProperties> PipesModel::getProcList()
     for (int i = 0; i < dlist.size(); i++) {
         QFileInfo fi = dlist.at(i);
         bool ok = false;
-        pid_t pid = fi.baseName().toULong(&ok);
+        pid_t pid = fi.baseName().toInt(&ok);
         if (ok) { // checking if it is a number
             QDir dfd(QString("%1/fd").arg(fi.absoluteFilePath()));
             QString cmdline = QString("/proc/%1/cmdline").arg(pid);

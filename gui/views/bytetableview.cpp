@@ -106,11 +106,13 @@ HexDelegate::HexDelegate(int nhexColumncount, QObject *parent) :
 {
     hexColumncount = nhexColumncount;
     allSelected = false;
+    hexModel = nullptr;
     //qDebug() << "Created: " << this;
 }
 
 HexDelegate::~HexDelegate()
 {
+    hexModel = nullptr;
     //qDebug() << "Destroyed: " << this;
 }
 
@@ -152,41 +154,59 @@ void HexDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, c
         QStyle *style = options.widget? options.widget->style() : QApplication::style();
 
         TextCell textData;
-        textData.setTextFormat(Qt::PlainText);
-        textData.setText(options.text);
-        textData.setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
-        textData.setTextInteractionFlags(Qt::TextSelectableByKeyboard);
+        textData.setTextFormat(Qt::RichText);
+        //textData.setText(options.text);
+
 
         int row = index.row();
         int textSize = options.text.size();
         int maxColumn = qMin(qMin(hexColumncount,ByteTableView::MAXCOL),textSize);
+
+
+        QString colorTemp = QString("<span style='color:%1; background-color:%2'>%3</span>");
+        QString final;
+        for (int i = 0; i < maxColumn; i++) {
+            QModelIndex tindex = index.sibling(row, i);
+
+            QColor fg = hexModel->data(tindex, Qt::ForegroundRole).value<QColor>();
+            QColor bg = hexModel->data(tindex, Qt::BackgroundRole).value<QColor>();
+            final.append(colorTemp.arg(fg.name())
+                         .arg(bg.name())
+                         .arg(options.text.mid(i,1).toHtmlEscaped()));
+        }
+        textData.setText(final);
+        textData.setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
+        textData.setTextInteractionFlags(Qt::TextSelectableByKeyboard);
+
         // apply the selection from the hexa cells
         if (allSelected) {
             textData.setSelection(0,textSize);
         } else if (selectedLines.contains(row)) {
             int rowval = selectedLines.value(row);
-            if ( rowval == COMPLETE_LINE)
-                textData.setSelection(0,textSize);
-            else {
+            if (rowval != 0) {
+                if ( rowval == COMPLETE_LINE)
+                    textData.setSelection(0,textSize);
+                else {
 
-                int start = maxColumn + 1;
-                int length = 1;
-                bool selectionActive = false;
-                for (int i = 0; i < maxColumn ; i++) {
-                    if (rowval & colFlags[i]) {
-                        selectionActive = ! selectionActive;
-                    }
-                    if (selectionActive) {
-                        if (start == maxColumn + 1)
-                            start = i;
-                        length++;
-                    }
+                    int start = maxColumn + 1;
+                    int length = 1;
+                    bool selectionActive = false;
+                    for (int i = 0; i < maxColumn ; i++) {
+                        if (rowval & colFlags[i]) {
+                            selectionActive = ! selectionActive;
+                        }
+                        if (selectionActive) {
+                            if (start == maxColumn + 1)
+                                start = i;
+                            length++;
+                        }
 
+                    }
+                    if (selectionActive)
+                        length = 1;
+    //                if (start < textSize)
+                        textData.setSelection(start,length);
                 }
-                if (selectionActive)
-                    length = 1;
-//                if (start < textSize)
-                    textData.setSelection(start,length);
             }
         }
 
@@ -223,6 +243,11 @@ void HexDelegate::selectAll()
 {
     selectedLines.clear();
     allSelected = true;
+}
+
+void HexDelegate::setHexModel(ByteItemModel *nhexModel)
+{
+    hexModel = nhexModel;
 }
 
 void HexDelegate::setColumnCount(int val)
@@ -278,7 +303,7 @@ void HexSelectionModel::select(const QModelIndex &index, QItemSelectionModel::Se
 
 void HexSelectionModel::select(const QItemSelection & , QItemSelectionModel::SelectionFlags command)
 {
-    QItemSelection newSelection;
+    QItemSelection newerSelection;
 
     delegate->clearSelected();
     if (!startIndex.isValid() || !endIndex.isValid()) {
@@ -289,10 +314,10 @@ void HexSelectionModel::select(const QItemSelection & , QItemSelectionModel::Sel
 
     if (startIndex == endIndex) {
         delegate->selectedLines.insert(startIndex.row(),HexDelegate::colFlags[startIndex.column()]);
-        newSelection.select(startIndex,startIndex);
+        newerSelection.select(startIndex,startIndex);
     } else if (startIndex.row() == endIndex.row()) {
         delegate->selectedLines.insert(startIndex.row(),HexDelegate::colFlags[startIndex.column()] | HexDelegate::colFlags[endIndex.column()]);
-        newSelection.select(startIndex,endIndex);
+        newerSelection.select(startIndex,endIndex);
     } else {
         QPersistentModelIndex temp = startIndex;
         QPersistentModelIndex start = startIndex;
@@ -302,31 +327,31 @@ void HexSelectionModel::select(const QItemSelection & , QItemSelectionModel::Sel
             end = temp;
         }
 
-        newSelection.select(start, start.sibling(start.row(),maxColumn));
+        newerSelection.select(start, start.sibling(start.row(),maxColumn));
         delegate->selectedLines.insert(start.row(),HexDelegate::colFlags[start.column()] | HexDelegate::colFlags[maxColumn]);
-        newSelection.select(end.sibling(end.row(),0), end);
+        newerSelection.select(end.sibling(end.row(),0), end);
         delegate->selectedLines.insert(end.row(),HexDelegate::colFlags[0] | HexDelegate::colFlags[end.column()]);
         if ((end.row() - start.row()) > 1) {
-            newSelection.select(start.sibling(start.row() + 1, 0),start.sibling(end.row() - 1,maxColumn));
+            newerSelection.select(start.sibling(start.row() + 1, 0),start.sibling(end.row() - 1,maxColumn));
             for (int i = start.row() + 1; i < end.row(); i++) {
                 delegate->selectedLines.insert(i,HexDelegate::COMPLETE_LINE);
             }
         }
     }
-    QItemSelectionModel::select(newSelection,command);
+    QItemSelectionModel::select(newerSelection,command);
 
 }
 
 void HexSelectionModel::selectAll()
 {   // startIndex and endIndex should have been set externally
-    QItemSelection newSelection;
+    QItemSelection newerSelection;
     int maxColumn = hexColumncount - 1;
     delegate->clearSelected();
 
 
-    newSelection.select(startIndex, endIndex.sibling(endIndex.row(),maxColumn));
+    newerSelection.select(startIndex, endIndex.sibling(endIndex.row(),maxColumn));
     delegate->selectAll();
-    QItemSelectionModel::select(newSelection,QItemSelectionModel::Select);
+    QItemSelectionModel::select(newerSelection,QItemSelectionModel::Select);
 
 }
 
@@ -405,6 +430,7 @@ void ByteTableView::setModel(ByteItemModel *nmodel)
     old = nullptr;
 
     currentModel = nmodel;
+    delegate->setHexModel(currentModel);
     searchObject = currentModel->getSource()->getSearchObject();
     if (searchObject != nullptr) {
         connect(searchObject, &SearchAbstract::jumpRequest, this, &ByteTableView::gotoSearch, Qt::QueuedConnection);
@@ -416,16 +442,15 @@ void ByteTableView::setModel(ByteItemModel *nmodel)
     currentSelectionModel = new(std::nothrow) HexSelectionModel(hexColumncount, nmodel, this);
     if (currentSelectionModel == nullptr) {
         qFatal("Cannot allocate memory for currentSelectionModel X{");
-    } else {
-
-        currentSelectionModel->setDelegate(delegate);
-
-        connect(currentSelectionModel, &HexSelectionModel::selectionChanged, this, &ByteTableView::onSelectionChanged);
-
-        QItemSelectionModel *sm = QTableView::selectionModel();
-        QTableView::setSelectionModel(currentSelectionModel);
-        delete sm;
     }
+
+    currentSelectionModel->setDelegate(delegate);
+
+    connect(currentSelectionModel, &HexSelectionModel::selectionChanged, this, &ByteTableView::onSelectionChanged);
+
+    QItemSelectionModel *sm = QTableView::selectionModel();
+    QTableView::setSelectionModel(currentSelectionModel);
+    delete sm;
 }
 
 void ByteTableView::mousePressEvent(QMouseEvent *event)
@@ -449,24 +474,27 @@ void ByteTableView::mousePressEvent(QMouseEvent *event)
 
         }
 
-    }
-    currentSelectionModel->clear();
-    if (current.isValid()) {
-        if (pos == ByteItemModel::INVALID_POSITION) {
-            current = current.sibling(-1,-1);
+    } else if (event->button() == Qt::LeftButton) {
+        currentSelectionModel->clear();
+        if (current.isValid()) {
+            if (pos == ByteItemModel::INVALID_POSITION) {
+                current = current.sibling(-1,-1);
+                currentSelectionModel->startIndex = current;
+                currentSelectionModel->endIndex = current;
+                emit newSelection();
+            } else {
+                // ignoring the start change if shift is pressed
+                if (!(event->modifiers().testFlag(Qt::ShiftModifier) && currentSelectionModel->startIndex.isValid()))
+                    currentSelectionModel->startIndex = current;
+                currentSelectionModel->endIndex = current;
+            }
+        } else { // clicking outside the table
             currentSelectionModel->startIndex = current;
             currentSelectionModel->endIndex = current;
+            currentSelectionModel->clear(); // clearing the selection a second time ... ?
             emit newSelection();
-        } else {
-            if (!(event->modifiers().testFlag(Qt::ShiftModifier) && currentSelectionModel->startIndex.isValid()))
-                currentSelectionModel->startIndex = current;
-            currentSelectionModel->endIndex = current;
         }
-    } else {
-        currentSelectionModel->startIndex = current;
-        currentSelectionModel->endIndex = current;
-        emit newSelection();
-    }
+    } // ignoring wheel button
 
     QTableView::mousePressEvent(event);
 
@@ -477,7 +505,7 @@ void ByteTableView::mouseMoveEvent(QMouseEvent *event)
     QPersistentModelIndex current = indexAt(event->pos());
     // checking if the mouse pointer is in the table, and extending the selection if needed
     if (current.isValid() && currentModel->position(current) != ByteItemModel::INVALID_POSITION ) {
-        currentSelectionModel->endIndex = indexAt(event->pos());
+        currentSelectionModel->endIndex = current;
     }
     QTableView::mouseMoveEvent(event);
 }
@@ -591,7 +619,7 @@ QModelIndex ByteTableView::moveCursor(QAbstractItemView::CursorAction cursorActi
     } else if (cursorAction == QAbstractItemView::MoveEnd) {
         nextIndex = currentModel->createIndex(currentModel->getSource()->getViewOffset(currentModel->getSource()->highByte()));
     } else if (cursorAction == QAbstractItemView::MovePageDown) {
-        nextIndex = currentModel->createIndex(currentModel->getSource()->getViewOffset(currentModel->getSource()->getRealOffset(getCurrentPos()) + (hexColumncount * 16)));
+        nextIndex = currentModel->createIndex(currentModel->getSource()->getViewOffset(currentModel->getSource()->getRealOffset(getCurrentPos()) + (static_cast<quint64>(hexColumncount) * 16)));
         if (!nextIndex.isValid()) {
             if (getCurrentPos() % hexColumncount < currentModel->size() % hexColumncount)
                 nextIndex = currentModel->createIndex((currentModel->rowCount() - 1), getCurrentPos() % hexColumncount);
@@ -599,7 +627,7 @@ QModelIndex ByteTableView::moveCursor(QAbstractItemView::CursorAction cursorActi
                 nextIndex = currentModel->createIndex(currentModel->size() - 1);
         }
     } else if (cursorAction == QAbstractItemView::MovePageUp) {
-        nextIndex = currentModel->createIndex(currentModel->getSource()->getViewOffset(currentModel->getSource()->getRealOffset(getCurrentPos()) - (hexColumncount * 16)));
+        nextIndex = currentModel->createIndex(currentModel->getSource()->getViewOffset(currentModel->getSource()->getRealOffset(getCurrentPos()) - (static_cast<quint64>(hexColumncount) * 16)));
         if (!nextIndex.isValid())
             nextIndex = currentModel->createIndex(getCurrentPos() % hexColumncount);
     }
@@ -676,11 +704,11 @@ bool ByteTableView::getSelectionInfo(int *pos, int *length)
             (*length) = 0;
             return false;
         }
-        (*length) = (int)diff + 1;
+        (*length) = static_cast<int>(diff) + 1;
         if (pos1 <= pos2)
-            (*pos) = (int)pos1;
+            (*pos) = static_cast<int>(pos1);
         else
-            (*pos) = (int)pos2;
+            (*pos) = static_cast<int>(pos2);
 
         return true;
     }
@@ -741,7 +769,7 @@ void ByteTableView::replaceSelectedBytes(char byte)
 void ByteTableView::replaceSelectedBytes(QByteArray data)
 {
     ByteSourceAbstract * bsource = static_cast<ByteItemModel *>(currentModel)->getSource();
-    int capabilities = bsource->getCapabilities();
+    int capabilities = static_cast<int>(bsource->getCapabilities());
     if (!bsource->isReadonly()) {
         int pos = 0;
         int length = 0;
@@ -831,7 +859,7 @@ void ByteTableView::markSelected(const QColor &color, QString text)
         int pos1 = currentModel->position(currentSelectionModel->startIndex);
         int pos2 = currentModel->position(currentSelectionModel->endIndex);
 
-        currentModel->getSource()->viewMark(pos1, pos2, color,QColor(), text); // pos1 and pos2 are guaranted to be valid at this point (i.e. positive integers)
+        currentModel->getSource()->viewMark(pos1, pos2, color, GlobalsValues::MARKINGS_FG_COLOR, text); // pos1 and pos2 are guaranted to be valid at this point (i.e. positive integers)
     }
 }
 
@@ -865,7 +893,7 @@ bool ByteTableView::goTo(quint64 offset, bool absolute, bool negative, bool sele
             return false;
         }
     } else { // relative offset
-        quint64 currentOffset = (quint64)getCurrentPos() + currentModel->getSource()->startingRealOffset();
+        quint64 currentOffset = static_cast<quint64>(getCurrentPos()) + currentModel->getSource()->startingRealOffset();
         if (negative) { // relative negative
             if (offset > currentOffset) {
                 emit error(tr("Real offset would underflow, ignoring goto request"),LOGID);
@@ -918,7 +946,7 @@ void ByteTableView::search(QByteArray item, QBitArray mask)
     if (currentViewPos < 0)
         currentViewPos = 0;
 
-    quint64 curPos = (quint64)currentViewPos + currentModel->getSource()->startingRealOffset();
+    quint64 curPos = static_cast<quint64>(currentViewPos) + currentModel->getSource()->startingRealOffset();
 
     if (lastSearchIndex == curPos)
         curPos++;

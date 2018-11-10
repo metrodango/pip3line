@@ -18,7 +18,7 @@ Released under AGPL see LICENSE for more information
 #include "shared/guiconst.h"
 
 BasicSourceReader::BasicSourceReader(QByteArray *source) :
-    buffer(source,0)
+    buffer(source,nullptr)
 {
     if (!buffer.open(QIODevice::ReadOnly)) {
         qCritical() << tr("Could not open buffer for reading T_T");
@@ -39,7 +39,7 @@ bool BasicSourceReader::seek(quint64 pos)
         emit log(tr("pos is too large for seeking, ignoring"),metaObject()->className(),Pip3lineConst::LERROR);
         return false;
     }
-    return buffer.seek((qint64)pos);
+    return buffer.seek(static_cast<qint64>(pos));
 }
 
 int BasicSourceReader::read(char *cbuf, int maxLen)
@@ -48,7 +48,7 @@ int BasicSourceReader::read(char *cbuf, int maxLen)
         emit log(tr("maxLen is too large for reading, reducing it."),metaObject()->className(),Pip3lineConst::LWARNING);
         maxLen = MAX_READ_SIZE; // MAX_READ_SIZE is small
     }
-    return (int)buffer.read(cbuf,(qint64)maxLen); // maxLen is small, so no issue in conversion
+    return static_cast<int>(buffer.read(cbuf,static_cast<qint64>(maxLen))); // maxLen is small, so no issue in conversion
 }
 
 bool BasicSourceReader::isReadable()
@@ -76,7 +76,7 @@ void BasicSearch::internalStart()
         return;
     }
 
-    totalSearchSize = sdata->size();
+    totalSearchSize = static_cast<quint64>(sdata->size());
     qint64 dataSize = sdata->size();
     qint64 itemSize = sitem.size();
 
@@ -85,7 +85,7 @@ void BasicSearch::internalStart()
         return;
     }
 
-    int numBlock = dataSize / SearchBlockSize + ((sdata->size() % SearchBlockSize) == 0 ? 0 : 1);
+    int numBlock = static_cast<int>(dataSize / SearchBlockSize + ((sdata->size() % SearchBlockSize) == 0 ? 0 : 1));
 
     int i = 0;
     for (i = 0; i < numBlock; i++) {
@@ -101,8 +101,8 @@ void BasicSearch::internalStart()
         if (sw == nullptr) {
             qFatal("Cannot allocate memory for SearchWorker X{");
         }
-        sw->setStartOffset(i * SearchBlockSize);
-        sw->setEndOffset(qMin((quint64)(i * SearchBlockSize + SearchBlockSize),totalSearchSize) - 1); // -1 due to size values in use
+        sw->setStartOffset(static_cast<quint64>(i) * SearchBlockSize);
+        sw->setEndOffset(qMin(static_cast<quint64>(i * SearchBlockSize + SearchBlockSize),totalSearchSize) - 1); // -1 due to size values in use
         sw->setSearchItem(sitem,mask);
         addSearchWorker(sw);
     }
@@ -146,7 +146,21 @@ QByteArray BasicSource::getRawData()
 
 void BasicSource::setRawData(QByteArray data, quintptr source)
 {
+    QByteArray oldData = rawData;
     rawData = data;
+    if (trackChanges) {
+        clearAllMarkings();
+        BytesRangeList * ranges = new(std::nothrow) BytesRangeList();
+        if (ranges == nullptr) {
+            qFatal("Cannot allocate memory for BytesRangeList X{");
+        }
+        BytesRange::compareAndMark(data, oldData, ranges, GuiStyles::DEFAULT_MARKING_COLOR, QColor(), GuiConst::MODIFIED_STR);
+
+        if (!ranges->isEmpty())
+            setNewMarkings(ranges);
+        else
+            delete ranges;
+    }
     emit updated(source);
     emit sizeChanged();
     emit reset();
@@ -154,7 +168,7 @@ void BasicSource::setRawData(QByteArray data, quintptr source)
 
 quint64 BasicSource::size()
 {
-    return rawData.size();
+    return static_cast<quint64>(rawData.size());
 }
 
 QByteArray BasicSource::extract(quint64 offset, int length)
@@ -163,11 +177,11 @@ QByteArray BasicSource::extract(quint64 offset, int length)
         return QByteArray();
 
     if (length < 0) {
-        offset = (offset + length + 1);
+        offset = (offset + static_cast<quint64>(length) + 1);
         length = qAbs(length);
     }
 
-    return rawData.mid(offset,length);
+    return rawData.mid(static_cast<int>(offset),length);
 }
 
 char BasicSource::extract(quint64 offset)
@@ -175,14 +189,14 @@ char BasicSource::extract(quint64 offset)
     if (!validateOffsetAndSize(offset, 1)) {
         return '\00';
     }
-    return rawData.at(offset);
+    return rawData.at(static_cast<int>(offset));
 }
 
 void BasicSource::replace(quint64 offset, int length, QByteArray repData, quintptr source)
 {
     if (!_readonly && validateOffsetAndSize(offset, length)) {
-        historyAddReplace(offset, rawData.mid(offset,length),repData);
-        rawData.replace(offset,length,repData);
+        historyAddReplace(offset, rawData.mid(static_cast<int>(offset),length),repData);
+        rawData.replace(static_cast<int>(offset),length,repData);
 
         if (!staticMarking) {
             int diff = length - repData.size(); // we (safely) assume that size() cannot be negative
@@ -198,8 +212,8 @@ void BasicSource::insert(quint64 offset, QByteArray repData, quintptr source)
 {
     if (!_readonly && validateOffsetAndSize(offset, 0)) {
         historyAddInsert(offset,repData);
-        rawData.insert(offset, repData);
-        if (!staticMarking) BytesRange::moveMarkingAfterInsert(userMarkingsRanges, offset,repData.size());
+        rawData.insert(static_cast<int>(offset), repData);
+        if (!staticMarking) BytesRange::moveMarkingAfterInsert(userMarkingsRanges, offset,static_cast<quint64>(repData.size()));
         emit updated(source);
         emit sizeChanged();
     }
@@ -208,27 +222,27 @@ void BasicSource::insert(quint64 offset, QByteArray repData, quintptr source)
 void BasicSource::remove(quint64 offset, int length, quintptr source)
 {
     if (!_readonly && validateOffsetAndSize(offset, 0)) {
-        historyAddRemove(offset,rawData.mid(offset,length));
-        rawData.remove(offset, length);
+        historyAddRemove(offset,rawData.mid(static_cast<int>(offset),length));
+        rawData.remove(static_cast<int>(offset), length);
 
         if (!staticMarking) {
             quint64 end = offset;
             if (length < 0) {
                 length = qAbs(length);
-                if (offset < (quint64)length) {
+                if (offset < static_cast<quint64>(length)) {
                     offset = 0;
                 } else {
-                    offset = offset - length;
+                    offset = offset - static_cast<quint64>(length);
                 }
             } else {
-                if (offset + (quint64)length > (quint64)rawData.size())
-                    end = rawData.size();
+                if (offset + static_cast<quint64>(length) > static_cast<quint64>(rawData.size()))
+                    end = static_cast<quint64>(rawData.size());
                 else
-                    end = offset + (quint64)length - 1;
+                    end = offset + static_cast<quint64>(length) - 1;
             }
 
             BytesRange::clearMarkingFromList(userMarkingsRanges, offset,end);
-            BytesRange::moveMarkingAfterDelete(userMarkingsRanges, offset,length);
+            BytesRange::moveMarkingAfterDelete(userMarkingsRanges, offset,static_cast<quint64>(length));
         }
         emit updated(source);
         emit sizeChanged();
@@ -247,11 +261,11 @@ void BasicSource::clear(quintptr source)
 
 int BasicSource::getViewOffset(quint64 realoffset)
 {
-    if (realoffset > (quint64) rawData.size()) {
+    if (realoffset > static_cast<quint64>(rawData.size())) {
         emit log(tr("Offset too large: %1").arg(realoffset),LOGID, Pip3lineConst::LERROR);
         return - 1;
     }
-    return (int)realoffset;
+    return static_cast<int>(realoffset);
 }
 
 int BasicSource::preferredTabType()
@@ -261,7 +275,7 @@ int BasicSource::preferredTabType()
 
 bool BasicSource::isOffsetValid(quint64 offset)
 {
-    return offset < ((quint64)rawData.size());
+    return offset < (static_cast<quint64>(rawData.size()));
 }
 
 bool BasicSource::isReadableText()
@@ -274,7 +288,7 @@ bool BasicSource::isReadableText()
         if (TEXT.contains(rawData.at(i)))
             count++;
     }
-    if ((float)(count)/rawData.size() < 0.7) {
+    if (static_cast<double>(count)/rawData.size() < 0.7) {
         return false;
     }
     return true;
@@ -327,7 +341,7 @@ SearchAbstract *BasicSource::requestSearchObject(QObject *)
 
 bool BasicSource::validateOffsetAndSize(quint64 offset, int length)
 {
-    if (offset > (quint64)rawData.size()) { // hitting the limit data size
+    if (offset > static_cast<quint64>(rawData.size())) { // hitting the limit data size
         emit log(tr("Offset too large: %1 length: %2").arg(offset).arg(length),LOGID, Pip3lineConst::LERROR);
         return false;
     }
@@ -337,12 +351,12 @@ bool BasicSource::validateOffsetAndSize(quint64 offset, int length)
         return false;
     }
 
-    if ((quint64)(INT_MAX - length) < offset) { // // hitting the limit
+    if (static_cast<quint64>(INT_MAX - length) < offset) { // // hitting the limit
         emit log(tr("Length too large, hitting the int MAX limit. offset: %1 length: %2").arg(offset).arg(length),LOGID,Pip3lineConst::LWARNING);
         return false;
     }
 
-    if (offset + (quint64)length > (quint64)rawData.size()) { // this is behond the end of the data
+    if (offset + static_cast<quint64>(length) > static_cast<quint64>(rawData.size())) { // this is behond the end of the data
         emit log(tr("Length too large for the data set. offset: %1 length: %2").arg(offset).arg(length),LOGID,Pip3lineConst::LWARNING);
         return false;
     }

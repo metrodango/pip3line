@@ -16,7 +16,7 @@ NewViewMenu::NewViewMenu(GuiHelper *guiHelper, QWidget *parent) :
     QMenu(parent),
     guiHelper(guiHelper)
 {
-    setTitle(tr("New View"));
+    setTitle(tr("Choose View type"));
     QAction * descAction = new(std::nothrow)QAction(tr("View type"),this);
     if (descAction == nullptr) {
         qFatal("Cannot allocate memory for QAction X{");
@@ -120,7 +120,11 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
         }
     }
 
-    newView->setConfigButton(configButton);
+    if (newView != nullptr) {
+        newView->setConfiguration(viewData.options);
+        newView->setConfigButton(configButton);
+    }
+
     return newView;
 }
 

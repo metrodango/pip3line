@@ -220,7 +220,7 @@ void SearchResultsWidget::savetoFile(QString format, int base)
                 if (written == data.length())
                     break;
                 else
-                    data = data.mid(written - 1);
+                    data = data.mid(static_cast<int>(written) - 1); // we assume that the write call will return something sensible
             }
             if (i < list->size() - 1)
                 file.write("\n");

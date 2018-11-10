@@ -26,7 +26,7 @@ class LIBTRANSFORMSHARED_EXPORT ModulesManagementWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit ModulesManagementWidget(ModulesManagement * modulesMgmt, QWidget *parent = 0);
+        explicit ModulesManagementWidget(ModulesManagement * modulesMgmt, QWidget *parent = nullptr);
         ~ModulesManagementWidget();
 
     private Q_SLOTS:

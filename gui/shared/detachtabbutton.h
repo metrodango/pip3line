@@ -20,8 +20,8 @@ class DetachTabButton : public QPushButton
     public:
         explicit DetachTabButton(TabAbstract *tab);
     private:
+        Q_DISABLE_COPY(DetachTabButton)
         TabAbstract * curtab;
-
 };
 
 #endif // DETACHTABBUTTON_H

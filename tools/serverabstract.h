@@ -59,6 +59,8 @@ class ServerAbstract : public QObject
         QList<Processor *> clientProcessor;
         ProcessingStats stats;
         bool allowForwardingLogs;
+    private:
+        Q_DISABLE_COPY(ServerAbstract)
 };
 
 #endif // SERVERABSTRACT_H

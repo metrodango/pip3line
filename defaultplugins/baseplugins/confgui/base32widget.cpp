@@ -40,7 +40,7 @@ Base32Widget::~Base32Widget()
 
 void Base32Widget::onVariantchange(int newVariant)
 {
-    transform->setVariant((Base32::CharSetVariant)newVariant);
+    transform->setVariant(static_cast<Base32::CharSetVariant>(newVariant));
     ui->charsetDisplay->setText(QString(transform->getCharTable()));
 }
 

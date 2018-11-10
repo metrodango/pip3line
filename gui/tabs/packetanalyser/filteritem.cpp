@@ -208,8 +208,8 @@ void FilterData::setSearchValue(const QByteArray &nvalue)
 
     int msize = searchValue.size();
     if (msize > 0) {
-        mask = new(std::nothrow) char[msize];
-        memset(mask, 0,msize);
+        mask = new(std::nothrow) char[static_cast<size_t>(msize)];
+        memset(mask, 0,static_cast<size_t>(msize));
 
         for (int i = 0; i < msize;i++) {
             mask[i] = '\xFF'; // no widlcard by default
@@ -295,7 +295,7 @@ QHash<QString, QString> FilterData::getConfiguration()
             ret.insert(GuiConst::STATE_MASK, maskstr);
         }
     }
-    ret.insert(GuiConst::STATE_TYPE, QString::number((int)searchType));
+    ret.insert(GuiConst::STATE_TYPE, QString::number(static_cast<int>(searchType)));
     return ret;
 }
 
@@ -328,8 +328,8 @@ void FilterData::setConfiguration(const QHash<QString, QString> &conf)
 
     if (conf.contains(GuiConst::STATE_TYPE)) {
         int val = conf.value(GuiConst::STATE_TYPE).toInt(&ok);
-        if (ok && (val == (int)HEXA || val == (int)UTF8 || val == (int)UTF16))
-            searchType = (FilterData::SEARCH_TYPE)val;
+        if (ok && (val == HEXA || val == UTF8 || val == UTF16))
+            searchType = static_cast<FilterData::SEARCH_TYPE>(val);
     }
 }
 
@@ -365,8 +365,8 @@ void FilterData::setBitMask(QBitArray bitMask)
     if (mask != nullptr)
         delete[] mask;
 
-    mask = new(std::nothrow) char[msize];
-    memset(mask, 0,msize);
+    mask = new(std::nothrow) char[static_cast<size_t>(msize)];
+    memset(mask, 0,static_cast<size_t>(msize));
 
     for (int i = 0; i < msize;i++) {
         mask[i] = bitMask.testBit(i) ? '\xFF' : '\x00';
@@ -547,14 +547,14 @@ void FilterLength::setConfiguration(const QHash<QString, QString> &conf)
 
     if (conf.contains(GuiConst::STATE_TYPE)) {
         int val = conf.value(GuiConst::STATE_TYPE).toInt(&ok);
-        if (ok && (val == (int)LESS ||
-                   val == (int)LESSEQUAL ||
-                   val == (int)GREATER ||
-                   val == (int)GREATEREQUAL ||
-                   val == (int)EQUAL ||
-                   val == (int)DIFFERENT))
+        if (ok && (val == LESS ||
+                   val == LESSEQUAL ||
+                   val == GREATER ||
+                   val == GREATEREQUAL ||
+                   val == EQUAL ||
+                   val == DIFFERENT))
 
-            op = (FilterLength::Operators)val;
+            op = static_cast<FilterLength::Operators>(val);
     }
 }
 
@@ -617,7 +617,7 @@ void FilterDirection::setConfiguration(const QHash<QString, QString> &conf)
     if (conf.contains(GuiConst::STATE_DIRECTION)) {
         int val = conf.value(GuiConst::STATE_SIZE).toInt(&ok);
         if (ok && (val==Packet::LEFTRIGHT || val==Packet::RIGHTLEFT || val==Packet::NODIRECTION ))
-            direction = (Packet::Direction)val;
+            direction = static_cast<Packet::Direction>(val);
     }
 }
 
@@ -700,14 +700,14 @@ void FilterText::setConfiguration(const QHash<QString, QString> &conf)
                    val==QRegExp::RegExp2 ||
                    val==QRegExp::WildcardUnix ||
                    val==QRegExp::W3CXmlSchema11 ))
-            regexp.setPatternSyntax((QRegExp::PatternSyntax)val);
+            regexp.setPatternSyntax(static_cast<QRegExp::PatternSyntax>(val));
     }
 
     if (conf.contains(GuiConst::STATE_REGEXP_CASE_SENSITIVE)) {
         int val = conf.value(GuiConst::STATE_REGEXP_CASE_SENSITIVE).toInt(&ok);
         if (ok && (val==Qt::CaseSensitive ||
                    val==Qt::CaseInsensitive ))
-            regexp.setCaseSensitivity((Qt::CaseSensitivity)val);
+            regexp.setCaseSensitivity(static_cast<Qt::CaseSensitivity>(val));
     }
 
     if (conf.contains(GuiConst::STATE_COLUMN)) {

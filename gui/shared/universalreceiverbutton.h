@@ -43,6 +43,7 @@ class UniversalReceiverButton : public QPushButton
     signals:
         void tookReceiver();
     private:
+        Q_DISABLE_COPY(UniversalReceiverButton)
         GuiHelper * guiHelper;
         TabAbstract *attachedTab;
         static  CommonUniversalReceiverListener staticListener;

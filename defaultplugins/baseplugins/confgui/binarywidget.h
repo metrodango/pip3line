@@ -23,7 +23,7 @@ class BinaryWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit BinaryWidget(Binary *ntransform, QWidget *parent = 0);
+        explicit BinaryWidget(Binary *ntransform, QWidget *parent = nullptr);
         ~BinaryWidget();
     private slots:
         void onChangeGroupBy(int value);

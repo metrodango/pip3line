@@ -23,13 +23,14 @@ class IPBlocksSources : public BlocksSource
         virtual QList<QSslCertificate> getPeerCerts();
         virtual QString getCurrentCipher();
         virtual QHash<QString, QString> getConfiguration();
-        virtual void setConfiguration(QHash<QString, QString> conf);
+        virtual void setConfiguration(const  QHash<QString, QString> &conf);
 
     public slots:
         void setHostname(const QString &name);
         virtual void setHostPort(const quint16 &port);
         virtual void setHostAddress(const QHostAddress &addr);
     protected:
+        Q_DISABLE_COPY(IPBlocksSources)
         virtual QWidget *requestGui(QWidget * parent = nullptr);
         QHostAddress hostAddress;
         quint16 hostPort;

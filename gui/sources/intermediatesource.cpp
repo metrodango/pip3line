@@ -33,7 +33,7 @@ IntermediateSource::IntermediateSource(GuiHelper *guiHelper,
         connect(wrapperTransform, &TransformAbstract::confUpdated,this, [=](void) {onOriginalUpdated();});
     }
 
-    capabilities = originalSource->getCapabilities() & !(CAP_TRANSFORM | CAP_LOADFILE) ;
+    capabilities = originalSource->getCapabilities() & static_cast<quint32>(~(CAP_TRANSFORM | CAP_LOADFILE)) ;
     connect(this, &IntermediateSource::sendRequest, guiHelper->getCentralTransProc(), &ThreadedProcessor::processRequest);
     connect(original, &ByteSourceAbstract::updated, this, &IntermediateSource::onOriginalUpdated);
     connect(original, &ByteSourceAbstract::sizeChanged, this, &IntermediateSource::onOriginalSizeChanged);
@@ -121,7 +121,7 @@ void IntermediateSource::optionGuiRequested()
 
 void IntermediateSource::onOriginalUpdated(quintptr source)
 {
-    if (source == (quintptr) this)
+    if (source == reinterpret_cast<quintptr>(this))
         return;
 
     onOriginalSizeChanged();
@@ -133,7 +133,7 @@ void IntermediateSource::onOriginalUpdated(quintptr source)
         TransformRequest *tr = new(std::nothrow) TransformRequest(
                     ta,
                     oriData,
-                    (quintptr) this);
+                    reinterpret_cast<quintptr>(this));
 
         if (tr == nullptr) {
             qFatal("Cannot allocate memory for TransformRequest X{");
@@ -159,7 +159,7 @@ void IntermediateSource::onCurrentUpdated()
             TransformRequest *tr = new(std::nothrow) TransformRequest(
                         ta,
                         rawData,
-                        (quintptr) this);
+                        reinterpret_cast<quintptr>(this));
 
             if (tr == nullptr) {
                 qFatal("Cannot allocate memory for TransformRequest X{");
@@ -172,7 +172,7 @@ void IntermediateSource::onCurrentUpdated()
             qCritical() << tr("[IntermediateSource::onCurrentUpdated] Cloning failed T_T");
         }
     } else {
-        original->replace(startOffset,length,rawData,(quintptr)this);
+        original->replace(startOffset,length,rawData,reinterpret_cast<quintptr>(this));
     }
 }
 
@@ -187,7 +187,7 @@ void IntermediateSource::inboundProcessingFinished(QByteArray data, Messages mes
 
 void IntermediateSource::outboundProcessingFinished(QByteArray data, Messages messages)
 {
-    original->replace(startOffset,length,data,(quintptr)this);
+    original->replace(startOffset,length,data,reinterpret_cast<quintptr>(this));
     for (int i = 0; i < messages.size() ; i++) {
         emit log(messages.at(i).message,messages.at(i).source, messages.at(i).level);
     }
@@ -204,11 +204,11 @@ void IntermediateSource::onOriginalReadOnlyChanged(bool val)
 
 void IntermediateSource::onOriginalSizeChanged()
 {
-    quint64 temp = qMin(endOffset - startOffset,qMin(original->size(), (quint64)INT_MAX));
+    quint64 temp = qMin(endOffset - startOffset,qMin(original->size(), static_cast<quint64>(INT_MAX)));
 
     if (temp > INT_MAX) {
         length = INT_MAX;
     } else {
-        length = (int)temp;
+        length = static_cast<int>(temp);
     }
 }

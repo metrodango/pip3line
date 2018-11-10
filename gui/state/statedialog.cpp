@@ -1,8 +1,9 @@
 #include "statedialog.h"
 #include "ui_statedialog.h"
-#include <QApplication>
 #include <QRect>
 #include <QDesktopWidget>
+#include <QScreen>
+#include <QGuiApplication>
 
 StateDialog::StateDialog(QWidget *parent) :
     QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint),
@@ -13,7 +14,7 @@ StateDialog::StateDialog(QWidget *parent) :
     ui->progressBar->setMaximum(0);
     ui->progressBar->setValue(0);
 
-    const QRect screen = QApplication::desktop()->screenGeometry();
+    const QRect screen = QGuiApplication::primaryScreen()->availableGeometry();
     move(screen.center() - this->rect().center());
 }
 

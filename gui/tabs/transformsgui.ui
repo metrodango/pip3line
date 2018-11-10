@@ -15,8 +15,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>715</width>
+    <height>454</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -191,6 +191,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="trackChangesCheckBox">
+        <property name="toolTip">
+         <string>Highlight changes whenever a modification occurs. Only applies to hex view.</string>
+        </property>
+        <property name="text">
+         <string>show changes</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -239,8 +249,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>396</width>
-        <height>262</height>
+        <width>713</width>
+        <height>413</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="mainLayout">

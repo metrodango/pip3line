@@ -11,7 +11,7 @@ class CertificatesModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit CertificatesModel(QObject *parent = 0);
+        explicit CertificatesModel(QObject *parent = nullptr);
         ~CertificatesModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -25,6 +25,7 @@ class CertificatesModel : public QAbstractTableModel
         void certListUpdated(const QList<QSslCertificate> &cacerts);
 
     private:
+        Q_DISABLE_COPY(CertificatesModel)
         QList<QSslCertificate> certList;
         static const QStringList headersList;
         static const QString YES_STR;
@@ -35,7 +36,7 @@ class SSLCipherModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit SSLCipherModel(const QList<QSslCipher> &cipherlist, QObject *parent = 0);
+        explicit SSLCipherModel(const QList<QSslCipher> &cipherlist, QObject *parent = nullptr);
         ~SSLCipherModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -56,6 +57,7 @@ class SSLCipherModel : public QAbstractTableModel
     signals:
         void ciphersListUpdated(const QList<QSslCipher> & ciphers);
     private:
+        Q_DISABLE_COPY(SSLCipherModel)
         static const QStringList headerList;
         static const int CHECKBOX_COLUMN;
         QList<QSslCipher> cipherList;
@@ -66,7 +68,7 @@ class SSLCurvesModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit SSLCurvesModel(const QVector<QSslEllipticCurve> &curvesList, QObject *parent = 0);
+        explicit SSLCurvesModel(const QVector<QSslEllipticCurve> &curvesList, QObject *parent = nullptr);
         ~SSLCurvesModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -84,6 +86,7 @@ class SSLCurvesModel : public QAbstractTableModel
     signals:
         void selectedCurvesListUpdated(const QVector<QSslEllipticCurve> & curves);
     private:
+        Q_DISABLE_COPY(SSLCurvesModel)
         static const QStringList headerList;
         static const int CHECKBOX_COLUMN;
         QVector<QSslEllipticCurve> fullCurvesList;
@@ -103,7 +106,7 @@ class SSLOptionsWidget : public QWidget
                                   QString SNIValue,
                                   bool usingSystemsCAs,
                                   const QList<QSslCertificate> &otherCAs,
-                                  QWidget *parent = 0);
+                                  QWidget *parent = nullptr);
         ~SSLOptionsWidget();
     public slots:
         void setSNIValue(QString value);
@@ -143,6 +146,7 @@ class SSLOptionsWidget : public QWidget
         void allowedNextProtocolsUpdated(const QList<QByteArray> &value);
         void selectedCurvesListUpdated(const QVector<QSslEllipticCurve> & curves);
     private:
+        Q_DISABLE_COPY(SSLOptionsWidget)
         static const QStringList SSL_VERIFICATION_MODES;
         QString concat(const QStringList &list);
         QString prettyHex(const QByteArray &data);

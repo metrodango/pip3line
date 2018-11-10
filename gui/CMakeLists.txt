@@ -16,11 +16,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (WITH_SCINTILLA)
-	set (QSCINTILLA_HOME "..\\ext\\QScintilla_gpl")
-    message ( STATUS "-- Enabling QScintilla support --" )
+    set (QSCINTILLA_HOME "${PROJECT_SOURCE_DIR}\\..\\ext\\QScintilla_gpl")
+    message ( STATUS "Enabling QScintilla support --" )
     add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
-        ${QSCINTILLA_HOME}\\Qt4Qt5
+        ${QSCINTILLA_HOME}\\Qt4Qt5 /usr/local/include/
     )
     if (WIN32)
         link_directories (
@@ -28,7 +28,7 @@ if (WITH_SCINTILLA)
         )
     else()
         link_directories (
-             ${QSCINTILLA_HOME}\\Qt4Qt5
+             ${QSCINTILLA_HOME}\\Qt4Qt5 /usr/local/lib/
         )
     endif()
 endif(WITH_SCINTILLA)
@@ -45,7 +45,6 @@ include_directories (
 if (NOT APPLE)
   link_directories (
     ${PROJECT_SOURCE_DIR}/../lib
-    /usr/lib64/qt4/
   )
 else()
 	message( STATUS "-- Enabling MAC OSX specifics --" )
@@ -55,7 +54,7 @@ endif()
 
 #set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../bin )
 
-set ( EXTERN_LIBS transform )
+set ( EXTERN_LIBS ${EXTERN_LIBS} transform )
 
 if (WITH_SCINTILLA)
 	if ((WIN32) OR (APPLE))
@@ -66,7 +65,11 @@ if (WITH_SCINTILLA)
             OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
             OUTPUT_STRIP_TRAILING_WHITESPACE
           )
-          if (LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu")
+          execute_process(COMMAND ${LSB_RELEASE} -cs
+            OUTPUT_VARIABLE LSB_RELEASE_CODENAME
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+          if (LSB_RELEASE_ID_SHORT STREQUAL "Ubuntu" AND LSB_RELEASE_CODENAME STREQUAL "xenial")
             set ( EXTERN_LIBS ${EXTERN_LIBS} qt5scintilla2)
           else ()
             set ( EXTERN_LIBS ${EXTERN_LIBS} qscintilla2_qt5)
@@ -137,6 +140,13 @@ set ( pip3line_HDRS
 	sources/blocksources/socksproxyhelper.h
 	sources/blocksources/pipeclientlistener.h
 	sources/blocksources/pipeclientwidget.h
+	sources/blocksources/sharedmemorysource.h
+	sources/blocksources/shmtypes/shmsysvwidget.h
+	sources/blocksources/shmtypes/sharedmemposixwidget.h
+	sources/blocksources/shmtypes/sharedmemconnector.h
+	sources/blocksources/shmtypes/sysv_shm.h
+	sources/blocksources/shmtypes/sharedmemposix.h
+	sources/blocksources/shmtypes/sharedmemorysourcebasewidget.h
 	views/hexview.h
 	views/textview.h
 	views/bytetableview.h
@@ -167,6 +177,8 @@ set ( pip3line_HDRS
 	tabs/packetanalyser/filterdialog.h
 	tabs/packetanalyser/filteritem.h
 	tabs/packetanalyser/filterengine.h
+	tabs/packetanalyser/myoproxy.h
+	tabs/packetanalyser/myoproxywidget.h
 	shared/offsetgotowidget.h
 	shared/searchwidget.h
 	shared/readonlybutton.h
@@ -255,6 +267,13 @@ set ( pip3line_SRCS
 	sources/blocksources/socksproxyhelper.cpp
 	sources/blocksources/pipeclientlistener.cpp
 	sources/blocksources/pipeclientwidget.cpp
+	sources/blocksources/sharedmemorysource.cpp
+	sources/blocksources/shmtypes/sharedmemconnector.cpp
+	sources/blocksources/shmtypes/sharedmemorysourcebasewidget.cpp
+	sources/blocksources/shmtypes/sharedmemposix.cpp
+	sources/blocksources/shmtypes/sharedmemposixwidget.cpp
+	sources/blocksources/shmtypes/sysv_shm.cpp
+	sources/blocksources/shmtypes/shmsysvwidget.cpp
 	views/hexview.cpp
 	views/bytetableview.cpp
 	views/byteitemmodel.cpp
@@ -286,6 +305,8 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/filterdialog.cpp
 	tabs/packetanalyser/filteritem.cpp
 	tabs/packetanalyser/filterengine.cpp
+	tabs/packetanalyser/myoproxy.cpp
+        tabs/packetanalyser/myoproxywidget.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp
@@ -339,6 +360,7 @@ set ( pip3line_UIS
 	tabs/packetanalyser/importexportdialog.ui
 	tabs/packetanalyser/packetanalyseroptionsdialog.ui
 	tabs/packetanalyser/filterdialog.ui
+        tabs/packetanalyser/myoproxywidget.ui
 	floatingdialog.ui
 	quickviewdialog.ui
 	quickviewitem.ui
@@ -353,6 +375,9 @@ set ( pip3line_UIS
 	sources/blocksources/baseblocksourcewidget.ui
 	sources/blocksources/ipnetworkclientwidget.ui
 	sources/blocksources/pipeclientwidget.ui
+	sources/blocksources/shmtypes/shmsysvwidget.ui
+	sources/blocksources/shmtypes/sharedmemposixwidget.ui
+	sources/blocksources/shmtypes/sharedmemorysourcebasewidget.ui
 	shared/searchresultswidget.ui
 	shared/transformdisplayconf.ui
 	shared/ssloptionswidget.ui
@@ -376,6 +401,8 @@ qt5_add_resources(RSCS ${pip3line_RSCS})
 
 add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
 
+set ( EXTERN_LIBS ${EXTERN_LIBS} )
+
 if(WIN32)
     target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent Qt5::WinMain )
 endif(WIN32)
@@ -384,8 +411,8 @@ endif(WIN32)
 target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent ${EXTERN_LIBS} )
 
 if(UNIX)
-	install (TARGETS pip3line DESTINATION bin)
-	install (FILES pip3line.desktop DESTINATION /usr/share/applications)
-	install (FILES icons/pip3line.png DESTINATION /usr/share/icons/hicolor/128x128/apps)
+	install (TARGETS pip3line DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+	install (FILES pip3line.desktop DESTINATION /usr/share/applications PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+	install (FILES icons/pip3line.png DESTINATION /usr/share/icons/hicolor/128x128/apps PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 endif(UNIX)
 

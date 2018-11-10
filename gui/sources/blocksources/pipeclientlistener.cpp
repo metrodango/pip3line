@@ -21,7 +21,7 @@ PipeClientListener::PipeClientListener( QObject *parent) :
     pipeName = "InvalidPipeName";
     flags = REFLEXION_OPTIONS;
     type = CLIENT;
-    updateTimer.moveToThread(&workerThread);
+    updateConnectionsTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
     workerThread.start();
 }
@@ -60,7 +60,7 @@ QHash<QString, QString> PipeClientListener::getConfiguration()
     return ret;
 }
 
-void PipeClientListener::setConfiguration(QHash<QString, QString> conf)
+void PipeClientListener::setConfiguration(const QHash<QString, QString> &conf)
 {
     BlocksSource::setConfiguration(conf);
     if (conf.contains(GuiConst::STATE_NAME)) {
@@ -71,7 +71,6 @@ void PipeClientListener::setConfiguration(QHash<QString, QString> conf)
             qCritical() << tr("[PipeClientListener::setConfiguration] Invalid Path, ignoring.");
         }
     }
-
 }
 
 QWidget *PipeClientListener::getAdditionnalCtrls(QWidget *parent)
@@ -135,7 +134,7 @@ void PipeClientListener::sendBlock(Block *block)
                 if (sockets.size() > 10000)
                     emit log(tr("The number of Pipe clients connections as reached 10 000. Dude for real ?"),ID, Pip3lineConst::LERROR);
                 mapExtSourcesToLocal.insert(bid, sid);
-                emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::LSTATUS);
+                emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::PLSTATUS);
 
                 qint64 bwritten = socket->write(data);
                 while (size > bwritten) {
@@ -212,7 +211,7 @@ void PipeClientListener::createConnection()
         if (sockets.size() > 10000)
             emit log(tr("The number of Pipe clients connections as reached 10 000. Dude for real ?"),ID, Pip3lineConst::LERROR);
 
-        emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::LSTATUS);
+        emit log(tr("Opening a new connection: %1").arg(sid),ID,Pip3lineConst::PLSTATUS);
 
         updateConnectionsInfo();
     }
@@ -272,7 +271,7 @@ void PipeClientListener::onClientDeconnection()
     if (obj != nullptr) {
         QLocalSocket * socket = dynamic_cast<QLocalSocket *>(obj);
         if (socket != nullptr) {
-            emit log(tr("Disconnection for %1").arg(socket->serverName()), ID, Pip3lineConst::LSTATUS);
+            emit log(tr("Disconnection for %1").arg(socket->serverName()), ID, Pip3lineConst::PLSTATUS);
             if (sockets.contains(socket)) {
                 int cid = sockets.take(socket).sid;
 

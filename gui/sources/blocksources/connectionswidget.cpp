@@ -41,7 +41,7 @@ QVariant TargetModel::data(const QModelIndex &index, int role) const
             case 0:
                 return targetList.at(row).getTimestamp().toString();
             case 1:
-                return tr("0x%1").arg(QString::number((quintptr)targetList.at(row).getSource(), 16));
+                return tr("0x%1").arg(QString::number(reinterpret_cast<quintptr>(targetList.at(row).getSource()), 16));
             case 2:
                 return QString::number(targetList.at(row).getConnectionID());
             case 3:

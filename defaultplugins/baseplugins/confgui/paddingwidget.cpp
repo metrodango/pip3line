@@ -23,7 +23,7 @@ PaddingWidget::PaddingWidget(Padding *ntransform, QWidget *parent) :
     ui->setupUi(this);
     ui->blockSizeSpinBox->setMinimum(Padding::MINBLOCKSIZE);
     ui->blockSizeSpinBox->setMaximum(Padding::MAXBLOCKSIZE);
-    ui->typeComboBox->setCurrentIndex((int)transform->getVariant());
+    ui->typeComboBox->setCurrentIndex(static_cast<int>(transform->getVariant()));
     ui->blockSizeSpinBox->setValue(transform->getBlocksize());
     ui->charWidget->setChar(transform->getPadChar());
 
@@ -41,7 +41,7 @@ PaddingWidget::~PaddingWidget()
 
 void PaddingWidget::onVariantChanged(int val)
 {
-    transform->setVariant((Padding::PaddingVariant)val);
+    transform->setVariant(static_cast<Padding::PaddingVariant>(val));
 }
 
 void PaddingWidget::onBlockSizeChanged(int val)
@@ -52,6 +52,6 @@ void PaddingWidget::onBlockSizeChanged(int val)
 void PaddingWidget::onPaddingCharChange(char value) {
     transform->setPadChar(value);
     ui->typeComboBox->blockSignals(true);
-    ui->typeComboBox->setCurrentIndex((int)Padding::CUSTOM);
+    ui->typeComboBox->setCurrentIndex(static_cast<int>(Padding::CUSTOM));
     ui->typeComboBox->blockSignals(false);
 }

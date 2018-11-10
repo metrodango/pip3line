@@ -23,7 +23,7 @@ class HieroglyphyWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit HieroglyphyWidget(Hieroglyphy * transform, QWidget *parent = 0);
+        explicit HieroglyphyWidget(Hieroglyphy * transform, QWidget *parent = nullptr);
         ~HieroglyphyWidget();
         
     private slots:

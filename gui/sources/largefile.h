@@ -27,6 +27,7 @@ class FileSourceReader : public SourceReader
         int read(char * buffer, int maxLen);
         bool isReadable();
     private:
+        Q_DISABLE_COPY(FileSourceReader)
         bool open();
         QFile file;
 };
@@ -38,6 +39,7 @@ class FileSearch : public SearchAbstract {
         ~FileSearch();
         void setFileName(QString fileName);
     private:
+        Q_DISABLE_COPY(FileSearch)
         void internalStart();
         QString filename;
         static const quint32 MIN_SIZE_FOR_THREADS;
@@ -47,7 +49,7 @@ class LargeFile : public LargeRandomAccessSource
 {
         Q_OBJECT
     public:
-        explicit LargeFile(QObject *parent = 0);
+        explicit LargeFile(QObject *parent = nullptr);
         ~LargeFile();
         QString description();
         QString name();
@@ -74,7 +76,7 @@ class LargeFile : public LargeRandomAccessSource
         bool isFileWriteable();
         bool seekFile(quint64 offset);
         QWidget * requestGui(QWidget *parent,ByteSourceAbstract::GUI_TYPE type);
-        SearchAbstract *requestSearchObject(QObject *parent = 0);
+        SearchAbstract *requestSearchObject(QObject *parent = nullptr);
         bool readData(quint64 offset, QByteArray &data, int size);
         bool writeData(quint64 offset, int length, const QByteArray &data, quintptr source);
         QFile file;
@@ -91,6 +93,8 @@ class LargeFileSourceStateObj : public LargeRandomAccessSourceStateObj
         ~LargeFileSourceStateObj();
     protected:
         void internalRun();
+    private:
+        Q_DISABLE_COPY(LargeFileSourceStateObj)
 };
 
 #endif // LARGEFILE_H

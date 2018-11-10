@@ -20,4 +20,4 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 LIBS += -L"../../bin/" -ltransform
 INCLUDEPATH += ../../libtransform
-DESTDIR = ../../bin
+DESTDIR = $$PWD/../../bin

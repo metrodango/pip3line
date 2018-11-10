@@ -61,7 +61,7 @@ int ByteItemModel::size()
 {
     int lsize = byteSource->viewSize();
     if (lsize < 0) {
-        qWarning() << tr("Bytes source size is negative [x%1]").arg((quintptr)byteSource);
+        qWarning() << tr("Bytes source size is negative [x%1]").arg(reinterpret_cast<quintptr>(byteSource),0,16);
         lsize = 0;
     }
 
@@ -151,12 +151,10 @@ QVariant ByteItemModel::data(const QModelIndex &index, int role) const
         {
             return Qt::AlignCenter;
         }
-        break;
         case Qt::FontRole:
         {
             return GlobalsValues::GLOBAL_REGULAR_FONT;
         }
-        break;
     }
     return QVariant();
 }
@@ -175,7 +173,7 @@ QVariant ByteItemModel::headerData(int section, Qt::Orientation orientation, int
             return QVariant();
     } else {
         if (section < rowCount())
-            return QString("0x%1").arg((section * hexColumncount) + byteSource->startingRealOffset(),textOffsetSize,16,QChar('0'));
+            return QString("0x%1").arg(static_cast<quint64>(section * hexColumncount) + byteSource->startingRealOffset(),textOffsetSize,16,QChar('0'));
         else
             return QVariant();
     }
@@ -189,7 +187,7 @@ Qt::ItemFlags ByteItemModel::flags(const QModelIndex &index) const
     if (index.column() >= hexColumncount)
         return Qt::ItemIsEnabled;
 
-    if (hexColumncount * index.row() + index.column() + byteSource->startingRealOffset() < byteSource->size())
+    if (static_cast<quint64>(hexColumncount) * static_cast<quint64>(index.row()) + static_cast<quint64>(index.column()) + byteSource->startingRealOffset() < byteSource->size())
         return QAbstractItemModel::flags(index) | (byteSource->isReadonly() ? Qt::ItemIsEnabled : Qt::ItemIsEditable);
     else
         return Qt::ItemIsEnabled;
@@ -214,9 +212,9 @@ bool ByteItemModel::setData(const QModelIndex &index, const QVariant &value, int
                 temp = INT_MAX;
             }
 
-            byteSource->viewInsert(size,QByteArray(temp,0x00),(quintptr) this);
+            byteSource->viewInsert(static_cast<int>(size),QByteArray(static_cast<int>(temp),0x00),reinterpret_cast<quintptr>(this));
         }
-        byteSource->viewReplace(pos,1, hexVal, (quintptr) this);
+        byteSource->viewReplace(static_cast<int>(pos),1, hexVal, reinterpret_cast<quintptr>(this));
 
         emit dataChanged(index, index);
         return true;
@@ -251,7 +249,7 @@ bool ByteItemModel::insert(int pos, const QByteArray &data)
 {
     if (byteSource->hasCapability(ByteSourceAbstract::CAP_RESIZE) && !byteSource->isReadonly()) {
         beginResetModel();
-        byteSource->viewInsert(pos,data, (quintptr) this);
+        byteSource->viewInsert(pos,data, reinterpret_cast<quintptr>(this));
         endResetModel();
         return true;
     }
@@ -263,7 +261,7 @@ bool ByteItemModel::remove(int pos, int length)
 {
     if (byteSource->hasCapability(ByteSourceAbstract::CAP_RESIZE) && !byteSource->isReadonly()) {
         beginResetModel();
-        byteSource->viewRemove(pos,length, (quintptr) this);
+        byteSource->viewRemove(pos,length, reinterpret_cast<quintptr>(this));
         endResetModel();
         return true;
     }
@@ -277,7 +275,7 @@ bool ByteItemModel::replace(int pos, int length, QByteArray val)
              !byteSource->hasCapability(ByteSourceAbstract::CAP_RESIZE))) {
             return false;
         }
-        byteSource->viewReplace(pos,length,val, (quintptr) this);
+        byteSource->viewReplace(pos,length,val, reinterpret_cast<quintptr>(this));
         emit dataChanged(createIndex(pos), createIndex(pos + length));
         return true;
     }
@@ -297,8 +295,8 @@ void ByteItemModel::clear()
 int ByteItemModel::position(const QModelIndex &index) const
 {
     if (index.isValid() && index.column() < hexColumncount && index.column() > -1 ) {
-        qint64 pos = (qint64)hexColumncount * (qint64)index.row() + (qint64)index.column();
-        return ((pos < byteSource->viewSize() && pos < INT_MAX) ? pos : INVALID_POSITION);
+        qint64 pos = static_cast<qint64>(hexColumncount) * static_cast<qint64>(index.row()) + static_cast<qint64>(index.column());
+        return ((pos < byteSource->viewSize() && pos < INT_MAX) ? static_cast<int>(pos) : INVALID_POSITION);
     } else {
         return INVALID_POSITION;
     }
@@ -306,7 +304,7 @@ int ByteItemModel::position(const QModelIndex &index) const
 
 void ByteItemModel::receivedSourceUpdate(quintptr viewSource)
 {
-    if (viewSource != (quintptr) this) {
+    if (viewSource != reinterpret_cast<quintptr>(this)) {
         beginResetModel();
         textOffsetSize = byteSource->textOffsetSize();
         endResetModel();
@@ -315,7 +313,7 @@ void ByteItemModel::receivedSourceUpdate(quintptr viewSource)
 
 void ByteItemModel::receivedMinorSourceupdate(quint64 start, quint64 end)
 {
-    emit dataChanged(createIndex(start),createIndex(end));
+    emit dataChanged(createIndex(static_cast<int>(start)),createIndex(static_cast<int>(end)));
 }
 int ByteItemModel::getTextOffsetSize() const
 {

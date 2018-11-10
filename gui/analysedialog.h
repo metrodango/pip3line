@@ -24,7 +24,7 @@ class AnalyseDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit AnalyseDialog(GuiHelper * guiHelper, QWidget *parent = 0);
+        explicit AnalyseDialog(GuiHelper * guiHelper, QWidget *parent = nullptr);
         ~AnalyseDialog();
         BaseStateAbstract *getStateMngtObj();
         QString getInputValue();
@@ -61,6 +61,7 @@ class AnalyseDialogStateObj : public AppStateObj
         explicit AnalyseDialogStateObj(AnalyseDialog *diag);
         ~AnalyseDialogStateObj();
     private:
+        Q_DISABLE_COPY(AnalyseDialogStateObj)
         void internalRun();
 };
 

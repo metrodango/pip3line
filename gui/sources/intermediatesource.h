@@ -25,7 +25,7 @@ class IntermediateSource : public BasicSource
                                     TransformAbstract * transform = nullptr,
                                     quint64 oriStartOffset = 0,
                                     quint64 oriEndOffset = ULLONG_MAX,
-                                    QObject *parent = 0);
+                                    QObject *parent = nullptr);
         ~IntermediateSource();
         void setData(QByteArray data, quintptr source = INVALID_SOURCE);
         void replace(quint64 offset, int length, QByteArray repData, quintptr source = INVALID_SOURCE);
@@ -45,6 +45,7 @@ class IntermediateSource : public BasicSource
         void onOriginalReadOnlyChanged(bool val);
         void onOriginalSizeChanged();
     private:
+        Q_DISABLE_COPY(IntermediateSource)
         GuiHelper * guiHelper;
         ByteSourceAbstract *original;
         TransformAbstract *wrapperTransform;

@@ -27,7 +27,7 @@ class SettingsDialog : public AppDialog
 {
         Q_OBJECT
     public:
-        explicit SettingsDialog(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit SettingsDialog(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~SettingsDialog();
         void setVersionUpdateMessage(QString mess);
     public slots:
@@ -82,6 +82,9 @@ class SettingsDialog : public AppDialog
         void onCustomFontClicked();
         void onSaveNowClicked();
         void onHexSizesValuesChanged();
+        void onJsonColorChanges();
+        void onSearchColorsChanges();
+        void onResetAppearance();
     private:
         Q_DISABLE_COPY(SettingsDialog)
         void connectUpdateSignals();

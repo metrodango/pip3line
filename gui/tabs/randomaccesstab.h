@@ -34,7 +34,7 @@ class RandomAccessTab : public TabAbstract
 {
         Q_OBJECT
     public:
-        explicit RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit RandomAccessTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~RandomAccessTab();
         int getBlockCount() const;
         ByteSourceAbstract *getSource(int blockIndex);
@@ -81,6 +81,8 @@ class RandomAccessStateObj : public TabStateObj
         explicit RandomAccessStateObj(RandomAccessTab *tab);
         ~RandomAccessStateObj();
         void run();
+    private:
+        Q_DISABLE_COPY(RandomAccessStateObj)
 };
 
 class RandomAccessClosingStateObj : public BaseStateAbstract
@@ -95,6 +97,8 @@ class RandomAccessClosingStateObj : public BaseStateAbstract
     protected:
         RandomAccessTab *tab;
         int scrollIndex;
+    private:
+        Q_DISABLE_COPY(RandomAccessClosingStateObj)
 };
 
 #endif // RANDOMACCESSTAB_H

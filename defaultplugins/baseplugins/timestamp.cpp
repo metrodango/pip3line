@@ -135,7 +135,7 @@ bool TimeStamp::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLTZ),id);
     } else {
-        setTZ((TimeStamp::TZ) val);
+        setTZ(static_cast<TimeStamp::TZ>(val));
     }
 
     return res;

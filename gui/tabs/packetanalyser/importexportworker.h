@@ -22,7 +22,7 @@ class ImportExportWorker : public QObject
                                     GuiConst::FileOperations ops = GuiConst::UNKNOWN_OPERATION,
                                     GuiConst::FileFormat format = GuiConst::INVALID_FORMAT,
                                     bool enableCompression = true,
-                                    QObject *parent = 0);
+                                    QObject *parent = nullptr);
         ~ImportExportWorker();
         quint32 getPcapLinkType() const;
         void setPcapLinkType(const PcapDef::Link_Type &value);
@@ -58,6 +58,7 @@ class ImportExportWorker : public QObject
         void finished();
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     private:
+        Q_DISABLE_COPY(ImportExportWorker)
         QSharedPointer<Packet> nextPacket();
         void addPlainRawPacket(QByteArray data, QDateTime date = QDateTime::currentDateTime());
         GuiConst::FileOperations ops;

@@ -15,7 +15,7 @@ class NewViewButton : public QPushButton
         Q_OBJECT
     public:
         static const QString TEXT_TEXT;
-        explicit NewViewButton(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit NewViewButton(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~NewViewButton();
         SingleViewAbstract *getView(ByteSourceAbstract *bytesource, QWidget *parent);
         TabAbstract::ViewTab getTabData() const;
@@ -23,6 +23,7 @@ class NewViewButton : public QPushButton
     signals:
         void newViewRequested();
     private:
+        Q_DISABLE_COPY(NewViewButton)
         NewViewMenu * menu;
 };
 

@@ -24,7 +24,7 @@ class DistormWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit DistormWidget(DistormTransf * transform, QWidget *parent = 0);
+        explicit DistormWidget(DistormTransf * transform, QWidget *parent = nullptr);
         ~DistormWidget();
     private slots:
         void onMaxInstruc(int val);

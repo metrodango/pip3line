@@ -211,12 +211,12 @@ void SearchLine::setError(bool val)
     update();
 }
 
-void SearchLine::updateProgress(double val)
+void SearchLine::updateProgress(quint64 val)
 {
     if (searching) { // it means that we are searching ..
-        progress = val;
+        progress = static_cast<double>(val) / static_cast<double>(sourceSize);
         update();
-    } // ignore the update otherwise, it would be an old signal kicking in
+    }
 }
 
 void SearchLine::onSearchStarted()
@@ -262,7 +262,9 @@ void SearchLine::paintEvent(QPaintEvent *event)
         initStyleOption(&lenap);
         QRect backgroundRect = style()->subElementRect(QStyle::SE_LineEditContents, &lenap, this);
 
-        int mid = backgroundRect.width() * progress;
+
+        int mid = qRound(progress * double(backgroundRect.width()));
+
         QLinearGradient gradient(10,10,backgroundRect.width(),10);
 
         gradient.setColorAt(0, LOADING_COLOR);
@@ -284,7 +286,7 @@ void SearchLine::paintEvent(QPaintEvent *event)
 void SearchLine::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Return) {
-        emit newSearch(text(),event->modifiers());
+        emit newSearch(text(), event->modifiers());
         event->accept();
         return;
     } else if (event->key() == Qt::Key_N && event->modifiers().testFlag(Qt::ControlModifier))  {
@@ -420,22 +422,19 @@ void SearchWidget::onSearchStarted()
         stopPushButton->setEnabled(true);
         if (model != nullptr)
             model->startSearch();
+
+        statsTimer.start(200, this);
     }
 }
 
 void SearchWidget::onSearchEnded()
 {
     if (searchDelegate != nullptr) {
+        statsTimer.stop();
         setCursor(Qt::ArrowCursor);
         stopPushButton->setEnabled(false);
         lineEdit->onSearchEnded();
     }
-}
-
-void SearchWidget::updateStatusProgress(double val)
-{
-    if (searchDelegate != nullptr)
-        lineEdit->updateProgress(val);
 }
 
 void SearchWidget::clearSearch()
@@ -464,7 +463,7 @@ void SearchWidget::nextFind(quint64 pos)
     }
 }
 
-void SearchWidget::onSearch(QString val, int modifiers)
+void SearchWidget::onSearch(QString val, unsigned int modifiers)
 {
     if (searchDelegate != nullptr) {
         qDebug() << "Searching for " << val;
@@ -555,6 +554,14 @@ void SearchWidget::onRequestNext()
 {
     nextFind(lastJumpStart);
 }
+
+void SearchWidget::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+    if (searchDelegate != nullptr) {
+        lineEdit->updateProgress(searchDelegate->getProgress());
+    }
+}
 bool SearchWidget::isViewIsText() const
 {
     return viewIsText;
@@ -590,7 +597,6 @@ void SearchWidget::setSearchDelegate(SearchAbstract * delegate)
         lineEdit->setPlaceholderText(FIND_PLACEHOLDER_TEXT);
         lineEdit->setToolTip(TOOLTIP_TEXT);
         connect(searchDelegate, &SearchAbstract::errorStatus, this, &SearchWidget::setError,Qt::QueuedConnection);
-        connect(searchDelegate, &SearchAbstract::progressStatus,lineEdit, &SearchLine::updateProgress,Qt::QueuedConnection);
         connect(stopPushButton, &QPushButton::clicked, searchDelegate, &SearchAbstract::stopSearch, Qt::DirectConnection);
 
         setVisible(true);

@@ -36,7 +36,7 @@ void TDS7_ENC::transform(const QByteArray &input, QByteArray &output)
         output = QByteArray(size * 2, ('\x00' ^ xorEnc));
 
         for (int i = 0; i < size; i++) {
-            output[i * 2] =  (((uchar)input[i]) >> 4 | ((uchar)input[i]) << 4) ^ xorEnc;
+            output[i * 2] =  uchar(uchar(input[i]) >> uchar(4) | uchar(input[i]) << uchar(4)) ^ xorEnc;
         }
 
     } else {
@@ -59,7 +59,7 @@ void TDS7_ENC::transform(const QByteArray &input, QByteArray &output)
 
         for (int i = 0; i < size; i++) {
             if (i % 2 == 0) {
-                output[i/2] = ((uchar)output[i]) >> 4 | ((uchar)output[i]) << 4;
+                output[i/2] = char(uchar(uchar(output[i]) >> uchar(4)) | uchar(uchar(output[i]) << uchar(4)));
             }
         }
 
@@ -74,5 +74,5 @@ bool TDS7_ENC::isTwoWays()
 
 QString TDS7_ENC::help() const
 {
-    return tr("TDS 7 password encoding used my MS SQL databases connections. Useful when the connection is unencrypted or one can intercept the TLs connection.");
+    return tr("TDS 7 password encoding used by MS SQL databases connections. Useful when the connection is unencrypted or one can intercept the TLS connection.");
 }

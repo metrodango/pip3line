@@ -48,9 +48,9 @@ QString Padding::help() const
 QHash<QString, QString> Padding::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
-    properties.insert(XMLVARIANT,QString::number((int)choosenVariant));
+    properties.insert(XMLVARIANT,QString::number(static_cast<int>(choosenVariant)));
     properties.insert(XMLPADDINGCHAR,saveChar(padChar));
-    properties.insert(XMLBLOCKSIZE,QString::number((int)blockSize));
+    properties.insert(XMLBLOCKSIZE,QString::number(static_cast<int>(blockSize)));
 
     return properties;
 }
@@ -73,7 +73,7 @@ bool Padding::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLVARIANT),id);
     } else {
-        setVariant((PaddingVariant)val);
+        setVariant(static_cast<PaddingVariant>(val));
     }
 
     QString tmp = propertiesList.value(XMLPADDINGCHAR);
@@ -154,16 +154,16 @@ void Padding::transform(const QByteArray &input, QByteArray &output) {
         case ANSI:
             for (int i = 0; i < paddingLength - 1; i++)
                 output.append('\x00');
-            output.append((char)paddingLength);
+            output.append(static_cast<char>(paddingLength));
             break;
         case ISO:
-            qsrand(QTime::currentTime().msec()); // non cryptographic quality, boo
+            qsrand(static_cast<uint>(QTime::currentTime().msec())); // non cryptographic quality, boo
             for (int i = 0; i < paddingLength; i++)
-                output.append((char)(qrand()) % 255);
+                output.append(static_cast<char>((qrand()) % 256));
             break;
         case PKCS7:
             for (int i = 0; i < paddingLength; i++)
-                output.append((char)paddingLength);
+                output.append(static_cast<char>(paddingLength));
             break;
         case CUSTOM:
             for (int i = 0; i < paddingLength; i++)

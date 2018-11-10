@@ -23,7 +23,7 @@ class RegularExpWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit RegularExpWidget(RegularExp *ntransform, QWidget *parent = 0);
+        explicit RegularExpWidget(RegularExp *ntransform, QWidget *parent = nullptr);
         ~RegularExpWidget();
     private slots:
         void onActionTypeChange(int val);

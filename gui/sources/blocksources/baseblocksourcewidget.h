@@ -13,7 +13,7 @@ class BaseBlockSourceWidget : public QTabWidget
 {
         Q_OBJECT
     public:
-        explicit BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent = 0);
+        explicit BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent = nullptr);
         ~BaseBlockSourceWidget();
         void insertWidgetInGeneric(int index, QWidget * widget);
         void setTLSWidget(QWidget * widget);
@@ -26,6 +26,7 @@ class BaseBlockSourceWidget : public QTabWidget
         void onInboundTransformWidgetDDestroyed();
         void onOutboundTransformWidgetDDestroyed();
     private:
+        Q_DISABLE_COPY(BaseBlockSourceWidget)
         Ui::BaseBlockSourceWidget *ui;
         BlocksSource *bsource;
         QWidget * sslgui;

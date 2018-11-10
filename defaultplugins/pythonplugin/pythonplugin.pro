@@ -12,8 +12,8 @@ TEMPLATE = lib
 CONFIG += plugin debug no_keywords c++14 warn_on
 
 # Comment this out if you want to compile the 2.7 version
-#CONFIG += CONF_PYTHON_3
-DEFINES += CONF_PYTHON_27
+CONFIG += CONF_PYTHON_3
+#DEFINES += CONF_PYTHON_27
 
 CONF_PYTHON_3 {
     DEFINES += BUILD_PYTHON_3

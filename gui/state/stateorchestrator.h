@@ -47,6 +47,7 @@ class StateOrchestrator : public QObject
         void finished();
         void statusupdate();
     private:
+        Q_DISABLE_COPY(StateOrchestrator)
         void onFinished();
         QStack<BaseStateAbstract *> executionStack;
         QThread *localthread;

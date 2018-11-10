@@ -64,7 +64,7 @@ bool BytesRange::isInRange(int value)
     if (value < 0)
         return false;
 
-    return isInRange((quint64)value);
+    return isInRange(static_cast<quint64>(value));
 }
 
 bool BytesRange::isInRange(quint64 value)
@@ -293,7 +293,6 @@ void BytesRange::addMarkToList(BytesRangeList *list, quint64 start, quint64 end,
     newRange->setForeground(fgColor);
     newRange->setDescription(toolTip);
     BytesRange::addMarkToList(list, newRange);
-
 }
 
 void BytesRange::clearMarkingFromList(BytesRangeList *list, quint64 start, quint64 end)
@@ -342,11 +341,6 @@ void BytesRange::clearMarkingFromList(BytesRangeList *list, quint64 start, quint
             }
         }
     }
-
-//    qDebug() << "Marks" << list->size();
-//    for (int i = 0; i < list->size(); i++) {
-//        qDebug() << "- " << QString::number(list->at(i)->lowerVal,16) << ":" << QString::number(list->at(i)->upperVal,16);
-    //    }
 }
 
 void BytesRange::moveMarkingAfterDelete(BytesRangeList *list, quint64 pos, quint64 deleteSize)
@@ -419,7 +413,7 @@ void BytesRange::moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int 
         if (diff < 0) { // expansion
             diff = qAbs(diff);
             if (pos < currRange->lowerVal){
-                if (currRange->lowerVal > ULLONG_MAX - diff){ // at this point the range is ... out of range, removing it
+                if (currRange->lowerVal > ULLONG_MAX - static_cast<quint64>(diff)){ // at this point the range is ... out of range, removing it
                     currRange.clear();
                     list->removeAt(i);
                     i--; // need to take into account the fact that one object was removed;
@@ -427,29 +421,64 @@ void BytesRange::moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int 
                     continue;
                 }
                 else
-                    currRange->lowerVal = currRange->lowerVal + diff;
+                    currRange->lowerVal = currRange->lowerVal + static_cast<quint64>(diff);
             }
 
-            if (currRange->upperVal > ULLONG_MAX - diff) {
+            if (currRange->upperVal > ULLONG_MAX - static_cast<quint64>(diff)) {
                 currRange->upperVal = ULLONG_MAX;
             }
             else
-                currRange->upperVal = currRange->upperVal + diff;
+                currRange->upperVal = currRange->upperVal + static_cast<quint64>(diff);
         } else { // reduction
             if (pos < currRange->lowerVal){
-                if (currRange->lowerVal < (quint64)diff) // diff is positive
+                if (currRange->lowerVal < static_cast<quint64>(diff)) // diff is positive
                     currRange->lowerVal = 0;
                 else
-                    currRange->lowerVal = currRange->lowerVal - diff;
+                    currRange->lowerVal = currRange->lowerVal - static_cast<quint64>(diff);
             }
 
-            if (currRange->upperVal < (quint64)diff) { // at this point the range is ... out of range, removing it
+            if (currRange->upperVal < static_cast<quint64>(diff)) { // at this point the range is ... out of range, removing it
                 currRange.clear();
                 list->removeAt(i);
                 msize--;
             }
             else
-                currRange->upperVal = currRange->upperVal - diff;
+                currRange->upperVal = currRange->upperVal - static_cast<quint64>(diff);
+        }
+    }
+}
+
+void BytesRange::compareAndMark(const QByteArray &data1, const QByteArray &data2, BytesRangeList *ranges, const QColor &bgcolor, const QColor &fgColor, const QString &toolTip)
+{
+    int size = qMin(data1.size(), data2.size());
+    if (size > 0) {
+        int cstart = 0;
+        bool markingBytes = false;
+        for (int i = 0; i < size; i++) {
+            if (data1.at(i) != data2.at(i)) {
+                if (!markingBytes) {
+                    cstart = i;
+                    markingBytes = true;
+                }
+            } else if (markingBytes) {
+                markingBytes = false;
+                // i is garanteed to be > 0
+                BytesRange::addMarkToList(ranges,
+                                          static_cast<quint64>(cstart),
+                                          static_cast<quint64>(i - 1),
+                                          bgcolor,
+                                          fgColor,
+                                          toolTip);
+
+            }
+        }
+        if (markingBytes) {
+            BytesRange::addMarkToList(ranges,
+                                      static_cast<quint64>(cstart),
+                                      static_cast<quint64>(qMax(data1.size(), data2.size()) - 1),
+                                      bgcolor,
+                                      fgColor,
+                                      toolTip);
         }
     }
 }
@@ -515,6 +544,7 @@ ByteSourceAbstract::ByteSourceAbstract(QObject *parent) :
     QObject(parent)
 {
     capabilities = 0;
+    trackChanges = false;
     confGui = nullptr;
     buttonBar = nullptr;
     upperView = nullptr;
@@ -568,7 +598,7 @@ QByteArray ByteSourceAbstract::viewExtract(int offset, int length)
         return QByteArray();
     }
 
-    return extract(offset,length);
+    return extract(static_cast<quint64>(offset),length);
 }
 
 char ByteSourceAbstract::viewExtract(int offset)
@@ -577,7 +607,7 @@ char ByteSourceAbstract::viewExtract(int offset)
         emit log(tr("[viewExtract] Negative offset %1, ignoring").arg(offset),metaObject()->className(),Pip3lineConst::LERROR);
         return '\00';
     }
-    return extract(offset);
+    return extract(static_cast<quint64>(offset));
 }
 
 void ByteSourceAbstract::replace(quint64 , int , QByteArray , quintptr )
@@ -591,7 +621,7 @@ void ByteSourceAbstract::viewReplace(int offset, int length, QByteArray repData,
         emit log(tr("[viewReplace] Negative offset/length o:%1 l:%2, ignoring").arg(offset).arg(length),metaObject()->className(),Pip3lineConst::LERROR);
         return;
     }
-    replace(offset,length,repData,source);
+    replace(static_cast<quint64>(offset),length,repData,source);
 }
 
 void ByteSourceAbstract::insert(quint64 , QByteArray , quintptr )
@@ -605,7 +635,7 @@ void ByteSourceAbstract::viewInsert(int offset, QByteArray repData, quintptr sou
         emit log(tr("[viewInsert] Negative offset %1, ignoring").arg(offset),metaObject()->className(),Pip3lineConst::LERROR);
         return;
     }
-    insert(offset,repData,source);
+    insert(static_cast<quint64>(offset),repData,source);
 }
 
 void ByteSourceAbstract::remove(quint64, int , quintptr )
@@ -620,7 +650,7 @@ void ByteSourceAbstract::viewRemove(int offset, int length, quintptr source)
         emit log(tr("[viewRemove] Negative offset/length o:%1 l:%2, ignoring").arg(offset).arg(length),metaObject()->className(),Pip3lineConst::LERROR);
         return;
     }
-    remove(offset,length,source);
+    remove(static_cast<quint64>(offset),length,source);
 }
 
 void ByteSourceAbstract::clear(quintptr)
@@ -690,7 +720,7 @@ void ByteSourceAbstract::viewMark(int start, int end, const QColor &bgcolor, con
     if (start < 0 || end < 0 ) {
         emit log(tr("[viewMark] Negative end/start %1/%2, ignoring").arg(start).arg(end),metaObject()->className(),Pip3lineConst::LERROR);
     } else {
-        mark(start,end,bgcolor,fgColor,toolTip);
+        mark(static_cast<quint64>(start),static_cast<quint64>(end),bgcolor,fgColor,toolTip);
     }
 }
 
@@ -720,7 +750,7 @@ void ByteSourceAbstract::viewClearMarking(int start, int end)
     if (start < 0 || end < 0 ) {
         emit log(tr("[viewClearMarking] Negative end/start %1/%2, ignoring").arg(start).arg(end),metaObject()->className(),Pip3lineConst::LERROR);
     } else {
-        clearMarking(start,end);
+        clearMarking(static_cast<quint64>(start),static_cast<quint64>(end));
     }
 }
 
@@ -760,6 +790,16 @@ void ByteSourceAbstract::clearAllMarkingsNoUpdate()
         delete userMarkingsRanges;
         userMarkingsRanges = nullptr;
     }
+}
+
+bool ByteSourceAbstract::isTrackChanges() const
+{
+    return trackChanges;
+}
+
+void ByteSourceAbstract::setTrackChanges(bool value)
+{
+    trackChanges = value;
 }
 
 BytesRangeList *ByteSourceAbstract::getUserMarkingsRanges() const
@@ -818,7 +858,7 @@ QColor ByteSourceAbstract::getBgViewColor(int pos)
         return QColor();
     }
 
-    return getBgColor(pos);
+    return getBgColor(static_cast<quint64>(pos));
 }
 
 QColor ByteSourceAbstract::getFgColor(quint64 pos)
@@ -850,7 +890,7 @@ QColor ByteSourceAbstract::getFgViewColor(int pos)
         emit log(tr("[getFgViewColor] Negative offset/length o:%1, ignoring").arg(pos),metaObject()->className(),Pip3lineConst::LERROR);
         return QColor();
     }
-    return getFgColor(pos);
+    return getFgColor(static_cast<quint64>(pos));
 }
 
 QString ByteSourceAbstract::getToolTip(quint64 pos)
@@ -884,7 +924,7 @@ QString ByteSourceAbstract::getViewToolTip(int pos)
         return QString();
     }
 
-    return getToolTip(pos);
+    return getToolTip(static_cast<quint64>(pos));
 }
 
 QString ByteSourceAbstract::toPrintableString(const QByteArray &val)
@@ -961,7 +1001,7 @@ int ByteSourceAbstract::viewSize()
         emit log(tr("Size of the byte source is hitting the INT_MAX limit for the gui view, consider implementing a discreet view"),metaObject()->className(),Pip3lineConst::LERROR);
         csize = INT_MAX;
     }
-    return (int)csize;
+    return static_cast<int>(csize);
 }
 
 void ByteSourceAbstract::setViewSize(int)
@@ -1119,7 +1159,7 @@ void ByteSourceAbstract::writeToFile(QString destFilename, QByteArray data)
             if (written == data.length())
                 break;
             else
-                data = data.mid(written - 1);
+                data = data.mid(static_cast<int>(written) - 1);
         };
 
         file.close();
@@ -1137,7 +1177,7 @@ void ByteSourceAbstract::saveToFile(QString destFilename, quint64 startOffset, q
         } else {
             t = endOffset - startOffset + 1;
         }
-        writeToFile(destFilename, extract(startOffset,t));
+        writeToFile(destFilename, extract(startOffset,static_cast<int>(t)));
     } else {
         emit log(tr("Invalid offsets, ignoring save."),metaObject()->className(),Pip3lineConst::LERROR);
     }
@@ -1152,7 +1192,7 @@ void ByteSourceAbstract::saveToFile(QString destFilename)
 int ByteSourceAbstract::getViewOffset(quint64 realoffset)
 { // return the parameter value casted to int by default
     if (realoffset < INT_MAX) { // checking the int limit
-        return realoffset;
+        return static_cast<int>(realoffset);
     } else {
         emit log(tr("Offset value is hitting the INT_MAX limit for the gui view, consider implementing a discreet view"),metaObject()->className(),Pip3lineConst::LERROR);
         return -1;
@@ -1165,7 +1205,7 @@ quint64 ByteSourceAbstract::getRealOffset(int viewOffset) // by default return t
         emit log(tr("View Offset is negative, returning zero"),metaObject()->className(),Pip3lineConst::LERROR);
         return 0;
     } else {
-        return (quint64)viewOffset;
+        return static_cast<quint64>(viewOffset);
     }
 }
 
@@ -1200,6 +1240,7 @@ void ByteSourceStateObj::run()
         writer->writeAttribute(GuiConst::STATE_NAME, bs->name());
         writer->writeAttribute(GuiConst::STATE_READONLY, write(bs->isReadonly()));
         writer->writeAttribute(GuiConst::STATE_STATIC_MARKINGS, write(bs->hasStaticMarking()));
+        writer->writeAttribute(GuiConst::STATE_TRACK_CHANGES, write(bs->isTrackChanges()));
 
         // inherited class save
         internalRun();
@@ -1236,7 +1277,7 @@ void ByteSourceStateObj::run()
                 ByteSourceAbstract::HistItem hi = history.at(i);
                 writer->writeStartElement(GuiConst::STATE_HEX_HISTORY_ITEM);
                 writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_OFFSET, write(hi.offset));
-                writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_ACTION, write((int)hi.action));
+                writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_ACTION, write(static_cast<int>(hi.action)));
                 writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_BEFORE, write(hi.before));
                 writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_AFTER, write(hi.after));
                 writer->writeEndElement(); // STATE_HEX_HISTORY_ITEM
@@ -1267,6 +1308,10 @@ void ByteSourceStateObj::run()
 
             if (attributes.hasAttribute(GuiConst::STATE_STATIC_MARKINGS)) {
                 bs->setStaticMarking(readBool(attributes.value(GuiConst::STATE_STATIC_MARKINGS)));
+            }
+
+            if (attributes.hasAttribute(GuiConst::STATE_TRACK_CHANGES)) {
+                bs->setTrackChanges(readBool(attributes.value(GuiConst::STATE_TRACK_CHANGES)));
             }
 
             // loading inherited class specific
@@ -1396,7 +1441,7 @@ void ByteSourceStateObj::run()
                             continue;
                         }
                         else
-                            hi.action = (ByteSourceAbstract::HistAction) action;
+                            hi.action = static_cast<ByteSourceAbstract::HistAction>(action);
 
                         hi.before = readByteArray(attributes.value(GuiConst::STATE_HEX_HISTORY_BEFORE));
 

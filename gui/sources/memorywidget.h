@@ -29,7 +29,7 @@ class MemoryWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit MemoryWidget(CurrentMemorysource *source, QWidget *parent = 0);
+        explicit MemoryWidget(CurrentMemorysource *source, QWidget *parent = nullptr);
         ~MemoryWidget();
         void setProcSelection(bool val);
         QSize sizeHint() const;
@@ -40,6 +40,7 @@ class MemoryWidget : public QWidget
         void contextMenuAction(QAction * action);
         void onSearch(QByteArray item, QBitArray mask, bool maybetext);
     private:
+        Q_DISABLE_COPY(MemoryWidget)
         static const QString GOTOSTART;
         static const QString GOTOEND;
         void initContextMenu();

@@ -31,6 +31,7 @@ Released under AGPL see LICENSE for more information
 CompareWorker::CompareWorker(ByteSourceAbstract *sA, ByteSourceAbstract *sB, QObject *parent) :
     QObject(parent)
 {
+    curProgress.store(0);
     sourceA = sA;
     connect(this, &CompareWorker::newMarkingsA, sourceA, &ByteSourceAbstract::setNewMarkings, Qt::QueuedConnection);
     sourceB = sB;
@@ -56,8 +57,7 @@ CompareWorker::~CompareWorker()
 
 void CompareWorker::compare()
 {
-    quint64 compSize = qMin(sizeA, sizeB);
-    quint64 progressMark = compSize * 0.01;
+    quint64 compSize = getComparisonSize();
     tooltipDiffA = tr("%1 \"%2\"").arg(markSame ? "Same as" : "Different from").arg(nameB);
     tooltipDiffB = tr("%1 \"%2\"").arg(markSame ? "Same as" : "Different from").arg(nameA);
     quint64 realA = 0;
@@ -78,21 +78,21 @@ void CompareWorker::compare()
     for(quint64 j = 0; j < count; j++) {
         quint64 curBlockIndex = j * BLOCKSIZE;
         quint64 size = qMin(BLOCKSIZE, qMin(sizeA - curBlockIndex, sizeB - curBlockIndex));
-        QByteArray dataA = sourceA->extract(startA + curBlockIndex, size);
-        QByteArray dataB = sourceB->extract(startB + curBlockIndex, size);
+        QByteArray dataA = sourceA->extract(startA + curBlockIndex, static_cast<int>(size));
+        QByteArray dataB = sourceB->extract(startB + curBlockIndex, static_cast<int>(size));
         if (dataA.size() != dataB.size()) {
             qCritical() << tr("Extracted data size different .. something wrong here T_T");
             endingThread();
             return;
         } else { // getting the actual size read
-            size = (quint64)dataA.size();
+            size = static_cast<quint64>(dataA.size());
         }
 
         for (quint64 k = 0; k < size; k++){
             quint64 curindex = k + curBlockIndex;
             realA = startA + curindex;
             realB = startB + curindex;
-            if (dataA.at(k) != dataB.at(k)) {
+            if (dataA.at(static_cast<int>(k)) != dataB.at(static_cast<int>(k))) {
                 if (!markSame) {
                     markingA(realA);
                     markingB(realB);
@@ -113,9 +113,7 @@ void CompareWorker::compare()
                 return;
             }
 
-            if (curindex > 0 && progressMark > 0 && curindex % progressMark == 0) {
-                emit progress((int)(float)(curindex) * ((float)100/(float)compSize));
-            }
+            curProgress = curindex;
         }
     }
 
@@ -191,10 +189,6 @@ void CompareWorker::endBMarking()
         BytesRange::addMarkToList(rangesB,markerStartB,markerEndB,marksColor,QColor(),tooltipDiffB);
     ismarkingB = false;
 }
-int CompareWorker::getResultDifferences() const
-{
-    return resultDifferences;
-}
 
 QColor CompareWorker::getMarkColor() const
 {
@@ -204,6 +198,16 @@ QColor CompareWorker::getMarkColor() const
 void CompareWorker::setMarkColor(const QColor &value)
 {
     marksColor = value;
+}
+
+quint64 CompareWorker::getProgress() const
+{
+    return curProgress.load();
+}
+
+quint64 CompareWorker::getComparisonSize() const
+{
+    return qMin(sizeA, sizeB);
 }
 
 QString CompareWorker::getNameB() const
@@ -320,6 +324,7 @@ ComparisonDialog::ComparisonDialog(GuiHelper *nguiHelper, QWidget *parent) :
     if (ui == nullptr) {
         qFatal("Cannot allocate memory for Ui::ComparisonDialog X{");
     }
+    worker = nullptr;
     workerThread = nullptr;
     ui->setupUi(this);
     ui->resultLabel->setVisible(false);
@@ -457,7 +462,7 @@ void ComparisonDialog::onCompare()
     if (sourceA == nullptr || sourceB == nullptr)
         return;
 
-    CompareWorker *worker = new(std::nothrow) CompareWorker(sourceA, sourceB);
+    worker = new(std::nothrow) CompareWorker(sourceA, sourceB);
     if (worker == nullptr) {
         qFatal("Cannot allocate memory for CompareWorker X{");
     }
@@ -491,12 +496,13 @@ void ComparisonDialog::onCompare()
     }
     worker->moveToThread(workerThread);
     connect(workerThread, &QThread::started, worker, &CompareWorker::compare);
-    connect(worker, &CompareWorker::progress, ui->progressBar, &QProgressBar::setValue);
+  //  connect(worker, &CompareWorker::progress, ui->progressBar, &QProgressBar::setValue);
     connect(worker, &CompareWorker::finishComparing, this, &ComparisonDialog::endOfComparison);
 
     ui->stackedWidget->setCurrentIndex(1);
     compareTimer.restart();
     workerThread->start();
+    statsTimer.start(100,this);
 }
 
 void ComparisonDialog::loadTabs()
@@ -545,8 +551,10 @@ void ComparisonDialog::onEntrySelected(int)
     checkIfComparable();
 }
 
-void ComparisonDialog::endOfComparison(int differences)
+void ComparisonDialog::endOfComparison(quint64 differences)
 {
+    worker = nullptr;
+    statsTimer.stop();
     guiHelper->getLogger()->logStatus(tr("Comparison done in %1 ms").arg(compareTimer.elapsed()));
     workerThread->quit();
     workerThread->deleteLater();
@@ -558,8 +566,6 @@ void ComparisonDialog::endOfComparison(int differences)
     }
     ui->resultLabel->setVisible(true);
     ui->resultLabel->setText(tr("Differences found: <b>%1</b>").arg(differences));
-
-
 }
 
 void ComparisonDialog::refreshEntries(QComboBox *entryBox, int count)
@@ -654,6 +660,15 @@ void ComparisonDialog::checkIfComparable()
         ui->acceptPushButton->setEnabled(true);
         ui->acceptPushButton->setToolTip("click here to begin comparison");
     }
+}
+
+void ComparisonDialog::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event)
+    if (worker != nullptr) {
+        ui->progressBar->setValue(qRound(float(worker->getProgress()) * (float(100)/float(worker->getComparisonSize()))));
+    }
+
 }
 QColor ComparisonDialog::getMarksColor() const
 {

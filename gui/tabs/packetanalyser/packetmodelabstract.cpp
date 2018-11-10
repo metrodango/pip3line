@@ -94,7 +94,7 @@ int PacketModelAbstract::getDefaultWidthForColumn(const int &col)
 void PacketModelAbstract::setMaxPayloadDisplaySize(int value)
 {
     maxPayloadDisplaySize = value;
-    emit dataChanged(createIndex(0, COLUMN_PAYLOAD), createIndex(size() - 1, COLUMN_PAYLOAD));
+    emit dataChanged(createIndex(0, COLUMN_PAYLOAD), createIndex(static_cast<int>(size()) - 1, COLUMN_PAYLOAD));
 }
 
 bool PacketModelAbstract::isAutoMergeConsecutivePackets() const
@@ -173,7 +173,7 @@ QVariant PacketModelAbstract::payloadData(const QSharedPointer<Packet> packet, i
         else if (column == COLUMN_CID)
             return QVariant(packet->getSourceid());
         else if (column == COLUMN_LENGTH)
-            return QVariant(GuiConst::convertSizetoBytesString(packet->getData().length()));
+            return QVariant(GuiConst::convertSizetoBytesString(static_cast<quint64>(packet->getData().length())));
         else if (column > lastPredefinedColumn && column < columnNames.size()) {
             QHash<QString, QString> fields = packet->getAdditionalFields();
             if (fields.contains(columnNames.at(column))) {
@@ -217,7 +217,7 @@ QVariant PacketModelAbstract::payloadData(const QSharedPointer<Packet> packet, i
 QSharedPointer<Packet> PacketModelAbstract::getPacket(const QModelIndex &index)
 {
     if (index.isValid()) {
-        return getPacket((qint64)index.row());
+        return getPacket(static_cast<qint64>(index.row()));
     }
 
     return QSharedPointer<Packet>();
@@ -227,7 +227,7 @@ qint64 PacketModelAbstract::indexToPacketIndex(const QModelIndex &index)
 {
     if (index.isValid()) {
         // by default nothing to do
-        return (qint64)index.row();
+        return static_cast<qint64>(index.row());
     }
 
     return INVALID_POS;
@@ -409,7 +409,7 @@ void PacketModelAbstract::setColumnFormat(const QString &columnName, OutputForma
         Usercolumn uc = userColumnsDef.value(columnName);
         uc.format = format;
         userColumnsDef.insert(columnName, uc);
-        emit dataChanged(createIndex(0,COLUMN_PAYLOAD), createIndex(size() - 1, COLUMN_PAYLOAD));
+        emit dataChanged(createIndex(0,COLUMN_PAYLOAD), createIndex(static_cast<int>(size()) - 1, COLUMN_PAYLOAD));
     } else if (userColumnsDef.contains(columnName)) {
         Usercolumn uc = userColumnsDef.value(columnName);
         uc.format = format;

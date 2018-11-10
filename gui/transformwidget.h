@@ -51,7 +51,7 @@ class TransformWidget : public QWidget
     Q_OBJECT
     
     public:
-        explicit TransformWidget(GuiHelper *guiHelper ,QWidget *parent = 0);
+        explicit TransformWidget(GuiHelper *guiHelper ,QWidget *parent = nullptr);
         ~TransformWidget();
         QByteArray output();
         TransformAbstract *getTransform();
@@ -154,6 +154,7 @@ class TransformWidgetStateObj : public BaseStateAbstract
         void run();
 
     private:
+        Q_DISABLE_COPY(TransformWidgetStateObj)
         TransformWidget *tw;
 };
 
@@ -165,6 +166,7 @@ class TransformWidgetFoldingObj : public BaseStateAbstract
         ~TransformWidgetFoldingObj();
         void run();
     private:
+        Q_DISABLE_COPY(TransformWidgetFoldingObj)
         TransformWidget *tw;
 };
 

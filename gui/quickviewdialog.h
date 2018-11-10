@@ -28,7 +28,7 @@ class QuickViewDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit QuickViewDialog(GuiHelper * guiHelper, QWidget *parent = 0);
+        explicit QuickViewDialog(GuiHelper * guiHelper, QWidget *parent = nullptr);
         ~QuickViewDialog();
         BaseStateAbstract *getStateMngtObj();
         QStringList getConf();
@@ -56,6 +56,7 @@ class QuickViewDialogStateObj : public AppStateObj
         explicit QuickViewDialogStateObj(QuickViewDialog *diag);
         ~QuickViewDialogStateObj();
     private:
+        Q_DISABLE_COPY(QuickViewDialogStateObj)
         void internalRun();
 };
 

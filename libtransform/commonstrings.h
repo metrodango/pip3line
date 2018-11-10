@@ -86,7 +86,7 @@ namespace Pip3lineConst {
     EXPORTING const QString USER_DIRECTORY;
     EXPORTING const int BLOCK_MAX_SIZE;
 
-    enum LOGLEVEL { LSTATUS = 0, LWARNING = 1, LERROR = 2};
+    enum LOGLEVEL { PLSTATUS = 0, LWARNING = 1, LERROR = 2};
     struct Message {
             QString message;
             QString source;

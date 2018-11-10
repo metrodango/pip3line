@@ -38,7 +38,7 @@ void ByteRot::transform(const QByteArray &input, QByteArray &output)
     output.clear();
     int sign = (wayValue == INBOUND ? 1 : -1);
     for (int i = 0; i < input.size(); i++) {
-        output.append(input.at(i) + sign * rotation);
+        output.append(input.at(i) + static_cast<char>(sign * rotation));
     }
 }
 

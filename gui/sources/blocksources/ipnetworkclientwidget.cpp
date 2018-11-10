@@ -15,7 +15,10 @@ IPNetworkClientWidget::IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget
 
     ui->setupUi(this);
 
-    ui->portSpinBox->setValue((int)listener->getHostPort());
+    ui->portSpinBox->setMaximum(USHRT_MAX);
+    ui->portSpinBox->setMinimum(0);
+    ui->portSpinBox->setValue(static_cast<int>(listener->getHostPort()));
+
 
     //connect(ui->portSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &IPNetworkClientWidget::onPortChanged);
     connect(ui->portSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPortChanged(int)));
@@ -59,7 +62,7 @@ void IPNetworkClientWidget::onTlsToggled(bool enabled)
 
 void IPNetworkClientWidget::onPortChanged(int value)
 {
-    listener->setHostPort((quint16) value);
+    listener->setHostPort(static_cast<quint16>(value));
 }
 
 void IPNetworkClientWidget::onIPChanged(const QString &value)

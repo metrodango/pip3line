@@ -25,7 +25,7 @@ TransformRequest::TransformRequest(TransformAbstract *ntransform, const QByteArr
     connect(transform, &TransformAbstract::warning, this, &TransformRequest::logWarning,Qt::DirectConnection);
     deleteObject = takeOwnerShip;
     if (ptid == 0)
-        ptid = (quintptr) this;
+        ptid = reinterpret_cast<quintptr>(this);
     else
         ptid = nptid;
 }
@@ -39,7 +39,7 @@ TransformRequest::TransformRequest(TransformAbstract *ntransform, const QList<QB
     connect(transform, &TransformAbstract::warning, this, &TransformRequest::logWarning,Qt::DirectConnection);
     deleteObject = takeOwnerShip;
     if (ptid == 0)
-        ptid = (quintptr) this;
+        ptid = reinterpret_cast<quintptr>(this);
     else
         ptid = nptid;
 
@@ -99,7 +99,7 @@ void TransformRequest::logWarning(QString message, QString source)
 
 void TransformRequest::logStatus(QString message, QString source)
 {
-    logMessage(message, source, LSTATUS);
+    logMessage(message, source, PLSTATUS);
 }
 
 

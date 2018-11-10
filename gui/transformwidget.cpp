@@ -101,7 +101,6 @@ TransformWidget::TransformWidget(GuiHelper *nguiHelper ,QWidget *parent) :
         qFatal("Cannot allocate memory for MessagePanelWidget X{");
     }
 
-
     ui->mainLayout->insertWidget(0,messagePanel);
     connect(byteSource, &ByteSourceAbstract::log, messagePanel, &MessagePanelWidget::log);
 
@@ -325,7 +324,7 @@ void TransformWidget::refreshOutput()
             TransformRequest *tr = new(std::nothrow) TransformRequest(
                         ta,
                         byteSource->getRawData(),
-                        (quintptr) this);
+                        reinterpret_cast<quintptr>(this));
 
             if (tr == nullptr) {
                 qFatal("Cannot allocate memory for TransformRequest X{");
@@ -357,7 +356,7 @@ void TransformWidget::processingFinished(QByteArray output, Messages messages)
                 case (LWARNING):
                     logWarning(messages.at(i).message, messages.at(i).source);
                     break;
-                case (LSTATUS):
+                case (PLSTATUS):
                     logStatus(messages.at(i).message, messages.at(i).source);
                     break;
                 default:
@@ -612,7 +611,6 @@ void TransformWidget::on_infoPushButton_clicked()
         infoDialog = new(std::nothrow) InfoDialog(guiHelper, currentTransform,this);
         if (infoDialog == nullptr) {
             qFatal("Cannot allocate memory for InfoDialog X{");
-            return;
         }
     }
     infoDialog->setVisible(true);
@@ -699,6 +697,9 @@ void TransformWidgetStateObj::run()
             it.next();
             writer->writeAttribute(it.key(), it.value());
         }
+        QString data = QString::fromUtf8(tw->jsonView->getTreeSavedState().toJson());
+        qDebug() << "[ TransformWidgetStateObj::run] " << qPrintable(data);
+        writer->writeAttribute(GuiConst::STATE_JSON_STATE, write(data));
         writer->writeAttribute(GuiConst::STATE_IS_FOLDED, write(tw->isFolded()));
         writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(tw->searchWidget->text(),true)); // searchWidget is never null (well, should never be)
         writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(tw->gotoWidget->text()));
@@ -752,6 +753,16 @@ void TransformWidgetStateObj::run()
                 QString text = readString(attrList.value(GuiConst::STATE_GOTOOFFSET_DATA));
                 if (!text.isEmpty()) {
                     tw->gotoWidget->setText(text);
+                }
+            }
+
+            if (attrList.hasAttribute(GuiConst::STATE_JSON_STATE)) {
+                QJsonParseError error;
+                QString data = readString(attrList.value(GuiConst::STATE_JSON_STATE));
+                qDebug() << "[TransformWidgetStateObj::run] " << qPrintable(data);
+                QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
+                if (!doc.isEmpty()) {
+                    tw->jsonView->restoreTreeState(doc);
                 }
             }
 

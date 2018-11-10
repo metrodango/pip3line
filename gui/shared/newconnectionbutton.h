@@ -9,6 +9,8 @@ class NewConnectionButton : public QPushButton
     public:
         NewConnectionButton(QWidget *parent);
         ~NewConnectionButton();
+    private:
+        Q_DISABLE_COPY(NewConnectionButton)
 };
 
 #endif // NEWCONNECTIONBUTTON_H

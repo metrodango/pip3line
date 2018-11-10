@@ -38,7 +38,7 @@ class LIBTRANSFORMSHARED_EXPORT TransformRequest : public QObject
         void logStatus(QString message, QString source = QString());
     private:
         Q_DISABLE_COPY(TransformRequest)
-        void logMessage(QString message, QString source = QString(), LOGLEVEL level = LSTATUS);
+        void logMessage(QString message, QString source = QString(), LOGLEVEL level = PLSTATUS);
         const QByteArray inputData;
         const QList<QByteArray> inputDatas;
         QByteArray outputData;

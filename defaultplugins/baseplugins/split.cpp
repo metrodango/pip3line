@@ -84,7 +84,7 @@ QHash<QString, QString> Split::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
     properties.insert(XMLSEPARATOR,saveChar(separator));
-    properties.insert(XMLGROUP,QString::number((int)group));
+    properties.insert(XMLGROUP,QString::number(static_cast<int>(group)));
     properties.insert(XMLEVERYTHING,QString::number(allGroup ? 1 : 0));
     properties.insert(XMLPROCESSLINEBYLINE,QString::number(processLineByLine ? 1 : 0));
     properties.insert(XMLCLEAN,QString::number(trimBlank ? 1 : 0));

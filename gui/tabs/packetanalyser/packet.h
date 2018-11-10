@@ -72,6 +72,7 @@ class Packet : public QObject
     signals:
         void updated();
     private:
+        Q_DISABLE_COPY(Packet)
         QByteArray originalData;
         QByteArray data;
         QList<ByteSourceAbstract::HistItem> history;

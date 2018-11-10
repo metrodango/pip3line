@@ -113,14 +113,14 @@ QHash<QString, QString> RegularExp::getConfiguration()
 {
     QHash<QString, QString> properties = TransformAbstract::getConfiguration();
     properties.insert(XMLPROCESSLINEBYLINE,QString::number(processLineByLine ? 1 : 0));
-    properties.insert(XMLACTIONTYPE,QString::number((int)actionType));
+    properties.insert(XMLACTIONTYPE,QString::number(static_cast<int>(actionType)));
     properties.insert(XMLGREEDYQUANT,QString::number(useGreedyQuantifier ? 1 : 0));
     properties.insert(XMLREGEXP,QString(expression.toUtf8().toBase64()));
     properties.insert(XMLCASEINSENSITIVE,QString::number(caseInsensitive ? 1 : 0));
 
     if (actionType == EXTRACT) {
         properties.insert(XMLALLGROUPS, QString::number(allGroups ? 1 : 0));
-        properties.insert(XMLGROUP, QString::number((int)selectedGroup));
+        properties.insert(XMLGROUP, QString::number(static_cast<int>(selectedGroup)));
     } else {
         properties.insert(XMLREPLACEWITH, QString(replacement.toUtf8().toBase64()));
     }
@@ -146,7 +146,7 @@ bool RegularExp::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLACTIONTYPE),id);
     } else {
-        setActionType((Actions)val);
+        setActionType(static_cast<Actions>(val));
     }
 
     val = propertiesList.value(XMLGREEDYQUANT).toInt(&ok);
@@ -154,7 +154,7 @@ bool RegularExp::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLGREEDYQUANT),id);
     } else {
-        setUsingGreedyQuantifier((bool)val);
+        setUsingGreedyQuantifier(val == 1);
     }
 
     setExpression(QString(QByteArray::fromBase64(propertiesList.value(XMLREGEXP).toUtf8())));

@@ -39,7 +39,7 @@ char Substitution::s_table_tcpa[256] = {
 Substitution::Substitution()
 {
     for (quint16 i = 0; i < SubstitutionTables::S_ARRAY_SIZE; i++) {
-        s_table_e[i] = (char)i;
+        s_table_e[i] = static_cast<char>(i);
     }
 
     createDecryptTable();
@@ -73,11 +73,11 @@ void Substitution::transform(const QByteArray &input, QByteArray &output)
 
     if (wayValue == INBOUND) {
         for (int i = 0; i < input.size(); i++) {
-            output.append((char)s_table_e[(quint8)input.at(i)]);
+            output.append(static_cast<char>(s_table_e[static_cast<quint8>(input.at(i))]));
         }
     } else {
         for (int i = 0; i < input.size(); i++) {
-            output.append((char)s_table_d[(quint8)input.at(i)]);
+            output.append(static_cast<char>(s_table_d[static_cast<quint8>(input.at(i))]));
         }
     }
 
@@ -166,13 +166,12 @@ QByteArray Substitution::getPredeterminedTable(QString name)
         switch(l) {
         case 0:
             for (quint16 i = 0; i < SubstitutionTables::S_ARRAY_SIZE; i++) {
-                ret.append((char)i);
+                ret.append(static_cast<char>(i));
             }
             break;
         case 1:
             ret.append(s_table_tcpa,SubstitutionTables::S_ARRAY_SIZE);
             return ret;
-            break;
         default:
             return s_table_e;
         }
@@ -191,6 +190,6 @@ QString Substitution::help() const
 void Substitution::createDecryptTable()
 {
     for (quint16 i = 0; i < SubstitutionTables::S_ARRAY_SIZE; i++) {
-        s_table_d[(quint8)s_table_e[i]] = i;
+        s_table_d[static_cast<quint8>(s_table_e[i])] = static_cast<char>(i);
     }
 }

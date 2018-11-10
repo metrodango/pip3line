@@ -19,7 +19,7 @@ class SearchResultsWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit SearchResultsWidget(FoundOffsetsModel *offsetModel, GuiHelper *nguiHelper,  QWidget *parent = 0);
+        explicit SearchResultsWidget(FoundOffsetsModel *offsetModel, GuiHelper *nguiHelper,  QWidget *parent = nullptr);
         ~SearchResultsWidget();
     public slots:
         void clearResults();
@@ -36,6 +36,7 @@ class SearchResultsWidget : public QWidget
         void onSaveToFileDecAction();
         void setCurrentSelection(int pos);
     private:
+        Q_DISABLE_COPY(SearchResultsWidget)
         bool eventFilter(QObject *obj, QEvent *ev);
         Ui::SearchResultsWidget *ui;
         FoundOffsetsModel * itemModel;

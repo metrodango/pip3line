@@ -21,6 +21,7 @@ class CurrentMemorysource;
 
 // extending OffsetRange to add functionalities specific to memory management
 class MemRange : public BytesRange {
+        Q_OBJECT
     public:
         explicit MemRange(quint64 lowerVal, quint64 upperVal, QString description = QString());
         ~MemRange() {}
@@ -53,7 +54,7 @@ class MemRangeModel : public QAbstractListModel
 {
         Q_OBJECT
     public:
-        explicit MemRangeModel(QObject * parent = 0);
+        explicit MemRangeModel(QObject * parent = nullptr);
         ~MemRangeModel();
         QList<QSharedPointer<MemRange> > getList();
         bool isOffsetInRange(quint64 offset);
@@ -69,6 +70,7 @@ class MemRangeModel : public QAbstractListModel
         void addRange(QSharedPointer<MemRange> range);
         void setCurrentRange(QSharedPointer<MemRange> range);
     private:
+        Q_DISABLE_COPY(MemRangeModel)
         enum COLUMN { START_OFFSET = 0,
                       END_OFFSET = 1,
                       PERMISSIONS = 2,
@@ -94,7 +96,7 @@ class CurrentMemorysource : public LargeRandomAccessSource
 {
         Q_OBJECT
     public:
-        explicit CurrentMemorysource(QObject *parent = 0);
+        explicit CurrentMemorysource(QObject *parent = nullptr);
         ~CurrentMemorysource();
         QString description();
         quint64 size();
@@ -113,6 +115,7 @@ class CurrentMemorysource : public LargeRandomAccessSource
     signals:
         void mappingChanged();
     private:
+        Q_DISABLE_COPY(CurrentMemorysource)
         QWidget *requestGui(QWidget *parent,ByteSourceAbstract::GUI_TYPE type);
         bool readData(quint64 offset, QByteArray &data, int size);
         bool writeData(quint64 offset, int length, const QByteArray &data, quintptr source);

@@ -31,7 +31,7 @@ class QuickViewItemConfig : public QDialog
         Q_OBJECT
         
     public:
-        explicit QuickViewItemConfig(GuiHelper *guiHelper, QWidget *parent = 0);
+        explicit QuickViewItemConfig(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~QuickViewItemConfig();
         TransformAbstract * getTransform();
         void setTransform(TransformAbstract * transform);

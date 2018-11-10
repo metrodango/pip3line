@@ -23,7 +23,7 @@ class SplitWidget : public QWidget
     Q_OBJECT
     
     public:
-        explicit SplitWidget(Split *ntransform, QWidget *parent = 0);
+        explicit SplitWidget(Split *ntransform, QWidget *parent = nullptr);
         ~SplitWidget();
     private slots:
         void onSeparatorChange(char);

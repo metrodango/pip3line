@@ -25,8 +25,8 @@ Released under AGPL see LICENSE for more information
 #include <commonstrings.h>
 #include <QDir>
 #include <QByteArray>
-FILE * _logFile = nullptr; // logFile
-MainWindow * w = nullptr;
+static FILE * _logFile = nullptr; // logFile
+static MainWindow * w = nullptr;
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &, const QString &msg)
 {
@@ -81,13 +81,13 @@ static void setup_unix_signal_handlers()
     sigemptyset(&term.sa_mask);
     term.sa_flags |= SA_RESTART;
 
-    if (sigaction(SIGTERM, &term, 0) == -1)
+    if (sigaction(SIGTERM, &term, nullptr) == -1)
         qWarning("Could not set the SIGTERM signal handler");
-    if (sigaction(SIGINT, &term, 0) == -1)
+    if (sigaction(SIGINT, &term, nullptr) == -1)
         qWarning("Could not set the SIGINT signal handler");
-    if (sigaction(SIGQUIT, &term, 0) == -1)
+    if (sigaction(SIGQUIT, &term, nullptr) == -1)
         qWarning("Could not set the SIGQUIT signal handler");
-    if (sigaction(SIGABRT, &term, 0) == -1)
+    if (sigaction(SIGABRT, &term, nullptr) == -1)
         qWarning("Could not set the SIGABRT signal handler");
 }
 #endif
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
     }
 
     // initializing the default random generator
-    qsrand((uint)QDateTime::currentDateTime().time().msec());
+    qsrand(static_cast<uint>(QDateTime::currentDateTime().time().msec()));
 
     int ret = 0;
     w = new(std::nothrow) MainWindow(debugging);

@@ -24,7 +24,7 @@ class MessageDialog : public AppDialog
     Q_OBJECT
     
     public:
-        explicit MessageDialog(GuiHelper * guiHelper, QWidget *parent = 0);
+        explicit MessageDialog(GuiHelper * guiHelper, QWidget *parent = nullptr);
         ~MessageDialog();
         long errors();
         long warnings();

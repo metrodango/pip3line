@@ -57,7 +57,8 @@ QWidget *IPBlocksSources::requestGui(QWidget *parent)
         base->setTLSWidget(sslConfiguration->getGui());
 
     if (type == BlocksSource::CLIENT) {
-        if (flags & IP_OPTIONS) { // SOCKS5 does not need the IP configuration
+        //qDebug() << "is client";
+        if (flags & GEN_IP_OPTIONS) { // SOCKS5 does not need the IP configuration
             IPNetworkClientWidget * widget = new(std::nothrow) IPNetworkClientWidget(this, parent);
             if (widget == nullptr) {
                 qFatal("Cannot allocate memory for NetworkClientWidget X{");
@@ -78,6 +79,7 @@ QWidget *IPBlocksSources::requestGui(QWidget *parent)
 
     return base;
 }
+
 QSslConfiguration IPBlocksSources::getSslConfiguration()
 {
     return sslConfiguration->getSslConfiguration();
@@ -111,12 +113,13 @@ QHash<QString, QString> IPBlocksSources::getConfiguration()
     if (!hostName.isEmpty())
         ret.insert(GuiConst::STATE_NAME, hostName);
 
-    ret.unite(sslConfiguration->getConfiguration());
+    if (isTLSEnabled())
+        ret.unite(sslConfiguration->getConfiguration());
 
     return ret;
 }
 
-void IPBlocksSources::setConfiguration(QHash<QString, QString> conf)
+void IPBlocksSources::setConfiguration(const QHash<QString, QString> &conf)
 {
     BlocksSource::setConfiguration(conf);
 
@@ -143,7 +146,8 @@ void IPBlocksSources::setConfiguration(QHash<QString, QString> conf)
         }
     }
 
-    sslConfiguration->setConfiguration(conf);
+    if (isTLSEnabled())
+        sslConfiguration->setConfiguration(conf);
 }
 
 QString IPBlocksSources::getHostname() const

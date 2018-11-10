@@ -25,11 +25,13 @@ class SendToMenu : public QMenu
         void sendToRequest(QAction * action);
 
     private:
+        Q_DISABLE_COPY(SendToMenu)
         GuiHelper *guiHelper;
         QHash<QAction *, TabAbstract *> sendToTabMapping;
         QHash<QAction *, Target<BlocksSource *> > sendToBlockSourceMapping;
         QHash<QAction *, Target<SourcesOrchestatorAbstract *> > sendToOrchestratorMapping;
         QAction * sendToNewTabAction;
+        QAction * sendToNewHexEditorAction;
         QList<QMenu *> subMenus;
 };
 

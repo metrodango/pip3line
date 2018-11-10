@@ -24,7 +24,7 @@ class LIBTRANSFORMSHARED_EXPORT DeleteableListItem : public QWidget
         Q_OBJECT
         
     public:
-        explicit DeleteableListItem(const QString &text, const QPixmap &im = QPixmap(), QWidget *parent = 0);
+        explicit DeleteableListItem(const QString &text, const QPixmap &im = QPixmap(), QWidget *parent = nullptr);
         ~DeleteableListItem();
         QString getName();
         void setEnableDelete(bool val);

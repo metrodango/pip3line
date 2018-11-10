@@ -24,6 +24,7 @@ Released under AGPL see LICENSE for more information
 
 namespace GuiConst
 {
+    extern const char* MEM_ALLOC_ERROR_STR;
     extern const QString UNDEFINED_TEXT;
     extern const QString SETTINGS_SERVER_PORT;
     extern const QString SETTINGS_SERVER_IP;
@@ -60,6 +61,11 @@ namespace GuiConst
     extern const QString SETTINGS_FUZZING_EXPORT_FORMAT;
     extern const QString SETTINGS_EQUALITY_PACKETS_BACKGROUND;
     extern const QString SETTINGS_EQUALITY_PACKETS_FOREGROUND;
+    extern const QString SETTINGS_JSON_TYPE_COLOR;
+    extern const QString SETTINGS_JSON_KEY_COLOR;
+    extern const QString SETTINGS_JSON_VALUE_COLOR;
+    extern const QString SETTINGS_SEARCH_BG_COLOR;
+    extern const QString SETTINGS_SEARCH_FG_COLOR;
 
     extern const QString DEFAULT_STATE_FILE;
     extern const QString STATE_PIP3LINE_DOC;
@@ -173,6 +179,7 @@ namespace GuiConst
     extern const QString STATE_OUTBOUNDTRANSFORM;
     extern const QString STATE_INJECTED_PACKET;
     extern const QString STATE_TRACK_PACKETS;
+    extern const QString STATE_TRACK_CHANGES;
     extern const QString STATE_AUTO_MERGE;
     extern const QString STATE_SOURCEID;
     extern const QString STATE_MAX_PAYLOAD_DISPLAY_SIZE;
@@ -198,6 +205,11 @@ namespace GuiConst
     extern const QString STATE_REGEXP_CASE_SENSITIVE;
     extern const QString STATE_REGEXP_PATTERN_SYNTAX;
     extern const QString STATE_CID_LIST;
+    extern const QString STATE_SERVER_TYPE;
+    extern const QString STATE_CLIENT_TYPE;
+    extern const QString STATE_KEY;
+    extern const QString STATE_SHMID;
+    extern const QString STATE_JSON_STATE;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;
@@ -215,6 +227,7 @@ namespace GuiConst
     extern const QString UPDATE_URL;
     extern const QString RELEASES_URL;
     extern const QString NO_TRANSFORM;
+    extern const QString MODIFIED_STR;
 
     extern const int DEFAULT_PORT;
     extern const char DEFAULT_BLOCK_SEPARATOR;
@@ -321,6 +334,12 @@ namespace GlobalsValues {
     extern QFont GLOBAL_REGULAR_FONT;
     extern QColor EqualsPacketsBackground;
     extern QColor EqualsPacketsForeground;
+    extern QColor JSON_KEY_COLOR;
+    extern QColor JSON_VALUE_COLOR;
+    extern QColor JSON_TYPE_COLOR;
+    extern QColor MARKINGS_FG_COLOR;
+    extern QColor SEARCH_BG_COLOR;
+    extern QColor SEARCH_FG_COLOR;
 }
 
 namespace GuiStyles {
@@ -337,6 +356,12 @@ namespace GuiStyles {
     extern const QColor DEFAULT_MARKING_COLOR_SIZE;
     extern const QColor DEFAULT_MARKING_COLOR_TYPE;
     extern const QFont DEFAULT_REGULAR_FONT;
+    extern const QColor DEFAULT_JSON_KEY_COLOR;
+    extern const QColor DEFAULT_JSON_VALUE_COLOR;
+    extern const QColor DEFAULT_JSON_TYPE_COLOR;
+    extern const QColor DEFAULT_MARKING_FG_COLOR;
+    extern const QColor DEFAULT_SEARCH_BG_COLOR;
+    extern const QColor DEFAULT_SEARCH_FG_COLOR;
 }
 
 #endif // GUICONST_H

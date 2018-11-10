@@ -23,7 +23,7 @@ class RandomCaseWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit RandomCaseWidget(RandomCase *ntransform, QWidget *parent = 0);
+        explicit RandomCaseWidget(RandomCase *ntransform, QWidget *parent = nullptr);
         ~RandomCaseWidget();
     private:
         Ui::RandomCaseWidget *ui;

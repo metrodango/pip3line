@@ -22,45 +22,45 @@ find_package(Qt5Core)
 find_package(Qt5Svg)
 
 include_directories (
-	../../libtransform/
-	)
+    ../../libtransform/
+    )
 
 link_directories (
-	${PROJECT_SOURCE_DIR}/../../lib
-	)
+    ${PROJECT_SOURCE_DIR}/../../lib
+    )
 
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
 
 find_package(OpenSSL)
 
 if (OPENSSL_FOUND)
-	message( STATUS "OpenSSL library found ... OK")
-	include_directories(${OPENSSL_INCLUDE_DIR})
-	link_directories(${OPENSSL_LIBRARIES})
-	set ( EXTERN_LIBS transform ${OPENSSL_CRYPTO_LIBRARY} )
+    message( STATUS "OpenSSL library found ... OK")
+    include_directories(${OPENSSL_INCLUDE_DIR})
+    link_directories(${OPENSSL_LIBRARIES})
+    set ( EXTERN_LIBS transform ${OPENSSL_CRYPTO_LIBRARY} )
 
-	set ( opensslplugin_HDRS
-		opensslplugin_global.h
-		opensslplugin.h
-		opensslhashes.h
-		)
+    set ( opensslplugin_HDRS
+        opensslplugin_global.h
+        opensslplugin.h
+        opensslhashes.h
+    )
 
-	set ( opensslplugin_SRCS
-		opensslplugin.cpp
-		opensslhashes.cpp
-		)
-	
-	add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
-	target_link_libraries ( opensslplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+    set ( opensslplugin_SRCS
+        opensslplugin.cpp
+        opensslhashes.cpp
+    )
 
-	IF(UNIX)
-		install (TARGETS opensslplugin DESTINATION lib/pip3line/
-			PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-			GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
-	ENDIF(UNIX)
+    add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
+    target_link_libraries ( opensslplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+
+    IF(UNIX)
+        install (TARGETS opensslplugin DESTINATION lib/pip3line/
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
+    ENDIF(UNIX)
 
 else (OPENSSL_FOUND)
-	message( WARNING "OpenSSL library not found !! this plugin will not be compiled." )
+    message( WARNING "OpenSSL library not found !! this plugin will not be compiled." )
 endif (OPENSSL_FOUND)
 
 

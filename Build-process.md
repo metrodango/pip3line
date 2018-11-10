@@ -99,11 +99,15 @@ For an x86 compilation with VS 2015:
 
 > C:\path> "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 
+For an x64 compilation with VS 2017:
+
+> C:\path> "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
 Then simply:
 > C:\path> cmake -G  "NMake Makefiles" ..\ [ + options]
 
 for example:
-> C:\path> cmake -G  "NMake Makefiles" ..\  -DALL=ON
+> C:\path> cmake -G  "NMake Makefiles" ..\  -DALL=ON -DWITH_SCINTILLA=ON
 
 Following with the compilation phase
 > C:\path> nmake
@@ -130,7 +134,7 @@ The compilation on OS X is pretty much the same as for Linux.
 
 Install dependencies with brew :
 
-> shell$ brew install cmake qt5 python3 qscintilla2 openssl git
+> shell$ brew install cmake qt5 python3 python27 qscintilla2 openssl git
 
 Just make sure to set up the CMAKE_PREFIX_PATH to the Qt & OpenSSL base dir. For a default install it should be as follow:
 
@@ -184,6 +188,10 @@ Distorm can be found on GitHub and it is recommended to use the latest git versi
 git clone https://github.com/gdabah/distorm.git
 
 It is relatively easy to compile (compare to OpenSSL for instance), even on Windows platforms (hint: Have a look into the 'make' directory)
+
+If, for various reasons, your distro/platform does not have a proper distorm package, there is a way to generate and use it as statically linked library:
+
+> -DWITH_DISTORM_LINK_STATICALLY=ON
 
 ## Using QScintilla for text highlights
 

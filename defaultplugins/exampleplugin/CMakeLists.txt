@@ -22,24 +22,24 @@ find_package(Qt5Core)
 find_package(Qt5Svg)
 
 include_directories (
-	../../libtransform/)
+    ../../libtransform/)
 
 link_directories (
-	${PROJECT_SOURCE_DIR}/../../lib
-	)
+    ${PROJECT_SOURCE_DIR}/../../lib
+    )
 
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/../../bin/plugins )
 
 set ( exampleplugin_HDRS
-	exampleplugin_global.h
-	exampleplugin.h
-	identity.h
-	)
+    exampleplugin_global.h
+    exampleplugin.h
+    identity.h
+    )
 
 set ( exampleplugin_SRCS
-	exampleplugin.cpp
-	identity.cpp
-	)
+    exampleplugin.cpp
+    identity.cpp
+    )
 
 set ( EXTERN_LIB transform )
 
@@ -48,8 +48,9 @@ add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 target_link_libraries ( exampleplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
 
 IF(UNIX)
-	install (TARGETS exampleplugin DESTINATION lib/pip3line/
-		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-		GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    install (TARGETS exampleplugin DESTINATION lib/pip3line/
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
 ENDIF(UNIX)
 

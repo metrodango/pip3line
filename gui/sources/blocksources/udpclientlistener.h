@@ -11,7 +11,7 @@ class UdpClientListener : public IPBlocksSources
         Q_OBJECT
     public:
         static const QString ID;
-        explicit UdpClientListener(QHostAddress hostAddress = UdpClientListener::DEFAULT_ADDRESS, quint16 hostPort = UdpClientListener::DEFAULT_PORT, QObject *parent = 0);
+        explicit UdpClientListener(QHostAddress hostAddress = UdpClientListener::DEFAULT_ADDRESS, quint16 hostPort = UdpClientListener::DEFAULT_PORT, QObject *parent = nullptr);
         ~UdpClientListener();
         QString getName();
         QString getDescription();
@@ -24,6 +24,7 @@ class UdpClientListener : public IPBlocksSources
         void dataReceived();
         void checkTimeouts();
     private:
+        Q_DISABLE_COPY(UdpClientListener)
         void internalUpdateConnectionsInfo();
         static const int MAX_UDP_DATAGRAM_SIZE_HARD;
         static const int MAX_UDP_DATAGRAM_SIZE_SOFT;

@@ -115,7 +115,7 @@ void TabStateObj::run()
 
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         writer->writeStartElement(GuiConst::STATE_TAB);
-        writer->writeAttribute(GuiConst::STATE_PRETAB_TYPE, write((int)tab->getPreTabType()));
+        writer->writeAttribute(GuiConst::STATE_PRETAB_TYPE, write(static_cast<int>(tab->getPreTabType())));
         writer->writeAttribute(GuiConst::STATE_TAB_NAME, tab->getName());
         if (isWindowed) {
             writer->writeAttribute(GuiConst::STATE_WINDOWED, QString::number(TabAbstract::WINDOWED_TAB));

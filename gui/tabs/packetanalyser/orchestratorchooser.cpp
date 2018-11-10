@@ -12,11 +12,13 @@
 #include "sources/blocksources/udpclientlistener.h"
 #include "sources/blocksources/tlsserverlistener.h"
 #include "sources/blocksources/tlsclientlistener.h"
+#include "sources/blocksources/sharedmemorysource.h"
 #include "guihelper.h"
 #include "shared/defaultdialog.h"
 #include "externalproxyorchestrator.h"
 #include "proxyorchestrator.h"
 #include "socksorchestrator.h"
+#include "myoproxy.h"
 #include "sources/blocksources/pipeclientlistener.h"
 
 OrchestratorChooser::OrchestratorChooser(GuiHelper *guiHelper, SourcesOrchestatorAbstract *orchestrator, QWidget *parent) :
@@ -59,6 +61,7 @@ void OrchestratorChooser::setType(int type)
             blockSignals(true);
             setCurrentIndex(type);
             blockSignals(false);
+            destructorLink = connect(orchestrator, &SourcesOrchestatorAbstract::destroyed, this, &OrchestratorChooser::onOrchestratorDeleted);
             emit newOrchestrator(orchestrator);
         } else {
             blockSignals(true);
@@ -73,10 +76,10 @@ SourcesOrchestatorAbstract *OrchestratorChooser::getOrchestrator()
     return orchestrator;
 }
 
-int OrchestratorChooser::showConfPanel(bool blocking)
+int OrchestratorChooser::showConfPanel(SourcesOrchestatorAbstract *targetOrchestrator, bool blocking)
 {
     int ret = QDialog::Rejected;
-    if (orchestrator != nullptr) {
+    if (targetOrchestrator != nullptr) {
         DefaultDialog *confDialog = new(std::nothrow) DefaultDialog(this);
         if (confDialog == nullptr) {
             qFatal("Cannot allocate memory for DefaultDialog X{");
@@ -85,7 +88,7 @@ int OrchestratorChooser::showConfPanel(bool blocking)
         confDialog->setWindowTitle(tr("Configuration"));
         confDialog->resize(400,300);
 
-        QWidget * confWidget = orchestrator->getConfGui(nullptr);
+        QWidget * confWidget = targetOrchestrator->getConfGui(nullptr);
 
         if (confWidget != nullptr) {
             confDialog->setMainWidget(confWidget);
@@ -103,6 +106,13 @@ int OrchestratorChooser::showConfPanel(bool blocking)
     return ret;
 }
 
+void OrchestratorChooser::onGuiRequested()
+{
+    if (orchestrator != nullptr) {
+        showConfPanel(orchestrator);
+    }
+}
+
 void OrchestratorChooser::onOrchestratorDeleted()
 {
     orchestrator = nullptr;
@@ -110,22 +120,25 @@ void OrchestratorChooser::onOrchestratorDeleted()
 
 void OrchestratorChooser::onSelection(int index)
 {
-    if (orchestrator != nullptr) {
-        // need to disconnect due to the deferred deletion
-        disconnect(destructorLink);
-        orchestrator->stop();
-        orchestrator->deleteLater();
-        orchestrator = nullptr;
-    }
-    orchestrator = createOrchestratorFromType(index);
-    if (orchestrator != nullptr) {
-        if (QDialog::Accepted == showConfPanel(true)) {
-            emit newOrchestrator(orchestrator);
+    SourcesOrchestatorAbstract * temporchestrator = createOrchestratorFromType(index);
+    if (temporchestrator != nullptr) {
+        if (QDialog::Accepted == showConfPanel(temporchestrator, true)) {
+            if (orchestrator != nullptr) {
+                // need to disconnect due to the deferred deletion
+                disconnect(destructorLink);
+                orchestrator->stop();
+                orchestrator->deleteLater();
+            }
+            orchestrator = temporchestrator;
+            destructorLink = connect(orchestrator, &SourcesOrchestatorAbstract::destroyed, this, &OrchestratorChooser::onOrchestratorDeleted);
+            emit newOrchestrator(temporchestrator);
         } else {
-            blockSignals(true);
-            setCurrentIndex(0); // resetting to nothing
-            blockSignals(false);
-            delete orchestrator;
+            if (orchestrator != nullptr) {
+                blockSignals(true);
+                setCurrentIndex(static_cast<int>(orchestrator->getType())); // resetting to the previous one
+                blockSignals(false);
+            }
+            delete temporchestrator;
         }
     }
 }
@@ -146,12 +159,6 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                     qFatal("Cannot allocate memory for RawTcpListener X{");
                 }
 
-                bs->setFlags(BlocksSource::REFLEXION_OPTIONS |
-                             BlocksSource::TLS_OPTIONS |
-                             BlocksSource::TLS_ENABLED |
-                             BlocksSource::B64BLOCKS_OPTIONS |
-                             BlocksSource::IP_OPTIONS);
-
                 SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
                 if (ci == nullptr) {
                     qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
@@ -168,8 +175,6 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             if (bs == nullptr) {
                 qFatal("Cannot allocate memory for UdpClientListener X{");
             }
-
-            bs->setFlags(BlocksSource::REFLEXION_OPTIONS | BlocksSource::IP_OPTIONS);
 
             SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
             if (ci == nullptr) {
@@ -189,8 +194,6 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 qFatal("Cannot allocate memory for UdpServerListener X{");
             }
 
-            bs->setFlags(BlocksSource::REFLEXION_OPTIONS);
-
             SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
             if (ci == nullptr) {
                 qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
@@ -206,11 +209,6 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 if (bs == nullptr) {
                     qFatal("Cannot allocate memory for UdpServerListener X{");
                 }
-
-                bs->setFlags(BlocksSource::REFLEXION_OPTIONS |
-                             BlocksSource::TLS_OPTIONS |
-                             BlocksSource::TLS_ENABLED |
-                             BlocksSource::B64BLOCKS_OPTIONS);
 
                 SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
                 if (ci == nullptr) {
@@ -237,7 +235,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
                 client->setFlags(BlocksSource::TLS_OPTIONS |
                                  BlocksSource::TLS_ENABLED |
-                                 BlocksSource::IP_OPTIONS);
+                                 BlocksSource::GEN_IP_OPTIONS);
 
                 ProxyOrchestrator *ci = new(std::nothrow) ProxyOrchestrator(server,client);
                 if (ci == nullptr) {
@@ -262,7 +260,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 qFatal("Cannot allocate memory for UdpClientListener X{");
             }
 
-            udpClient->setFlags(BlocksSource::IP_OPTIONS);
+            udpClient->setFlags(BlocksSource::GEN_IP_OPTIONS);
 
             ProxyOrchestrator *ci = new(std::nothrow) ProxyOrchestrator(udpServer,udpClient);
             if (ci == nullptr) {
@@ -374,14 +372,36 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 orch = ci;
             }
             break;
+            case SourcesOrchestatorAbstract::MYO_PROXY:
+            {
+                MYOProxy *myop = new(std::nothrow) MYOProxy();
+                if (myop == nullptr) {
+                    qFatal("Cannot allocate memory for MYOProxy X{");
+                }
+
+                myop->setType(SourcesOrchestatorAbstract::MYO_PROXY);
+                orch = myop;
+            }
+            break;
+            case SourcesOrchestatorAbstract::SHARED_MEM:
+            {
+                SharedMemorySource * shms = new(std::nothrow) SharedMemorySource();
+                if (shms == nullptr) {
+                    qFatal("Cannot allocate memory for SharedMemorySource X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(shms);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::SHARED_MEM);
+                orch = ci;
+            }
+            break;
         default:
             qCritical() << tr("[OrchestratorChooser::createOrchestratorFromType] Unmanaged type: %1").arg(type);
     }
 
-    if (orch != nullptr) {
-        connect(orch, &SourcesOrchestatorAbstract::log, guiHelper, &GuiHelper::logMessage);
-        destructorLink = connect(orch, &SourcesOrchestatorAbstract::destroyed, this, &OrchestratorChooser::onOrchestratorDeleted);
-    }
     return orch;
 }
 

@@ -1,5 +1,7 @@
 @echo off
 
+IF "%QTDIR%"=="" SET QTDIR=C:\Qt\5.11.2\msvc2017_64
+
 IF "%1"=="" goto Usage
 SET GOTVERSION=false
 IF NOT "%1"=="2015_32" SET GOTVERSION=true 
@@ -15,6 +17,8 @@ REM IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 REM IF "%VSVERSION%"=="2017_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2017_64"
 
 SET QT_LIBS=%QTDIR%
+
+echo QT libs selected %QT_LIBS%
 
 REM Openssl lib
 IF "%VSVERSION%"=="2015_32" set "OPENSSL_PATH=C:\OpenSSL-Win32"
@@ -67,7 +71,7 @@ SET "DISTORM_PATH=..\ext\distorm"
 IF NOT EXIST %DISTORM_PATH% GOTO Nonexistentdistorm
 copy %DISTORM_PATH%"\distorm3.dll"
 
-echo [5] Copying OpenSSL lib (if present)
+echo [5] Copying OpenSSL lib (if present) %OPENSSL_PATH%
 IF NOT EXIST "%OPENSSL_PATH%" GOTO NonexistentOpenssl
 
 copy "%OPENSSL_PATH%\bin\*.dll"

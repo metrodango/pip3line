@@ -27,7 +27,7 @@ class FileWidget : public QWidget
     Q_OBJECT
     
     public:
-        explicit FileWidget(LargeFile *fsource, QWidget *parent = 0);
+        explicit FileWidget(LargeFile *fsource, QWidget *parent = nullptr);
         ~FileWidget();
         QSize sizeHint() const;
 
@@ -36,6 +36,7 @@ class FileWidget : public QWidget
     private slots:
         void refresh();
     private:
+        Q_DISABLE_COPY(FileWidget)
         Ui::FileWidget *ui;
         LargeFile *source;
 };

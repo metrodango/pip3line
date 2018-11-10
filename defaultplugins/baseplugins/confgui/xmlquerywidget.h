@@ -23,7 +23,7 @@ class XmlQueryWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit XmlQueryWidget(XmlQuery *transform, QWidget *parent = 0);
+        explicit XmlQueryWidget(XmlQuery *transform, QWidget *parent = nullptr);
         ~XmlQueryWidget();
     public slots:
         void onQuerySubmit();

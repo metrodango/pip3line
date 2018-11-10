@@ -29,34 +29,34 @@ find_package(Qt5Core)
 find_package(Qt5Svg)
 
 include_directories (
-	../libtransform
-	)
+    ../libtransform
+    )
 
 link_directories (
-	${PROJECT_SOURCE_DIR}/../lib
-	)
+    ${PROJECT_SOURCE_DIR}/../lib
+    )
 
 set ( EXTERN_LIBS transform)
 
 set ( pip3linecmd_HDRS
-	masterthread.h
-	../tools/processor.h
-	../version.h
-	../tools/binaryprocessor.h
-	../tools/textprocessor.h
-	../tools/serverabstract.h
-	../tools/processingstats.h
-	)
+    ../tools/binaryprocessor.h
+    ../tools/processingstats.h
+    ../tools/processor.h
+    ../tools/serverabstract.h
+    ../tools/textprocessor.h
+    ../version.h
+    masterthread.h
+    )
 
 set ( pip3linecmd_SRCS
-	main.cpp
-	masterthread.cpp
-	../tools/processor.cpp
-	../tools/binaryprocessor.cpp
-	../tools/textprocessor.cpp
-	../tools/serverabstract.cpp
-	../tools/processingstats.cpp
-	)
+    ../tools/binaryprocessor.cpp
+    ../tools/processingstats.cpp
+    ../tools/processor.cpp
+    ../tools/serverabstract.cpp
+    ../tools/textprocessor.cpp
+    main.cpp
+    masterthread.cpp
+    )
 
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
@@ -67,5 +67,5 @@ endif(WIN32)
 target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 if(UNIX)
-	install (TARGETS pip3linecmd DESTINATION bin)
+    install (TARGETS pip3linecmd DESTINATION bin)
 endif(UNIX)

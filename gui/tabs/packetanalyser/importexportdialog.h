@@ -12,7 +12,7 @@ class ImportExportDialog : public QDialog
 {
         Q_OBJECT
     public:
-        explicit ImportExportDialog(GuiConst::FileOperations type, bool hasSelection = false, QWidget *parent = 0);
+        explicit ImportExportDialog(GuiConst::FileOperations type, bool hasSelection = false, QWidget *parent = nullptr);
         ~ImportExportDialog();
         QString getFileName() const;
         GuiConst::FileFormat getFormat() const;
@@ -31,6 +31,7 @@ class ImportExportDialog : public QDialog
         void onXmlorJsonToggled(bool enable);
         void onToClipboardToggled(bool enable);
     private:
+        Q_DISABLE_COPY(ImportExportDialog)
         Ui::ImportExportDialog *ui;
         GuiConst::FileOperations type;
 };

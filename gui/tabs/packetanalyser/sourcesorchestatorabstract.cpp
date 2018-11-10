@@ -102,6 +102,11 @@ void SourcesOrchestatorAbstract::setConfiguration(QHash<QString, QString> conf)
     qDebug() << "Configuration size" << conf.size();
 }
 
+bool SourcesOrchestatorAbstract::isTrackingChanges()
+{
+    return false;
+}
+
 void SourcesOrchestatorAbstract::postPacket(QSharedPointer<Packet> packet)
 {
     if (packet->isInjected())
@@ -207,10 +212,13 @@ QStringList SourcesOrchestatorAbstract::initSourcesStrings()
          << "External Proxy (UDP)"
          << "SOCKS 5 Proxy"
 #if defined(Q_OS_WIN32)
-         << "Named Pipe client";
+         << "Named Pipe client"
 #else
-         << "UNIX Local socket client";
+         << "UNIX Local socket client"
 #endif
+         << "MYO Proxy"
+         << "Shared Memory";
+
     return list;
 }
 

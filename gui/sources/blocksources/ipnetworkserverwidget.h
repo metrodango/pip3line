@@ -17,7 +17,7 @@ class IPNetworkServerWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget *parent = 0);
+        explicit IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget *parent = nullptr);
         ~IPNetworkServerWidget();
     public slots:
         void onTlsToggled(bool enabled);
@@ -28,6 +28,7 @@ class IPNetworkServerWidget : public QWidget
     signals:
         void log(QString mess, QString source, Pip3lineConst::LOGLEVEL level);
     private:
+        Q_DISABLE_COPY(IPNetworkServerWidget)
         IPBlocksSources * listener;
         Ui::IPNetworkServerWidget *ui;
 };

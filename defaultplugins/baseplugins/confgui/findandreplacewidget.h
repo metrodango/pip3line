@@ -25,7 +25,7 @@ class FindAndReplaceWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit FindAndReplaceWidget(FindAndReplace * ntransform, QWidget *parent = 0);
+        explicit FindAndReplaceWidget(FindAndReplace * ntransform, QWidget *parent = nullptr);
         ~FindAndReplaceWidget();
 
     private:

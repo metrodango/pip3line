@@ -25,7 +25,7 @@ class SingleViewAbstract : public QWidget
 {
         Q_OBJECT
     public:
-        explicit SingleViewAbstract(ByteSourceAbstract *dataModel, GuiHelper *guiHelper, QWidget *parent = 0, bool takeByteSourceOwnership = false);
+        explicit SingleViewAbstract(ByteSourceAbstract *dataModel, GuiHelper *guiHelper, QWidget *parent = nullptr, bool takeByteSourceOwnership = false);
         virtual ~SingleViewAbstract();
         ByteSourceAbstract *getByteSource() const;
         QPushButton *getConfigButton() const;
@@ -47,6 +47,10 @@ class SingleViewAbstract : public QWidget
         QBitArray previousMask;
         bool hasSourceOwnership;
         QPushButton * configButton;
+    private slots:
+        void onConfigButtonDestroyed();
+    private:
+        Q_DISABLE_COPY(SingleViewAbstract)
 };
 
 #endif // SINGLEVIEWABSTRACT_H

@@ -31,7 +31,7 @@ class ParametersItemModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit ParametersItemModel( QObject *parent = 0);
+        explicit ParametersItemModel( QObject *parent = nullptr);
         ~ParametersItemModel();
         int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
         int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -57,7 +57,7 @@ class LIBTRANSFORMSHARED_EXPORT ModuleTransformWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit ModuleTransformWidget(ScriptTransformAbstract *transform, QWidget *parent = 0);
+        explicit ModuleTransformWidget(ScriptTransformAbstract *transform, QWidget *parent = nullptr);
         ~ModuleTransformWidget();
     public slots:
         void reloadConf();

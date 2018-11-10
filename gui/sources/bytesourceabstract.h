@@ -31,7 +31,7 @@ class BytesRange;
 class BytesRangeList : public QObject, public QList<QSharedPointer<BytesRange> > {
         Q_OBJECT
     public:
-        explicit BytesRangeList(QObject *parent = 0);
+        explicit BytesRangeList(QObject *parent = nullptr);
         BytesRangeList(BytesRangeList const &other);
         BytesRangeList& operator = (BytesRangeList const &other);
         virtual ~BytesRangeList();
@@ -43,6 +43,7 @@ class BytesRangeList : public QObject, public QList<QSharedPointer<BytesRange> >
 
 class BytesRange : public QObject
 {
+        Q_OBJECT
     public:
         static const QString HEXFORMAT;
         explicit BytesRange(quint64 lowerVal, quint64 upperVal, QString description = QString());
@@ -75,6 +76,7 @@ class BytesRange : public QObject
         static void moveMarkingAfterDelete(BytesRangeList *list, quint64 pos, quint64 deleteSize);
         static void moveMarkingAfterInsert(BytesRangeList *list, quint64 pos, quint64 insertSize);
         static void moveMarkingAfterReplace(BytesRangeList *list, quint64 pos, int diff);
+        static void compareAndMark(const QByteArray &data1, const QByteArray &data2, BytesRangeList *list, const QColor &bgcolor, const QColor &fgColor, const QString &toolTip);
     protected:
         QString description;
         quint64 lowerVal;
@@ -120,7 +122,7 @@ class ByteSourceAbstract : public QObject
 
         enum MarkingLayer {USER_MARKINGS = 0, SEARCH_MARKINGS = 1, COMPARE_MARKINGS = 2};
 
-        explicit ByteSourceAbstract(QObject *parent = 0);
+        explicit ByteSourceAbstract(QObject *parent = nullptr);
         virtual ~ByteSourceAbstract();
         virtual QString description() = 0;
         virtual QString name();
@@ -150,13 +152,13 @@ class ByteSourceAbstract : public QObject
         virtual bool isOffsetValid(quint64 offset);
         virtual bool isReadableText();
 
-        SearchAbstract * getSearchObject(QObject *parent = 0,bool singleton = true);
+        SearchAbstract * getSearchObject(QObject *parent = nullptr,bool singleton = true);
 
         virtual bool tryMoveUp(int size);
         virtual bool tryMoveDown(int size);
         virtual bool hasDiscreetView();
 
-        QWidget * getGui(QWidget *parent = 0,ByteSourceAbstract::GUI_TYPE type = ByteSourceAbstract::GUI_CONFIG);
+        QWidget * getGui(QWidget *parent = nullptr,ByteSourceAbstract::GUI_TYPE type = ByteSourceAbstract::GUI_CONFIG);
 
         virtual void viewMark(int start, int end, const QColor &bgcolor,const QColor &fgColor = QColor(), QString toolTip = QString());
 
@@ -191,6 +193,7 @@ class ByteSourceAbstract : public QObject
         bool hasStaticMarking() const;
         void setStaticMarking(bool value);
 
+        bool isTrackChanges() const;
     public slots:
         virtual bool historyForward();
         virtual bool historyBackward();
@@ -200,6 +203,7 @@ class ByteSourceAbstract : public QObject
         void mark(quint64 start, quint64 end, const QColor &bgcolor,const QColor &fgColor = QColor(), QString toolTip = QString());
         virtual void setData(QByteArray data, quintptr source = INVALID_SOURCE); // not always possible
         void setNewMarkings(BytesRangeList * newUserMarkingsRanges);
+        void setTrackChanges(bool value);
     private slots:
         void onGuiDestroyed();
         void onMarkingsListDeleted();
@@ -241,6 +245,9 @@ class ByteSourceAbstract : public QObject
         bool _readonly;
         QString _name;
         bool staticMarking; // markings won't get affected by deletion or insertion
+        bool trackChanges; // not applicable to all
+    private:
+        Q_DISABLE_COPY(ByteSourceAbstract)
 };
 
 class ByteSourceStateObj : public BaseStateAbstract
@@ -253,6 +260,8 @@ class ByteSourceStateObj : public BaseStateAbstract
     protected:
         virtual void internalRun();
         ByteSourceAbstract *bs;
+    private:
+        Q_DISABLE_COPY(ByteSourceStateObj)
 };
 
 class ByteSourceClosingObj : public BaseStateAbstract
@@ -265,6 +274,7 @@ class ByteSourceClosingObj : public BaseStateAbstract
         void setReadonly(bool value);
 
     private:
+        Q_DISABLE_COPY(ByteSourceClosingObj)
         ByteSourceAbstract *bs;
         bool readonly;
 };

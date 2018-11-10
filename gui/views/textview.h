@@ -40,7 +40,7 @@ class TextView : public SingleViewAbstract
         Q_OBJECT
         
     public:
-        explicit TextView(ByteSourceAbstract *byteSource, GuiHelper *guiHelper, QWidget *parent = 0, bool takeByteSourceOwnership = false);
+        explicit TextView(ByteSourceAbstract *byteSource, GuiHelper *guiHelper, QWidget *parent = nullptr, bool takeByteSourceOwnership = false);
         ~TextView();
         void setModel(ByteSourceAbstract *byteSource);
         void search(QByteArray item, QBitArray mask = QBitArray());

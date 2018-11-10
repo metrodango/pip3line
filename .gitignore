@@ -19,6 +19,7 @@ unittests/unittests-build-*
 unittests/build-*
 pip3line.kdev4
 extras/burp_plugin/bin
+extras/burp_plugin/out
 *.jardesc
 extras/burp_plugin/.classpath
-ext/distorm
+*.swp

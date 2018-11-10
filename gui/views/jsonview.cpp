@@ -11,6 +11,7 @@
 #include "guihelper.h"
 #include "shared/guiconst.h"
 #include <transformabstract.h>
+#include <cmath>
 using namespace GuiConst;
 
 const QString JsonItem::OBJECT_STR = "[Object]";
@@ -78,13 +79,28 @@ QVariant JsonItem::data(int column) const
             ret = itemName;
     } else {
         if (valueType == ARRAY) {
-            ret = ARRAY_STR;
+            QString str = ARRAY_STR;
+            if (children.isEmpty())
+                str.append(" (empty)");
+            ret = str;
         } else if (valueType == OBJECT) {
-            ret = OBJECT_STR;
+            QString str = OBJECT_STR;
+            if (children.isEmpty())
+                str.append(" (empty)");
+            ret = str;
         } else if (value.isBool()){
             ret = value.toBool() ? QString("true") : QString("false");
         } else if (value.isDouble()) {
-            ret = QString::number(value.toDouble());
+            ret = QString::number(value.toInt(0));
+            if (ret == 0) {
+                double out = value.toDouble();
+                double intprt;
+                if (std::modf(out,&intprt) == 0.0) { // this is an integer
+                    ret = QString::number(static_cast<qint64>(intprt));
+                } else {
+                    ret = QString::number(out,'f',10);
+                }
+            }
         } else if (value.isString()){
             ret = value.toString();
         } else if (value.isNull()) {
@@ -170,6 +186,7 @@ const QString JsonModel::ROOT_STR = "(root)";
 JsonModel::JsonModel(const QJsonDocument &jsonDoc, QObject *parent) :
     QAbstractItemModel(parent)
 {
+    readonly = false;
     root = new(std::nothrow) JsonItem(QJsonValue(), nullptr, QString("root Item"));
     if (root == nullptr) {
         qFatal("Cannot allocate memory for root JsonItem X{");
@@ -209,9 +226,57 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const
 {
     QVariant ret;
     if (index.isValid()) {
+        int col = index.column();
         if (role == Qt::DisplayRole) {
-            ret = static_cast<JsonItem*>(index.internalPointer())->data(index.column());
+            ret = static_cast<JsonItem*>(index.internalPointer())->data(col);
+        } else if (role == Qt::ForegroundRole) {
+            if (col == 0) {
+                ret = QVariant(GlobalsValues::JSON_KEY_COLOR);
+            } else {
+                if (static_cast<JsonItem*>(index.internalPointer())->getValueType() == JsonItem::OTHER) {
+                    ret = QVariant(GlobalsValues::JSON_VALUE_COLOR);
+                } else {
+                    ret = QVariant(GlobalsValues::JSON_TYPE_COLOR);
+                }
+            }
         }
+    }
+    return ret;
+}
+
+bool JsonModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    bool ret = false;
+    if (index.isValid() && role == Qt::EditRole && !readonly) {
+        JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
+        QJsonValue jval;
+        switch(value.type()) {
+            case QVariant::Bool:
+                jval = QJsonValue(value.toBool());
+                break;
+            case QVariant::Int:
+            case QVariant::UInt:
+                jval = QJsonValue(value.toInt());
+                break;
+            case QVariant::LongLong:
+            case QVariant::ULongLong:
+                jval = QJsonValue(value.toLongLong());
+                break;
+            case QVariant::Double:
+                jval = QJsonValue(value.toDouble());
+                break;
+            case QVariant::String:
+                jval = QJsonValue(value.toString());
+                break;
+            default:
+                break;
+        }
+        if (!jval.isNull()) {
+            item->setValue(jval);
+            emit jsonUpdated();
+            ret = true;
+        }
+
     }
     return ret;
 }
@@ -219,8 +284,13 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags JsonModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-              return 0;
+              return nullptr;
 
+    JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
+    JsonItem::Type vtype = item->getValueType();
+    if (vtype == JsonItem::OTHER && !readonly) {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
     return QAbstractItemModel::flags(index);
 }
 
@@ -248,10 +318,10 @@ QModelIndex JsonModel::index(int row, int column, const QModelIndex &parent) con
         parentitem = static_cast<JsonItem*>(parent.internalPointer());
     }
 
-    if (parentitem != nullptr) {
+    if (parentitem != nullptr && row < parentitem->childrenCount()) {
         JsonItem * child = parentitem->child(row);
         if (child != nullptr) {
-            ret = createIndex(row,column, (void *)child);
+            ret = createIndex(row,column, reinterpret_cast<void *>(child));
         }
     }
     return ret;
@@ -265,7 +335,7 @@ QModelIndex JsonModel::parent(const QModelIndex &index) const
 
         if (item != nullptr && item != root) {
             JsonItem * parentItem = item->parent();
-            ret = createIndex(parentItem->row(),0,(void *)parentItem);
+            ret = createIndex(parentItem->row(),0,reinterpret_cast<void *>(parentItem));
         }
     }
     return ret;
@@ -302,6 +372,16 @@ void JsonModel::setJsonDoc(const QJsonDocument &jsonDoc)
     endResetModel();
 }
 
+bool JsonModel::isNull()
+{
+    return root->childrenCount() == 0;
+}
+
+void JsonModel::setReadonly(bool value)
+{
+    readonly = value;
+}
+
 JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget *parent, bool takeByteSourceOwnership):
     SingleViewAbstract(nbyteSource, nguiHelper, parent, takeByteSourceOwnership)
 {
@@ -319,12 +399,18 @@ JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     layout->addWidget(tree);
     setLayout(layout);
 
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    tree->setSizeAdjustPolicy(QTreeView::AdjustToContents);
     globalContextMenu = nullptr;
     copyMenu = nullptr;
     replaceMenu = nullptr;
     sendToMenu = nullptr;
+
+    model->setReadonly(byteSource->isReadonly());
+    connect(byteSource, &ByteSourceAbstract::readOnlyChanged, model, &JsonModel::setReadonly);
 
     buildContextMenus();
     updateImportExportMenus();
@@ -333,6 +419,10 @@ JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     connect(tree,&QTreeView::customContextMenuRequested, this, &JsonView::onRightClick);
     connect(byteSource, &ByteSourceAbstract::updated, this, &JsonView::sourceUpdated);
     connect(guiHelper, &GuiHelper::importExportUpdated, this, &JsonView::updateImportExportMenus);
+    connect(tree, &QTreeView::expanded, this, &JsonView::onTreeChanges);
+    connect(tree,&QTreeView::collapsed, this, &JsonView::onTreeChanges);
+    connect(model, &JsonModel::jsonUpdated, this, &JsonView::onManualUpdate);
+
 }
 
 JsonView::~JsonView()
@@ -348,7 +438,7 @@ JsonView::~JsonView()
 
 void JsonView::sourceUpdated(quintptr source)
 {
-    if (source == (quintptr) this)
+    if (source == reinterpret_cast<quintptr>(this))
         return;
 
     if (isJsonValid()) {
@@ -375,10 +465,6 @@ bool JsonView::isJsonValid()
         return false;
     }
 
-    if (model == nullptr || tree == nullptr) {
-        return false;
-    }
-
     QByteArray data = byteSource->getRawData();
     if (data.isEmpty()) {
         return false;
@@ -388,11 +474,14 @@ bool JsonView::isJsonValid()
     QJsonDocument jdoc = QJsonDocument::fromJson(data, &error);
     if (!jdoc.isNull()) {
         model->setJsonDoc(jdoc);
+        disconnect(tree, &QTreeView::expanded, this, &JsonView::onTreeChanges);
         tree->expand(model->index(0,0));
+        connect(tree, &QTreeView::expanded, this, &JsonView::onTreeChanges);
+        tree->resizeColumnToContents(0);
+        restoreTreeState(treeSavedState);
         return true;
     } else {
         return false;
-      //  qDebug() << tr("Json parsing error:") << error.errorString();
     }
 }
 
@@ -406,14 +495,12 @@ void JsonView::updateImportExportMenus()
     QAction * action = new(std::nothrow) QAction(tr("From clipboard as"), replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu clipboard X{");
-        return;
     }
     action->setDisabled(true);
     replaceMenu->addAction(action);
     action = new(std::nothrow) QAction(UTF8_STRING_ACTION, replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu clipboard X{");
-        return;
     }
 
     replaceMenu->addAction(action);
@@ -421,7 +508,6 @@ void JsonView::updateImportExportMenus()
         action = new(std::nothrow) QAction(list.at(i), replaceMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu user X{");
-            return;
         }
         replaceMenu->addAction(action);
     }
@@ -434,7 +520,6 @@ void JsonView::onCopy(QAction *action)
 
 void JsonView::onReplace(QAction *action)
 {
-    qDebug() << tr("replacing");
     QModelIndex index = tree->currentIndex();
     JsonItem *item = nullptr;
     if (index.isValid()) {
@@ -455,7 +540,6 @@ void JsonView::onReplace(QAction *action)
             }
 
             if (!rawVal.isEmpty()) {
-                qDebug() << tr("Got value");
                 QJsonValue repVal;
                 QJsonParseError error;
                 QJsonDocument jdoc = QJsonDocument::fromJson(rawVal, &error);
@@ -483,41 +567,168 @@ void JsonView::onSendToTriggered(QAction *action)
     sendToMenu->processingAction(action, getCurrentIndexValue());
 }
 
+void JsonView::onManualUpdate()
+{
+    byteSource->setData(model->getJsonDoc().toJson());
+}
+
+void JsonView::onTreeChanges()
+{
+    tree->resizeColumnToContents(0);
+    treeSavedState = getTreeState();
+    // qDebug() << "[JsonView::onTreeChanges] " << qPrintable(QString::fromUtf8(treeSavedState.toJson()));
+}
+
+QJsonDocument JsonView::getTreeState()
+{
+    QJsonDocument doc;
+    QModelIndex root = model->index(0, 0, tree->rootIndex());
+    QJsonObject obj = getState(root);
+    doc.setObject(obj);
+    // qDebug() << "[JsonView::getTreeState] " << qPrintable(QString::fromUtf8(doc.toJson()));
+    return doc;
+}
+
+QJsonObject JsonView::getState(const QModelIndex &index)
+{
+    QJsonObject ret;
+    JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
+    if (item != nullptr) {
+        int count = item->childrenCount();
+        if (item->getValueType() == JsonItem::ARRAY) {
+            ret.insert(GuiConst::STATE_TYPE, JsonItem::ARRAY);
+        } else if (item->getValueType() == JsonItem::OBJECT) {
+            ret.insert(GuiConst::STATE_TYPE, JsonItem::OBJECT);
+        } else {
+            return ret;
+        }
+
+        QJsonObject data;
+        for (int i = 0; i < count; i++) {
+            QModelIndex child = model->index(i,0,index);
+            if (tree->isExpanded(child)) {
+                item = static_cast<JsonItem*>(child.internalPointer());
+                data.insert(item->getName(), getState(child));
+            }
+        }
+
+        ret.insert(GuiConst::STATE_DATA, data);
+    }
+    return ret;
+}
+
+void JsonView::restoreTreeState(const QJsonDocument &doc)
+{
+    if (!doc.isEmpty()) {
+        if (doc.isObject()) {
+            treeSavedState = doc;
+            if (!model->isNull()) {
+
+                QJsonObject obj = doc.object();
+                restoreState(obj,model->index(0,0,tree->rootIndex()));
+            }
+        } else {
+            qCritical() << tr("[JsonView::restoreTreeState] Json root needs to be an object");
+        }
+    }
+}
+
+void JsonView::restoreState(const QJsonObject &obj, const QModelIndex &index)
+{
+    if (obj.contains(GuiConst::STATE_TYPE)) {
+        JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
+        if (item != nullptr) {
+            int type = obj.value(GuiConst::STATE_TYPE).toInt();
+            if (item->getValueType() == type) {
+                tree->expand(index);
+            }
+
+            if (obj.contains(GuiConst::STATE_DATA)) {
+                QJsonObject data = obj.value(GuiConst::STATE_DATA).toObject();
+                if (!data.isEmpty()) {
+                    for (int i = 0; i < item->childrenCount(); i++) {
+                        JsonItem* child = item->child(i);
+                        if (data.contains(child->getName())) {
+                            restoreState(data.value(child->getName()).toObject(),model->index(i,0,index));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+QHash<QString, QString> JsonView::getConfiguration()
+{
+    QHash<QString, QString> ret = SingleViewAbstract::getConfiguration();
+    ret.insert(GuiConst::STATE_JSON_STATE, QString::fromUtf8(treeSavedState.toJson()));
+    return ret;
+}
+
+void JsonView::setConfiguration(QHash<QString, QString> conf)
+{
+    SingleViewAbstract::setConfiguration(conf);
+    if (conf.contains(GuiConst::STATE_JSON_STATE)) {
+        QString data = conf.value(GuiConst::STATE_JSON_STATE);
+        QJsonParseError error;
+        QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
+        if (!doc.isNull()) {
+            restoreTreeState(doc);
+        } else {
+            qCritical() << tr("[JsonView::setConfiguration] Parsing error: %1").arg(error.errorString());
+        }
+    }
+}
+
 void JsonView::buildContextMenus()
 {
     sendToMenu = new(std::nothrow) SendToMenu(guiHelper, tr("Send value to"));
     if (sendToMenu == nullptr) {
         qFatal("Cannot allocate memory for sendToMenu X{");
-        return;
     }
     connect(sendToMenu, &SendToMenu::triggered, this, &JsonView::onSendToTriggered);
 
     copyMenu = new(std::nothrow) QMenu(tr("Copy value as"));
     if (copyMenu == nullptr) {
         qFatal("Cannot allocate memory for copyMenu X{");
-        return;
     }
     connect(copyMenu, &QMenu::triggered, this, &JsonView::onCopy);
 
     replaceMenu = new(std::nothrow) QMenu(tr("Replace value"));
     if (replaceMenu == nullptr) {
         qFatal("Cannot allocate memory for replaceMenu X{");
-        return;
     }
     connect(replaceMenu, &QMenu::triggered, this, &JsonView::onReplace);
 
     globalContextMenu = new(std::nothrow) QMenu();
     if (globalContextMenu == nullptr) {
         qFatal("Cannot allocate memory for globalContextMenu X{");
-        return;
     }
 
+    QAction * action = new(std::nothrow)QAction(QString("Expand All"));
+    if (action == nullptr) {
+        qFatal("Cannot allocate memory for expandAllAction X{");
+    }
+
+    connect(action, &QAction::triggered, tree, &QTreeView::expandAll);
+
+    globalContextMenu->addAction(action);
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(replaceMenu);
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(sendToMenu);
     globalContextMenu->addSeparator();
     globalContextMenu->addMenu(copyMenu);
+
+    action = new(std::nothrow)QAction(QString("Collapse All"));
+    if (action == nullptr) {
+        qFatal("Cannot allocate memory for collapseAllAction X{");
+    }
+
+    globalContextMenu->addSeparator();
+    globalContextMenu->addAction(action);
+
+    connect(action, &QAction::triggered, tree, &QTreeView::collapseAll);
 }
 
 QByteArray JsonView::getCurrentIndexValue()
@@ -546,4 +757,10 @@ QByteArray JsonView::getCurrentIndexValue()
     }
 
     return ret;
+}
+
+QJsonDocument JsonView::getTreeSavedState() const
+{
+    // qDebug() << "[JsonView::getTreeSavedState] " << qPrintable(QString::fromUtf8(treeSavedState.toJson()));
+    return treeSavedState;
 }

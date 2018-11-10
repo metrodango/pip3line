@@ -114,7 +114,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
         initial = input;
     }
 
-    quint32 sizeLimit = (quint32)initial.size();
+    quint32 sizeLimit = static_cast<quint32>(initial.size());
 
     buf.setBuffer(&initial);
     buf.open(QIODevice::ReadOnly);
@@ -165,7 +165,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             emit error(tr("Invalid Worksation Domain buffer (16-23)"),id);
             return;
         }
-        temp = initial.mid(offset,length);
+        temp = initial.mid(int(offset),length);
 
         str = QString::fromUtf8(temp);
 
@@ -179,7 +179,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             emit error(tr("Invalid Worksation Name buffer (24-31)"),id);
             return;
         }
-        temp = initial.mid(offset,length);
+        temp = initial.mid(int(offset),length);
 
         str = QString::fromUtf8(temp);
         if (str.isEmpty())
@@ -198,7 +198,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             return;
         }
 
-        temp2 = initial.mid(offset,length);
+        temp2 = initial.mid(int(offset),length);
 
         quint32 flags = 0;
 
@@ -235,7 +235,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             return;
         }
 
-        temp2 = initial.mid(offset,length);
+        temp2 = initial.mid(int(offset),length);
         if (temp2.isEmpty())
             str = "nullptr";
         else {
@@ -255,7 +255,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             return;
         }
 
-        temp = initial.mid(offset,length);
+        temp = initial.mid(int(offset),length);
         output.append("LM/LMv2: ").append(temp.mid(8,16).toHex()).append("\n");
         output.append("LM challenge: ").append(temp.mid(0,8).toHex()).append("\n");
 
@@ -264,31 +264,31 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             return;
         }
 
-        QByteArray ntlm = initial.mid(offset,length);
+        QByteArray ntlm = initial.mid(int(offset),length);
 
         if (!readSecurityBuffer(buf, &length, &maxLength, &offset, sizeLimit)) {
             emit error(tr("Invalid Target Name (28-35)"),id);
             return;
         }
-        QByteArray targetName = initial.mid(offset,length);
+        QByteArray targetName = initial.mid(int(offset),length);
 
         if (!readSecurityBuffer(buf, &length, &maxLength, &offset, sizeLimit)) {
             emit error(tr("Invalid User Name (36-43)"),id);
             return;
         }
-        QByteArray userName = initial.mid(offset,length);
+        QByteArray userName = initial.mid(int(offset),length);
 
         if (!readSecurityBuffer(buf, &length, &maxLength, &offset, sizeLimit)) {
             emit error(tr("Invalid Workstation Name (44-51)"),id);
             return;
         }
-        QByteArray workstationName = initial.mid(offset,length);
+        QByteArray workstationName = initial.mid(int(offset),length);
 
         if (!readSecurityBuffer(buf, &length, &maxLength, &offset, sizeLimit)) {
             emit error(tr("Invalid Session Key (52-59)"),id);
             return;
         }
-        QByteArray sessionKey = initial.mid(offset,length);
+        QByteArray sessionKey = initial.mid(int(offset),length);
 
         quint32 flags = 0;
         if (!readFlags(buf, &flags)) {
@@ -373,7 +373,7 @@ void Ntlmssp::setDecodeBase64(bool val)
     emit confUpdated();
 }
 
-QByteArray Ntlmssp::extractFlags(int flags)
+QByteArray Ntlmssp::extractFlags(quint32 flags)
 {
     QByteArray res;
 
@@ -479,13 +479,13 @@ QByteArray Ntlmssp::extractOSVersion(QBuffer &input)
     if (temp.size() != 1)
         return str;
 
-    memcpy((void *)(&major),temp.data(),1);
+    memcpy(static_cast<void *>(&major),temp.data(),1);
 
     temp = input.read(1);
         if (temp.size() != 1)
             return str;
 
-    memcpy((void *)(&minor),temp.data(),1);
+    memcpy(static_cast<void *>(&minor),temp.data(),1);
 
     str.append("  Major Version ").append(QByteArray::number(major)).append("\n");
     str.append("  Minor version ").append(QByteArray::number(minor)).append("\n");
@@ -621,7 +621,7 @@ QByteArray Ntlmssp::toTimeStamp(const QByteArray &data)
     rest = timeStamp % 10000;
     date.setTimeSpec(Qt::UTC);
     date.setDate(QDate(1601,1,1));
-    date = date.addMSecs(val1 > LONG_MAX ? LONG_MAX : (qint64) val1); // just in case there is a crazy value
+    date = date.addMSecs(val1 > LONG_MAX ? LONG_MAX : static_cast<qint64>(val1)); // just in case there is a crazy value
     ret = date.toString("ddd d MMMM yyyy hh:mm:ss.zzz").toUtf8();
     ret.append("ms ").append(QByteArray::number(rest)).append(" ns UTC");
     return ret;

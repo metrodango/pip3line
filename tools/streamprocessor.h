@@ -19,7 +19,7 @@ class StreamProcessor : public Processor
 {
         Q_OBJECT
     public:
-        explicit StreamProcessor(TransformMgmt * tFactory,QObject *parent = 0);
+        explicit StreamProcessor(TransformMgmt * tFactory,QObject *parent = nullptr);
         virtual void run();
     public slots:
         void stop();

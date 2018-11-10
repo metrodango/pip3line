@@ -24,7 +24,7 @@ class InfoDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit InfoDialog(GuiHelper * guiHelper, TransformAbstract *transform, QWidget *parent = 0);
+        explicit InfoDialog(GuiHelper * guiHelper, TransformAbstract *transform, QWidget *parent = nullptr);
         ~InfoDialog();
         TransformAbstract * getTransform();
         

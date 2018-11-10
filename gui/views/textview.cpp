@@ -463,7 +463,6 @@ void TextView::buildContextMenu()
     sendToMenu = new(std::nothrow) SendToMenu(guiHelper, tr("Send selection to"));
     if (sendToMenu == nullptr) {
         qFatal("Cannot allocate memory for sendToMenu X{");
-        return;
     }
 
     connect(sendToMenu, &SendToMenu::triggered, this, &TextView::onSendToTriggered);
@@ -471,7 +470,6 @@ void TextView::buildContextMenu()
     loadMenu = new(std::nothrow) QMenu(tr("Load from clipboard"));
     if (loadMenu == nullptr) {
         qFatal("Cannot allocate memory for importMenu X{");
-        return;
     }
     guiHelper->updateLoadContextMenu(loadMenu);
     connect(loadMenu, &QMenu::triggered, this, &TextView::onLoad);
@@ -479,7 +477,6 @@ void TextView::buildContextMenu()
     copyMenu = new(std::nothrow) QMenu(tr("Copy as"));
     if (copyMenu == nullptr) {
         qFatal("Cannot allocate memory for copyMenu X{");
-        return;
     }
 
     guiHelper->updateCopyContextMenu(copyMenu);
@@ -496,7 +493,6 @@ void TextView::buildContextMenu()
     saveToFileMenu = new(std::nothrow) QMenu(tr("Save to file"));
     if (saveToFileMenu == nullptr) {
         qFatal("Cannot allocate memory for saveToFile X{");
-        return;
     }
     connect(saveToFileMenu, &QMenu::triggered, this, &TextView::onSaveToFile);
     saveToFileMenu->addAction(ui->saveAllToFileAction);
@@ -525,7 +521,6 @@ void TextView::buildContextMenu()
 
     if (globalContextMenu == nullptr) {
         qFatal("Cannot allocate memory for globalContextMenu X{");
-        return;
     }
 
     globalContextMenu->addAction(selectAllAction);
@@ -549,7 +544,7 @@ void TextView::onTextChanged()
 #else
     sdata = plainTextEdit->toPlainText();
 #endif
-    byteSource->setData(encode(sdata),(quintptr) this);
+    byteSource->setData(encode(sdata),reinterpret_cast<quintptr>(this));
     updateStats();
     if (autoCopyToClipboard)
         copyToClipboard();
@@ -557,7 +552,7 @@ void TextView::onTextChanged()
 
 void TextView::updateText(quintptr source)
 {
-    if (source == (quintptr) this)
+    if (source == reinterpret_cast<quintptr>(this))
         return;
 
     QByteArray rawdata = byteSource->getRawData();

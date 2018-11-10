@@ -31,7 +31,8 @@ TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort,
     socksProxy(false)
 {
     tlsPorts.append(443);
-    flags |= REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED;
+    flags = REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED | B64BLOCKS_OPTIONS;
+
     type = SERVER;
 
     connect(this, &TLSServerListener::sslChanged, this, &TLSServerListener::onTLSUpdated);
@@ -47,7 +48,7 @@ TLSServerListener::TLSServerListener(QHostAddress hostAddress, quint16 hostPort,
     sslConfiguration->setLocalCert(defaultCertPath);
     sslConfiguration->setLocalKey(defaultCertPath);
 
-    updateTimer.moveToThread(&serverThread);
+    updateConnectionsTimer.moveToThread(&serverThread);
     moveToThread(&serverThread);
     serverThread.start();
 
@@ -88,7 +89,7 @@ void TLSServerListener::sendBlock(Block *block)
             int size = data.size();
             qint64 written = 0;
             while (written += i.key()->write(data) < size) {
-                data = data.mid(written);
+                data = data.mid(static_cast<int>(written));
             }
             dataSend = true;
             break;
@@ -124,7 +125,7 @@ bool TLSServerListener::startListening()
         server = nullptr;
         return false;
     }
-    emit log(tr("started %1:%2").arg(hostAddress.toString()).arg(hostPort), actualID, Pip3lineConst::LSTATUS);
+    emit log(tr("started %1:%2").arg(hostAddress.toString()).arg(hostPort), actualID, Pip3lineConst::PLSTATUS);
     emit started();
     return true;
 }
@@ -133,7 +134,7 @@ void TLSServerListener::stopListening()
 {
     if (server != nullptr && server->isListening()) {
         server->close();
-        emit log(tr("stopped %1:%2").arg(hostAddress.toString()).arg(hostPort), actualID, Pip3lineConst::LSTATUS);
+        emit log(tr("stopped %1:%2").arg(hostAddress.toString()).arg(hostPort), actualID, Pip3lineConst::PLSTATUS);
         delete server;
         server = nullptr;
         emit stopped();
@@ -182,8 +183,6 @@ void TLSServerListener::onConnectionClosed(int cid)
         delete socket;
         updateConnectionsInfo();
     }
-
-
 }
 
 void TLSServerListener::dataReceived()
@@ -264,7 +263,7 @@ void TLSServerListener::dataReceived()
 
 void TLSServerListener::handlingClient(qintptr socketDescriptor)
 {
-    qDebug() << "[TLSServerListener::handlingClient] New client" << socketDescriptor;
+  //  qDebug() << "[TLSServerListener::handlingClient] New client" << socketDescriptor;
 
     QSslSocket * socket = new(std::nothrow) QSslSocket();
     if (socket == nullptr) {
@@ -284,7 +283,7 @@ void TLSServerListener::handlingClient(qintptr socketDescriptor)
         }
 
         clientsProxyNeeded.insert(socket, proxyHelper);
-    } else if (isTLSEnable()) {
+    } else if (isTLSEnabled()) {
         if (!startingTLS(socket)) {
             emit log(tr("SSL/TLS handshake failed. Closing the connection."),actualID, Pip3lineConst::LERROR);
             socket->disconnectFromHost();
@@ -301,7 +300,7 @@ void TLSServerListener::handlingClient(qintptr socketDescriptor)
     }
 
     if (socket != nullptr) {
-        emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::LSTATUS);
+        emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::PLSTATUS);
         connect(socket, &QSslSocket::disconnected, this, &TLSServerListener::onClientDeconnection,Qt::QueuedConnection);
 
         clients.insert(socket, BlocksSource::newSourceID(this));
@@ -380,7 +379,7 @@ void TLSServerListener::internalUpdateConnectionsInfo()
         i.next();
         QSslSocket * socket = i.key();
         QString desc = socket->peerAddress().toString();
-        if (isTLSEnable())
+        if (isTLSEnabled())
             desc.append(QString(":%1/TLS").arg(socket->peerPort()));
         else
             desc.append(QString(":%1/TCP").arg(socket->peerPort()));
@@ -416,7 +415,7 @@ bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
 
 void TLSServerListener::handlingDisconnect(QSslSocket *socket)
 {
-    emit log(tr("Disconnection for %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::LSTATUS);
+    emit log(tr("Disconnection for %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::PLSTATUS);
     if (clients.contains(socket)) {
         int rsid = clients.take(socket);
 

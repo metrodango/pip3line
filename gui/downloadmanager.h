@@ -29,7 +29,7 @@ class DownloadManager : public QObject
 {
         Q_OBJECT
     public:
-        explicit DownloadManager(QUrl &url, GuiHelper *guiHelper, QObject *parent = 0);
+        explicit DownloadManager(QUrl &url, GuiHelper *guiHelper, QObject *parent = nullptr);
         ~DownloadManager();
         bool launch();
         QByteArray getData();

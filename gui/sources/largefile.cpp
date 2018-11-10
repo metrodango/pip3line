@@ -35,7 +35,7 @@ bool FileSourceReader::seek(quint64 pos)
         emit log(tr("pos is too large for seeking, ignoring"),metaObject()->className(),Pip3lineConst::LERROR);
         return false;
     }
-    return file.seek((qint64)pos);
+    return file.seek(static_cast<qint64>(pos));
 }
 
 int FileSourceReader::read(char *buffer, int maxLen)
@@ -44,11 +44,11 @@ int FileSourceReader::read(char *buffer, int maxLen)
         emit log(tr("maxLen is too large for reading, reducing it."),metaObject()->className(),Pip3lineConst::LWARNING);
         maxLen = MAX_READ_SIZE; // MAX_READ_SIZE is small
     }
-    qint64 ret = file.read(buffer,(qint64) maxLen); // maxLen is small
+    qint64 ret = file.read(buffer,static_cast<qint64>(maxLen)); // maxLen is small
     if (ret < 0) {
         emit log(tr("File read error: %1").arg(file.errorString()),metaObject()->className(),Pip3lineConst::LERROR);
     }
-    return (int)ret;
+    return static_cast<int>(ret);
 }
 
 bool FileSourceReader::isReadable()
@@ -93,7 +93,7 @@ void FileSearch::internalStart()
     if (sitem.isEmpty())
         return;
     QFileInfo info(filename);
-    quint64 fsize = info.size();
+    quint64 fsize = static_cast<quint64>(info.size());
     totalSearchSize = fsize;
     quint64 blocksize = 0;
     int threadCount;
@@ -109,7 +109,7 @@ void FileSearch::internalStart()
         }
     }
 
-    blocksize = fsize / ((quint64)threadCount);
+    blocksize = fsize / (static_cast<quint64>(threadCount));
     int i = 0;
     for (i = 0; i < threadCount; i++) {
         SearchWorker * worker = nullptr;
@@ -123,9 +123,9 @@ void FileSearch::internalStart()
         if (worker == nullptr) {
             qFatal("Cannot allocate memory for SearchWorker X{");
         } else {
-            worker->setStartOffset(i * blocksize);
-            worker->setEndOffset(qMin((i+1) * blocksize + sitem.size(),fsize) - 1); // qMin is for the last block
-            worker->setStatsStep((quint64)((double)totalSearchSize * 0.01)); // setting stats steps at 1% of the total size
+            worker->setStartOffset(static_cast<quint64>(i) * blocksize);
+            worker->setEndOffset(qMin(static_cast<quint64>(i+1) * blocksize + static_cast<quint64>(sitem.size()),fsize) - 1); // qMin is for the last block
+            worker->setStatsStep(qRound(static_cast<double>(totalSearchSize) * 0.01)); // setting stats steps at 1% of the total size
             addSearchWorker(worker);
         }
     }
@@ -163,7 +163,7 @@ QString LargeFile::name()
 quint64 LargeFile::size()
 {
     if (file.isReadable()) {
-        return (quint64)fileSize; // this should be a non-negative value
+        return static_cast<quint64>(fileSize); // this should be a non-negative value
     }
     return 0;
 }
@@ -197,7 +197,7 @@ void LargeFile::fromLocalFile(QString fileName, quint64 startOffset)
         dataChunk.clear();
     } else {
         if (infoFile.isWritable()) {
-            emit log(tr("File %1 is writeable").arg(fileName),metaObject()->className(),Pip3lineConst::LSTATUS);
+            emit log(tr("File %1 is writeable").arg(fileName),metaObject()->className(),Pip3lineConst::PLSTATUS);
 
             if (!file.open(QIODevice::ReadWrite)) {
                 emit log(tr("Failed to open %1:\n %2").arg(fileName).arg(file.errorString()),metaObject()->className(),Pip3lineConst::LERROR);
@@ -207,7 +207,7 @@ void LargeFile::fromLocalFile(QString fileName, quint64 startOffset)
                 _readonly = false;
             }
         } else {
-            emit log(tr("File %1 is not writeable").arg(fileName),metaObject()->className(),Pip3lineConst::LSTATUS);
+            emit log(tr("File %1 is not writeable").arg(fileName),metaObject()->className(),Pip3lineConst::PLSTATUS);
             _readonly = true;
             if (!file.open(QIODevice::ReadOnly)) {
                 emit log(tr("Failed to open %1:\n %2").arg(fileName).arg(file.errorString()),metaObject()->className(),Pip3lineConst::LERROR);
@@ -275,7 +275,7 @@ void LargeFile::saveToFile(QString destFilename)
 
 bool LargeFile::isOffsetValid(quint64 offset)
 {
-    return offset < (quint64)fileSize; //  filesize should always be positive
+    return offset < static_cast<quint64>(fileSize); //  filesize should always be positive
 }
 
 bool LargeFile::tryMoveUp(int sizeToMove)
@@ -297,24 +297,24 @@ bool LargeFile::tryMoveView(int sizeToMove)
         if (currentStartingOffset == 0)
             return false; // already at the beginning, nothing to see here
 
-        if (currentStartingOffset < (quint64)(-1 * sizeToMove)) { // checking how much we can go up
+        if (currentStartingOffset < static_cast<quint64>(-1 * sizeToMove)) { // checking how much we can go up
             newOffset = 0;
         } else {
-            newOffset = currentStartingOffset + sizeToMove;
+            newOffset = currentStartingOffset + static_cast<quint64>(sizeToMove);
         }
     } else {
-        if (ULLONG_MAX - (quint64)sizeToMove - (quint64)chunksize < currentStartingOffset) {
+        if (ULLONG_MAX - static_cast<quint64>(sizeToMove) - static_cast<quint64>(chunksize) < currentStartingOffset) {
             return false; // checking overflow
         }
 
-        if (currentStartingOffset + (quint64)chunksize >= (quint64)fileSize) {
+        if (currentStartingOffset + static_cast<quint64>(chunksize) >= static_cast<quint64>(fileSize)) {
             return false; // no more data
         }
 
-        newOffset = currentStartingOffset + sizeToMove;
+        newOffset = currentStartingOffset + static_cast<quint64>(sizeToMove);
     }
 
-    int readsize = qMin((quint64)fileSize - newOffset,(quint64)chunksize);
+    int readsize = static_cast<int>(qMin(static_cast<quint64>(fileSize) - newOffset, static_cast<quint64>(chunksize)));
     QByteArray temp;
     if (!readData(newOffset,temp,readsize)) {
         return false;
@@ -370,7 +370,7 @@ bool LargeFile::seekFile(quint64 offset)
         emit log(tr("[seekFile] Hitting the LLONG_MAX limit for Qt, ignoring"),metaObject()->className(), Pip3lineConst::LERROR);
         return false;
     }
-    if (!file.seek(offset)) {
+    if (!file.seek(static_cast<qint64>(offset))) {
         emit log(tr("Error while seeking: %1").arg(file.errorString()),metaObject()->className(), Pip3lineConst::LERROR);
         return false;
     }
@@ -437,20 +437,20 @@ bool LargeFile::readData(quint64 offset, QByteArray &data, int length)
         return false;
    // qDebug() << "read Data: " << offset << length << fileSize;
     bool noError = true;
-    if (length < 1 || offset > (quint64)fileSize)
+    if (length < 1 || offset > static_cast<quint64>(fileSize))
         noError = false;
     else {
 
-        if ((quint64)(LLONG_MAX - length) < offset ) {
+        if (static_cast<quint64>(LLONG_MAX - length) < offset ) {
             qDebug() << tr("Hitting LLONG_MAX limit");
             noError = false;
         } else if (seekFile(offset)) {
-            char * buf = new(std::nothrow) char[length];
+            char * buf = new(std::nothrow) char[static_cast<unsigned long>(length)];
             if (buf == nullptr) {
                 qFatal("Cannot allocate memory for the file buffer X{");
             }
-            if (offset + (quint64)length > (quint64)fileSize) {
-                length = (quint64)fileSize - offset; // just skip the last bytes if the requested block goes out-of-bound
+            if (offset + static_cast<quint64>(length) > static_cast<quint64>(fileSize)) {
+                length = static_cast<int>(static_cast<quint64>(fileSize) - offset); // just skip the last bytes if the requested block goes out-of-bound
                 //qDebug() << "Reducing length";
             }
          //   qDebug() << "read Data(2): " << offset << length << fileSize;
@@ -465,7 +465,7 @@ bool LargeFile::readData(quint64 offset, QByteArray &data, int length)
                 if (bytesRead < length) {
                     qDebug() << tr("Length read (%1) inferior to length requested (%2) at %3").arg(bytesRead).arg(length).arg(offset);
                 }
-                data = QByteArray(buf, bytesRead);
+                data = QByteArray(buf, static_cast<int>(bytesRead)); // guaranted to be < length (< INT_MAX)
             }
 
             delete [] buf;
@@ -491,7 +491,7 @@ bool LargeFile::writeData(quint64 offset, int length, const QByteArray &repData,
 
     if (isFileWriteable()) {
 
-        if (offset > (quint64)fileSize) {
+        if (offset > static_cast<quint64>(fileSize)) {
             emit log(tr("Offset is outside the file, ignoring"), metaObject()->className(), Pip3lineConst::LERROR);
             return noError;
         }
@@ -510,7 +510,7 @@ bool LargeFile::writeData(quint64 offset, int length, const QByteArray &repData,
             return noError;
         }
 
-        if ((quint64) (fileSize - length) < offset) { // stupidity check
+        if (static_cast<quint64>(fileSize - length) < offset) { // stupidity check
             emit log(tr("Offset + length is outside the file, ignoring"), metaObject()->className(), Pip3lineConst::LERROR);
             return noError;
         }

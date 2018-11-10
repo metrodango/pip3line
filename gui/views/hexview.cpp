@@ -142,7 +142,7 @@ ByteTableView *HexView::getHexTableView()
 
 quint64 HexView::getLowPos()
 {
-    return hexTableView->getLowerSelected();
+    return static_cast<quint64>(hexTableView->getLowerSelected());
 }
 
 void HexView::updateStats()
@@ -162,7 +162,7 @@ void HexView::updateStats()
     }
 
 
-    int scount = hexTableView->getSelectedBytesCount();
+    int scount = static_cast<int>(hexTableView->getSelectedBytesCount());
     //hexTableView->verticalHeader()->adjustSize();
     if ( scount != 0) {
         ret.append(tr(" [ %1|x%2 selected ]").arg(scount).arg(QString::number(scount,16)));
@@ -177,7 +177,7 @@ void HexView::updateStats()
     if (offset < 0) {
         ret.append("NA");
     } else {
-        quint64 finaloffset = offset + byteSource->startingRealOffset();
+        quint64 finaloffset = static_cast<quint64>(offset) + byteSource->startingRealOffset();
         ret.append(QString::number(finaloffset));
         ret.append(" | x");
         ret.append(QString::number(finaloffset,16));
@@ -251,7 +251,6 @@ void HexView::updateMarkMenu()
         QAction *  action = new(std::nothrow) QAction(QIcon(pix),i.key(), markMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateMarkMenu X{");
-            return;
         }
         markMenu->addAction(action);
     }
@@ -269,21 +268,18 @@ void HexView::updateImportExportMenus()
     QAction * action = new(std::nothrow) QAction(NEW_BYTE_ACTION, replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu new byte X{");
-        return;
     }
     replaceMenu->addAction(action);
     replaceMenu->addSeparator();
     action = new(std::nothrow) QAction(tr("From clipboard as"), replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu clipboard X{");
-        return;
     }
     action->setDisabled(true);
     replaceMenu->addAction(action);
     action = new(std::nothrow) QAction(UTF8_STRING_ACTION, replaceMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu clipboard X{");
-        return;
     }
 
     replaceMenu->addAction(action);
@@ -291,7 +287,6 @@ void HexView::updateImportExportMenus()
         action = new(std::nothrow) QAction(list.at(i), replaceMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus replaceMenu user X{");
-            return;
         }
         replaceMenu->addAction(action);
     }
@@ -300,14 +295,12 @@ void HexView::updateImportExportMenus()
     action = new(std::nothrow) QAction(NEW_BYTE_ACTION, insertAfterMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus insertAfterMenu new byte X{");
-        return;
     }
     insertAfterMenu->addAction(action);
     insertAfterMenu->addSeparator();
     action = new(std::nothrow) QAction(UTF8_STRING_ACTION, insertAfterMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus insertAfterMenu UTF8 X{");
-        return;
     }
     insertAfterMenu->addAction(action);
 
@@ -315,7 +308,6 @@ void HexView::updateImportExportMenus()
         action = new(std::nothrow) QAction(list.at(i), insertAfterMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus insertAfterMenu user's X{");
-            return;
         }
         insertAfterMenu->addAction(action);
     }
@@ -324,14 +316,12 @@ void HexView::updateImportExportMenus()
     action = new(std::nothrow) QAction(NEW_BYTE_ACTION, insertBeforeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus insertBeforeMenu new byte X{");
-        return;
     }
     insertBeforeMenu->addAction(action);
     insertBeforeMenu->addSeparator();
     action = new(std::nothrow) QAction(UTF8_STRING_ACTION, insertBeforeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for action updateImportExportMenus insertBeforeMenu UTF8 X{");
-        return;
     }
     insertBeforeMenu->addAction(action);
 
@@ -339,7 +329,6 @@ void HexView::updateImportExportMenus()
         action = new(std::nothrow) QAction(list.at(i), insertBeforeMenu);
         if (action == nullptr) {
             qFatal("Cannot allocate memory for action updateImportExportMenus insertBeforeMenu user's X{");
-            return;
         }
         insertBeforeMenu->addAction(action);
     }
@@ -361,7 +350,6 @@ void HexView::onReplace(QAction *action)
         NewByteDialog *dialog = new(std::nothrow) NewByteDialog(guiHelper, this,true);
         if (dialog == nullptr) {
             qFatal("Cannot allocate memory for onReplace NewByteDialog X{");
-            return;
         }
         dialog->setModal(true);
         int ret = dialog->exec();
@@ -394,7 +382,6 @@ void HexView::onInsertAfter(QAction *action)
         NewByteDialog *dialog = new(std::nothrow) NewByteDialog(guiHelper, this);
         if (dialog == nullptr) {
             qFatal("Cannot allocate memory for onInsertAfter NewByteDialog X{");
-            return;
         }
         dialog->setModal(true);
         int ret = dialog->exec();
@@ -422,7 +409,6 @@ void HexView::onInsertBefore(QAction *action)
         NewByteDialog *dialog = new(std::nothrow) NewByteDialog(guiHelper, this);
         if (dialog == nullptr) {
             qFatal("Cannot allocate memory for onInsertBefore NewByteDialog X{");
-            return;
         }
         dialog->setModal(true);
         int ret = dialog->exec();
@@ -487,14 +473,14 @@ void HexView::onSelectFromSizeMenu(QAction *action)
         return;
     }
 
-    qint64 inter = byteSource->size() - hexTableView->getHigherSelected();
-    if (val >= (quint64)(inter < 0 ? 0 : inter) ) {
+    qint64 inter = static_cast<qint64>(byteSource->size() - static_cast<quint64>(hexTableView->getHigherSelected()));
+    if (val >= static_cast<quint64>(inter < 0 ? 0 : inter) ) {
         QString mess = tr("This size value would select out-of-bound (maybe the selected value is a signed int)");
         logger->logError(mess);
         QMessageBox::warning(this, tr("Value too large"), mess, QMessageBox::Ok);
     } else {
         qint64 pos = hexTableView->getHigherSelected() + 1;
-        hexTableView->selectBytes(pos, val);
+        hexTableView->selectBytes(static_cast<int>(pos), static_cast<int>(val));
     }
 }
 
@@ -512,8 +498,8 @@ void HexView::onGotoFromOffsetMenu(QAction *action)
         if (val == 0) {
             return;
         }
-        qint64 inter = byteSource->size() - hexTableView->getHigherSelected();
-        if (val >= (quint64)(inter < 0 ? 0 : inter)) {
+        qint64 inter = static_cast<qint64>(byteSource->size() - static_cast<quint64>(hexTableView->getHigherSelected()));
+        if (val >= static_cast<quint64>(inter < 0 ? 0 : inter)) {
             QString mess = tr("This offset value would go out-of-bound (maybe the selected value is a signed int)");
             logger->logError(mess);
             QMessageBox::warning(this, tr("Value too large"), mess, QMessageBox::Ok);
@@ -564,7 +550,7 @@ void HexView::onCopyCurrentOffset(QAction *action)
 quint64 HexView::normalizeSelectedInt(bool bigEndian)
 {
     QByteArray bytesdata = hexTableView->getSelectedBytes();
-    quint64 size = bytesdata.size(); // converting int to quint64, no drama here
+    quint64 size = static_cast<quint64>(bytesdata.size()); // converting int to quint64, no drama here
     if (size > 8) {
         QString mess = tr("Too many bytes selected for an uint 64 (max 8 bytes)");
         logger->logError(mess);
@@ -586,9 +572,9 @@ quint64 HexView::normalizeSelectedInt(bool bigEndian)
     }
     if (size < sizeof(quint64)) {
         if (reverseByteOrdering)
-            bytesdata.prepend(QByteArray(sizeof(quint64) - bytesdata.size(),'\x00'));
+            bytesdata.prepend(QByteArray(static_cast<int>(sizeof(quint64) - static_cast<quint64>(bytesdata.size())),'\x00'));
         else
-            bytesdata.append(QByteArray(sizeof(quint64) - bytesdata.size(),'\x00'));
+            bytesdata.append(QByteArray(static_cast<int>(sizeof(quint64) - static_cast<quint64>(bytesdata.size())),'\x00'));
     }
 
     if (reverseByteOrdering) {
@@ -655,8 +641,8 @@ QJsonObject HexView::createFuzzingTemplate(ByteSourceAbstract *bs)
                 QJsonObject injp;
                 QSharedPointer<BytesRange> br = brl->at(i);
                 injp.insert(GuiConst::STATE_TYPE, br->getDescription());
-                injp.insert(GuiConst::START_STR,QJsonValue((qint64)br->getLowerVal())); // size should be reasonable, so it should not matter
-                injp.insert(GuiConst::STATE_SIZE, QJsonValue((qint64)br->getSize()));
+                injp.insert(GuiConst::START_STR,QJsonValue(static_cast<qint64>(br->getLowerVal()))); // size should be reasonable, so it should not matter
+                injp.insert(GuiConst::STATE_SIZE, QJsonValue(static_cast<qint64>(br->getSize())));
                 injectionPoints.append(injp);
             }
             fuzzConfiguration.insert("injectionsPoints", injectionPoints);
@@ -698,7 +684,7 @@ void HexView::onExportForFuzzing()
                     if (written == data.length())
                         break;
                     else
-                        data = data.mid(written - 1);
+                        data = data.mid(static_cast<int>(written) - 1);
                 };
 
                 file.close();
@@ -736,7 +722,6 @@ void HexView::onNewByteArray()
     NewByteDialog *dialog = new(std::nothrow) NewByteDialog(guiHelper, this);
     if (dialog == nullptr) {
         qFatal("Cannot allocate memory for onNewByteArray NewByteDialog X{");
-        return;
     }
     dialog->setModal(true);
     int ret = dialog->exec();
@@ -762,168 +747,144 @@ void HexView::buildContextMenus()
     sendToMenu = new(std::nothrow) SendToMenu(guiHelper, tr("Send selection to"));
     if (sendToMenu == nullptr) {
         qFatal("Cannot allocate memory for sendToMenu X{");
-        return;
     }
     connect(sendToMenu, &SendToMenu::triggered, this, &HexView::onSendToTriggered);
 
     markMenu = new(std::nothrow) QMenu(tr("Mark as"));
     if (markMenu == nullptr) {
         qFatal("Cannot allocate memory for markMenu X{");
-        return;
     }
     connect(markMenu, &QMenu::triggered, this, &HexView::onMarkMenu);
 
     copyMenu = new(std::nothrow) QMenu(tr("Copy as"));
     if (copyMenu == nullptr) {
         qFatal("Cannot allocate memory for copyMenu X{");
-        return;
     }
     connect(copyMenu, &QMenu::triggered, this, &HexView::onCopy);
 
     loadMenu = new(std::nothrow) QMenu(tr("Load from clipboard"));
     if (loadMenu == nullptr) {
         qFatal("Cannot allocate memory for importMenu X{");
-        return;
     }
     connect(loadMenu, &QMenu::triggered, this, &HexView::onLoad);
 
     insertAfterMenu = new(std::nothrow) QMenu(tr("Insert after"));
     if (insertAfterMenu == nullptr) {
         qFatal("Cannot allocate memory for insertAfterMenu X{");
-        return;
     }
     connect(insertAfterMenu, &QMenu::triggered, this, &HexView::onInsertAfter);
 
     replaceMenu = new(std::nothrow) QMenu(tr("Replace selection "));
     if (replaceMenu == nullptr) {
         qFatal("Cannot allocate memory for replaceMenu X{");
-        return;
     }
     connect(replaceMenu, &QMenu::triggered, this, &HexView::onReplace);
 
     insertBeforeMenu = new(std::nothrow) QMenu(tr("Insert before"));
     if (insertBeforeMenu == nullptr) {
         qFatal("Cannot allocate memory for insertBeforeMenu X{");
-        return;
     }
     connect(insertBeforeMenu, &QMenu::triggered, this, &HexView::onInsertBefore);
 
     selectFromSizeMenu = new(std::nothrow) QMenu(tr("Select from size"));
     if (selectFromSizeMenu == nullptr) {
         qFatal("Cannot allocate memory for selectFromSizeMenu X{");
-        return;
     }
     connect(selectFromSizeMenu, &QMenu::triggered, this, &HexView::onSelectFromSizeMenu);
 
     QAction * action = new(std::nothrow) QAction(LITTLE_ENDIAN_STRING, selectFromSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_LE_ACTION X{");
-        return;
     }
     selectFromSizeMenu->addAction(action);
 
     action = new(std::nothrow) QAction(BIG_ENDIAN_STRING, selectFromSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_BE_ACTION X{");
-        return;
     }
     selectFromSizeMenu->addAction(action);
 
     gotoFromOffsetMenu = new(std::nothrow) QMenu(tr("Goto selected offset"));
     if (gotoFromOffsetMenu == nullptr) {
         qFatal("Cannot allocate memory for gotoFromOffsetMenu X{");
-        return;
     }
     connect(gotoFromOffsetMenu, &QMenu::triggered, this, &HexView::onGotoFromOffsetMenu);
 
     action = new(std::nothrow) QAction(ABSOLUTE_LITTLE_ENDIAN_STRING, gotoFromOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_LE_ACTION X{");
-        return;
     }
     gotoFromOffsetMenu->addAction(action);
 
     action = new(std::nothrow) QAction(ABSOLUTE_BIG_ENDIAN_STRING, gotoFromOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_LE_ACTION X{");
-        return;
     }
     gotoFromOffsetMenu->addAction(action);
 
     action = new(std::nothrow) QAction(RELATIVE_LITTLE_ENDIAN_STRING, gotoFromOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_BE_ACTION X{");
-        return;
     }
     gotoFromOffsetMenu->addAction(action);
 
     action = new(std::nothrow) QAction(RELATIVE_BIG_ENDIAN_STRING, gotoFromOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SELECT_BE_ACTION X{");
-        return;
     }
     gotoFromOffsetMenu->addAction(action);
 
     copySelectionSizeMenu = new(std::nothrow) QMenu(tr("Copy selection size"));
     if (copySelectionSizeMenu == nullptr) {
         qFatal("Cannot allocate memory for copySelectionSizeMenu X{");
-        return;
     }
     connect(copySelectionSizeMenu, &QMenu::triggered, this, &HexView::onCopySelectionSize);
 
     action = new(std::nothrow) QAction(OCTAL_STRING, copySelectionSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_OCTAL_ACTION X{");
-        return;
     }
     copySelectionSizeMenu->addAction(action);
 
     action = new(std::nothrow) QAction(DECIMAL_STRING, copySelectionSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_DECIMAL_ACTION X{");
-        return;
     }
     copySelectionSizeMenu->addAction(action);
 
     action = new(std::nothrow) QAction(HEXADECIMAL_STRING, copySelectionSizeMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_HEXADECIMAL_ACTION X{");
-        return;
     }
     copySelectionSizeMenu->addAction(action);
 
     copyCurrentOffsetMenu = new(std::nothrow) QMenu(tr("Copy offset value"));
     if (copyCurrentOffsetMenu == nullptr) {
         qFatal("Cannot allocate memory for copyCurrentOffsetMenu X{");
-        return;
     }
     connect(copyCurrentOffsetMenu, &QMenu::triggered, this, &HexView::onCopyCurrentOffset);
 
     action = new(std::nothrow) QAction(OCTAL_STRING, copyCurrentOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_OCTAL_ACTION X{");
-        return;
     }
     copyCurrentOffsetMenu->addAction(action);
 
     action = new(std::nothrow) QAction(DECIMAL_STRING, copyCurrentOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_DECIMAL_ACTION X{");
-        return;
     }
     copyCurrentOffsetMenu->addAction(action);
 
     action = new(std::nothrow) QAction(HEXADECIMAL_STRING, copyCurrentOffsetMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for SIZE_HEXADECIMAL_ACTION X{");
-        return;
     }
     copyCurrentOffsetMenu->addAction(action);
 
     saveToFileMenu = new(std::nothrow) QMenu(tr("Save to file"));
     if (saveToFileMenu == nullptr) {
         qFatal("Cannot allocate memory for saveToFile X{");
-        return;
     }
     connect(saveToFileMenu, &QMenu::triggered, this, &HexView::onSaveToFile);
     saveToFileMenu->addAction(ui->saveToFileAction);
@@ -932,7 +893,6 @@ void HexView::buildContextMenus()
     fuzzingExportAction = new(std::nothrow) QAction("Export Fuzzing config", globalContextMenu);
     if (fuzzingExportAction == nullptr) {
         qFatal("Cannot allocate memory for SIZE_HEXADECIMAL_ACTION X{");
-        return;
     }
 
     connect(fuzzingExportAction, &QAction::triggered, this, &HexView::onExportForFuzzing);
@@ -940,7 +900,6 @@ void HexView::buildContextMenus()
     globalContextMenu = new(std::nothrow) QMenu();
     if (globalContextMenu == nullptr) {
         qFatal("Cannot allocate memory for globalContextMenu X{");
-        return;
     }
 
     globalContextMenu->addAction(ui->selectAllAction);

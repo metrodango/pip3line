@@ -89,6 +89,8 @@ class TabStateObj : public BaseStateAbstract
         TabAbstract *tab;
         bool isWindowed;
         QByteArray windowState;
+    private:
+        Q_DISABLE_COPY(TabStateObj)
 };
 
 #endif // TABABSTRACT_H

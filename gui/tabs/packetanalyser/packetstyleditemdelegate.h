@@ -10,6 +10,8 @@ class PacketStyledItemDelegate : public QStyledItemDelegate
         explicit PacketStyledItemDelegate(QObject * parent = nullptr);
         ~PacketStyledItemDelegate();
         QString displayText(const QVariant &value, const QLocale &locale) const;
+    private:
+        Q_DISABLE_COPY(PacketStyledItemDelegate)
 };
 
 #endif // PACKETSTYLEDITEMDELEGATE_H

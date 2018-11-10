@@ -35,13 +35,8 @@ ModuleTransformWidget::ModuleTransformWidget(ScriptTransformAbstract *ntransform
     reloadingParams = false;
     ui->setupUi(this);
 
-#if QT_VERSION >= 0x050000
     ui->parameterstableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->parameterstableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-#else
-    ui->parameterstableView->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    ui->parameterstableView->horizontalHeader()->setResizeMode(QHeaderView::Fixed);
-#endif
 
     ui->parameterstableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->parameterstableView, &QTableView::customContextMenuRequested, this, &ModuleTransformWidget::customMenuRequested);

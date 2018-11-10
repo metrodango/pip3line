@@ -85,6 +85,7 @@ TransformsGui::TransformsGui(GuiHelper *guiHelper, QWidget *parent) :
     connect(ui->massProcessingPushButton, &QPushButton::clicked, this, &TransformsGui::onMassProcessing);
     connect(transformFactory, &TransformMgmt::savedUpdated, this, &TransformsGui::buildSavedCombo);
     connect(ui->autoCopyLastPushButton, &QPushButton::toggled, this, &TransformsGui::onAutoCopychanged);
+    connect(ui->trackChangesCheckBox, &QCheckBox::toggled, this , &TransformsGui::onTrackChangesToggled);
 }
 
 TransformsGui::~TransformsGui()
@@ -181,7 +182,6 @@ void TransformsGui::setCurrentTransformChain(TransformChain talist)
         twa = new(std::nothrow) TransformWidget(guiHelper, this);
         if (twa == nullptr) {
             qFatal("Cannot allocate memory for TransformWidget X{");
-            return;
         } else {
             twa->setTransform(talist.at(i));
             widgetList.append(twa);
@@ -190,7 +190,6 @@ void TransformsGui::setCurrentTransformChain(TransformChain talist)
     twa = new(std::nothrow) TransformWidget(guiHelper, this);
     if (twa == nullptr) {
         qFatal("Cannot allocate memory for TransformWidget X{");
-        return;
     }
 
     widgetList.append(twa);
@@ -251,6 +250,15 @@ BaseStateAbstract *TransformsGui::getStateMngtObj()
     return stateObj;
 }
 
+bool TransformsGui::isTrackingChanges()
+{
+    return ui->trackChangesCheckBox->isChecked();
+}
+
+void TransformsGui::setTrackChanges(bool enable)
+{
+    ui->trackChangesCheckBox->setChecked(enable);
+}
 
 void TransformsGui::processNewTransformation()
 {
@@ -269,8 +277,8 @@ void TransformsGui::processNewTransformation()
             TransformWidget * ntw = new(std::nothrow) TransformWidget(guiHelper, this);
             if (ntw == nullptr) {
                 qFatal("Cannot allocate memory for TransformWidget ntw X{");
-                return;
             }
+            ntw->getSource()->setTrackChanges(ui->trackChangesCheckBox->isChecked());
             addWidget(ntw);
         }
     } else {
@@ -326,7 +334,6 @@ void TransformsGui::onMassProcessing()
         massProcessingDialog = new(std::nothrow) MassProcessingDialog(guiHelper, this);
         if (massProcessingDialog == nullptr) {
             qFatal("Cannot allocate memory for MassProcessingDialog X{");
-            return;
         }
         massProcessingDialog->setTranformChain(getCurrentChainConf());
         massProcessingDialog->setWindowTitle(tr("Mass processing for %1").arg(name));
@@ -344,6 +351,7 @@ void TransformsGui::addWidget(TransformWidget *transformWidget)
     }
 
     transformWidget->setAutoCopyTextToClipboard(ui->autoCopyLastPushButton->isChecked());
+    transformWidget->getSource()->setTrackChanges(ui->trackChangesCheckBox->isChecked());
     transformWidgetList.append(transformWidget); // updating the list
 
     // Adding the widget to the gui
@@ -636,6 +644,13 @@ void TransformsGui::onInsertRequest()
     }
 }
 
+void TransformsGui::onTrackChangesToggled(bool enable)
+{
+    for (int i = 0; i < transformWidgetList.size(); i++) {
+        transformWidgetList.at(i)->getSource()->setTrackChanges(enable);
+    }
+}
+
 void TransformsGui::onTransformChanged()
 {
     emit chainChanged(getCurrentChainConf());
@@ -673,7 +688,7 @@ void TransformGuiStateObj::run()
 
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         conf = tgtab->getCurrentChainConf();
-
+        writer->writeAttribute(GuiConst::STATE_TRACK_CHANGES, write(tgtab->isTrackingChanges()));
         writer->writeAttribute(GuiConst::STATE_TRANSFORM_CONF, write(conf,true));
         size = tgtab->getBlockCount();
         int finalSize = size;
@@ -706,6 +721,15 @@ void TransformGuiStateObj::run()
     } else {
         QXmlStreamAttributes attrList = reader->attributes();
         conf = readString(attrList.value(GuiConst::STATE_TRANSFORM_CONF));
+
+        if (attributes.hasAttribute(GuiConst::STATE_TRACK_CHANGES)) {
+            QString val = attributes.value(GuiConst::STATE_TRACK_CHANGES).toString();
+            if (val == GuiConst::STATE_YES) {
+                tgtab->setTrackChanges(true);
+            } else if (val == GuiConst::STATE_NO) {
+                tgtab->setTrackChanges(false);
+            }
+        }
 
         if (!conf.isEmpty()) {
             tgtab->setCurrentChainConf(conf, true);

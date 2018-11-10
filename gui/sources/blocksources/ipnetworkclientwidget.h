@@ -16,7 +16,7 @@ class IPNetworkClientWidget : public QWidget
 {
         Q_OBJECT
     public:
-        explicit IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget *parent = 0);
+        explicit IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget *parent = nullptr);
         ~IPNetworkClientWidget();
     signals:
         void log(QString mess, QString source, Pip3lineConst::LOGLEVEL level);
@@ -30,6 +30,7 @@ class IPNetworkClientWidget : public QWidget
         void onResolutionTimerExpired();
         void lookupFinished(QHostInfo info);
     private:
+        Q_DISABLE_COPY(IPNetworkClientWidget)
         Ui::IPNetworkClientWidget *ui;
         IPBlocksSources * listener;
         QTimer resolutionTimer;

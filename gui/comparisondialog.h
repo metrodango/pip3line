@@ -15,7 +15,9 @@ Released under AGPL see LICENSE for more information
 #include <QList>
 #include <QColor>
 #include <QTime>
+#include <QAtomicInteger>
 #include <QBitArray>
+#include <QBasicTimer>
 #include "sources/bytesourceabstract.h"
 
 namespace Ui {
@@ -32,7 +34,7 @@ class CompareWorker : public QObject
 {
         Q_OBJECT
     public:
-        explicit CompareWorker(ByteSourceAbstract * sA, ByteSourceAbstract * sB, QObject *parent = 0);
+        explicit CompareWorker(ByteSourceAbstract * sA, ByteSourceAbstract * sB, QObject *parent = nullptr);
         ~CompareWorker();
         quint64 getStartA() const;
         void setARange(const quint64 start, const quint64 end);
@@ -54,18 +56,17 @@ class CompareWorker : public QObject
         void setNameB(const QString &value);
         QColor getMarkColor() const;
         void setMarkColor(const QColor &value);
-
-        int getResultDifferences() const;
-
+        quint64 getProgress() const;
+        quint64 getComparisonSize() const;
     public slots:
         void compare();
         void stop();
     signals:
         void newMarkingsA(BytesRangeList *);
         void newMarkingsB(BytesRangeList *);
-        void finishComparing(int differences);
-        void progress(int percent);
+        void finishComparing(quint64 differences);
     private:
+        Q_DISABLE_COPY(CompareWorker)
         void endingThread();
         void markingA(quint64 offset);
         void endAMarking();
@@ -96,7 +97,8 @@ class CompareWorker : public QObject
         quint64 markerStartB;
         quint64 markerEndB;
         bool ismarkingB;
-        int resultDifferences;
+        quint64 resultDifferences;
+        QAtomicInteger<quint64> curProgress;
 };
 
 class ComparisonDialog : public AppDialog
@@ -104,14 +106,13 @@ class ComparisonDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit ComparisonDialog(GuiHelper *guiHelper ,QWidget *parent = 0);
+        explicit ComparisonDialog(GuiHelper *guiHelper ,QWidget *parent = nullptr);
         ~ComparisonDialog();
         BaseStateAbstract *getStateMngtObj();
         QBitArray getUiConf() const;
         void setUiConf(QBitArray conf);
         QColor getMarksColor() const;
         void setMarksColor(const QColor &value);
-
     public slots:
         void loadTabs();
     private slots:
@@ -121,17 +122,21 @@ class ComparisonDialog : public AppDialog
         void oncolorChange();
         void onAdvancedClicked(bool status);
         void onEntrySelected(int index);
-        void endOfComparison(int differences);
+        void endOfComparison(quint64 differences);
     private:
+        Q_DISABLE_COPY(ComparisonDialog)
         void refreshEntries(QComboBox *entryBox, int count);
         void refreshTabs(QComboBox *tabBox);
         void changeIconColor(QColor color);
         void checkIfComparable();
+        void timerEvent(QTimerEvent *event);
         Ui::ComparisonDialog *ui;
         QList<TabAbstract *> tabs;
         QColor marksColor;
         QThread * workerThread;
+        CompareWorker *worker;
         QTime compareTimer;
+        QBasicTimer statsTimer;
         static const int BUTTONS_TO_SAVE;
 };
 
@@ -142,6 +147,7 @@ class ComparisonDialogStateObj : public AppStateObj
         explicit ComparisonDialogStateObj(ComparisonDialog *diag);
         ~ComparisonDialogStateObj();
     private:
+        Q_DISABLE_COPY(ComparisonDialogStateObj)
         void internalRun();
 };
 

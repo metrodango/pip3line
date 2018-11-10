@@ -22,7 +22,7 @@ class AboutDialog : public AppDialog
         Q_OBJECT
         
     public:
-        explicit AboutDialog(GuiHelper * guiHelper, QWidget *parent = 0);
+        explicit AboutDialog(GuiHelper * guiHelper, QWidget *parent = nullptr);
         ~AboutDialog();
         
     private:

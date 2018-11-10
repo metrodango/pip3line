@@ -23,7 +23,7 @@ class RotXWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit RotXWidget(Rotx *ntransform, QWidget *parent = 0);
+        explicit RotXWidget(Rotx *ntransform, QWidget *parent = nullptr);
         ~RotXWidget();
     public slots:
         void onVariantChanged(int val);

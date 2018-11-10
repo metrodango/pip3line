@@ -36,7 +36,7 @@ class HexView : public SingleViewAbstract
 {
         Q_OBJECT
     public:
-        explicit HexView(ByteSourceAbstract *dataModel,GuiHelper *guiHelper, QWidget *parent = 0, bool takeByteSourceOwnership = false);
+        explicit HexView(ByteSourceAbstract *dataModel,GuiHelper *guiHelper, QWidget *parent = nullptr, bool takeByteSourceOwnership = false);
         ~HexView();
         void addCustomMenuActions(QAction * action);
         ByteTableView *getHexTableView();

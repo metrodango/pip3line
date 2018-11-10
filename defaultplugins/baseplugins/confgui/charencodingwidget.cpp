@@ -29,7 +29,7 @@ CharEncodingWidget::CharEncodingWidget(CharEncoding *ntransform, QWidget *parent
     for (int i = 0; i < codecs.size(); i++) {
         ui->codecComboBox->addItem(QString(codecs.at(i)),QVariant(codecs.at(i)));
     }
-    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData((QVariant) transform->getCodecName()));
+    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData(QVariant(transform->getCodecName())));
 
     ui->convertInvalidToNullCheckBox->setChecked(transform->getConvertInvalidToNull());
     ui->insertBOMCheckBox->setChecked(transform->getIncludeHeader());
@@ -51,19 +51,19 @@ CharEncodingWidget::~CharEncodingWidget()
 void CharEncodingWidget::on_UTF16PushButton_clicked()
 {
     transform->setCodecName("UTF-16");
-    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData((QVariant) transform->getCodecName()));
+    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData(QVariant(transform->getCodecName())));
 }
 
 void CharEncodingWidget::on_latin1PushButton_clicked()
 {
     transform->setCodecName("ISO-8859-1");
-    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData((QVariant) transform->getCodecName()));
+    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData(QVariant(transform->getCodecName())));
 }
 
 void CharEncodingWidget::onUTF8Clicked()
 {
     transform->setCodecName("UTF-8");
-    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData((QVariant) transform->getCodecName()));
+    ui->codecComboBox->setCurrentIndex(ui->codecComboBox->findData(QVariant(transform->getCodecName())));
 }
 
 void CharEncodingWidget::onCodecChanged()

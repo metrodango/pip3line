@@ -47,7 +47,7 @@ class BasicSource : public ByteSourceAbstract
 {
         Q_OBJECT
     public:
-        explicit BasicSource(QObject *parent = 0);
+        explicit BasicSource(QObject *parent = nullptr);
         virtual ~BasicSource();
         QString description();
         virtual void setData(QByteArray data, quintptr source = INVALID_SOURCE);
@@ -73,7 +73,7 @@ class BasicSource : public ByteSourceAbstract
         static const QByteArray TEXT;
         static const QString LOGID;
         bool validateOffsetAndSize(quint64 offset, int length);
-        SearchAbstract *requestSearchObject(QObject *parent = 0);
+        SearchAbstract *requestSearchObject(QObject *parent = nullptr);
         BasicSearch *bsearchObj;
 };
 

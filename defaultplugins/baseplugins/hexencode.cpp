@@ -54,7 +54,7 @@ bool HexEncode::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLTYPE),id);
     } else {
-        setType((Type)val);
+        setType(static_cast<Type>(val));
     }
 
     val = propertiesList.value(XML_ADDPREFIX).toInt(&ok);

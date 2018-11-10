@@ -7,20 +7,21 @@
 #include <QDebug>
 
 const quint16 TLSClientListener::DEFAULT_PORT = 443;
-const QHostAddress TLSClientListener::DEFAULT_ADDRESS = QHostAddress("216.21.170.226");
+const QHostAddress TLSClientListener::DEFAULT_ADDRESS = QHostAddress("127.0.0.1");
 const QString TLSClientListener::ID = QString("TCP/TLS client");
 
 TLSClientListener::TLSClientListener(QHostAddress hostAddress, quint16 hostPort, QObject *parent) :
     IPBlocksSources(hostAddress, hostPort, parent),
     running(false)
 {
-    flags |= REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED | IP_OPTIONS;
+    flags = REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED | GEN_IP_OPTIONS | B64BLOCKS_OPTIONS;
+
     type = CLIENT;
     connect(this, &TLSClientListener::sslChanged, this, &TLSClientListener::onTLSUpdated);
 
     setTlsEnable(true);
 
-    updateTimer.moveToThread(&workerThread);
+    updateConnectionsTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
     workerThread.start();
 }
@@ -101,7 +102,7 @@ void TLSClientListener::sendBlock(Block *block)
 
             QHostAddress tempAddr = hostAddress;
             quint16 tempPort = hostPort;
-            bool tlsEnabled = isTLSEnable();
+            bool tlsEnabled = isTLSEnabled();
 
             if (specificConnectionsData.contains(bid)) {
                 ConnectionDetails cd = specificConnectionsData.value(bid);
@@ -233,7 +234,7 @@ void TLSClientListener::createConnection()
 
     QHostAddress tempAddr = hostAddress;
     quint16 tempPort = hostPort;
-    bool tlsEnabled = isTLSEnable();
+    bool tlsEnabled = isTLSEnabled();
 
     if (tlsEnabled) {
         qDebug() << "CA certs:" << sslConfiguration->getSslConfiguration().caCertificates().size();
@@ -331,7 +332,7 @@ void TLSClientListener::onClientDeconnection()
     if (obj != nullptr) {
         QSslSocket * socket = dynamic_cast<QSslSocket *>(obj);
         if (socket != nullptr) {
-            emit log(tr("Disconnection for %1/%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::LSTATUS);
+            emit log(tr("Disconnection for %1/%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::PLSTATUS);
             if (sockets.contains(socket)) {
                 int cid = sockets.take(socket);
 
@@ -415,7 +416,7 @@ void TLSClientListener::onTLSStarted()
         mess.chop(1);
     }
     mess.append("]");
-    emit log(mess, actualID, Pip3lineConst::LSTATUS);
+    emit log(mess, actualID, Pip3lineConst::PLSTATUS);
 }
 
 void TLSClientListener::onPlainStarted()
@@ -433,7 +434,7 @@ void TLSClientListener::onPlainStarted()
                     .arg(sslConfiguration->getSslPeerNameSNI())
                     .arg(socket->peerAddress().toString())
                     .arg(socket->peerPort()));
-    emit log(mess, actualID, Pip3lineConst::LSTATUS);
+    emit log(mess, actualID, Pip3lineConst::PLSTATUS);
 }
 
 void TLSClientListener::onTLSUpdated(bool enabled)
@@ -456,7 +457,7 @@ void TLSClientListener::internalUpdateConnectionsInfo()
                 .arg(BlocksSource::NEW_CONNECTION_STRING)
                 .arg(hostAddress.toString())
                 .arg(hostPort))
-                .arg(isTLSEnable() ? QString("TLS") : QString("TCP"));
+                .arg(isTLSEnabled() ? QString("TLS") : QString("TCP"));
         tac.setDescription(desc);
         tac.setSource(this);
         connectionsInfo.append(tac);
@@ -469,7 +470,7 @@ void TLSClientListener::internalUpdateConnectionsInfo()
                     .arg(i.value())
                     .arg(hostAddress.toString())
                     .arg(hostPort))
-                    .arg(isTLSEnable() ? tr("TLS") : tr("TCP"));
+                    .arg(isTLSEnabled() ? tr("TLS") : tr("TCP"));
             Target<BlocksSource *> tac;
             tac.setDescription(desc);
             tac.setConnectionID(i.value());

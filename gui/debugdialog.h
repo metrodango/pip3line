@@ -28,7 +28,7 @@ class DebugDialog : public AppDialog
 {
         Q_OBJECT
     public:
-        explicit DebugDialog(GuiHelper* helper, QWidget *parent = 0);
+        explicit DebugDialog(GuiHelper* helper, QWidget *parent = nullptr);
         ~DebugDialog();
         
         void closeEvent(QCloseEvent *event);

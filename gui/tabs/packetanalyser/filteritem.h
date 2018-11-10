@@ -40,6 +40,8 @@ class FilterItem : public QObject
         QString name;
         bool reverseSelection;
         FilterType filterId;
+    private:
+        Q_DISABLE_COPY(FilterItem)
 
 };
 
@@ -68,6 +70,7 @@ class FilterData : public FilterItem
         void setConfiguration(const QHash<QString, QString> &conf);
         bool isValid();
     private:
+        Q_DISABLE_COPY(FilterData)
         QByteArray searchValue;
         int startingOffset;
         char *mask;
@@ -90,6 +93,7 @@ class FilterTimeStamp : public FilterItem
         void setBefore(const QDateTime &value);
 
     private:
+        Q_DISABLE_COPY(FilterTimeStamp)
         QDateTime after;
         QDateTime before;
 };
@@ -119,6 +123,7 @@ class FilterLength : public FilterItem
         FilterLength::Operators getOp() const;
         void setOp(const FilterLength::Operators &value);
     private:
+        Q_DISABLE_COPY(FilterLength)
         int lengthValue;
         FilterLength::Operators op;
 };
@@ -136,6 +141,7 @@ class FilterDirection : public FilterItem
         Packet::Direction getDirection() const;
         void setDirection(const Packet::Direction &value);
     private:
+        Q_DISABLE_COPY(FilterDirection)
         Packet::Direction direction;
 };
 
@@ -155,6 +161,7 @@ class FilterText : public FilterItem
         QString getTargetColumn() const;
         void setTargetColumn(QString columnName);
     private:
+        Q_DISABLE_COPY(FilterText)
         QRegExp regexp;
         QString targetColumn;
 };
@@ -172,8 +179,8 @@ class FilterCIDs : public FilterItem
         bool isValid();
         QList<int> getCidList() const;
         void setCidList(const QList<int> &value);
-
     private:
+        Q_DISABLE_COPY(FilterCIDs)
         QList<int> cidList;
 };
 
@@ -187,7 +194,7 @@ class FilterItemsList : public QList<QSharedPointer<FilterItem> >
         ~FilterItemsList();
         QSharedPointer<FilterItem> getFilter(const QString &name);
         bool containsFilter(const QString &name);
-
+    private:
 };
 
 #endif // FILTERITEM_H

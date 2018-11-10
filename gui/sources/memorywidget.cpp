@@ -99,8 +99,8 @@ void MemoryWidget::contextMenuAction(QAction *action)
     quint64 offset = range->getLowerVal();
     if (action->text() != GOTOSTART) {
         quint64 endoffset = range->getUpperVal();
-        if (!(endoffset  + 1 - msource->viewSize() < offset))
-            offset = endoffset + 1 - msource->viewSize();
+        if (!(endoffset  + 1 - static_cast<quint64>(msource->viewSize()) < offset))
+            offset = endoffset + 1 - static_cast<quint64>(msource->viewSize());
     }
     msource->setStartingOffset(offset);
 }
@@ -122,7 +122,6 @@ void MemoryWidget::initContextMenu()
     QAction * action = new(std::nothrow) QAction(GOTOSTART,contextMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for GOTOSTART X{");
-        return;
     }
 
     contextMenu->addAction(action);
@@ -130,7 +129,6 @@ void MemoryWidget::initContextMenu()
     action = new(std::nothrow) QAction(GOTOEND,contextMenu);
     if (action == nullptr) {
         qFatal("Cannot allocate memory for GOTOEND X{");
-        return;
     }
     contextMenu->addAction(action);
 

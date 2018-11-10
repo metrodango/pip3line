@@ -192,7 +192,7 @@ void ImportExportWorker::loadFromPcap(QIODevice *file)
             if (pac == nullptr)
                 qFatal("Cannot allocate memory for Packet X{");
 
-            if ((quint32)ppacket->getData().size() < ppacket->getOriginalSize()) {
+            if (static_cast<quint32>(ppacket->getData().size()) < ppacket->getOriginalSize()) {
                 qWarning() << tr("[Pcap] Packet %1 appears to have been truncated").arg(count);
             }
             pac->setTimestamp(ppacket->getTimestamp());
@@ -306,7 +306,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
                         if (!ok || (direcInt != Packet::LEFTRIGHT && direcInt != Packet::RIGHTLEFT && direcInt != Packet::NODIRECTION)) {
                             qCritical() << tr("[ImportExportWorker::loadFromXML] Cannot parse direction: %1").arg(attributes.value(GuiConst::STATE_DIRECTION).toString());
                         } else {
-                            pac->setDirection((Packet::Direction)direcInt);
+                            pac->setDirection(static_cast<Packet::Direction>(direcInt));
                         }
                     }
 
@@ -503,7 +503,7 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
                 if (!ok || (direcInt != Packet::LEFTRIGHT && direcInt != Packet::RIGHTLEFT && direcInt != Packet::NODIRECTION)) {
                     qCritical() << tr("[ImportExportWorker::loadFromJson] Cannot parse direction: %1").arg(jsonpac.value(GuiConst::STATE_DIRECTION).toString());
                 } else {
-                    pac->setDirection((Packet::Direction)direcInt);
+                    pac->setDirection(static_cast<Packet::Direction>(direcInt));
                 }
             }
 
@@ -650,8 +650,8 @@ QSharedPointer<Packet> ImportExportWorker::nextPacket()
     currentIndex++;
 
     if (applyFilter) {
-        if (currentIndex < (qint64)filteredList.size()) {
-            return model->getPacket(filteredList.at((int)currentIndex));
+        if (currentIndex < static_cast<qint64>(filteredList.size())) {
+            return model->getPacket(filteredList.at(static_cast<int>(currentIndex)));
         }
     } else { // entire list
         if (currentIndex < model->size()) {

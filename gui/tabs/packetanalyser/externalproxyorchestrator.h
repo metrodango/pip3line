@@ -7,7 +7,7 @@ class ExternalProxyOrchestrator : public SourcesOrchestatorAbstract
 {
         Q_OBJECT
     public:
-        explicit ExternalProxyOrchestrator(BlocksSource *inboundSource, BlocksSource *outboundSource, QObject *parent = 0);
+        explicit ExternalProxyOrchestrator(BlocksSource *inboundSource, BlocksSource *outboundSource, QObject *parent = nullptr);
         ~ExternalProxyOrchestrator();
         QList<Target<SourcesOrchestatorAbstract *> > getAvailableConnections();
         BlocksSource * getBlockSource(int index);
@@ -21,6 +21,7 @@ class ExternalProxyOrchestrator : public SourcesOrchestatorAbstract
         void onOutboundBlockSourceDestroyed();
         void checkForwarder();
     private:
+        Q_DISABLE_COPY(ExternalProxyOrchestrator)
         Target<SourcesOrchestatorAbstract *> toOrchestratorTarget(Target<BlocksSource *> bst);
         BlocksSource * inboundSource{nullptr};
         BlocksSource * outboundSource{nullptr};

@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-<herd>forensics</herd>
-<use>
-  <flag name='openssl'>Compile the OpenSSL plugin</flag>
-  <flag name='python27'>Compile the python 2.7 plugin</flag>
-  <flag name='python3'>Compile the python 3 plugin</flag>
-  <flag name='distorm'>Compile the distorm plugin</flag>
-  <flag name='qscintilla'>Use QScintilla for advanced text display</flag>
-</use>
+	<maintainer type="person">
+		<email>gabriel.caudrelier@gmail.com</email>
+		<name>Gabriel Caudrelier</name>
+	</maintainer>
+	<maintainer type="project">
+		<email>proxy-maint@gentoo.org</email>
+		<name>Proxy Maintainers</name>
+	</maintainer>
+	<use>
+		<flag name='ssl'>Compile the plugin adding miscellaneous hashes from OpenSSL</flag>
+		<flag name='python2'>Compile the Python 2.7 plugin</flag>
+		<flag name='python3'>Compile the Python 3.x plugin</flag>
+		<flag name='qscintilla'>Use QScintilla for advanced text display</flag>
+	</use>
 </pkgmetadata>

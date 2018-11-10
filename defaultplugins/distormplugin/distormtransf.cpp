@@ -24,8 +24,8 @@ DistormTransf::DistormTransf()
     codeOffset = 0;
     asmType = A32Bits;
     maxInstruction = 200;
-    showoffset = false;
-    showopcodes = false;
+    showoffset = true;
+    showopcodes = true;
 }
 
 DistormTransf::~DistormTransf()
@@ -67,9 +67,9 @@ void DistormTransf::transform(const QByteArray &input, QByteArray &output)
 
     _DecodedInst * resultInstr = new _DecodedInst[maxInstruction];
 #ifdef SUPPORT_64BIT_OFFSET
-    _DecodeResult result = distorm_decode64((_OffsetType)codeOffset, (const unsigned char*)input.constData(), input.size(), dt, resultInstr, maxInstruction, &decodedInstruction);
+    _DecodeResult result = distorm_decode64(static_cast<_OffsetType>(codeOffset), reinterpret_cast<const unsigned char*>(input.constData()), input.size(), dt, resultInstr, maxInstruction, &decodedInstruction);
 #else
-    _DecodeResult result = distorm_decode32((_OffsetType)codeOffset, (const unsigned char*)input.constData(), input.size(), dt, resultInstr, maxInstruction, &decodedInstruction);
+    _DecodeResult result = distorm_decode32(static_cast<_OffsetType>(codeOffset), reinterpret_cast<const unsigned char*>(input.constData()), input.size(), dt, resultInstr, maxInstruction, &decodedInstruction);
 #endif
     if (result == DECRES_SUCCESS || result == DECRES_MEMORYERR) {
         if (result == DECRES_MEMORYERR) {
@@ -83,7 +83,7 @@ void DistormTransf::transform(const QByteArray &input, QByteArray &output)
 
             if (showoffset) {
                 output.append("0x");
-                temp = QByteArray::number((qulonglong)instruction.offset,16);
+                temp = QByteArray::number(static_cast<qulonglong>(instruction.offset),16);
                 entrySize = temp.size();
                 for (int j = 0; j < maxOffsetSize - entrySize; j++) {
                     temp.prepend('0');
@@ -92,8 +92,16 @@ void DistormTransf::transform(const QByteArray &input, QByteArray &output)
                 output.append(' ');
             }
 
+            int length = 0;
             if (showopcodes) {
-                temp = QByteArray((char *)instruction.instructionHex.p,instruction.instructionHex.length);
+
+                if (instruction.instructionHex.length < MAX_TEXT_SIZE) {
+                    length = static_cast<int>(instruction.instructionHex.length);
+                } else {
+                    length = 0;
+                    emit error(tr("Result instruction length Invalid"), id);
+                }
+                temp = QByteArray(reinterpret_cast<char *>(instruction.instructionHex.p),length);
                 entrySize = temp.size();
                 for (int j = 0; j < maxOffsetSize + 2 - entrySize; j++) {
                     temp.append(' ');
@@ -102,9 +110,21 @@ void DistormTransf::transform(const QByteArray &input, QByteArray &output)
                 output.append(' ');
             }
 
-            output.append((char *)instruction.mnemonic.p,instruction.mnemonic.length);
+            if (instruction.mnemonic.length < MAX_TEXT_SIZE) {
+                length = static_cast<int>(instruction.mnemonic.length);
+            } else {
+                length = 0;
+                emit error(tr("Result mnemonic length Invalid"), id);
+            }
+            output.append(reinterpret_cast<char *>(instruction.mnemonic.p),length);
             output.append(' ');
-            output.append((char *)instruction.operands.p,instruction.operands.length);
+            if (instruction.operands.length < MAX_TEXT_SIZE) {
+                length = static_cast<int>(instruction.operands.length);
+            } else {
+                length = 0;
+                emit error(tr("Result operands length Invalid"), id);
+            }
+            output.append(reinterpret_cast<char *>(instruction.operands.p),length);
             output.append('\n');
         }
     } else {
@@ -153,7 +173,7 @@ bool DistormTransf::setConfiguration(QHash<QString, QString> propertiesList)
         res = false;
         emit error(tr("Invalid value for %1").arg(XMLASMTYPE),id);
     } else {
-        setDecodeType((ASMType) val1);
+        setDecodeType(static_cast<ASMType>(val1));
     }
 
     uint val2 = propertiesList.value(XMLMAXINSTRUCTION).toUInt(&ok);

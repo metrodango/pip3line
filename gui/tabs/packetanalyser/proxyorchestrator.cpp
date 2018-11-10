@@ -132,7 +132,7 @@ void ProxyOrchestrator::onBlockReceived(Block *block)
         }
 
         QSharedPointer<Packet> pac = QSharedPointer<Packet> (new(std::nothrow) Packet(block));
-        if (pac == nullptr) {
+        if (pac.isNull()) {
             qFatal("Cannot allocate Packet X{");
         }
 

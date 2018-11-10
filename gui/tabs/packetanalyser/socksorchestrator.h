@@ -9,10 +9,10 @@ class SocksOrchestrator : public ProxyOrchestrator
         Q_OBJECT
     public:
         explicit SocksOrchestrator(BlocksSource *serverSource, BlocksSource *clientSource);
-        ~SocksOrchestrator();
-
+        ~SocksOrchestrator() override;
     private:
-        QWidget * requestConfGui(QWidget *parent);
+        Q_DISABLE_COPY(SocksOrchestrator)
+        QWidget * requestConfGui(QWidget *parent) override;
         QList<quint16> tlsPorts;
 
 };

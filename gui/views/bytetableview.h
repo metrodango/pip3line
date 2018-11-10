@@ -35,17 +35,20 @@ class TextCell : public QLabel
 {
     Q_OBJECT
     public:
-        explicit TextCell(QWidget *parent = 0, Qt::WindowFlags f = 0);
-        explicit TextCell(const QString &text, QWidget *parent = 0, Qt::WindowFlags f = 0);
+        explicit TextCell(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
+        explicit TextCell(const QString &text, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
+    private:
+        Q_DISABLE_COPY(TextCell)
 };
 
 class HexValidator : public QValidator
 {
         Q_OBJECT
     public:
-        explicit HexValidator(int size, QObject *parent = 0);
+        explicit HexValidator(int size, QObject *parent = nullptr);
         State validate(QString & input, int & pos) const;
     private:
+        Q_DISABLE_COPY(HexValidator)
         int maxSize;
 };
 
@@ -53,12 +56,13 @@ class HexLineEdit : public QLineEdit
 {
         Q_OBJECT
     public:
-        explicit HexLineEdit(QWidget *parent = 0);
+        explicit HexLineEdit(QWidget *parent = nullptr);
     signals:
         void inputValid();
     private slots:
         void onInputChanged();
     private:
+        Q_DISABLE_COPY(HexLineEdit)
         void keyPressEvent(QKeyEvent * event);
 };
 
@@ -66,7 +70,7 @@ class HexDelegate : public QStyledItemDelegate
 {
         Q_OBJECT
     public:
-        explicit HexDelegate(int hexColumncount, QObject *parent = 0);
+        explicit HexDelegate(int hexColumncount, QObject *parent = nullptr);
         ~HexDelegate();
         QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /* Unused */, const QModelIndex & /* Unused */) const;
         void setEditorData(QWidget *editor, const QModelIndex &index) const;
@@ -76,6 +80,7 @@ class HexDelegate : public QStyledItemDelegate
         QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const;
         void clearSelected();
         void selectAll();
+        void setHexModel(ByteItemModel * hexModel);
     public slots:
         void setColumnCount(int val);
         void onEditorValid();
@@ -88,6 +93,7 @@ class HexDelegate : public QStyledItemDelegate
         QSize normalCellSize;
         QSize previewCellSize;
         bool allSelected;
+        ByteItemModel * hexModel;
         friend class HexSelectionModel;
 };
 
@@ -118,7 +124,7 @@ class ByteTableView : public QTableView
 {
         Q_OBJECT
     public:
-        explicit ByteTableView(QWidget *parent = 0);
+        explicit ByteTableView(QWidget *parent = nullptr);
         ~ByteTableView();
         void setModel(ByteItemModel * model);
         QByteArray getSelectedBytes();

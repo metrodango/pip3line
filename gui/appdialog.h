@@ -25,7 +25,7 @@ class AppDialog : public QDialog
 {
         Q_OBJECT
     public:
-        explicit AppDialog(GuiHelper * guiHelper, QWidget *parent = 0);
+        explicit AppDialog(GuiHelper * guiHelper, QWidget *parent = nullptr);
         virtual ~AppDialog();
         void attachAction(QAction * action);
         virtual BaseStateAbstract *getStateMngtObj();
@@ -42,6 +42,8 @@ class AppDialog : public QDialog
         LoggerWidget *logger;
         void hideEvent(QHideEvent *event);
         QAction * attachedAction;
+    private:
+        Q_DISABLE_COPY(AppDialog)
 };
 
 class AppStateObj : public BaseStateAbstract
@@ -54,6 +56,8 @@ class AppStateObj : public BaseStateAbstract
     protected:
         virtual void internalRun();
         AppDialog *dialog;
+    private:
+        Q_DISABLE_COPY(AppStateObj)
 };
 
 #endif // APPDIALOG_H

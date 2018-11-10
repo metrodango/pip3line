@@ -13,13 +13,13 @@ const int UdpServerListener::MAX_DATAGRAM_SIZE = 3000;
 UdpServerListener::UdpServerListener(QHostAddress hostAddress, quint16 hostPort, QObject *parent) :
     IPBlocksSources(hostAddress,hostPort, parent)
 {
-    flags |= REFLEXION_OPTIONS ;
+    flags = REFLEXION_OPTIONS ;
     type = SERVER;
     udpSocket = nullptr;
     connect(&connectionsTimer, &QTimer::timeout, this, &UdpServerListener::checkTimeouts);
     connectionsTimer.setInterval(GuiConst::DEFAULT_UDP_TIMEOUT_MS);
     connectionsTimer.moveToThread(&serverThread);
-    updateTimer.moveToThread(&serverThread);
+    updateConnectionsTimer.moveToThread(&serverThread);
     moveToThread(&serverThread);
     serverThread.start();
 
@@ -104,7 +104,7 @@ bool UdpServerListener::startListening()
         return false;
     }
 
-    emit log(tr("UDP server started %1:%2").arg(hostAddress.toString()).arg(hostPort), ID, Pip3lineConst::LSTATUS);
+    emit log(tr("UDP server started %1:%2").arg(hostAddress.toString()).arg(hostPort), ID, Pip3lineConst::PLSTATUS);
 
     emit started();
 
@@ -136,7 +136,12 @@ void UdpServerListener::packetReceived()
     quint16 senderPort;
 
     qint64 datagramSize = udpSocket->pendingDatagramSize();
-    data.resize(datagramSize);
+    if (datagramSize < INT_MAX) {
+        data.resize(static_cast<int>(datagramSize));
+    } else {
+        qCritical() << tr("[UdpServerListener::dataReceived] datagramSize invalid T_T");
+        return;
+    }
 
     qint64 bread = 0;
     bread += udpSocket->readDatagram(data.data(), data.size(), &sender, &senderPort);

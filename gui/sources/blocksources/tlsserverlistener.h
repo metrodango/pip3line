@@ -17,12 +17,14 @@ class BaseTcpServer : public QTcpServer
 {
         Q_OBJECT
     public:
-        explicit BaseTcpServer(QObject *parent = 0);
+        explicit BaseTcpServer(QObject *parent = nullptr);
         ~BaseTcpServer();
     signals:
         void newClient(qintptr socketDescriptor);
     private slots:
         void incomingConnection(qintptr socketDescriptor);
+    private:
+        Q_DISABLE_COPY(BaseTcpServer)
 };
 
 
@@ -31,7 +33,7 @@ class TLSServerListener : public IPBlocksSources
         Q_OBJECT
     public:
         static const QString ID;
-        explicit TLSServerListener(QHostAddress hostAddress = TLSServerListener::DEFAULT_ADDRESS, quint16 hostPort = TLSServerListener::DEFAULT_PORT, QObject *parent = 0);
+        explicit TLSServerListener(QHostAddress hostAddress = TLSServerListener::DEFAULT_ADDRESS, quint16 hostPort = TLSServerListener::DEFAULT_PORT, QObject *parent = nullptr);
         ~TLSServerListener();
         QString getName();
         QString getDescription();
@@ -55,6 +57,7 @@ class TLSServerListener : public IPBlocksSources
         void onClientDeconnection();
         void onTLSUpdated(bool enabled);
     private:
+        Q_DISABLE_COPY(TLSServerListener)
         void internalUpdateConnectionsInfo();
         bool startingTLS(QSslSocket *socket);
         static const quint16 DEFAULT_PORT;

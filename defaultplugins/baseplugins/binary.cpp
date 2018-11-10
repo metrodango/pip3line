@@ -41,7 +41,7 @@ void Binary::transform(const QByteArray &input, QByteArray &output) {
 
     if (wayValue == TransformAbstract::INBOUND) {
         for (int i = 0; i < input.size(); i++) {
-            temp = QByteArray::number((uchar)(input.at(i)), 2);
+            temp = QByteArray::number(static_cast<uchar>(input.at(i)), 2);
             if (temp.size() < 8) {
                 int count = temp.size();
                 for (int j = 0; j < 8 - count ; j++)

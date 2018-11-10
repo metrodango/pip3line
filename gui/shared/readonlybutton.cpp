@@ -79,10 +79,10 @@ void ReadOnlyButton::onToggle(bool val)
             }
             return;
         } else {
-            mess = tr("Could not set readonly property on %1").arg(((QObject *)byteSource)->metaObject()->className());
+            mess = tr("Could not set readonly property on %1").arg((static_cast<QObject *>(byteSource))->metaObject()->className());
         }
     } else {
-        mess = tr("%1 does not have the CAP_WRITE capability T_T").arg(((QObject *)byteSource)->metaObject()->className());
+        mess = tr("%1 does not have the CAP_WRITE capability T_T").arg((static_cast<QObject *>(byteSource))->metaObject()->className());
         blockSignals(true);
         setStyleSheet(GuiStyles::PushButtonReadonly);
         setChecked(true);

@@ -158,7 +158,8 @@ bool PythonModules::initialize()
 
     QStringList list;
     Py_ssize_t listSize = 0;
-    PyObject* sysPath = PySys_GetObject((char*)"path"); // borrowed
+    QByteArray temp("path");
+    PyObject* sysPath = PySys_GetObject(temp.data()); // borrowed
 
     if (PyList_Check(sysPath) != 0) {
         listSize = PyList_Size(sysPath);
@@ -761,7 +762,13 @@ QString PythonModules::pyStringToQtString(PyObject *strPyObj)
     if (PyUnicode_Check(strPyObj)) {
         wchar_t *wstring = PyUnicode_AsWideCharString(strPyObj, &size); // new object, need to be cleaned
         if (wstring != nullptr) {
-            ret = QString::fromWCharArray(wstring,size);
+            if (size > 0 && size < INT_MAX) {
+                ret = QString::fromWCharArray(wstring,static_cast<int>(size));
+            } else {
+                qCritical() << tr("[PythonModules::pyStringToQtString] Invalid string size");
+                ret = QString("INVALID");
+            }
+
             PyMem_Free(wstring);
 #else
     if (PyString_Check(strPyObj)) {

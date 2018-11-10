@@ -9,6 +9,7 @@
 #include <QItemSelection>
 #include <transformabstract.h>
 #include <QSharedPointer>
+#include "packet.h"
 
 class Packet;
 class TransformRequest;
@@ -52,6 +53,7 @@ class PacketModelAbstract : public QAbstractTableModel
         virtual QVariant payloadData(const QSharedPointer<Packet> packet,  int column, int role) const;
 
         virtual QSharedPointer<Packet> getPacket(qint64 index) = 0;
+        virtual QSharedPointer<Packet> getPreviousPacket(qint64 index, Packet::Direction direction = Packet::NODIRECTION) = 0;
         virtual QSharedPointer<Packet> getPacket(const QModelIndex & index);
         virtual qint64 indexToPacketIndex(const QModelIndex & index);
         virtual void removePacket(qint64 index) = 0;
@@ -133,6 +135,8 @@ class PacketModelAbstract : public QAbstractTableModel
         bool autoMergeConsecutivePackets;
         int lastPredefinedColumn;
         int maxPayloadDisplaySize;
+    private:
+        Q_DISABLE_COPY(PacketModelAbstract)
 };
 
 #endif // PACKETMODELABSTRACT_H

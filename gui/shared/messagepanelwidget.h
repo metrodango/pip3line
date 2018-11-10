@@ -23,7 +23,7 @@ class MessagePanelWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit MessagePanelWidget(QWidget *parent = 0);
+        explicit MessagePanelWidget(QWidget *parent = nullptr);
         ~MessagePanelWidget();
         QString toHTML();
         void setHTML(QString html);
@@ -36,6 +36,7 @@ class MessagePanelWidget : public QWidget
         void closeWidget();
         void clear();
     private:
+        Q_DISABLE_COPY(MessagePanelWidget)
         Ui::MessagePanelWidget *ui;
 };
 

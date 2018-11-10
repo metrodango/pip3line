@@ -66,9 +66,9 @@ BlocksSource::BlocksSource(QObject *parent) :
     outboundTranform(nullptr),
     gui(nullptr)
 {
-    updateTimer.setInterval(500);
-    updateTimer.setSingleShot(true);
-    connect(&updateTimer, &QTimer::timeout, this, &BlocksSource::triggerUpdate, Qt::QueuedConnection);
+    updateConnectionsTimer.setInterval(500);
+    updateConnectionsTimer.setSingleShot(true);
+    connect(&updateConnectionsTimer, &QTimer::timeout, this, &BlocksSource::triggerUpdate, Qt::QueuedConnection);
 
     b64MaxBlockLength = DEFAULT_B64_BLOCK_MAX_SIZE;
     b64BlocksSeparator = '\x0a';
@@ -189,10 +189,10 @@ void BlocksSource::updateConnectionsInfo()
 {
     if (!initialTime.isValid()) {
         initialTime = QTime::currentTime();
-        updateTimer.start();
+        updateConnectionsTimer.start();
     } else {
         if (initialTime.msecsTo(QTime::currentTime()) < 1000) {
-            updateTimer.start();
+            updateConnectionsTimer.start();
         } else {
             triggerUpdate();
         }
@@ -330,7 +330,7 @@ void BlocksSource::restart()
     startListening();
 }
 
-bool BlocksSource::isTLSEnable() const
+bool BlocksSource::isTLSEnabled() const
 {
     return (flags & TLS_ENABLED) != 0;
 }
@@ -356,7 +356,7 @@ void BlocksSource::triggerUpdate()
     internalUpdateConnectionsInfo();
     infoLocker.unlock();
     initialTime = QTime();
-    updateTimer.stop();
+    updateConnectionsTimer.stop();
     emit updated();
 }
 
@@ -387,7 +387,7 @@ void BlocksSource::setFlags(const quint64 &value)
     flags = value;
 
     // emitting some updates
-    emit sslChanged(isTLSEnable());
+    emit sslChanged(isTLSEnabled());
 
     emit reflexionChanged(isReflexive());
 }
@@ -425,7 +425,7 @@ QHash<QString, QString> BlocksSource::getConfiguration()
     return ret;
 }
 
-void BlocksSource::setConfiguration(QHash<QString, QString> conf)
+void BlocksSource::setConfiguration(const QHash<QString, QString> &conf)
 {
     bool ok = false;
 

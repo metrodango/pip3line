@@ -23,7 +23,7 @@ class NumberToCharWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit NumberToCharWidget(NumberToChar * transform,QWidget *parent = 0);
+        explicit NumberToCharWidget(NumberToChar * transform,QWidget *parent = nullptr);
         ~NumberToCharWidget();
 
     private slots:

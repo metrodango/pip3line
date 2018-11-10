@@ -36,11 +36,17 @@ SingleViewAbstract::~SingleViewAbstract()
     logger = nullptr;
     delete configButton;
     configButton = nullptr;
+    //setParent(nullptr);
 }
 
 void SingleViewAbstract::searchAgain()
 {
     return search(previousSearch,previousMask);
+}
+
+void SingleViewAbstract::onConfigButtonDestroyed()
+{
+    configButton = nullptr;
 }
 
 QPushButton *SingleViewAbstract::getConfigButton() const
@@ -50,7 +56,12 @@ QPushButton *SingleViewAbstract::getConfigButton() const
 
 void SingleViewAbstract::setConfigButton(QPushButton *value)
 {
+    if (configButton != nullptr) {
+        disconnect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
+        delete configButton;
+    }
     configButton = value;
+    connect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
 }
 
 QHash<QString, QString> SingleViewAbstract::getConfiguration()

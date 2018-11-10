@@ -23,7 +23,7 @@ class XorWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit XorWidget(Xor *ntransform, QWidget *parent = 0);
+        explicit XorWidget(Xor *ntransform, QWidget *parent = nullptr);
         ~XorWidget();
 
     private slots:

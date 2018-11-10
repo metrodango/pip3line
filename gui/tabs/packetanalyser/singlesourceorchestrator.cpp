@@ -57,6 +57,11 @@ int SingleSourceOrchestrator::blockSourceCount() const
     return 0;
 }
 
+bool SingleSourceOrchestrator::isTrackingChanges()
+{
+    return (source->getFlags() & BlocksSource::WANTS_TRACKING);
+}
+
 void SingleSourceOrchestrator::postPacket(QSharedPointer<Packet> packet)
 {
     packet->setDirection(Packet::LEFTRIGHT);

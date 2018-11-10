@@ -15,7 +15,7 @@ Released under AGPL see LICENSE for more information
 #include <QThread>
 #include <QHash>
 #include <QModelIndex>
-#include <QAtomicInt>
+#include <QAtomicInteger>
 #include <commonstrings.h>
 #include <QIODevice>
 #include <QBitArray>
@@ -38,13 +38,15 @@ class SourceReader : public QObject
         virtual bool isReadable() = 0;
     signals:
         void log(QString mess,QString source,Pip3lineConst::LOGLEVEL level);
+    private:
+        Q_DISABLE_COPY(SourceReader)
 };
 
 class SearchWorker : public QObject
 {
         Q_OBJECT
     public:
-        explicit SearchWorker(SourceReader * device, QObject *parent = 0);
+        explicit SearchWorker(SourceReader * device, QObject *parent = nullptr);
         ~SearchWorker();
         quint64 getStartOffset() const;
         void setStartOffset(const quint64 &value);
@@ -54,15 +56,15 @@ class SearchWorker : public QObject
         BytesRangeList *getFoundList();
         bool getHasError() const;
         void setStatsStep(int value);
-
+        quint64 getProgress() const;
     signals:
-        void progressUpdate(quint64); // bytes processed
         void log(QString mess,QString source,Pip3lineConst::LOGLEVEL level);
         void finished();
     public slots:
         void cancel();
         void search();
     private:
+        Q_DISABLE_COPY(SearchWorker)
         quint64 startOffset;
         quint64 endOffset;
         int BufferSize;
@@ -75,6 +77,7 @@ class SearchWorker : public QObject
         bool listSend;
         int searchSize;
         bool hasError;
+        QAtomicInteger<quint64> progress;
 };
 
 
@@ -86,11 +89,12 @@ class SearchAbstract : public QObject
         ~SearchAbstract();
         void setSearchItem(const QByteArray &value, QBitArray bitmask = QBitArray());
         BytesRangeList *getGlobalFoundList();
-        static QColor SEARCH_COLOR;
         quint64 getCursorOffset() const;
         void setCursorOffset(const quint64 &value);
         bool getJumpToNext() const;
         void setJumpToNext(bool value);
+
+        quint64 getProgress() const;
 
     public slots:
         void startSearch();
@@ -103,12 +107,9 @@ class SearchAbstract : public QObject
         void jumpRequest(quint64 soffset,quint64 eoffset);
         void errorStatus(bool val);
         void log(QString mess,QString source,Pip3lineConst::LOGLEVEL level);
-        void progressStatus(double percent);
         void searchStarted();
         void searchEnded();
         void dataReset();
-    protected slots:
-        void processStats(quint64 val);
     protected:
         static const int MAX_SEARCH_ITEM_SIZE;
         virtual void internalStart() = 0;
@@ -117,13 +118,15 @@ class SearchAbstract : public QObject
         char *mask;
         bool stopped;
         QThread eventThread;
-        QHash<SearchWorker *, quint64> workers;
+        QList<SearchWorker *> workers;
         quint64 oldStats;
         quint64 totalSearchSize;
         int statsStep;
         BytesRangeList * globalFoundList;
         bool hasError;
         bool jumpToNext;
+    private:
+        Q_DISABLE_COPY(SearchAbstract)
 };
 
 #endif // SEARCHABSTRACT_H

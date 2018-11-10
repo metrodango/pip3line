@@ -43,7 +43,7 @@ void HMACTransform::transform(const QByteArray &input, QByteArray &output)
 
     int blocksize = getBlocksize(selectedHash);
     if (key.length() > blocksize)
-        key = QCryptographicHash::hash(key, (QCryptographicHash::Algorithm)selectedHash); // keys longer than blocksize are shortened
+        key = QCryptographicHash::hash(key, static_cast<QCryptographicHash::Algorithm>(selectedHash)); // keys longer than blocksize are shortened
 
     if (key.length() < blocksize)
         key = key.append(QByteArray(blocksize - key.length(),'\x00')); // keys shorter than blocksize are zero-padded (where ∥ is concatenation)
@@ -55,8 +55,8 @@ void HMACTransform::transform(const QByteArray &input, QByteArray &output)
         i_key_pad[i] = i_key_pad[i] ^ key[i];
     }
     i_key_pad.append(input);
-    o_key_pad.append(QCryptographicHash::hash(i_key_pad,(QCryptographicHash::Algorithm)selectedHash));
-    output = QCryptographicHash::hash(o_key_pad,(QCryptographicHash::Algorithm)selectedHash);
+    o_key_pad.append(QCryptographicHash::hash(i_key_pad,static_cast<QCryptographicHash::Algorithm>(selectedHash)));
+    output = QCryptographicHash::hash(o_key_pad,static_cast<QCryptographicHash::Algorithm>(selectedHash));
 }
 
 bool HMACTransform::isTwoWays()
@@ -148,16 +148,13 @@ int HMACTransform::getBlocksize(int hash)
     case QCryptographicHash::Md5:
     case QCryptographicHash::Sha1:
         return 64;
-        break;
 #if QT_VERSION >= 0x050000
     case QCryptographicHash::Sha224:
     case QCryptographicHash::Sha256:
         return 64;
-        break;
     case QCryptographicHash::Sha384:
     case QCryptographicHash::Sha512:
         return 128;
-        break;
 #endif
     default:
         emit error(tr("Unknown hash identifier for block size:%1").arg(hash),id);

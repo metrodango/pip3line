@@ -68,8 +68,8 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
     ui->setupUi(this);
     ui->tabWidget->addTab(hexView, tr("Hex"));
 
-    ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);
-    ui->tabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, 0);
+    ui->tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, nullptr);
+    ui->tabWidget->tabBar()->setTabButton(0, QTabBar::LeftSide, nullptr);
 
     connect(ui->tabWidget, &QTabWidget::tabCloseRequested, this, &GenericTab::onDeleteTab);
 
@@ -192,7 +192,7 @@ void GenericTab::loadFromFile(QString fileName)
         bytesource->fromLocalFile(fileName);
         integrateByteSource();
     }  else {
-        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(((QObject *)bytesource)->metaObject()->className()),QMessageBox::Ok);
+        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg((static_cast<QObject *>(bytesource))->metaObject()->className()),QMessageBox::Ok);
     }
 }
 
@@ -218,7 +218,7 @@ void GenericTab::setData(const QByteArray &data)
     } else if (bytesource->hasCapability(ByteSourceAbstract::CAP_RESET)) {
         bytesource->setData(data);
     } else {
-        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_RESET capability").arg(((QObject *)bytesource)->metaObject()->className()),QMessageBox::Ok);
+        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_RESET capability").arg((static_cast<QObject *>(bytesource))->metaObject()->className()),QMessageBox::Ok);
     }
 }
 
@@ -250,7 +250,7 @@ void GenericTab::fileLoadRequest()
             setName(QFileInfo(fileName).fileName());
         }
     } else {
-        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(((QObject *)bytesource)->metaObject()->className()),QMessageBox::Ok);
+        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg((static_cast<QObject *>(bytesource))->metaObject()->className()),QMessageBox::Ok);
     }
 }
 
@@ -286,15 +286,16 @@ void GenericTab::onDeleteTab(int index)
             return;
         } else {
             vt = tabData.takeAt(index);
+            ui->tabWidget->removeTab(index + 1);
         }
 
-        delete sva;
+        sva->deleteLater();
     }
 }
 
 void GenericTab::onNewTabRequested()
 {
-    SingleViewAbstract * sva = newViewsContextMenu->getView(bytesource,ui->tabWidget);
+    SingleViewAbstract * sva = newViewsContextMenu->getView(bytesource, nullptr);
     if (sva != nullptr) {
         ViewTab data = newViewsContextMenu->getTabData();
         int index = ui->tabWidget->addTab(sva,data.tabName);
@@ -371,64 +372,8 @@ void GenericTab::integrateByteSource()
 
 void GenericTab::addViewTab(GenericTab::ViewTab data)
 {
-    SingleViewAbstract * newView = nullptr;
-    QTabWidget * thetabwiget = ui->tabWidget;
-    QPushButton * configButton = nullptr;
-
-    switch (data.type) {
-        case (GenericTab::HEXVIEW) : {
-                IntermediateSource * is = new(std::nothrow) IntermediateSource(guiHelper,bytesource,data.transform);
-                if (is == nullptr) {
-                    qFatal("Cannot allocate memory for IntermediateSource X{");
-                }
-
-                newView = new(std::nothrow) HexView(is,guiHelper,thetabwiget,true);
-                if (newView == nullptr) {
-                    qFatal("Cannot allocate memory for HexView X{");
-                }
-                configButton = new(std::nothrow) TransformGuiButton(data.transform);
-                if (configButton == nullptr) {
-                    qFatal("Cannot allocate memory for TransformGuiButton X{");
-                }
-            }
-            break;
-        case (GenericTab::TEXTVIEW) : {
-                IntermediateSource * is = new(std::nothrow) IntermediateSource(guiHelper,bytesource,data.transform);
-                if (is == nullptr) {
-                    qFatal("Cannot allocate memory for IntermediateSource X{");
-                }
-
-                newView = new(std::nothrow) TextView(is,guiHelper,thetabwiget,true);
-                if (newView == nullptr) {
-                    qFatal("Cannot allocate memory for TextView X{");
-                }
-                configButton = new(std::nothrow) TransformGuiButton(data.transform);
-                if (configButton == nullptr) {
-                    qFatal("Cannot allocate memory for TransformGuiButton X{");
-                }
-            }
-            break;
-        case (GenericTab::DEFAULTTEXT) : {
-                newView = new(std::nothrow) TextView(bytesource,guiHelper,thetabwiget);
-                if (newView == nullptr) {
-                    qFatal("Cannot allocate memory for TextView X{");
-                }
-            }
-            break;
-        default: {
-                logger->logError(tr("View Type undefined"));
-            }
-    }
-
-    if (newView != nullptr) {
-        newView->setConfiguration(data.options);
-        int index = thetabwiget->addTab(newView,data.tabName);
-        if (configButton != nullptr) {
-            thetabwiget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
-        }
-
-        tabData.append(data);
-    }
+    newViewsContextMenu->setTabData(data);
+    onNewTabRequested();
 }
 
 QList<TabAbstract::ViewTab> GenericTab::getTabData()
@@ -497,7 +442,10 @@ void GenericTabStateObj::run()
         for (int i = 0; i < size ; i++) {
             writer->writeStartElement(GuiConst::STATE_TABVIEW);
             TabAbstract::ViewTab vt = tabs.at(i);
-            writer->writeAttribute(GuiConst::STATE_TYPE, write((int)vt.type));
+            if (vt.type == TabAbstract::JSONVIEW) {
+                qDebug() << tr("generic");
+            }
+            writer->writeAttribute(GuiConst::STATE_TYPE, write(static_cast<int>(vt.type)));
             // saving configuration
             QString conf;
             TransformChain list;
@@ -582,10 +530,11 @@ void GenericTabStateObj::run()
                             readEndElement(GuiConst::STATE_TABVIEW); // closing now, because there is no child defined anyway
                             if (attrList.hasAttribute(GuiConst::STATE_TYPE)) {
                                 int type = readInt(attrList.value(GuiConst::STATE_TYPE),&ok);
-                                if (ok && (type == GenericTab::HEXVIEW ||
-                                           type == GenericTab::TEXTVIEW ||
-                                           type == GenericTab::DEFAULTTEXT)) {
-                                    vt.type = (GenericTab::ViewType) type;
+                                if (ok && (type == TabAbstract::HEXVIEW ||
+                                           type == TabAbstract::TEXTVIEW ||
+                                           type == TabAbstract::DEFAULTTEXT ||
+                                           type == TabAbstract::JSONVIEW)) {
+                                    vt.type = static_cast<GenericTab::ViewType>(type);
                                 } else {
                                     qWarning() << "Invalid state type for this view, skipping";
                                     continue;

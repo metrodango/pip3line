@@ -17,11 +17,12 @@ class ConnectionsInfosWidget : public QWidget
         Q_OBJECT
 
     public:
-        explicit ConnectionsInfosWidget(BlocksSource *listener, QWidget *parent = 0);
+        explicit ConnectionsInfosWidget(BlocksSource *listener, QWidget *parent = nullptr);
         ~ConnectionsInfosWidget();
     private slots:
         void onConnectionUpdated();
     private:
+        Q_DISABLE_COPY(ConnectionsInfosWidget)
         Ui::ConnectionsInfosWidget *ui;
         CertificatesModel *peerCertsModel;
         bool enableSSLViews;

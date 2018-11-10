@@ -23,7 +23,7 @@ class CutWidget : public QWidget
     Q_OBJECT
     
     public:
-        explicit CutWidget(Cut *ntransform, QWidget *parent = 0);
+        explicit CutWidget(Cut *ntransform, QWidget *parent = nullptr);
         ~CutWidget();
     private slots:
         void onFromChange(int value);

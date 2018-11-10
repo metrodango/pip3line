@@ -95,6 +95,7 @@ class MainTabsStateObj : public BaseStateAbstract
         ~MainTabsStateObj();
         void run();
     private:
+        Q_DISABLE_COPY(MainTabsStateObj)
         MainTabs *mtabs;
 };
 
@@ -109,6 +110,7 @@ class InitTabStateObj : public BaseStateAbstract
         void newTab(TabAbstract * tab);
         void detachTab(TabAbstract * tab, QByteArray state);
     private:
+        Q_DISABLE_COPY(InitTabStateObj)
         MainTabs *mtabs;
 };
 
@@ -125,6 +127,7 @@ class MainTabsClosingObj : public ClosingState
         void setLogsIndex(int value);
 
     private:
+        Q_DISABLE_COPY(MainTabsClosingObj)
         MainTabs *mtabs;
         bool showlogs;
         int currentIndex;

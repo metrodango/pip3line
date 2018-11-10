@@ -22,7 +22,7 @@ class BaseStateAbstract : public QObject
 {
         Q_OBJECT
     public:
-        explicit BaseStateAbstract(QObject *parent = 0);
+        explicit BaseStateAbstract(QObject *parent = nullptr);
         virtual ~BaseStateAbstract();
         QString getName() const;
         void setName(const QString &value);
@@ -100,6 +100,8 @@ class BaseStateAbstract : public QObject
         static const QChar B_ZERO;
         static const QChar B_ONE;
         static const char COMPRESSED_MARKER;
+    private:
+        Q_DISABLE_COPY(BaseStateAbstract)
 
 };
 

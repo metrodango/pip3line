@@ -1,9 +1,12 @@
 #include "guiconst.h"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QFontMetrics>
 
 namespace GuiConst
 {
+    const char* MEM_ALLOC_ERROR_STR = "Cannot allocate memory";
     const QString UNDEFINED_TEXT = "Undefined";
     const QString SETTINGS_SERVER_PORT = "DefaultServerPort";
     const QString SETTINGS_SERVER_IP = "DefaultServerIP";
@@ -40,7 +43,11 @@ namespace GuiConst
     const QString SETTINGS_FUZZING_EXPORT_FORMAT = "FuzzingExportFormat";
     const QString SETTINGS_EQUALITY_PACKETS_BACKGROUND = "EqualityPacketBackground";
     const QString SETTINGS_EQUALITY_PACKETS_FOREGROUND = "EqualityPacketForeground";
-
+    const QString SETTINGS_JSON_TYPE_COLOR = "JsonTypeColor";
+    const QString SETTINGS_JSON_KEY_COLOR = "JsonKeyColor";
+    const QString SETTINGS_JSON_VALUE_COLOR = "JsonValueColor";
+    const QString SETTINGS_SEARCH_BG_COLOR = "SearchBgColor";
+    const QString SETTINGS_SEARCH_FG_COLOR = "SearchFgColor";
     const QString DEFAULT_STATE_FILE = "savedstate.conf";
     const QString STATE_PIP3LINE_DOC = "Pip3lineState";
     const QString STATE_MAIN_WINDOW = "MainWindow";
@@ -153,6 +160,7 @@ namespace GuiConst
     const QString STATE_OUTBOUNDTRANSFORM = "OutboundTransform";
     const QString STATE_INJECTED_PACKET = "Injected";
     const QString STATE_TRACK_PACKETS = "TrackLast";
+    const QString STATE_TRACK_CHANGES = "TrackChanges";
     const QString STATE_AUTO_MERGE = "AutoMerge";
     const QString STATE_SOURCEID = "SourceID";
     const QString STATE_MAX_PAYLOAD_DISPLAY_SIZE = "MaxPayloadDisplaySize";
@@ -178,6 +186,11 @@ namespace GuiConst
     const QString STATE_REGEXP_CASE_SENSITIVE = "RegExpCaseSensitive";
     const QString STATE_REGEXP_PATTERN_SYNTAX = "RegExpPatternSyntax";
     const QString STATE_CID_LIST = "CIDsList";
+    const QString STATE_SERVER_TYPE = "ServerType";
+    const QString STATE_CLIENT_TYPE = "ClientType";
+    const QString STATE_KEY = "Key";
+    const QString STATE_SHMID = "Shmid";
+    const QString STATE_JSON_STATE = "JsonState";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;
@@ -195,6 +208,7 @@ namespace GuiConst
     const QString UPDATE_URL = "https://raw.githubusercontent.com/metrodango/pip3line/master/gui/release.txt";
     const QString RELEASES_URL = "https://github.com/metrodango/pip3line/releases";
     const QString NO_TRANSFORM = "No transform";
+    const QString MODIFIED_STR = "Modified";
 
     const int DEFAULT_PORT = 45632;
     const char DEFAULT_BLOCK_SEPARATOR = '\n';
@@ -284,7 +298,7 @@ namespace GuiConst
         QByteArray searchItem;
         mask.resize(searchRequest.size()/2);
         int i = 0;
-        while (i < searchRequest.size() -1 ) { // this is fine, we konw that val.size() > 0
+        while (i < searchRequest.size() -1 ) { // this is fine, we know that searchRequest.size() > 0
                 if (HEXCHAR.contains(searchRequest.at(i))
                         && HEXCHAR.contains(searchRequest.at(i+1))) { // check if valid hexa value
                     mask.setBit(i/2,true);
@@ -315,9 +329,9 @@ namespace GuiConst
         if (size < 1000)
             ret = QString("%1 B").arg(size);
         else if (size >= 1000 && size < 1000000)
-            ret = QString("%1 KiB").arg((double)size/(double)1000,0,'f',2);
+            ret = QString("%1 KiB").arg(static_cast<double>(size)/static_cast<double>(1000),0,'f',2);
         else if (size >= 1000000 && size < 1000000000)
-            ret = QString("%1 MiB").arg((double)size/(double)1000000,0,'f',2);
+            ret = QString("%1 MiB").arg(static_cast<double>(size)/static_cast<double>(1000000),0,'f',2);
 
         return ret;
     }
@@ -330,10 +344,9 @@ namespace GuiConst
     int calculateStringWidthWithGlobalFont(QString value)
     {
         QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
-        return fm.width(value);;
+//        qDebug() << QObject::tr("width") << fm.width(value);
+        return fm.width(value);
     }
-
-    // arbitratry number, dont' ask
 }
 
 namespace GuiStyles {
@@ -360,6 +373,12 @@ namespace GuiStyles {
 #else
      const QFont DEFAULT_REGULAR_FONT = QFont("Courier New",10);
 #endif
+     const QColor DEFAULT_JSON_KEY_COLOR = QColor(236,164,18);
+     const QColor DEFAULT_JSON_VALUE_COLOR = QColor(5, 184, 187);
+     const QColor DEFAULT_JSON_TYPE_COLOR = QColor(169, 0, 236);
+     const QColor DEFAULT_MARKING_FG_COLOR = Qt::black;
+     const QColor DEFAULT_SEARCH_BG_COLOR = QColor(211, 234, 0);
+     const QColor DEFAULT_SEARCH_FG_COLOR = Qt::black;
 }
 
 namespace GlobalsValues {
@@ -369,4 +388,10 @@ namespace GlobalsValues {
     QFont GLOBAL_REGULAR_FONT;
     QColor EqualsPacketsBackground = GuiStyles::DEFAULT_EQUAL_PACKETS_BACKGROUND;
     QColor EqualsPacketsForeground = GuiStyles::DEFAULT_EQUAL_PACKETS_FOREGROUND;
+    QColor JSON_KEY_COLOR = GuiStyles::DEFAULT_JSON_KEY_COLOR;
+    QColor JSON_VALUE_COLOR = GuiStyles::DEFAULT_JSON_VALUE_COLOR;
+    QColor JSON_TYPE_COLOR = GuiStyles::DEFAULT_JSON_TYPE_COLOR;
+    QColor MARKINGS_FG_COLOR = GuiStyles::DEFAULT_MARKING_FG_COLOR;
+    QColor SEARCH_BG_COLOR = GuiStyles::DEFAULT_SEARCH_BG_COLOR;
+    QColor SEARCH_FG_COLOR = GuiStyles::DEFAULT_SEARCH_FG_COLOR;
 }

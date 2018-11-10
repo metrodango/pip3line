@@ -23,7 +23,7 @@ class CharEncodingWidget : public QWidget
         Q_OBJECT
         
     public:
-        explicit CharEncodingWidget(CharEncoding *ntransform, QWidget *parent = 0);
+        explicit CharEncodingWidget(CharEncoding *ntransform, QWidget *parent = nullptr);
         ~CharEncodingWidget();
     private slots:
             void on_UTF16PushButton_clicked();

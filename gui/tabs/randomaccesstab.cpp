@@ -161,7 +161,7 @@ void RandomAccessTab::loadFromFile(QString fileName)
         bytesource->fromLocalFile(fileName);
         integrateByteSource();
     }  else {
-        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(((QObject *)bytesource)->metaObject()->className()),QMessageBox::Ok);
+        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(bytesource->metaObject()->className()),QMessageBox::Ok);
     }
 }
 
@@ -197,7 +197,7 @@ void RandomAccessTab::fileLoadRequest()
             integrateByteSource();
         }
     } else {
-        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(((QObject *)bytesource)->metaObject()->className()),QMessageBox::Ok);
+        QMessageBox::critical(this,tr("Error"), tr("%1 does not have the CAP_LOADFILE capability, ignoring").arg(bytesource->metaObject()->className()),QMessageBox::Ok);
     }
 }
 
@@ -264,7 +264,7 @@ bool RandomAccessTab::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->modifiers().testFlag(Qt::ControlModifier)) {
             if (keyEvent->key() == Qt::Key_N)  {
-                searchWidget->nextFind(bytesource->getRealOffset(hexView->getLowPos()));
+                searchWidget->nextFind(bytesource->getRealOffset(static_cast<int>(hexView->getLowPos())));
                 return true;
             } else if (keyEvent->key() == Qt::Key_G) {
                 gotoWidget->setFocus();
