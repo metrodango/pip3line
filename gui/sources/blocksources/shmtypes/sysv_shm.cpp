@@ -264,7 +264,7 @@ QHash<QString, QString> SysV_Shm::getConfiguration()
 {
     QHash<QString, QString> conf = SharedmemConnector::getConfiguration();
     if (!filename.isEmpty()) {
-        conf.insert(GuiConst::STATE_NAME, filename);
+        conf.insert(GuiConst::STATE_FILE_NAME, filename);
     } else {
         conf.insert(GuiConst::STATE_KEY, QString::number(key));
         conf.insert(GuiConst::STATE_SHMID, QString::number(shmid));
@@ -278,10 +278,11 @@ void SysV_Shm::setConfiguration(const QHash<QString, QString> &conf)
 {
     SharedmemConnector::setConfiguration(conf);
 
-    if (conf.contains(GuiConst::STATE_NAME)) {
-        QString val = conf.value(GuiConst::STATE_NAME);
-        if (!val.isEmpty())
+    if (conf.contains(GuiConst::STATE_FILE_NAME)) {
+        QString val = conf.value(GuiConst::STATE_FILE_NAME);
+        if (!val.isEmpty()) {
             setFilename(val);
+        }
     }
 
     if (filename.isEmpty()) { // no need for the rest if the filename is specified

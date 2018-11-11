@@ -101,6 +101,7 @@ QVariant CertificatesModel::headerData(int section, Qt::Orientation orientation,
         return QString("%1").arg(section);
     }
 }
+
 QList<QSslCertificate> CertificatesModel::getCertList() const
 {
     return certList;
@@ -469,13 +470,19 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     allowedNextProtocols = defaultconf.allowedNextProtocols();
     ui->http11CheckBox->setChecked(allowedNextProtocols.contains(QByteArray(QSslConfiguration::NextProtocolHttp1_1)));
     ui->sdpyCheckBox->setChecked(allowedNextProtocols.contains(QByteArray(QSslConfiguration::NextProtocolSpdy3_0)));
+#if QT_VERSION >= QT_VERSION_CHECK(5,8,0)
+    ui->http2CheckBox->setChecked(allowedNextProtocols.contains(QByteArray(QSslConfiguration::ALPNProtocolHTTP2)));
+#else
+    ui->http2CheckBox->setDisabled(true);
+    ui->http2CheckBox->setToolTip("Unsupported for Qt < 5.8");
+#endif
 
     clientCertLoaded = setLocalCert(sslConfiguration.localCertificate());
     clientPrivateKeyLoaded = setLocalPrivateKey(sslConfiguration.privateKey()) ;
 
     QSslConfiguration defconf = QSslConfiguration::defaultConfiguration();
     QList<QSslCipher> clist = defconf.supportedCiphers();
-    cipherModel = new(std::nothrow) SSLCipherModel(clist);
+    cipherModel = new(std::nothrow) SSLCipherModel(clist, ui->ciphersTableView);
     if (cipherModel == nullptr) {
         qFatal("Cannot allocate SSLCipherModel");
     }
@@ -518,7 +525,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     ui->ciphersTableView->setSelectionMode(QAbstractItemView::NoSelection);
 
     QVector<QSslEllipticCurve> ecList = QSslConfiguration::supportedEllipticCurves();
-    curvesModel = new(std::nothrow) SSLCurvesModel(ecList);
+    curvesModel = new(std::nothrow) SSLCurvesModel(ecList, ui->ecTableView);
     if (curvesModel == nullptr) {
         qFatal("Cannot allocate SSLCurvesModel");
     }
@@ -536,7 +543,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     ui->ecTableView->resizeColumnsToContents();
     ui->ecTableView->setSelectionMode(QAbstractItemView::NoSelection);
 
-    caCertModel = new(std::nothrow) CertificatesModel();
+    caCertModel = new(std::nothrow) CertificatesModel(ui->certificatesCAtableView);
     if (caCertModel == nullptr) {
         qFatal("Cannot allocate CertificatesModel");
     }
@@ -610,6 +617,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
 
     connect(ui->http11CheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onHTTP11NextProtocolToggled);
     connect(ui->sdpyCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSDPYNextProtocolToggled);
+    connect(ui->http2CheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onHTTP2NextProtocolToggled);
 }
 
 SSLOptionsWidget::~SSLOptionsWidget()
@@ -911,6 +919,23 @@ void SSLOptionsWidget::onSDPYNextProtocolToggled(bool checked)
     }
 
     emit allowedNextProtocolsUpdated(allowedNextProtocols);
+}
+
+void SSLOptionsWidget::onHTTP2NextProtocolToggled(bool checked)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5,8,0)
+    if (checked) {
+        if (!allowedNextProtocols.contains(QByteArray(QSslConfiguration::ALPNProtocolHTTP2))) {
+            allowedNextProtocols.append(QByteArray(QSslConfiguration::ALPNProtocolHTTP2));
+        }
+    } else {
+        allowedNextProtocols.removeAll(QByteArray(QSslConfiguration::ALPNProtocolHTTP2));
+    }
+
+    emit allowedNextProtocolsUpdated(allowedNextProtocols);
+#else
+    qCritical() << tr("[SSLOptionsWidget::onHTTP2NextProtocolToggled] unsupported T_T");
+#endif
 }
 
 QString SSLOptionsWidget::concat(const QStringList &list)

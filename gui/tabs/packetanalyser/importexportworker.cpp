@@ -321,7 +321,7 @@ void ImportExportWorker::loadFromXML(QXmlStreamReader *stream)
                         pac->setForeground(BaseStateAbstract::stringToColor(attributes.value(GuiConst::STATE_FOREGROUNG_COLOR)));
                     }
                     if (attributes.hasAttribute(GuiConst::STATE_BACKGROUNG_COLOR)) {
-                        pac->setForeground(BaseStateAbstract::stringToColor(attributes.value(GuiConst::STATE_BACKGROUNG_COLOR)));
+                        pac->setBackground(BaseStateAbstract::stringToColor(attributes.value(GuiConst::STATE_BACKGROUNG_COLOR)));
                     }
 
                     if (attributes.hasAttribute(GuiConst::STATE_INJECTED_PACKET)) {
@@ -518,7 +518,7 @@ void ImportExportWorker::loadFromJson(QJsonDocument *jdoc)
                 pac->setForeground(BaseStateAbstract::stringToColor(jsonpac.value(GuiConst::STATE_FOREGROUNG_COLOR).toString()));
             }
             if (jsonpac.contains(GuiConst::STATE_BACKGROUNG_COLOR)) {
-                pac->setForeground(BaseStateAbstract::stringToColor(jsonpac.value(GuiConst::STATE_BACKGROUNG_COLOR).toString()));
+                pac->setBackground(BaseStateAbstract::stringToColor(jsonpac.value(GuiConst::STATE_BACKGROUNG_COLOR).toString()));
             }
 
             if (jsonpac.contains(GuiConst::STATE_SOURCEID)) {

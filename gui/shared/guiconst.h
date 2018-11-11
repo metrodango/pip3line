@@ -102,6 +102,7 @@ namespace GuiConst
     extern const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET;
     extern const QString STATE_CHUNK_SIZE;
     extern const QString STATE_LARGE_FILE_NAME;
+    extern const QString STATE_FILE_NAME;
     extern const QString STATE_SEARCH_DATA;
     extern const QString STATE_GOTOOFFSET_DATA;
     extern const QString STATE_MESSAGE_PANEL;

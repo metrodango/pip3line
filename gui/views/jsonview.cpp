@@ -391,11 +391,12 @@ JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     }
 
     model = new(std::nothrow) JsonModel();
+    model->setParent(tree);
     QAbstractItemModel * old = tree->model();
     tree->setModel(model);
     delete old;
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(tree);
     setLayout(layout);
 

@@ -56,6 +56,7 @@ ShmSysVWidget::ShmSysVWidget(SysV_Shm * obj, QWidget *parent) :
     ui->keyLineEdit->setValidator(&numberVal);
     ui->shmLineEdit->setValidator(&numberVal);
     ui->permsLineEdit->setValidator(&numberVal);
+    ui->fileLineEdit->setText(connector->getFilename());
     ui->keyLineEdit->setText(QString::number(connector->getKey()));
     ui->shmLineEdit->setText(QString::number(connector->getShmid()));
     ui->sizeSpinBox->setValue(connector->getSize());

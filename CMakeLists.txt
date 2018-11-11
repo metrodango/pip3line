@@ -26,6 +26,7 @@ message( STATUS "* WITH_OPENSSL : enable/disable the Openssl plugin" )
 message( STATUS "* WITH_DISTORM : enable/disable the Distorm plugin" )
 message( STATUS "    WITH_DISTORM_LINK_STATICALLY : Fetch and build a static version (Unix-like target only)" )
 message( STATUS "* WITH_SCINTILLA : use QScintilla for more efficient text rendering" )
+message( STATUS "* ENABLE_ADDR_SANITIZER : Compile with asan (gcc with asan only)" )
 message( STATUS "Example:" )
 message( STATUS "cmake .. -DALL=ON -DWITH_PYTHON27=OFF" )
 message( STATUS "---" )
@@ -40,8 +41,6 @@ if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     if (GIT_BRANCH STREQUAL "")
         SET(GIT_BRANCH "Unknown")
     endif()
-    add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
-    
     message(STATUS "Git branch: ${GIT_BRANCH}")
     
     execute_process(COMMAND ${GIT_EXECUTABLE} -C ${CMAKE_CURRENT_SOURCE_DIR} rev-parse HEAD OUTPUT_VARIABLE GIT_COMMIT)
@@ -50,17 +49,16 @@ if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     if (GIT_COMMIT STREQUAL "")
         SET(GIT_COMMIT "Unknown")
     endif()
-    add_definitions(-DGIT_COMMIT=\"${GIT_COMMIT}\")
-
     message(STATUS "Building using git commit: ${GIT_COMMIT}")
     
 else()
     message( STATUS "Missing git binary or directory, Unknown git version --" )
     SET(GIT_COMMIT "Unknown")
     SET(GIT_BRANCH "Unknown")
-    add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
-    add_definitions(-DGIT_COMMIT=\"${GIT_COMMIT}\")
 endif()
+
+add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
+add_definitions(-DGIT_COMMIT=\"${GIT_COMMIT}\")
 
 message( STATUS "General Configuration --" )
 

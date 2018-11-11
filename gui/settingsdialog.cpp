@@ -97,6 +97,8 @@ SettingsDialog::SettingsDialog(GuiHelper *nhelper, QWidget *parent) :
     connect(ui->searchBgPushButton, &QPushButton::clicked, this, &SettingsDialog::onSearchColorsChanges);
     connect(ui->searchFgPushButton, &QPushButton::clicked, this, &SettingsDialog::onSearchColorsChanges);
     connect(ui->resetAppearancePushButton, &QPushButton::clicked, this, &SettingsDialog::onResetAppearance);
+    connect(ui->equalPacketsBGPushButton, &QPushButton::clicked, this, &SettingsDialog::onEqualPacketsColorsChanges);
+    connect(ui->equalPacketsFGPushButton, &QPushButton::clicked, this, &SettingsDialog::onEqualPacketsColorsChanges);
     ui->titleListWidget->setCurrentRow(0);
 }
 
@@ -193,6 +195,11 @@ void SettingsDialog::initializeConf()
     palette.setColor(QPalette::Window, GlobalsValues::SEARCH_BG_COLOR);
     ui->searchColorLabel->setAutoFillBackground(true);
     ui->searchColorLabel->setPalette(palette);
+
+    palette.setColor(QPalette::WindowText, GlobalsValues::EqualsPacketsForeground);
+    palette.setColor(QPalette::Window, GlobalsValues::EqualsPacketsBackground);
+    ui->equalPacketsLabel->setAutoFillBackground(true);
+    ui->equalPacketsLabel->setPalette(palette);
 
     //once finished we reconnect everything
     connectUpdateSignals();
@@ -783,6 +790,38 @@ void SettingsDialog::onSearchColorsChanges()
         ui->searchColorLabel->setPalette(palette);
 
         guiHelper->saveSearchColors();
+    }
+}
+
+void SettingsDialog::onEqualPacketsColorsChanges() {
+    QColor initialColor;
+    QObject * obj = sender();
+    if (obj == ui->equalPacketsBGPushButton) {
+        initialColor = GlobalsValues::EqualsPacketsBackground;
+    } else if (obj == ui->equalPacketsFGPushButton) {
+        initialColor = GlobalsValues::EqualsPacketsForeground;
+    } else {
+        // WTF ??
+        qCritical() << tr("[SettingsDialog::onEqualPacketsColorsChanges] Unknown object T_T");
+        return;
+    }
+
+    QColor choosenColor = QColorDialog::getColor(initialColor, this);
+    if (choosenColor.isValid()) {
+        QPalette palette;
+        if (obj == ui->equalPacketsBGPushButton) {
+            palette.setColor(QPalette::Window, choosenColor);
+            palette.setColor(QPalette::WindowText, GlobalsValues::SEARCH_FG_COLOR);
+            GlobalsValues::EqualsPacketsBackground = choosenColor;
+        } else if (obj == ui->equalPacketsFGPushButton) {
+            palette.setColor(QPalette::Window, GlobalsValues::SEARCH_BG_COLOR);
+            palette.setColor(QPalette::WindowText, choosenColor);
+            GlobalsValues::EqualsPacketsForeground = choosenColor;
+        }
+
+        ui->equalPacketsLabel->setPalette(palette);
+
+        guiHelper->saveEqualityPacketColors();
     }
 }
 

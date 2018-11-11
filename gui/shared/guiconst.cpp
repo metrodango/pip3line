@@ -83,6 +83,7 @@ namespace GuiConst
     const QString STATE_RANDOM_SOURCE_CURRENT_OFFSET = "CurrentStartingOffset";
     const QString STATE_CHUNK_SIZE = "ChunkSize";
     const QString STATE_LARGE_FILE_NAME = "LargeFileName";
+    const QString STATE_FILE_NAME = "FileName";
     const QString STATE_SEARCH_DATA = "SearchData";
     const QString STATE_GOTOOFFSET_DATA = "GotoOffsetData";
     const QString STATE_MESSAGE_PANEL = "Messages";

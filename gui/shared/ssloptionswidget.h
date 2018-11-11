@@ -128,6 +128,7 @@ class SSLOptionsWidget : public QWidget
         void onTLsv12Toggled(bool checked);
         void onHTTP11NextProtocolToggled(bool checked);
         void onSDPYNextProtocolToggled(bool checked);
+        void onHTTP2NextProtocolToggled(bool checked);
     signals:
         void useOfSystemCAUpdated(bool usesSystemCAs);
         void caListUpdated(const QList<QSslCertificate> & certificates);

@@ -85,6 +85,7 @@ class SettingsDialog : public AppDialog
         void onJsonColorChanges();
         void onSearchColorsChanges();
         void onResetAppearance();
+        void onEqualPacketsColorsChanges();
     private:
         Q_DISABLE_COPY(SettingsDialog)
         void connectUpdateSignals();

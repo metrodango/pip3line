@@ -159,7 +159,7 @@ PacketAnalyserOptionsDialog::PacketAnalyserOptionsDialog(GuiHelper *guiHelper,
 
     currentGui = nullptr;
 
-    colModel = new(std::nothrow) ColumnModel(guiHelper, mainModel, proxyModel, tableView);
+    colModel = new(std::nothrow) ColumnModel(guiHelper, mainModel, proxyModel, tableView, ui->columnsTableView);
     if (colModel == nullptr) {
         qFatal("Cannot allocate memory for ColumnModel X{");
     }

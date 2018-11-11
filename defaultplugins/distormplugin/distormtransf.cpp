@@ -127,6 +127,8 @@ void DistormTransf::transform(const QByteArray &input, QByteArray &output)
             output.append(reinterpret_cast<char *>(instruction.operands.p),length);
             output.append('\n');
         }
+
+        delete [] resultInstr;
     } else {
         emit error(tr("There was an error during the disassembling"), id);
     }

@@ -106,6 +106,8 @@ class PacketAnalyserTab : public TabAbstract
         void logMessage(const QString &message,const QString &source = QString(), Pip3lineConst::LOGLEVEL level = Pip3lineConst::PLSTATUS);
         void onFontUpdated();
         void onTrackingToggled(bool checked);
+        void onHighlightMenu(QAction *action);
+        void updateHighlightMenu();
     private:
         Q_DISABLE_COPY(PacketAnalyserTab)
         void selectLastPacket();
@@ -130,6 +132,8 @@ class PacketAnalyserTab : public TabAbstract
         QMenu *autoMergeMenu;
         QMenu * copyAsMenu;
         QMenu * sendPacketsMenu;
+        QMenu * highlightMenu;
+        QAction * newHighlight;
         QAction * sendPacketsToNew;
         QAction * merge;
         QAction * deleteColumn;

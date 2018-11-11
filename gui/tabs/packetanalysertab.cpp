@@ -44,6 +44,7 @@ Released under AGPL see LICENSE for more information
 #include <QDialog>
 #include <QAction>
 #include <QTimer>
+#include <QColorDialog>
 #include "guihelper.h"
 #include "pcapio/pcapdef.h"
 #include "sources/blocksources/blockssource.h"
@@ -53,6 +54,7 @@ Released under AGPL see LICENSE for more information
 #include "packetanalysertab.h"
 #include "quickviewitemconfig.h"
 #include "shared/sendtomenu.h"
+#include "textinputdialog.h"
 #include "packetanalyser/filterdialog.h"
 #include <state/stateorchestrator.h>
 
@@ -77,6 +79,8 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     copyAsMenu = nullptr;
     sendPacketsMenu = nullptr;
     sendPacketsToNew = nullptr;
+    highlightMenu = nullptr;
+    newHighlight = nullptr;
 
     optionsDialog = nullptr;
     filterDialog = nullptr;
@@ -103,6 +107,7 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
 
     buildContextMenu();
     buildHeadersContextMenu();
+    updateHighlightMenu();
 
     ui->forwardPushButton->setEnabled(false);
     // setting up the TableView
@@ -244,6 +249,7 @@ PacketAnalyserTab::~PacketAnalyserTab()
     delete autoMergeMenu;
     delete copyAsMenu;
     delete sendToMenu;
+    delete highlightMenu;
     delete globalContextMenu;
     delete tabHeaderViewsContextMenu;
     delete orchCombo;
@@ -948,6 +954,19 @@ void PacketAnalyserTab::buildContextMenu()
         qFatal("Cannot allocate memory for globalContextMenu X{");
     }
 
+    highlightMenu = new(std::nothrow) QMenu(tr("Highlight as"));
+    if (highlightMenu == nullptr) {
+        qFatal("Cannot allocate memory for highlightMenu X{");
+    }
+    connect(highlightMenu, &QMenu::triggered, this, &PacketAnalyserTab::onHighlightMenu);
+
+    globalContextMenu->addMenu(highlightMenu);
+
+    newHighlight = new(std::nothrow) QAction(tr("New highlight"), this);
+    if (merge == nullptr) {
+        qFatal("Cannot allocate memory for newHighlight X{");
+    }
+
     sendToMenu = new(std::nothrow) SendToMenu(guiHelper, tr("Send selection to"));
     if (sendToMenu == nullptr) {
         qFatal("Cannot allocate memory for sendToMenu X{");
@@ -1050,6 +1069,73 @@ void PacketAnalyserTab::setTrackingLast(bool value)
         if (trackingLast) {
             ui->packetTableView->selectRow(sortFilterProxyModel->rowCount() - 1);
         }
+    }
+}
+
+void PacketAnalyserTab::onHighlightMenu(QAction *action)
+{
+    QString name;
+    QColor highlightColor;
+    if (action == newHighlight) {
+        if (ui->packetTableView->selectionModel()->hasSelection()) {
+            highlightColor = QColorDialog::getColor(GuiStyles::DEFAULT_JSON_VALUE_COLOR, this);
+            if (highlightColor.isValid()) {
+                QPixmap pix(20,20);
+                pix.fill(highlightColor);
+                TextInputDialog *nameDialog = new(std::nothrow) TextInputDialog(this);
+                if (nameDialog == nullptr) {
+                    qFatal("Cannot allocate memory for textInputDialog X{");
+                }
+                nameDialog->setPixLabel(pix);
+                int ret = nameDialog->exec();
+                if (ret == QDialog::Accepted) {
+                    name = nameDialog->getInputText();
+                    if (!name.isEmpty())
+                        guiHelper->addNewMarkingColor(name,highlightColor);
+                }
+            }
+        }
+
+    } else {
+        name = action->text();
+        QHash<QString, QColor> colors = guiHelper->getMarkingsColor();
+        if (colors.contains(name)) {
+            highlightColor = colors.value(name);
+        } else {
+            qCritical("[PacketAnalyserTab::onHighlightMenu] Unknown marking color T_T");
+        }
+    }
+
+    if (highlightColor.isValid()) {
+        QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
+        for (int i = 0; i < modelList.size(); i++) {
+            QSharedPointer<Packet> pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
+            if (pac != nullptr) {
+                pac->setBackground(highlightColor);
+                pac->setComment(name);
+            }
+            else
+                qCritical() << tr("[PacketAnalyserTab::onHighlightMenu] packet is nullptr T_T");
+        }
+    }
+}
+
+void PacketAnalyserTab::updateHighlightMenu()
+{
+    highlightMenu->clear(); // action created on the fly should be automatically deleted
+    highlightMenu->addAction(newHighlight);
+    highlightMenu->addSeparator();
+    QHash<QString, QColor> colors = guiHelper->getMarkingsColor();
+    QHashIterator<QString, QColor> i(colors);
+    while (i.hasNext()) {
+        i.next();
+        QPixmap pix(48,48);
+        pix.fill(i.value());
+        QAction *  action = new(std::nothrow) QAction(QIcon(pix),i.key(), highlightMenu);
+        if (action == nullptr) {
+            qFatal("Cannot allocate memory for action updateMarkMenu X{");
+        }
+        highlightMenu->addAction(action);
     }
 }
 
