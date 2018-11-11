@@ -9,6 +9,7 @@
 ####
 
 message( STATUS "Configuring the Distorm plugin --")
+
 project( distormplugin )
 
 set ( CMAKE_BUILD_TYPE Release )
@@ -51,8 +52,6 @@ elseif(UNIX)
     include_directories ( ${PROJECT_SOURCE_DIR}/../../ext/distorm/include)
     link_directories ( ${PROJECT_SOURCE_DIR}/../../ext/distorm/make/linux )
 endif ()
-
-set ( EXTERN_LIBS transform distorm3 )
 
 set ( distormplugin_HDRS
     distorm_global.h
@@ -103,16 +102,17 @@ if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         else()
                 set ( OS_PATH "linux" )
         endif()
-        message(STATUS "${OS_PATH}")
+        message(STATUS "${OS_PATH} build")
         add_custom_target(build_distorm_lib ALL 
-                   COMMAND ${CMAKE_MAKE_PROGRAM} clib
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/${OS_PATH}
-                   COMMENT "distorm make file")
+                COMMAND "$(MAKE)" clib
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/${OS_PATH}
+                COMMENT "distorm make file")
         add_library (distorm3 STATIC IMPORTED)
         SET_TARGET_PROPERTIES(distorm3 PROPERTIES
                 IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/../../ext/distorm/distorm3.a)
         add_dependencies(distormplugin build_distorm_lib)
 endif ()
+set ( EXTERN_LIBS transform distorm3 )
 target_link_libraries ( distormplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 IF(UNIX)
