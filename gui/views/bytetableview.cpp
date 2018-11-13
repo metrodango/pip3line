@@ -36,6 +36,7 @@ TextCell::TextCell(QWidget *parent, Qt::WindowFlags f) :
 {
     QPalette p = palette();
     p.setColor(QPalette::Window, QApplication::palette().base().color());
+    p.setColor(QPalette::WindowText, QApplication::palette().text().color());
     setPalette(p);
 }
 

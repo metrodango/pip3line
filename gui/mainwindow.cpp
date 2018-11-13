@@ -148,6 +148,31 @@ MainWindow::MainWindow(bool debug, QWidget *parent) :
     palette.setColor(QPalette::Inactive,QPalette::Highlight, originalb);
     palette.setColor(QPalette::Disabled,QPalette::HighlightedText, originalf);
     palette.setColor(QPalette::Inactive,QPalette::HighlightedText, originalf);
+
+    // checking if the text and background colors are the same ...
+
+    originalb = palette.base().color();
+    originalf = palette.text().color();
+    if (originalb.red() == originalf.red() &&
+        originalb.green() == originalf.green() &&
+        originalb.blue() == originalf.blue()) {
+        qInfo() << tr("Background and foreground colors are the same .. XD");
+        originalf.setRed(255 - originalf.red());
+        originalf.setGreen(255 - originalf.green());
+        originalf.setBlue(255 - originalf.blue());
+        palette.setColor(QPalette::Normal, QPalette::Text, originalf);
+        palette.setColor(QPalette::Inactive, QPalette::Text, originalf);
+    } else {
+        QColor b = palette.base().color();
+        QColor t = palette.text().color();
+        qDebug() << tr("colors are differents: [%1,%2,%3] / [%4, %5, %6]")
+                   .arg(b.red())
+                   .arg(b.green())
+                   .arg(b.blue())
+                   .arg(t.red())
+                   .arg(t.green())
+                   .arg(t.blue());
+    }
     QApplication::setPalette(palette);
 
     // special stylesheet for the hexadecimal editor cells

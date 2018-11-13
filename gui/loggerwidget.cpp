@@ -27,6 +27,7 @@ LoggerWidget::LoggerWidget(QWidget *parent) :
     ui->setupUi(this);
 
     ui->messagesTextEdit->setTextBackgroundColor(QApplication::palette().base().color());
+    ui->messagesTextEdit->setBackgroundRole(QPalette::Base);
 
     uncheckedError = false;
 }
