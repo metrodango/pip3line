@@ -1,0 +1,31 @@
+.\" Manpage for pip3linecmd
+.\" Contact gabriel.caudrelier@gmail.com to correct errors or typos.
+.TH man 1 "13 November 2018" "1.0" "pip3linecmd man page"
+.SH NAME
+pip3linecmd - run transforms against various inputs 
+.SH SYNOPSIS
+pip3linecmd [options]
+.SH DESCRIPTION
+pip3linecmd is a command to run Transform (basics or registered) on a text input, processed line by line.
+.SH OPTIONS
+-b Treat the input as one binary block (as opposed to text file with lines)
+.PP
+-f [configuration file] name of the configuration file to use (generated from the GUI)
+.PP
+-h Display this help
+.PP
+-i Inbound "way" the transform is going to be run. It usually means encoding/encrypting. Ignored if the transform is one way.
+.PP
+-n do not show errors
+.PP
+-o outbound "way" the transform is going to be run. It usually means decoding/decrypting. Ignored if the transform is one way.
+.PP
+-t [Transform name] name of an existing Transform to use
+.PP
+-v verbose
+.SH SEE ALSO
+pip3line(1)
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Gabriel Caudrelier (gabriel.caudrelier@gmail.com)

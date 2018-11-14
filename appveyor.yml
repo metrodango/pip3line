@@ -1,4 +1,4 @@
-version: 3.5.0.{build}
+version: 3.5.4
 
 environment:
   matrix:
@@ -39,7 +39,18 @@ after_build:
 - 7z a pip3line_%APPVEYOR_BUILD_VERSION%_win_x64.zip pip3line_%APPVEYOR_BUILD_VERSION%_win_x64
 
 artifacts:
-- path: pip3line_$(appveyor_build_version)_win_x64.zip
+- path: pip3line_$(APPVEYOR_BUILD_VERSION)_win_x64.zip
   name: Pip3line
 
+deploy:
+- description: 'Pip3line windows binaries for x64'
+  provider: GitHub
+  auth_token:
+    secure: 9fnQrJR6a2T86409RrK9X5Bq9C2+PP5LuN9uSJivbhFbC+MxGE0CZx2nqObe55Ar
+  artifact: pip3line_$(APPVEYOR_BUILD_VERSION)_win_x64.zip
+  draft: false
+  prerelease: false
+  on:
+    branch: master
+    appveyor_repo_tag: true
 

@@ -67,5 +67,8 @@ endif(WIN32)
 target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
 if(UNIX)
+    include( GNUInstallDirs )
     install (TARGETS pip3linecmd DESTINATION bin)
+    install(FILES pip3linecmd.1
+       DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1 COMPONENT doc)
 endif(UNIX)

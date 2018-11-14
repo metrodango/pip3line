@@ -35,7 +35,6 @@ class SharedMemorySource : public BlocksSource
     private slots:
         void checkData();
         void onShmReset();
-        void onTimerStopped();
     private:
         Q_DISABLE_COPY(SharedMemorySource)
         SharedmemConnector * memConn;

@@ -134,7 +134,7 @@ QVariant ByteItemModel::data(const QModelIndex &index, int role) const
                 if (pos != INVALID_POSITION) {
                     QColor val = byteSource->getFgViewColor(pos);
                     if (!val.isValid()) {
-                        val = QApplication::palette().windowText().color();
+                        val = QApplication::palette().text().color();
                     }
                     return QVariant(val);
                 }

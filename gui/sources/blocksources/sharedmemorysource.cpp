@@ -25,8 +25,7 @@ SharedMemorySource::SharedMemorySource(QObject *parent) : BlocksSource(parent)
 
     checkTimer.moveToThread(&workerThread);
     connect(&checkTimer, &QTimer::timeout, this, &SharedMemorySource::checkData);
-    // connect(this, &SharedMemorySource::stopped, &checkTimer, &QTimer::stop, Qt::QueuedConnection);
-    connect(this, &SharedMemorySource::stopped, this, &SharedMemorySource::onTimerStopped, Qt::QueuedConnection);
+    connect(this, &SharedMemorySource::stopped, &checkTimer, &QTimer::stop, Qt::QueuedConnection);
 
     updateConnectionsTimer.moveToThread(&workerThread);
     moveToThread(&workerThread);
@@ -191,12 +190,6 @@ void SharedMemorySource::onShmReset()
 {
     stopListening();
     startListening();
-}
-
-void SharedMemorySource::onTimerStopped()
-{
-    qWarning() << tr("timer stopped");
-    checkTimer.stop();
 }
 
 bool SharedMemorySource::startListening()

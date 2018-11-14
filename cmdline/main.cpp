@@ -16,23 +16,29 @@ Released under AGPL see LICENSE for more information
 #include "masterthread.h"
 #include "../version.h"
 
-#define NOERRORPARAM "-n"
-#define VERBOSEPARAM "-v"
 #define BINARY_INPUT_PARAM "-b"
-#define TRANSFORM_NAME_PARAM "-t"
 #define FILE_PARAM "-f"
+#define HELP_PARAM "-h"
 #define INBOUND_PARAM "-i"
+#define NOERRORPARAM "-n"
 #define OUTBOUND_PARAM "-o"
+#define TRANSFORM_NAME_PARAM "-t"
+#define VERBOSEPARAM "-v"
 
 void usage() {
     QTextStream cout(stdout);
 
-    cout << APPNAME << QString(" %1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR) << QObject::tr(" Using libtransform v%1").arg(LIB_TRANSFORM_VERSION) << endl;
-    cout << "Usage: " << APPNAME << " [file]" << endl;
-    cout << "       " << TRANSFORM_NAME_PARAM << QObject::tr(" [Transform name] name of an existing Transform to use") << endl;
-    cout << "       " << FILE_PARAM << QObject::tr(" [configuration file] name of the configuration file to use (generated from the GUI)") << endl;
+    cout << "pip3linecmd" << QString(" %1").arg(VERSION_STRING) << QObject::tr(" Using libtransform v%1").arg(LIB_TRANSFORM_VERSION) << endl;
+    cout << "Usage: pip3linecmd" << " [options]" << endl;
     cout << "       " << BINARY_INPUT_PARAM << QObject::tr(" Treat the input as one binary block (as opposed to text file with lines)") << endl;
+    cout << "       " << FILE_PARAM << QObject::tr(" [configuration file] name of the configuration file to use (generated from the GUI)") << endl;
+    cout << "       " << HELP_PARAM << QObject::tr(" Display this help") << endl;
+    cout << "       " << INBOUND_PARAM << QObject::tr(" Inbound \"way\" the transform is going to be run. It usually means encoding/encrypting."
+                                                      " Ignored if the transform is one way.") << endl;
     cout << "       " << NOERRORPARAM << QObject::tr(" do not show errors") << endl;
+    cout << "       " << OUTBOUND_PARAM << QObject::tr(" Outbound \"way\" the transform is going to be run. It usually means decoding/decrypting. "
+                                                       "Ignored if the transform is one way.") << endl;
+    cout << "       " << TRANSFORM_NAME_PARAM << QObject::tr(" [Transform name] name of an existing Transform to use") << endl;
     cout << "       " << VERBOSEPARAM << QObject::tr(" verbose") << endl;
 }
 
@@ -51,13 +57,13 @@ static void setup_unix_signal_handlers()
     sigemptyset(&term.sa_mask);
     term.sa_flags |= SA_RESTART;
 
-    if (sigaction(SIGTERM, &term, 0) == -1)
+    if (sigaction(SIGTERM, &term, nullptr) == -1)
         qWarning("Could not set the SIGTERM signal handler");
-    if (sigaction(SIGINT, &term, 0) == -1)
+    if (sigaction(SIGINT, &term, nullptr) == -1)
         qWarning("Could not set the SIGINT signal handler");
-    if (sigaction(SIGQUIT, &term, 0) == -1)
+    if (sigaction(SIGQUIT, &term, nullptr) == -1)
         qWarning("Could not set the SIGQUIT signal handler");
-    if (sigaction(SIGABRT, &term, 0) == -1)
+    if (sigaction(SIGABRT, &term, nullptr) == -1)
         qWarning("Could not set the SIGABRT signal handler");
 
 }
@@ -84,7 +90,10 @@ int main(int argc, char *argv[])
 
     args.takeFirst();
 
-
+    if (args.contains(HELP_PARAM)) {
+        usage();
+        return -1;
+    }
 
     if (args.contains(NOERRORPARAM)) {
         noError = true;

@@ -179,7 +179,7 @@ void Processor::writeBlock(const QByteArray &data)
             if (whatHasBeenDone < outputval->size()) {
                 *outputval = outputval->remove(0,static_cast<int>(whatHasBeenDone));
             } else {
-                qCritical() << tr("[Processor::writeBlock] bytes written ");
+                qDebug() << tr("[Processor::writeBlock] bytes written %1").arg(whatHasBeenDone);
                 outputval->clear();
             }
 

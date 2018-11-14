@@ -90,6 +90,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     scintEditor->setFont(GlobalsValues::GLOBAL_REGULAR_FONT);
     scintEditor->setReadOnly(byteSource->isReadonly());
     scintEditor->setWrapMode(QsciScintilla::WrapCharacter);
+    scintEditor->setBackgroundRole(QPalette::Base);
 
     lexerCombobox = new(std::nothrow) QComboBox();
     if (lexerCombobox == nullptr) {
@@ -387,6 +388,7 @@ void TextView::onLexerChanged(int index)
         newLexer->setDefaultColor(QApplication::palette().text().color());
     }
     scintEditor->setLexer(newLexer);
+    scintEditor->setBackgroundRole(QPalette::Base);
     delete prevLexer;
 
     if (newLexer == nullptr) {

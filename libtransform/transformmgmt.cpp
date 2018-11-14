@@ -88,7 +88,7 @@ bool TransformMgmt::initialize(const QString &baseDirectory)
         qDebug() << tr("Application dir path is empty. Plugins won't probably load.");
     }
     pluginsDirectories << QString("%1/%2").arg(baseDirectory).arg(APP_PLUGIN_DIRECTORY);
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     pluginsDirectories << QDir(QString("%1/../lib/pip3line").arg(baseDirectory)).absolutePath();
 #endif
 
