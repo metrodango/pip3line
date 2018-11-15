@@ -1,4 +1,14 @@
-version: 3.5.4.x.{build}
+version: 3.5.4.{build}
+
+skip_commits:
+  files:
+    - .travis.yml
+    - INSTALL
+    - README.md
+    - Build-process.md
+    - unittests/*
+    - LICENCE
+    - todo
 
 environment:
   matrix:
