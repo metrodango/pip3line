@@ -81,7 +81,7 @@ if (UNIX)
     set_target_properties(transform PROPERTIES VERSION ${LIBTRANSFORM_VERSION_MAJOR}
         SOVERSION ${LIBTRANSFORM_VERSION_MAJOR})
     set_target_properties(transform PROPERTIES PUBLIC_HEADER
-            "${transform_HDRS};${transform_MOCS}")
+            "${transform_HDRS};${transform_MOCS};LibTransform")
 endif(UNIX)
 
 target_link_libraries(transform Qt5::Widgets Qt5::Svg Qt5::Concurrent)
@@ -89,8 +89,5 @@ target_link_libraries(transform Qt5::Widgets Qt5::Svg Qt5::Concurrent)
 IF(UNIX)
         install (TARGETS transform LIBRARY DESTINATION lib
                 PUBLIC_HEADER DESTINATION include/libtransform )
-    #    install (FILES ${transform_HDRS} DESTINATION include/libtransform )
-    #    install (FILES ${transform_MOCS} DESTINATION include/libtransform )
-    #    install (FILES LibTransform DESTINATION include )
 ENDIF(UNIX)
 
