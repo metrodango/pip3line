@@ -91,15 +91,12 @@ QVariant JsonItem::data(int column) const
         } else if (value.isBool()){
             ret = value.toBool() ? QString("true") : QString("false");
         } else if (value.isDouble()) {
-            ret = QString::number(value.toInt(0));
-            if (ret == 0) {
-                double out = value.toDouble();
-                double intprt;
-                if (std::modf(out,&intprt) == 0.0) { // this is an integer
-                    ret = QString::number(static_cast<qint64>(intprt));
-                } else {
-                    ret = QString::number(out,'f',10);
-                }
+            double out = value.toDouble();
+            double intprt;
+            if (std::modf(out,&intprt) == 0.0) { // this is an integer
+                ret = QString::number(static_cast<qint64>(intprt));
+            } else {
+                ret = QString::number(out,'g',10);
             }
         } else if (value.isString()){
             ret = value.toString();
