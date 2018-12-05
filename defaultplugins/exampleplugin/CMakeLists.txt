@@ -48,7 +48,8 @@ add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 target_link_libraries ( exampleplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
 
 IF(UNIX)
-    install (TARGETS exampleplugin DESTINATION lib/pip3line/
+    include( GNUInstallDirs )
+    install (TARGETS exampleplugin DESTINATION ${CMAKE_INSTALL_LIBDIR}/pip3line/
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
         GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     )

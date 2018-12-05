@@ -87,7 +87,8 @@ endif(UNIX)
 target_link_libraries(transform Qt5::Widgets Qt5::Svg Qt5::Concurrent)
 
 IF(UNIX)
-        install (TARGETS transform LIBRARY DESTINATION lib
+        include( GNUInstallDirs )
+        install (TARGETS transform LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 PUBLIC_HEADER DESTINATION include/libtransform )
 ENDIF(UNIX)
 

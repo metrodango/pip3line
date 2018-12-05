@@ -71,7 +71,8 @@ if (PYTHON_INCLUDE_DIRS AND PYTHON_LIBRARIES)
     target_link_libraries ( python3plugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
 
     IF(UNIX)
-        install (TARGETS python3plugin DESTINATION lib/pip3line/
+        include( GNUInstallDirs )
+        install (TARGETS python3plugin DESTINATION ${CMAKE_INSTALL_LIBDIR}/pip3line/
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
     endif(UNIX)

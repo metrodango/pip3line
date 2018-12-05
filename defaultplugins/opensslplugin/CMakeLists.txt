@@ -54,7 +54,8 @@ if (OPENSSL_FOUND)
     target_link_libraries ( opensslplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
 
     IF(UNIX)
-        install (TARGETS opensslplugin DESTINATION lib/pip3line/
+        include( GNUInstallDirs )
+        install (TARGETS opensslplugin DESTINATION ${CMAKE_INSTALL_LIBDIR}/pip3line/
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
     ENDIF(UNIX)
