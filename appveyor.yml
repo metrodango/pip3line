@@ -1,4 +1,4 @@
-version: 3.5.4.{build}
+version: 3.5.5.{build}
 
 skip_commits:
   files:
