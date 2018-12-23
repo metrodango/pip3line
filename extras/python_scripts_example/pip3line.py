@@ -83,7 +83,7 @@ class Pip3line:
 			print("Need array of bytes")
 			return b''
 
-		if (!self.conn):
+		if (not self.conn):
 			if not self.connect():
 				return b''
 
