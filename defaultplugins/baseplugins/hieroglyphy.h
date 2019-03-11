@@ -19,25 +19,25 @@ class Hieroglyphy : public TransformAbstract
         Q_OBJECT
     public:
         explicit Hieroglyphy();
-        ~Hieroglyphy();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~Hieroglyphy() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
-        QString inboundString() const;
-        QString outboundString() const;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString inboundString() const override;
+        QString outboundString() const override;
         QString hChar(char c);
         QString hUnicode(QChar u);
         QString hNumber(int num);
         QString hString(QString str);
         QString hScript(QString scr);
         QString toHex(char c);
-        QString help() const;
-        QString credits() const;
+        QString help() const override;
+        QString credits() const override;
 
         void setUseBtoa(bool val);
         bool isBtoaInUse() const;

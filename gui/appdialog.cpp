@@ -83,7 +83,7 @@ void AppStateObj::internalRun()
 
 
 AppDialog::AppDialog(GuiHelper * nguiHelper, QWidget *parent) :
-    QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint)
+    QDialog(parent,  Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
     guiHelper = nguiHelper;
     logger = guiHelper->getLogger();

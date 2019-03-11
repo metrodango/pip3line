@@ -34,7 +34,10 @@ SingleViewAbstract::~SingleViewAbstract()
     byteSource = nullptr;
     guiHelper = nullptr;
     logger = nullptr;
-    delete configButton;
+    if (configButton != nullptr) {
+        disconnect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
+        delete configButton;
+    }
     configButton = nullptr;
     //setParent(nullptr);
 }
@@ -60,8 +63,11 @@ void SingleViewAbstract::setConfigButton(QPushButton *value)
         disconnect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
         delete configButton;
     }
-    configButton = value;
-    connect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
+
+    if (value != nullptr) {
+        configButton = value;
+        connect(configButton, &QPushButton::destroyed, this, &SingleViewAbstract::onConfigButtonDestroyed);
+    }
 }
 
 QHash<QString, QString> SingleViewAbstract::getConfiguration()

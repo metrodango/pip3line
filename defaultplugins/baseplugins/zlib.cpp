@@ -94,7 +94,7 @@ QWidget *Zlib::requestGui(QWidget * parent)
 QString Zlib::help() const
 {
     QString help;
-    help.append("<p>Zlib compression algorithm</p><p>When compressing there is an option to automatically remove the size header (first 4 bytes), which is not used in many cases.</p>");
+    help.append("<p>Zlib compression algorithm</p><p>When compressing there is an option to automatically remove the size header (first 4 bytes), which is not used in many cases.</p><p>If decompression fails, another pass is tried by adding a four bytes null header at the beginning of the stream.");
     return help;
 }
 

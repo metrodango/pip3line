@@ -31,6 +31,7 @@ class JsonItem
         int indexOf(JsonItem *item);
         QJsonValue toJson();
         QString getName() const;
+        void setName(const QString &value);
         JsonItem::Type getValueType() const;
     private:
         Q_DISABLE_COPY(JsonItem)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-<comment>
+ <comment>
   * Released as open source by Gabriel Caudrelier
   *
   * Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -15,8 +15,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>287</width>
-    <height>169</height>
+    <width>500</width>
+    <height>330</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,7 +45,7 @@
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
             <item row="3" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="char63Label">
               <property name="text">
                <string>Character 63</string>
               </property>
@@ -90,7 +90,7 @@
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="char62Label">
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
               </property>
@@ -100,7 +100,7 @@
              </widget>
             </item>
             <item row="4" column="0">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="paddingLabel">
               <property name="text">
                <string>Padding</string>
               </property>
@@ -162,6 +162,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="invalidAsSepCheckBox">
+     <property name="text">
+      <string>Consider invalids as block separators (decoding)</string>
+     </property>
     </widget>
    </item>
   </layout>

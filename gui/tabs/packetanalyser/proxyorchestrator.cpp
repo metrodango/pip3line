@@ -107,7 +107,6 @@ void ProxyOrchestrator::postPacket(QSharedPointer<Packet> packet)
                      Pip3lineConst::LERROR);
         }
     }
-
 }
 
 bool ProxyOrchestrator::start()

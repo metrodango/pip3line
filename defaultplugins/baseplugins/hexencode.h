@@ -19,16 +19,16 @@ class HexEncode : public TransformAbstract
     public:
         enum Type {NORMAL = 0, ESCAPED = 1, CSTYLE = 2, CSV = 3, ESCAPED_MIXED = 4};
         explicit HexEncode();
-        ~HexEncode();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~HexEncode() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 
         Type getType();
         void setType(Type ntype);

@@ -254,6 +254,7 @@ bool FilterEngine::assertExpr(QString expression)
             bo->setRoperand(tok);
             rootToken = bo;
         }
+        expressionStr.clear();
         emit updated();
         return true;
     }

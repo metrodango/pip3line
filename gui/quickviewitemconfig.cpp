@@ -34,13 +34,14 @@ QuickViewItemConfig::QuickViewItemConfig(GuiHelper *nguiHelper, QWidget *parent)
     currentTransform = nullptr;
     confGui = nullptr;
     infoDialog = nullptr;
-    wayBoxVisible = true;
-    formatBoxVisible = true;
-    outputTypeVisible = true;
+    readonlyVisible = false;
+    wayBoxVisible = false;
+    formatBoxVisible = false;
+    outputTypeVisible = false;
     format = TEXTFORMAT;
     uiTransform->textRadioButton->setChecked(true);
     uiTransform->infoPushButton->setEnabled(false);
-
+    uiTransform->readonlyCheckBox->setChecked(false);
     uiTransform->oneLineRadioButton->setChecked(true);
 
     transformFactory = guiHelper->getTransformFactory();
@@ -51,18 +52,11 @@ QuickViewItemConfig::QuickViewItemConfig(GuiHelper *nguiHelper, QWidget *parent)
     connect(uiTransform->inboundRadioButton, &QRadioButton::toggled, this, &QuickViewItemConfig::onInboundWayChange);
     connect(uiTransform->infoPushButton, &QPushButton::clicked, this, &QuickViewItemConfig::onInfo);
     connect(uiTransform->textRadioButton, &QRadioButton::toggled, this, &QuickViewItemConfig::onTextFormatToggled);
-
-    uiTransform->wayGroupBox->setVisible(false);
-    uiTransform->formatGroupBox->setVisible(false);
-    uiTransform->typeGroupBox->setVisible(false);
 }
 
 QuickViewItemConfig::~QuickViewItemConfig()
 {
-    //qDebug() << "Destroying " << this;
-
     delete currentTransform;
-
     delete infoDialog;
     guiHelper = nullptr;
     delete uiTransform;
@@ -138,6 +132,16 @@ void QuickViewItemConfig::setOutputType(OutputType type)
     }
 }
 
+void QuickViewItemConfig::setReadonly(bool value)
+{
+    uiTransform->readonlyCheckBox->setChecked(value);
+}
+
+bool QuickViewItemConfig::getReadonly() const
+{
+    return uiTransform->readonlyCheckBox->isChecked();
+}
+
 OutputType QuickViewItemConfig::getOutputType()
 {
     return (uiTransform->oneLineRadioButton->isChecked() ? ONELINE : MULTILINES);
@@ -146,16 +150,25 @@ OutputType QuickViewItemConfig::getOutputType()
 void QuickViewItemConfig::setWayBoxVisible(bool val)
 {
     wayBoxVisible = val;
+    uiTransform->wayGroupBox->setVisible(wayBoxVisible);
 }
 
 void QuickViewItemConfig::setFormatVisible(bool val)
 {
     formatBoxVisible = val;
+    uiTransform->formatGroupBox->setVisible(formatBoxVisible);
 }
 
 void QuickViewItemConfig::setOutputTypeVisible(bool val)
 {
     outputTypeVisible = val;
+    uiTransform->typeGroupBox->setVisible(outputTypeVisible);
+}
+
+void QuickViewItemConfig::setReadonlyVisible(bool value)
+{
+    readonlyVisible = value;
+    uiTransform->readonlyCheckBox->setVisible(readonlyVisible);
 }
 
 void QuickViewItemConfig::onTransformSelect(QString name)

@@ -10,15 +10,15 @@ class Crc32 : public TransformAbstract
         static const QString id;
         static const quint32 crctable[];
         explicit Crc32();
-        ~Crc32();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        ~Crc32() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
 
         bool isLittleendian() const;
         void setLittleendian(bool value);

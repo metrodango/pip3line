@@ -47,11 +47,12 @@ class TabAbstract : public QWidget
         GuiHelper * getHelper();
         enum ViewType {UNDEFINED = 0, HEXVIEW = 1, TEXTVIEW = 2, DEFAULTTEXT = 3, JSONVIEW = 4};
         struct ViewTab {
-                ViewTab() : transform(nullptr), type(UNDEFINED),tabName(GuiConst::UNDEFINED_TEXT) {}
+                ViewTab() : transform(nullptr), type(UNDEFINED),tabName(GuiConst::UNDEFINED_TEXT), readonly(false) {}
                 TransformAbstract * transform;
                 ViewType type;
                 QString tabName;
                 QHash<QString, QString> options;
+                bool readonly;
         };
         static const int WINDOWED_TAB;
     public slots:

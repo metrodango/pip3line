@@ -689,7 +689,7 @@ void FilterText::setConfiguration(const QHash<QString, QString> &conf)
     bool ok = false;
 
     if (conf.contains(GuiConst::STATE_REGEXP_PATTERN)) {
-        regexp.setPattern(conf.value(GuiConst::STATE_SIZE));
+        regexp.setPattern(conf.value(GuiConst::STATE_REGEXP_PATTERN));
     }
 
     if (conf.contains(GuiConst::STATE_REGEXP_PATTERN_SYNTAX)) {

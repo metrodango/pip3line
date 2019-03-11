@@ -19,14 +19,14 @@ class Md4 : public TransformAbstract
     
     public:
         explicit Md4() {}
-        ~Md4() {}
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~Md4() override {}
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
 
-        QString help() const;
+        QString help() const override;
 
 };
 

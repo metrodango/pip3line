@@ -24,6 +24,7 @@ Base64::Base64()
     char63 = '/';
     paddingChar = '=';
     paddingType = DEFAULTPADDING;
+    considerInvalidCharAsSeparators = false;
 }
 
 Base64::~Base64()
@@ -54,6 +55,7 @@ QHash<QString, QString> Base64::getConfiguration()
         properties.insert(XMLCHAR63,saveChar(char63));
         properties.insert(XMLPADDINGTYPE,QString::number(static_cast<int>(paddingType)));
     }
+    properties.insert(XMLSEPARATOR,QString::number(considerInvalidCharAsSeparators ? 1 : 0));
     return properties;
 }
 
@@ -104,6 +106,13 @@ bool Base64::setConfiguration(QHash<QString, QString> propertiesList)
             emit error(tr("Invalid value for %1").arg(XMLPADDINGTYPE),id);
         } else {
             setPaddingType(static_cast<PaddingType>(val));
+        }
+    }
+
+    if (propertiesList.contains(XMLSEPARATOR)) {
+        val = propertiesList.value(XMLSEPARATOR).toInt(&ok);
+        if (ok && (val == 1 || val == 0)) {
+            considerInvalidCharAsSeparators = (val == 1);
         }
     }
     return res;
@@ -251,6 +260,19 @@ bool Base64::setPaddingChar(char val)
     return true;
 }
 
+bool Base64::getConsiderInvalidCharAsSeparators() const
+{
+    return considerInvalidCharAsSeparators;
+}
+
+void Base64::setConsiderInvalidCharAsSeparators(bool value)
+{
+    if (considerInvalidCharAsSeparators != value) {
+        considerInvalidCharAsSeparators = value;
+        emit confUpdated();
+    }
+}
+
 
 void Base64::transform(const QByteArray &input, QByteArray &output) {
     output.clear();
@@ -292,7 +314,7 @@ void Base64::transform(const QByteArray &input, QByteArray &output) {
 
 
             int rest = output.size() % 4;
-            if (rest != 0) {
+            if (rest != 0 && ! considerInvalidCharAsSeparators) {
 
                emit error(tr("Invalid padding: missing %1 or %2 too many").arg(4 - rest).arg(rest),id);
             }
@@ -301,24 +323,44 @@ void Base64::transform(const QByteArray &input, QByteArray &output) {
         while (output.at(output.size() -1 - count) == DEFAULTPADDINGCHAR) {
             count++;
         }
-        if (count < output.count(DEFAULTPADDINGCHAR)) {
-            emit error(tr("There seem to be one or more padding characters in the middle of the stream. They will be considered invalid"),id);
+        if (count < output.count(DEFAULTPADDINGCHAR) && ! considerInvalidCharAsSeparators) {
+            emit error(tr("There seems to be one or more padding characters in the middle of the stream. They will be considered invalid"),id);
         }
 
         output.replace(char62,"+");
         output.replace(char63,"/");
-        QByteArray invalid;
-        for (int i = 0; i < output.size() - count; i++) {
-            if (!BASE64CHAR.contains(output[i])) {
-                if (!invalid.contains(output.at(i)))
-                    invalid.append(output.at(i));
+        if (considerInvalidCharAsSeparators) {
+            int curStart = 0;
+            QByteArray final;
+            QList<QByteArray> nibbles;
+            for (int i = 0; i < output.size(); i++) {
+                if (!BASE64CHAR.contains(output[i])) {
+                    QByteArray part = output.mid(curStart, i - curStart);
+                //    qDebug() << "base64 part: " << QString::fromUtf8(part) << curStart << i << QString::fromUtf8(output.mid(curStart,1));
+                    if (!part.isEmpty()) {
+                        final.append(QByteArray::fromBase64(part));
+                    }
+                    if (output[i] != DEFAULTPADDINGCHAR) {
+                        final.append(output[i]);
+                    }
+                    curStart = i + 1;
+                }
             }
+            output = final;
+        } else {
+            QByteArray invalid;
+            for (int i = 0; i < output.size() - count; i++) {
+                if (!BASE64CHAR.contains(output[i])) {
+                    if (!invalid.contains(output.at(i)))
+                        invalid.append(output.at(i));
+                }
+            }
+            if (!invalid.isEmpty()) {
+                invalid.replace('=',paddingChar);
+                emit error(tr("Input string contains invalid Base64 character(s) : [%1].").arg(QString::fromUtf8(toPrintableString(invalid))),id);
+            }
+            output = QByteArray::fromBase64(output);
         }
-        if (!invalid.isEmpty()) {
-            invalid.replace('=',paddingChar);
-            emit error(tr("Input string contains invalid Base64 character(s) : [%1].").arg(QString::fromUtf8(toPrintableString(invalid))),id);
-        }
-        output = QByteArray::fromBase64(output);
     }
 }
 

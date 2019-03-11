@@ -21,16 +21,16 @@ class Xor : public TransformAbstract
         static const QByteArray HEXCHAR;
         enum Type {Basic = 0, PREVIOUSINPUT = 1, PREVIOUSOUTPUT = 2};
         explicit Xor();
-        ~Xor();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~Xor() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 
         QByteArray getKey() const;
         void setKey(QByteArray val);
@@ -38,8 +38,8 @@ class Xor : public TransformAbstract
         void setFromHex(bool val);
         void setType(Xor::Type val);
         Xor::Type getType() const;
-        QString inboundString() const;
-        QString outboundString() const;
+        QString inboundString() const override;
+        QString outboundString() const override;
     private:
         QByteArray applyPreviousInput(const QByteArray & data, QByteArray & key);
         QByteArray applyPreviousOutput(const QByteArray & data, QByteArray & key);

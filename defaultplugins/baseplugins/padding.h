@@ -22,14 +22,14 @@ class Padding : public TransformAbstract
         static const int MINBLOCKSIZE = 2;
         static const int MAXBLOCKSIZE = 1024;
         explicit Padding();
-        ~Padding();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~Padding() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
 
         char getPadChar();
@@ -38,7 +38,7 @@ class Padding : public TransformAbstract
         void setPadChar(char val);
         void setVariant(PaddingVariant val);
         bool setBlockSize(int val);
-        QString help() const;
+        QString help() const override;
     private:
 
         char padChar;

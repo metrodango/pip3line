@@ -20,20 +20,20 @@ class HMACTransform : public TransformAbstract
     public:
         static const QMap<int, QString> hashes;
         explicit HMACTransform();
-        ~HMACTransform();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        ~HMACTransform() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
         static const QString id;
         int getSelectedHash() const;
         void setSelectedHash(int value);
         QByteArray getKey() const;
         void setKey(const QByteArray &value);
-        QString help() const;
+        QString help() const override;
     private:
         static const QMap<int, QString> initHash();
         int getBlocksize(int hash);

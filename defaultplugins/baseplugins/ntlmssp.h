@@ -25,15 +25,15 @@ class Ntlmssp : public TransformAbstract
     public:
         static const QString id;
         explicit Ntlmssp();
-        ~Ntlmssp();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        ~Ntlmssp() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
 
         bool decodeBase64() const;
         void setDecodeBase64(bool val);

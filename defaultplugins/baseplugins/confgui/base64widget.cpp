@@ -25,6 +25,7 @@ Base64Widget::Base64Widget(Base64 *ntransform, QWidget *parent) :
     ui->char62LineEdit->setText(QString(transform->getChar62()));
     ui->char63LineEdit->setText(QString(transform->getChar63()));
     ui->paddingLineEdit->setText(QString(transform->getPaddingChar()));
+    ui->invalidAsSepCheckBox->setChecked(transform->getConsiderInvalidCharAsSeparators());
 
     if (transform->getChoosenVariation() == Base64::STANDARD) {
         ui->inclPaddingRadioButton->setChecked(true);
@@ -48,6 +49,7 @@ Base64Widget::Base64Widget(Base64 *ntransform, QWidget *parent) :
     connect(ui->noPaddingRadioButton, &QRadioButton::clicked, this, &Base64Widget::onCustomConf);
     //connect(ui->variantComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &Base64Widget::onChangeVariant);
     connect(ui->variantComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onChangeVariant(int)));
+    connect(ui->invalidAsSepCheckBox, &QCheckBox::toggled, this, &Base64Widget::onInvalidSepToggled);
 }
 
 Base64Widget::~Base64Widget()
@@ -151,4 +153,9 @@ void Base64Widget::onCustomConf()
     else
         transform->setPaddingType(Base64::NOPADDING);
 
+}
+
+void Base64Widget::onInvalidSepToggled(bool value)
+{
+    transform->setConsiderInvalidCharAsSeparators(value);
 }

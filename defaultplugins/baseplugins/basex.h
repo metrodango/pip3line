@@ -22,15 +22,15 @@ class BaseX : public TransformAbstract
         static const int MINBASE = 2;
         static const int MAXBASE = 36;
         explicit BaseX(int base = 10);
-        ~BaseX();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
+        ~BaseX() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
 
         int getBase() const;
         bool getUppercase() const;

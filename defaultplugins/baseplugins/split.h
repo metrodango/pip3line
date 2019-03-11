@@ -20,16 +20,16 @@ class Split : public TransformAbstract
     public:
         static const int MAXGROUPVALUE = 1000;
         explicit Split();
-        ~Split();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~Split() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 
         char getSeparator() const;
         int getSelectedGroup() const;

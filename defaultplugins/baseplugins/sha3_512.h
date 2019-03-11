@@ -18,13 +18,13 @@ class Sha3_512 : public TransformAbstract
     Q_OBJECT
     public:
         explicit Sha3_512();
-        ~Sha3_512();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~Sha3_512() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 };
 
 #endif // SHA3_512_H

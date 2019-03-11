@@ -24,16 +24,16 @@ class BASEPLUGINSSHARED_EXPORT BasePlugins : public QObject, public TransformFac
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
         explicit BasePlugins();
-        ~BasePlugins();
-        QString pluginName() const;
-        QString compiledWithQTversion() const;
-        TransformAbstract * getTransform(QString name);
-        const QStringList getTransformList(QString typeName);
-        const QStringList getTypesList();
-        QWidget * getConfGui(QWidget * parent);
-        int getLibTransformVersion() const;
-        QString pluginVersion() const;
-        void setCallBack(Pip3lineCallback *);
+        ~BasePlugins() override;
+        QString pluginName() const override;
+        QString compiledWithQTversion() const override;
+        TransformAbstract * getTransform(QString name) override;
+        const QStringList getTransformList(QString typeName) override;
+        const QStringList getTypesList() override;
+        QWidget * getConfGui(QWidget * parent) override;
+        int getLibTransformVersion() const override;
+        QString pluginVersion() const override;
+        void setCallBack(Pip3lineCallback *) override;
     private:
         TransformAbstract * getTransformFromFile(QString resFile);
         static const QString Base64Url;

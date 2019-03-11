@@ -33,16 +33,16 @@ class XmlQuery : public TransformAbstract
         Q_OBJECT
     public:
         explicit XmlQuery();
-        ~XmlQuery();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~XmlQuery() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 
         // specific functions
         QString getQueryString();

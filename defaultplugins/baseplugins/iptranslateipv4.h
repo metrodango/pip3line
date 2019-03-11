@@ -19,18 +19,18 @@ class IPTranslateIPv4 : public TransformAbstract
     public:
         enum BASE {BASE10 = 0, BASE16};
         explicit IPTranslateIPv4();
-        ~IPTranslateIPv4() {}
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~IPTranslateIPv4() override {}
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget *requestGui(QWidget *parent);
-        QString inboundString() const;
-        QString outboundString() const;
-        QString help() const;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget *requestGui(QWidget *parent) override;
+        QString inboundString() const override;
+        QString outboundString() const override;
+        QString help() const override;
         void setBase(BASE val);
         BASE getBase() const;
         void setLittleEndian(bool val = true);

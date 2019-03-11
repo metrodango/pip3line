@@ -19,12 +19,12 @@ class CiscoSecret7 : public TransformAbstract
     public:
         explicit CiscoSecret7();
         ~CiscoSecret7() {}
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
         unsigned int getSeed() const;
         bool setSeed(unsigned int seed);
     private:

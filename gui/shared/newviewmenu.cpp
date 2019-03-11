@@ -71,6 +71,8 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
                     qFatal("Cannot allocate memory for IntermediateSource X{");
                 }
 
+                is->setCustomReadonly(viewData.readonly);
+
                 newView = new(std::nothrow) HexView(is,guiHelper,parent,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for HexView X{");
@@ -87,7 +89,7 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
                 if (is == nullptr) {
                     qFatal("Cannot allocate memory for IntermediateSource X{");
                 }
-
+                is->setCustomReadonly(viewData.readonly);
                 newView = new(std::nothrow) TextView(is,guiHelper,parent,true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for TextView X{");
@@ -108,12 +110,21 @@ SingleViewAbstract * NewViewMenu::getView(ByteSourceAbstract *bytesource, QWidge
             break;
         case (TabAbstract::JSONVIEW) :
             {
-                newView = new(std::nothrow) JsonView(bytesource,guiHelper,parent);
+                IntermediateSource * is = new(std::nothrow) IntermediateSource(guiHelper,bytesource,viewData.transform);
+                if (is == nullptr) {
+                    qFatal("Cannot allocate memory for IntermediateSource X{");
+                }
+                is->setCustomReadonly(viewData.readonly);
+                newView = new(std::nothrow) JsonView(is,guiHelper,parent, true);
                 if (newView == nullptr) {
                     qFatal("Cannot allocate memory for JsonView X{");
                 }
+                configButton = new(std::nothrow) TransformGuiButton(viewData.transform);
+                if (configButton == nullptr) {
+                    qFatal("Cannot allocate memory for TransformGuiButton X{");
+                }
             }
-        break;
+            break;
         default:
         {
             qCritical() << tr("[NewViewMenu::getView] View Type undefined");
@@ -153,11 +164,13 @@ void NewViewMenu::onNewViewTab(QAction *action)
         itemConfig->setWayBoxVisible(true);
         itemConfig->setFormatVisible(false);
         itemConfig->setOutputTypeVisible(false);
+        itemConfig->setReadonlyVisible(true);
         int ret = itemConfig->exec();
         if (ret == QDialog::Accepted) {
             TransformAbstract * ta = itemConfig->getTransform();
             vt.transform = ta;
             vt.tabName = itemConfig->getName();
+            vt.readonly = itemConfig->getReadonly();
             if (action == newHexViewAction) {
                 vt.type = TabAbstract::HEXVIEW;
             } else if (action == newTextViewAction) {
@@ -176,7 +189,6 @@ void NewViewMenu::onNewViewTab(QAction *action)
         }
     }
     viewData = vt;
-
     emit newViewRequested();
 }
 

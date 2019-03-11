@@ -18,15 +18,15 @@ class ByteRot : public TransformAbstract
         Q_OBJECT
     public:
         explicit ByteRot();
-        ~ByteRot();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        ~ByteRot() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
         static const QString id;
 
         int getRotation() const;

@@ -164,6 +164,13 @@ QString JsonItem::getName() const
     return itemName;
 }
 
+void JsonItem::setName(const QString &value)
+{
+    if (itemName != value) {
+        itemName = value;
+    }
+}
+
 void JsonItem::clearChildren()
 {
     for (int i = 0; i < children.size(); i++) {
@@ -224,7 +231,7 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const
     QVariant ret;
     if (index.isValid()) {
         int col = index.column();
-        if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole || role == Qt::EditRole) {
             ret = static_cast<JsonItem*>(index.internalPointer())->data(col);
         } else if (role == Qt::ForegroundRole) {
             if (col == 0) {
@@ -245,35 +252,44 @@ bool JsonModel::setData(const QModelIndex &index, const QVariant &value, int rol
 {
     bool ret = false;
     if (index.isValid() && role == Qt::EditRole && !readonly) {
+       // qDebug() << index.row() << index.column();
         JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
-        QJsonValue jval;
-        switch(value.type()) {
-            case QVariant::Bool:
-                jval = QJsonValue(value.toBool());
-                break;
-            case QVariant::Int:
-            case QVariant::UInt:
-                jval = QJsonValue(value.toInt());
-                break;
-            case QVariant::LongLong:
-            case QVariant::ULongLong:
-                jval = QJsonValue(value.toLongLong());
-                break;
-            case QVariant::Double:
-                jval = QJsonValue(value.toDouble());
-                break;
-            case QVariant::String:
-                jval = QJsonValue(value.toString());
-                break;
-            default:
-                break;
+        if (index.column() == 1) { // value
+            QJsonValue jval;
+            switch(value.type()) {
+                case QVariant::Bool:
+                    jval = QJsonValue(value.toBool());
+                    break;
+                case QVariant::Int:
+                case QVariant::UInt:
+                    jval = QJsonValue(value.toInt());
+                    break;
+                case QVariant::LongLong:
+                case QVariant::ULongLong:
+                    jval = QJsonValue(value.toLongLong());
+                    break;
+                case QVariant::Double:
+                    jval = QJsonValue(value.toDouble());
+                    break;
+                case QVariant::String:
+                    jval = QJsonValue(value.toString());
+                    break;
+                default:
+                    break;
+            }
+            if (!jval.isNull()) {
+                item->setValue(jval);
+                emit jsonUpdated();
+                ret = true;
+            }
+        } else { // name
+            QString val = value.toString();
+            if (!val.isNull()) {
+                item->setName(val);
+                emit jsonUpdated();
+                ret = true;
+            }
         }
-        if (!jval.isNull()) {
-            item->setValue(jval);
-            emit jsonUpdated();
-            ret = true;
-        }
-
     }
     return ret;
 }
@@ -286,7 +302,11 @@ Qt::ItemFlags JsonModel::flags(const QModelIndex &index) const
     JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
     JsonItem::Type vtype = item->getValueType();
     if (vtype == JsonItem::OTHER && !readonly) {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+        // we don't want to change array object names
+        if (!(index.column() ==  0 &&
+                item->parent() != nullptr && // don't check the root object
+                item->parent()->getValueType() == JsonItem::ARRAY))
+            return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     }
     return QAbstractItemModel::flags(index);
 }
@@ -460,11 +480,13 @@ void JsonView::search(QByteArray , QBitArray )
 bool JsonView::isJsonValid()
 {
     if (byteSource == nullptr) {
+        model->setJsonDoc(QJsonDocument());
         return false;
     }
 
     QByteArray data = byteSource->getRawData();
     if (data.isEmpty()) {
+        model->setJsonDoc(QJsonDocument());
         return false;
     }
 
@@ -479,6 +501,7 @@ bool JsonView::isJsonValid()
         restoreTreeState(treeSavedState);
         return true;
     } else {
+        model->setJsonDoc(QJsonDocument());
         return false;
     }
 }

@@ -32,6 +32,7 @@ class Base64Widget : public QWidget
         void verifyChar63(QString nchar);
         void verifyCharPadding(QString nchar);
         void onCustomConf();
+        void onInvalidSepToggled(bool value);
     private:
         Ui::Base64Widget *ui;
         Base64 *transform;

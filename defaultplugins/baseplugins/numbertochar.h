@@ -18,18 +18,18 @@ class NumberToChar : public TransformAbstract
         Q_OBJECT
     public:
         explicit NumberToChar();
-        ~NumberToChar();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~NumberToChar() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QString help() const;
-        QWidget * requestGui(QWidget * parent);
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QString inboundString() const;
-        QString outboundString() const;
+        QString help() const override;
+        QWidget * requestGui(QWidget * parent) override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QString inboundString() const override;
+        QString outboundString() const override;
 
         char getSeparator() const;
         bool setSeparator(char c);

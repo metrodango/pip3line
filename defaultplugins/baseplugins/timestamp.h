@@ -23,18 +23,18 @@ class TimeStamp : public TransformAbstract
         static const QString PROP_DATEFORMAT;
         enum TZ { TZ_UTC = 0, TZ_LOCAL = 1 };
         explicit TimeStamp();
-        ~TimeStamp();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        ~TimeStamp() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
 
-        QString inboundString() const;
-        QString outboundString() const;
+        QString inboundString() const override;
+        QString outboundString() const override;
 
         void setDateFormat(QString format);
         QString getDateFormat() const;

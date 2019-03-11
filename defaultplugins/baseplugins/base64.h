@@ -23,16 +23,16 @@ class Base64 : public TransformAbstract
         enum Variation {STANDARD = 0, SAFEURL = 1, DOTNET = 2, CUSTOM = 3};
         enum PaddingType {DEFAULTPADDING = 0, DOTNETPADDING = 1, NOPADDING = 2, CUSTOMPADDING = 3};
         explicit Base64();
-        ~Base64();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input,QByteArray &output);
-        bool isTwoWays();
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
+        ~Base64() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input,QByteArray &output) override;
+        bool isTwoWays() override;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 
         Variation getChoosenVariation();
         PaddingType getPaddingType();
@@ -44,12 +44,15 @@ class Base64 : public TransformAbstract
         bool setChar62(char val);
         bool setChar63(char val);
         bool setPaddingChar(char val);
+        bool getConsiderInvalidCharAsSeparators() const;
+        void setConsiderInvalidCharAsSeparators(bool value);
     private:
         Variation choosenVariation;
         PaddingType paddingType;
         char char62;
         char char63;
         char paddingChar;
+        bool considerInvalidCharAsSeparators;
 };
 
 #endif // BASE64_H

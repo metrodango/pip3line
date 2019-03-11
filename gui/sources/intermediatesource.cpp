@@ -24,14 +24,9 @@ IntermediateSource::IntermediateSource(GuiHelper *guiHelper,
         startOffset = oriEndOffset;
     }
     onOriginalSizeChanged();
+    customReadonly = false;
 
-
-    if (wrapperTransform != nullptr) {
-        _readonly == wrapperTransform->isTwoWays() || original->isReadonly();
-        originalWay = wrapperTransform->way();
-        connect(original, &ByteSourceAbstract::readOnlyChanged, this, &IntermediateSource::onOriginalReadOnlyChanged);
-        connect(wrapperTransform, &TransformAbstract::confUpdated,this, [=](void) {onOriginalUpdated();});
-    }
+    integrateWrapperTransform();
 
     capabilities = originalSource->getCapabilities() & static_cast<quint32>(~(CAP_TRANSFORM | CAP_LOADFILE)) ;
     connect(this, &IntermediateSource::sendRequest, guiHelper->getCentralTransProc(), &ThreadedProcessor::processRequest);
@@ -48,6 +43,7 @@ IntermediateSource::~IntermediateSource()
 
 void IntermediateSource::setData(QByteArray data, quintptr source)
 {
+
     if (!checkReadOnly()) {
         if (rawData != data) {
             rawData = data;
@@ -63,6 +59,7 @@ void IntermediateSource::setData(QByteArray data, quintptr source)
 
 void IntermediateSource::replace(quint64 offset, int length, QByteArray repData, quintptr source)
 {
+//    qDebug() << "[void IntermediateSource::replace()]" << checkReadOnly();
     if (!checkReadOnly()) {
         BasicSource::replace(offset,length, repData,source);
         onCurrentUpdated();
@@ -211,4 +208,61 @@ void IntermediateSource::onOriginalSizeChanged()
     } else {
         length = static_cast<int>(temp);
     }
+}
+
+void IntermediateSource::integrateWrapperTransform()
+{
+    if (wrapperTransform != nullptr) {
+        _readonly = calculateReadonly();
+        originalWay = wrapperTransform->way();
+        connect(original, &ByteSourceAbstract::readOnlyChanged, this, &IntermediateSource::onOriginalReadOnlyChanged);
+        connect(wrapperTransform, &TransformAbstract::confUpdated,this, [=](void) {onOriginalUpdated();});
+    }
+}
+
+bool IntermediateSource::calculateReadonly()
+{/*
+    qDebug() << "[void IntermediateSource::calculateReadonly()] "
+             << customReadonly
+             << !wrapperTransform->isTwoWays()
+             << original->isReadonly();*/
+    return customReadonly || !wrapperTransform->isTwoWays() || original->isReadonly();
+}
+
+bool IntermediateSource::getCustomReadonly() const
+{
+    return customReadonly;
+}
+
+void IntermediateSource::setCustomReadonly(bool value)
+{
+    customReadonly = value;
+    _readonly = calculateReadonly();
+    emit readOnlyChanged(_readonly);
+}
+
+TransformAbstract *IntermediateSource::getWrapperTransform() const
+{
+    return wrapperTransform;
+}
+
+void IntermediateSource::setWrapperTransform(TransformAbstract *value)
+{
+    delete wrapperTransform;
+    wrapperTransform = value;
+    integrateWrapperTransform();
+    onOriginalUpdated();
+}
+
+bool IntermediateSource::setReadOnly(bool readonly)
+{
+    // original equation ! (!readonly && wrapperTransform->isTwoWays() && !original->isReadonly())
+    bool final = calculateReadonly() || readonly;
+
+    if (final != _readonly) {
+        _readonly = final;
+        emit readOnlyChanged(_readonly);
+        return true;
+    }
+    return false;
 }

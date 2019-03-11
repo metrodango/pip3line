@@ -697,9 +697,11 @@ void TransformWidgetStateObj::run()
             it.next();
             writer->writeAttribute(it.key(), it.value());
         }
-        QString data = QString::fromUtf8(tw->jsonView->getTreeSavedState().toJson());
-        qDebug() << "[ TransformWidgetStateObj::run] " << qPrintable(data);
-        writer->writeAttribute(GuiConst::STATE_JSON_STATE, write(data));
+        if (tw->jsonView->isJsonValid()) {
+            QString data = QString::fromUtf8(tw->jsonView->getTreeSavedState().toJson());
+          //  qDebug() << "[ TransformWidgetStateObj::run] " << qPrintable(data);
+            writer->writeAttribute(GuiConst::STATE_JSON_STATE, write(data));
+        }
         writer->writeAttribute(GuiConst::STATE_IS_FOLDED, write(tw->isFolded()));
         writer->writeAttribute(GuiConst::STATE_SEARCH_DATA, write(tw->searchWidget->text(),true)); // searchWidget is never null (well, should never be)
         writer->writeAttribute(GuiConst::STATE_GOTOOFFSET_DATA, write(tw->gotoWidget->text()));
@@ -759,7 +761,7 @@ void TransformWidgetStateObj::run()
             if (attrList.hasAttribute(GuiConst::STATE_JSON_STATE)) {
                 QJsonParseError error;
                 QString data = readString(attrList.value(GuiConst::STATE_JSON_STATE));
-                qDebug() << "[TransformWidgetStateObj::run] " << qPrintable(data);
+//                qDebug() << "[TransformWidgetStateObj::run] " << qPrintable(data);
                 QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
                 if (!doc.isEmpty()) {
                     tw->jsonView->restoreTreeState(doc);

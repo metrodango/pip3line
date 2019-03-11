@@ -153,6 +153,7 @@ GenericTab::GenericTab(ByteSourceAbstract *nbytesource, GuiHelper *guiHelper, QW
 
     connect(newViewsContextMenu, &NewViewMenu::newViewRequested, this, &GenericTab::onNewTabRequested);
     ui->tabWidget->installEventFilter(this);
+    ui->tabWidget->tabBar()->installEventFilter(this);
     ui->addViewPushButton->setMenu(newViewsContextMenu);
 
     UniversalReceiverButton *urb = new(std::nothrow) UniversalReceiverButton(this, guiHelper);
@@ -298,11 +299,7 @@ void GenericTab::onNewTabRequested()
     SingleViewAbstract * sva = newViewsContextMenu->getView(bytesource, nullptr);
     if (sva != nullptr) {
         ViewTab data = newViewsContextMenu->getTabData();
-        int index = ui->tabWidget->addTab(sva,data.tabName);
-        QPushButton * configButton = sva->getConfigButton();
-        if (configButton != nullptr) {
-            ui->tabWidget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
-        }
+        ui->tabWidget->addTab(sva,data.tabName);
         tabData.append(data);
     }
 }
@@ -344,6 +341,64 @@ bool GenericTab::eventFilter(QObject *receiver, QEvent *event)
                     newViewsContextMenu->exec(ui->tabWidget->mapToGlobal(me->pos()));
                     return true;
                 }
+            }
+        }
+    } else if (receiver == ui->tabWidget->tabBar()) {
+        if (event->type() == QEvent::MouseButtonDblClick) {
+            QMouseEvent* me = dynamic_cast<QMouseEvent*>(event);
+            if (me == nullptr) {
+                qCritical() << "[GenericTab::eventFilter] nullptr MouseButtonDblClick X{";
+                return true; // not supposed to happen anyway ..
+            } else {
+                // checking if we can locate the tab
+                int clickedTabId = ui->tabWidget->tabBar()->tabAt(me->pos());
+                if (clickedTabId < 0)
+                    return false; // passing over ?
+
+                if (clickedTabId >= ui->tabWidget->tabBar()->count()) {
+                    qCritical() << "[GenericTab::eventFilter] clickedTabId out-of-range X{";
+                    return false;
+                }
+                int tabListIndex = clickedTabId - 1; // removing one because initial tab
+
+                //renaming2
+                QString currentName = ui->tabWidget->tabBar()->tabText(clickedTabId);
+                TabAbstract::ViewTab vt = tabData.at(tabListIndex);
+                SingleViewAbstract *sva = dynamic_cast<SingleViewAbstract *>(ui->tabWidget->widget(clickedTabId));
+                if (sva != nullptr) {
+                    IntermediateSource * is = dynamic_cast<IntermediateSource *>(sva->getByteSource());
+                    if (is != nullptr) {
+                        TransformAbstract * ta = is->getWrapperTransform();
+                        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
+                        if (itemConfig == nullptr) {
+                            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
+                        }
+
+                        itemConfig->setTransform(ta);
+                        itemConfig->setName(currentName);
+                        itemConfig->setWayBoxVisible(ta->isTwoWays());
+                        itemConfig->setReadonlyVisible(true);
+                        itemConfig->setReadonly(vt.readonly);
+                        int ret = itemConfig->exec();
+                        if (ret == QDialog::Accepted) {
+                            vt.tabName = itemConfig->getName();
+                            vt.readonly = itemConfig->getReadonly();
+                            TransformAbstract * ta = itemConfig->getTransform();
+                            is->setWrapperTransform(ta);
+                            is->setCustomReadonly(itemConfig->getReadonly());
+                            vt.transform = ta; // don't touch that, ever !!
+                            ui->tabWidget->tabBar()->setTabText(clickedTabId, vt.tabName);
+                            tabData.replace(tabListIndex, vt);
+                            delete itemConfig;
+                        } else { // action cancelled
+                            delete itemConfig;
+                        }
+                    } // if the cast fails no need to open the conf dialog
+                } else {
+                    qCritical() << "[GenericTab::eventFilter] nullptr SingleViewAbstract X{";
+                }
+
+                return true;  //no further handling of this event is required
             }
         }
     }
@@ -456,6 +511,7 @@ void GenericTabStateObj::run()
             QXmlStreamWriter streamin(&conf);
             tab->getHelper()->getTransformFactory()->saveConfToXML(list, &streamin);
             writer->writeAttribute(GuiConst::STATE_CONF, write(conf));
+            writer->writeAttribute(GuiConst::STATE_READONLY, write(vt.readonly));
             options = vt.options;
             QHashIterator<QString, QString> it(options);
             while (it.hasNext()) {
@@ -527,6 +583,9 @@ void GenericTabStateObj::run()
                         vt.transform = nullptr; // just initialising in case of screw up
                         if (readNextStart(GuiConst::STATE_TABVIEW)) {
                             attrList = reader->attributes();
+                            if (attrList.hasAttribute(GuiConst::STATE_READONLY)) {
+                                vt.readonly = readBool(attrList.value(GuiConst::STATE_READONLY));
+                            }
                             readEndElement(GuiConst::STATE_TABVIEW); // closing now, because there is no child defined anyway
                             if (attrList.hasAttribute(GuiConst::STATE_TYPE)) {
                                 int type = readInt(attrList.value(GuiConst::STATE_TYPE),&ok);

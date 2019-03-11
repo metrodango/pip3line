@@ -23,19 +23,19 @@ class BytesInteger : public TransformAbstract
         static const QString PROP_SIGNEDINTEGER;
         enum IntSize { I8bits = 1, I16bits = 2, I32bits = 4, I64bits = 8 };
         explicit BytesInteger();
-        ~BytesInteger();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
-        QString help() const;
+        ~BytesInteger() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString help() const override;
 
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
 
-        QString inboundString() const;
-        QString outboundString() const;
+        QString inboundString() const override;
+        QString outboundString() const override;
 
         bool isLittleEndian() const;
         void setLittleEndian(bool val);

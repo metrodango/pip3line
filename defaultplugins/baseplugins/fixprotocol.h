@@ -19,13 +19,13 @@ class FixProtocol : public TransformAbstract
         Q_OBJECT
     public:
         explicit FixProtocol();
-        ~FixProtocol();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~FixProtocol() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
     private:
         QByteArray translateField(QByteArray val);
         QXmlQuery query;

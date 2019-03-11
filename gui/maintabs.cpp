@@ -78,7 +78,7 @@ MainTabs::~MainTabs()
 
 bool MainTabs::eventFilter(QObject *receiver, QEvent *event)
 {
-    bool result = QObject::eventFilter(receiver, event);
+    //bool result = QObject::eventFilter(receiver, event);
 
     if (receiver == tabBarRef) {
         if (event->type() == QEvent::MouseButtonDblClick) {
@@ -90,7 +90,7 @@ bool MainTabs::eventFilter(QObject *receiver, QEvent *event)
                 // checking if we can locate the tab
                 int clickedTabId = tabBarRef->tabAt(me->pos());
                 if (clickedTabId == -1)
-                    return result;
+                    return false; // passing over ?
                 //renaming
                 askForRenaming(clickedTabId);
                 return true;  //no further handling of this event is required
@@ -124,7 +124,7 @@ bool MainTabs::eventFilter(QObject *receiver, QEvent *event)
 
         }
     }
-    return result;
+    return false;
 }
 
 LoggerWidget *MainTabs::getLogger() const

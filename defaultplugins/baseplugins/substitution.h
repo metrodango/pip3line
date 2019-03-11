@@ -20,22 +20,22 @@ class Substitution : public TransformAbstract
     public:
         static QStringList knownTables;
         explicit Substitution();
-        ~Substitution();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~Substitution() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
-        QWidget * requestGui(QWidget * parent);
-        QString inboundString() const;
-        QString outboundString() const;
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
+        QWidget * requestGui(QWidget * parent) override;
+        QString inboundString() const override;
+        QString outboundString() const override;
         QByteArray getSTable();
         void setSTable(QByteArray sTable);
         bool isPermutationValid(QByteArray sTable);
         QByteArray getPredeterminedTable(QString name);
-        QString help() const;
+        QString help() const override;
 
     private:
         static char s_table_tcpa[256];

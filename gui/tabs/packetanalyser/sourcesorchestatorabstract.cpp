@@ -156,7 +156,8 @@ QList<Target<SourcesOrchestatorAbstract *> > SourcesOrchestatorAbstract::toOrche
 {
     QList<Target<SourcesOrchestatorAbstract *> > list;
     for (int i = 0 ; i < ilist.size(); i++) {
-        list.append(toOrchestratorTarget(ilist.at(i)));
+        Target<SourcesOrchestatorAbstract *> ntarget = toOrchestratorTarget(ilist.at(i));
+        list.append(ntarget);
     }
 
     return list;

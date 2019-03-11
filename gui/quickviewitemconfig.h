@@ -40,13 +40,14 @@ class QuickViewItemConfig : public QDialog
         OutputFormat getFormat() const;
         void setFormat(OutputFormat format);
         void setOutputType(OutputType type);
+        void setReadonly(bool value);
+        bool getReadonly() const;
         OutputType getOutputType();
         void setWayBoxVisible(bool val);
         void setFormatVisible(bool val);
         void setOutputTypeVisible(bool val);
         void closeEvent(QCloseEvent *event);
-
-
+        void setReadonlyVisible(bool value);
     private slots:
         void onTransformSelect(QString name);
         void onInboundWayChange(bool checked);
@@ -68,6 +69,7 @@ class QuickViewItemConfig : public QDialog
         bool wayBoxVisible;
         bool formatBoxVisible;
         bool outputTypeVisible;
+        bool readonlyVisible;
 };
 
 #endif // QUICKVIEWITEMCONFIG_H

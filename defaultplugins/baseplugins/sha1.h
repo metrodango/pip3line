@@ -19,13 +19,13 @@ class Sha1 : public TransformAbstract
     
     public:
         explicit Sha1();
-        ~Sha1();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
+        ~Sha1() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
         static const QString id;
-        QString help() const;
+        QString help() const override;
 };
 
 #endif // SHA1_H

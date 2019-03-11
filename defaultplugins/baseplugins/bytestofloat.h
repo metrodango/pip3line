@@ -18,15 +18,15 @@ class BytesToFloat : public TransformAbstract
     public:
         enum FloatSize { F32bits = 4, F64bits = 8 };
         explicit BytesToFloat();
-        ~BytesToFloat();
-        QString name() const;
-        QString description() const;
-        void transform(const QByteArray &input, QByteArray &output);
-        bool isTwoWays();
-        QWidget * requestGui(QWidget * parent);
+        ~BytesToFloat() override;
+        QString name() const override;
+        QString description() const override;
+        void transform(const QByteArray &input, QByteArray &output) override;
+        bool isTwoWays() override;
+        QWidget * requestGui(QWidget * parent) override;
         static const QString id;
-        QHash<QString, QString> getConfiguration();
-        bool setConfiguration(QHash<QString, QString> propertiesList);
+        QHash<QString, QString> getConfiguration() override;
+        bool setConfiguration(QHash<QString, QString> propertiesList) override;
 
         bool isLittleEndian() const;
         void setLittleEndian(bool val);

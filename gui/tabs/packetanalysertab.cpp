@@ -57,6 +57,7 @@ Released under AGPL see LICENSE for more information
 #include "textinputdialog.h"
 #include "packetanalyser/filterdialog.h"
 #include <state/stateorchestrator.h>
+#include <sources/intermediatesource.h>
 
 PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     TabAbstract(guiHelper, parent),
@@ -183,6 +184,7 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     removeTabButton(0);
 
     ui->viewTabWidget->installEventFilter(this);
+    ui->viewTabWidget->tabBar()->installEventFilter(this);
 
     orchCombo = new(std::nothrow) OrchestratorChooser(guiHelper);
     if (orchCombo == nullptr) {
@@ -238,10 +240,13 @@ PacketAnalyserTab::PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent) :
     connect(ui->interceptPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onInterceptClicked);
     connect(ui->trackPushButton, &QPushButton::toggled, this, &PacketAnalyserTab::setTrackingLast);
     connect(ui->trackChangesPushButton, &QPushButton::toggled, this, &PacketAnalyserTab::onTrackingToggled);
-    connect(guiHelper, &GuiHelper::importExportUpdated, this, &PacketAnalyserTab::copyAsUpdate);
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &PacketAnalyserTab::updateCopyAsMenu);
     connect(ui->filterPushButton, &QPushButton::clicked, this, &PacketAnalyserTab::onFilter);
     connect(guiHelper, &GuiHelper::hexTableSizesUpdated, this, &PacketAnalyserTab::onFontUpdated);
     connect(guiHelper, &GuiHelper::registeredPacketsAnalysersUpdated, this, &PacketAnalyserTab::sendPacketsToUpdate, Qt::QueuedConnection);
+
+    connect(guiHelper, &GuiHelper::importExportUpdated, this, &PacketAnalyserTab::updateCopyAsMenu);
+    connect(guiHelper, &GuiHelper::markingsUpdated, this, &PacketAnalyserTab::updateHighlightMenu);
 }
 
 PacketAnalyserTab::~PacketAnalyserTab()
@@ -497,7 +502,7 @@ void PacketAnalyserTab::clearCurrentPacket()
     sortFilterProxyModel->setSelectedPacket(PacketModelAbstract::INVALID_POS);
 }
 
-void PacketAnalyserTab::copyAsUpdate()
+void PacketAnalyserTab::updateCopyAsMenu()
 {
     guiHelper->updateCopyContextMenu(copyAsMenu);
 }
@@ -739,14 +744,14 @@ void PacketAnalyserTab::onOrchestratorConnectionsChanged()
 
 void PacketAnalyserTab::onNewTabRequested()
 {
-    SingleViewAbstract * sva = tabHeaderViewsContextMenu->getView(bytesource,ui->viewTabWidget);
+    SingleViewAbstract * sva = tabHeaderViewsContextMenu->getView(bytesource,nullptr);
     if (sva != nullptr) {
         ViewTab data = tabHeaderViewsContextMenu->getTabData();
-        int index = ui->viewTabWidget->addTab(sva,data.tabName);
-        QPushButton * configButton = sva->getConfigButton();
-        if (configButton != nullptr) {
-            ui->viewTabWidget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
-        }
+        ui->viewTabWidget->addTab(sva,data.tabName);
+//        QPushButton * configButton = sva->getConfigButton();
+//        if (configButton != nullptr) {
+//            ui->viewTabWidget->tabBar()->setTabButton(index,QTabBar::LeftSide, configButton);
+//        }
         tabData.append(data);
     }
 }
@@ -783,15 +788,17 @@ void PacketAnalyserTab::onDeleteTab(int index)
         logger->logError(tr("Cannot close the main hexadecimal tab"),metaObject()->className());
     } else { // here we trust the index as it comes from the QTabWidget
         SingleViewAbstract * sva = static_cast<SingleViewAbstract *>(ui->viewTabWidget->widget(index));
+        ui->viewTabWidget->removeTab(index);
         ViewTab vt;
-        index--; // need to reduce the index to match the tabData index
-        if (index < 0 || index >= tabData.size()) {
+        int tabListIndex = translateTabViewIndex(index);
+
+        if (tabListIndex < 0 || tabListIndex >= tabData.size()) {
             qCritical() << tr("The index for Tabdata is out-of-bound T_T");
             return;
         } else {
-            vt = tabData.takeAt(index);
+            vt = tabData.takeAt(tabListIndex);
         }
-        delete sva;
+        sva->deleteLater();
     }
 }
 
@@ -816,20 +823,81 @@ void PacketAnalyserTab::onByteSourceUpdated(quintptr source)
 bool PacketAnalyserTab::eventFilter(QObject *receiver, QEvent *event)
 {
     bool result = QObject::eventFilter(receiver, event);
+
     if (receiver == ui->viewTabWidget) {
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent* me = dynamic_cast<QMouseEvent*>(event);
             if (me == nullptr) {
-                qCritical() << "[PacketAnalyserTab::eventFilter] nullptr MouseEvent";
+                qCritical() << "[PacketAnalyserTab::eventFilter] nullptr MouseButtonPress X{";
                 return true; // not supposed to happen anyway ..
-            } else if (me->buttons() == Qt::RightButton){
-                // only in the tabbar area
+            } else {
                 QRect clickable = tabBarRef->geometry();
                 clickable.setRight(geometry().right());
-                if (clickable.contains(me->pos())) {
-                    tabHeaderViewsContextMenu->exec(ui->viewTabWidget->mapToGlobal(me->pos()));
-                    return true;
+                if (me->buttons() == Qt::RightButton){
+                    // only in the tabbar area
+                    if (clickable.contains(me->pos())) {
+                        tabHeaderViewsContextMenu->exec(ui->viewTabWidget->mapToGlobal(me->pos()));
+                        return true;
+                    }
                 }
+            }
+        }
+    } else if (receiver == ui->viewTabWidget->tabBar()) {
+        if (event->type() == QEvent::MouseButtonDblClick) {
+            QMouseEvent* me = dynamic_cast<QMouseEvent*>(event);
+            if (me == nullptr) {
+                qCritical() << "[PacketAnalyserTab::eventFilter] nullptr MouseButtonDblClick X{";
+                return true; // not supposed to happen anyway ..
+            } else {
+                // checking if we can locate the tab
+                int clickedTabId = tabBarRef->tabAt(me->pos());
+                if (clickedTabId < 0)
+                    return false; // passing over ?
+
+                if (clickedTabId >= tabBarRef->count()) {
+                    qCritical() << "[PacketAnalyserTab::eventFilter] clickedTabId out-of-range X{";
+                    return false;
+                }
+                int tabListIndex = translateTabViewIndex(clickedTabId);
+
+                //renaming2
+                QString currentName = tabBarRef->tabText(clickedTabId);
+                TabAbstract::ViewTab vt = tabData.at(tabListIndex);
+                SingleViewAbstract *sva = dynamic_cast<SingleViewAbstract *>(ui->viewTabWidget->widget(clickedTabId));
+                if (sva != nullptr) {
+                    IntermediateSource * is = dynamic_cast<IntermediateSource *>(sva->getByteSource());
+                    if (is != nullptr) {
+                        TransformAbstract * ta = is->getWrapperTransform();
+                        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
+                        if (itemConfig == nullptr) {
+                            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
+                        }
+
+                        itemConfig->setTransform(ta);
+                        itemConfig->setName(currentName);
+                        itemConfig->setWayBoxVisible(ta->isTwoWays());
+                        itemConfig->setReadonlyVisible(true);
+                        itemConfig->setReadonly(vt.readonly);
+                        int ret = itemConfig->exec();
+                        if (ret == QDialog::Accepted) {
+                            vt.tabName = itemConfig->getName();
+                            vt.readonly = itemConfig->getReadonly();
+                            TransformAbstract * ta = itemConfig->getTransform();
+                            is->setWrapperTransform(ta);
+                            is->setCustomReadonly(itemConfig->getReadonly());
+                            vt.transform = ta; // don't touch that, ever !!
+                            tabBarRef->setTabText(clickedTabId, vt.tabName);
+                            tabData.replace(tabListIndex, vt);
+                            delete itemConfig;
+                        } else { // action cancelled
+                            delete itemConfig;
+                        }
+                    } // if the cast fails no need to open the conf dialog
+                } else {
+                    qCritical() << "[PacketAnalyserTab::eventFilter] nullptr SingleViewAbstract X{";
+                }
+
+                return true;  //no further handling of this event is required
             }
         }
     }
@@ -843,10 +911,12 @@ bool PacketAnalyserTab::getTrackChanges() const
 
 void PacketAnalyserTab::setTrackChanges(bool value)
 {
-    trackChanges = value;
-    ui->trackChangesPushButton->blockSignals(true);
-    ui->trackChangesPushButton->setChecked(trackChanges);
-    ui->trackChangesPushButton->blockSignals(false);
+    if (trackChanges != value) {
+        trackChanges = value;
+        ui->trackChangesPushButton->blockSignals(true);
+        ui->trackChangesPushButton->setChecked(trackChanges);
+        ui->trackChangesPushButton->blockSignals(false);
+    }
 }
 
 bool PacketAnalyserTab::isTrackingLast() const
@@ -914,7 +984,6 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
             }
         }
     } else if (action == split) {
-        qDebug() << "split requested";
         QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
         if (modelList.size() > 1) {
             QMessageBox::warning(this, tr("Too many selected"),tr("You an only select one packet when splitting"),QMessageBox::Ok);
@@ -944,6 +1013,17 @@ void PacketAnalyserTab::onContextMenuAction(QAction *action)
             packetModel->removePackets(selected);
             clearCurrentPacket();
         }
+    } else if (action == clearHighlights) {
+        QModelIndexList modelList = ui->packetTableView->selectionModel()->selectedRows();
+        for (int i = 0; i < modelList.size(); i++) {
+            QSharedPointer<Packet> pac = packetModel->getPacket(sortFilterProxyModel->indexToPacketIndex(modelList.at(i)));
+            if (pac != nullptr) {
+                pac->setBackground(QColor());
+                pac->setComment(QString());
+            }
+            else
+                qCritical() << tr("[PacketAnalyserTab::onContextMenuAction/clearHighlights] packet is nullptr T_T");
+        }
     }
 }
 
@@ -963,9 +1043,15 @@ void PacketAnalyserTab::buildContextMenu()
     globalContextMenu->addMenu(highlightMenu);
 
     newHighlight = new(std::nothrow) QAction(tr("New highlight"), this);
-    if (merge == nullptr) {
+    if (newHighlight == nullptr) {
         qFatal("Cannot allocate memory for newHighlight X{");
     }
+
+    clearHighlights = new(std::nothrow) QAction(tr("Clear highlights"), globalContextMenu);
+    if (clearHighlights == nullptr) {
+        qFatal("Cannot allocate memory for clearHighlights X{");
+    }
+    globalContextMenu->addAction(clearHighlights);
 
     sendToMenu = new(std::nothrow) SendToMenu(guiHelper, tr("Send selection to"));
     if (sendToMenu == nullptr) {
@@ -980,7 +1066,7 @@ void PacketAnalyserTab::buildContextMenu()
         qFatal("Cannot allocate memory for copyMenu X{");
     }
     connect(copyAsMenu, &QMenu::triggered, this, &PacketAnalyserTab::onCopyAs, Qt::UniqueConnection);
-    copyAsUpdate();
+    updateCopyAsMenu();
     globalContextMenu->addMenu(copyAsMenu);
 
     sendPacketsMenu = new(std::nothrow) QMenu(tr("Send packet(s)"));
@@ -1137,6 +1223,16 @@ void PacketAnalyserTab::updateHighlightMenu()
         }
         highlightMenu->addAction(action);
     }
+}
+
+int PacketAnalyserTab::translateTabViewIndex(int index)
+{
+    int ret = index - 1; // removing one as the initial view does not count
+    int oriIndex = ui->viewTabWidget->indexOf(oriHexView); // if the original view is there, removing another one
+    if (oriIndex != -1)
+        ret--;
+
+    return ret;
 }
 
 void PacketAnalyserTab::onSendToTriggered(QAction *action)
@@ -1363,7 +1459,11 @@ void PacketAnalyserTab::onFontUpdated()
 
 void PacketAnalyserTab::onTrackingToggled(bool checked)
 {
-    trackChanges = checked;
+    if (trackChanges != checked) {
+        trackChanges = checked;
+        if (!trackChanges && bytesource != nullptr)
+            bytesource->clearAllMarkings();
+    }
 }
 
 void PacketAnalyserTab::selectLastPacket()
@@ -1480,6 +1580,7 @@ void PacketAnalyserTabStateObj::run()
             QXmlStreamWriter streamin(&conf);
             gTab->guiHelper->getTransformFactory()->saveConfToXML(list, &streamin);
             writer->writeAttribute(GuiConst::STATE_CONF, write(conf));
+            writer->writeAttribute(GuiConst::STATE_READONLY, write(vt.readonly));
             confOptions = vt.options;
             QHashIterator<QString, QString> it(confOptions);
             while (it.hasNext()) {
@@ -1694,6 +1795,9 @@ void PacketAnalyserTabStateObj::run()
                         vt.transform = nullptr; // just initialising in case of screw up
                         if (readNextStart(GuiConst::STATE_TABVIEW)) {
                             attrList = reader->attributes();
+                            if (attrList.hasAttribute(GuiConst::STATE_READONLY)) {
+                                vt.readonly = readBool(attrList.value(GuiConst::STATE_READONLY));
+                            }
                             readEndElement(GuiConst::STATE_TABVIEW); // closing now, because there is no child defined anyway
                             if (attrList.hasAttribute(GuiConst::STATE_TYPE)) {
                                 int type = readInt(attrList.value(GuiConst::STATE_TYPE),&ok);

@@ -69,7 +69,7 @@ class PacketAnalyserTab : public TabAbstract
         void onExport();
         void onModelReseted();
         void clearCurrentPacket();
-        void copyAsUpdate();
+        void updateCopyAsMenu();
         void sendPacketsToUpdate();
         void onSelectionChanged(const QItemSelection &selection);
         void onContextMenuAction(QAction *action);
@@ -110,6 +110,7 @@ class PacketAnalyserTab : public TabAbstract
         void updateHighlightMenu();
     private:
         Q_DISABLE_COPY(PacketAnalyserTab)
+        int translateTabViewIndex(int index);
         void selectLastPacket();
         void checkIfOriginalTabNeeded();
         void removeTabButton(int index);
@@ -133,6 +134,7 @@ class PacketAnalyserTab : public TabAbstract
         QMenu * copyAsMenu;
         QMenu * sendPacketsMenu;
         QMenu * highlightMenu;
+        QAction * clearHighlights;
         QAction * newHighlight;
         QAction * sendPacketsToNew;
         QAction * merge;

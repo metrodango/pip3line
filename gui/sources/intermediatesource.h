@@ -26,13 +26,18 @@ class IntermediateSource : public BasicSource
                                     quint64 oriStartOffset = 0,
                                     quint64 oriEndOffset = ULLONG_MAX,
                                     QObject *parent = nullptr);
-        ~IntermediateSource();
-        void setData(QByteArray data, quintptr source = INVALID_SOURCE);
-        void replace(quint64 offset, int length, QByteArray repData, quintptr source = INVALID_SOURCE);
-        void insert(quint64 offset, QByteArray repData, quintptr source = INVALID_SOURCE);
-        void remove(quint64 offset, int length, quintptr source = INVALID_SOURCE);
-        void clear(quintptr source = INVALID_SOURCE);
-        void fromLocalFile(QString fileName);
+        ~IntermediateSource() override;
+        void setData(QByteArray data, quintptr source = INVALID_SOURCE) override;
+        void replace(quint64 offset, int length, QByteArray repData, quintptr source = INVALID_SOURCE) override;
+        void insert(quint64 offset, QByteArray repData, quintptr source = INVALID_SOURCE) override;
+        void remove(quint64 offset, int length, quintptr source = INVALID_SOURCE) override;
+        void clear(quintptr source = INVALID_SOURCE) override;
+        void fromLocalFile(QString fileName) override;
+        TransformAbstract *getWrapperTransform() const;
+        void setWrapperTransform(TransformAbstract *value);
+        bool setReadOnly(bool readonly = true) override;
+        bool getCustomReadonly() const;
+        void setCustomReadonly(bool value);
     public slots:
         void optionGuiRequested();
     signals:
@@ -46,6 +51,8 @@ class IntermediateSource : public BasicSource
         void onOriginalSizeChanged();
     private:
         Q_DISABLE_COPY(IntermediateSource)
+        void integrateWrapperTransform();
+        bool calculateReadonly();
         GuiHelper * guiHelper;
         ByteSourceAbstract *original;
         TransformAbstract *wrapperTransform;
@@ -53,6 +60,7 @@ class IntermediateSource : public BasicSource
         quint64 startOffset;
         quint64 endOffset;
         int length;
+        bool customReadonly;
 };
 
 #endif // INTERMEDIATESOURCE_H
