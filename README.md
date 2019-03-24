@@ -20,9 +20,27 @@ Download the release zip [here](https://github.com/metrodango/pip3line/releases)
 
 ## Install on MacOs:
 
+~~~
 $ brew install metrodango/pip3line/pip3line
+~~~
 
 ## Install on Linux:
+
+### Gentoo
+
+If using the 9999 package:
+
+~~~
+$ emerge -pv pip3line
+~~~
+
+If using the normal package, disable the network-sandbox for distorm
+
+~~~
+$ FEATURES="-network-sandbox" emerge pip3line
+~~~
+
+### Other distributions
 
 For now see the [build page](https://github.com/metrodango/pip3line/blob/master/Build-process.md)
 
