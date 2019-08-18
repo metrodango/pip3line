@@ -15,7 +15,9 @@ if [[ ${PV} == 9999* ]] ; then
 	EGIT_REPO_URI="https://github.com/metrodango/pip3line.git"
 	EGIT_BRANCH="master"
 else
-	SRC_URI="https://github.com/metrodango/pip3line/archive/v${PV}.tar.gz  -> ${P}.tar.gz"
+	DISTORMV="3.4.1"
+	SRC_URI="https://github.com/metrodango/pip3line/archive/v${PV}.tar.gz  -> ${P}.tar.gz
+			https://github.com/gdabah/distorm/archive/v${DISTORMV}.tar.gz -> distorm3-${DISTORMV}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 fi
 
@@ -42,6 +44,16 @@ RDEPEND="
 
 DEPEND="${RDEPEND}
 	distorm? ( dev-vcs/git )"
+
+src_unpack() {
+	if [ "${A}" != "" ]; then
+		unpack ${A}
+		if [ "${DISTORMV}" != "" ]; then # we are in a versioned ebuild, we need to link the distorm src dir inside the pip3line one
+		   
+			cp -ar ${WORKDIR}/distorm-${DISTORMV}/* ${WORKDIR}/${P}/ext/distorm
+		fi
+	fi
+}
 
 src_configure() {
 

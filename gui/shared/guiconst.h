@@ -211,6 +211,7 @@ namespace GuiConst
     extern const QString STATE_KEY;
     extern const QString STATE_SHMID;
     extern const QString STATE_JSON_STATE;
+    extern const QString STATE_DELAY;
 
     extern const bool DEFAULT_AUTO_SAVE_ENABLED;
     extern const bool DEFAULT_AUTO_RESTORE_ENABLED;

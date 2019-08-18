@@ -39,7 +39,7 @@ bool Sha3_256::isTwoWays() {
 QString Sha3_256::help() const
 {
     QString help;
-    help.append("<p>Sha3-256 hash (Keccak)</p><p>This transformation is using the QT internal hash function.</p>");
+    help.append("<p>Sha3-256 hash</p><p>This transformation is using the QT internal hash function.</p>");
     return help;
 }
 

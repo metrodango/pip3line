@@ -96,8 +96,6 @@ class PacketAnalyserTab : public TabAbstract
         void setIntercepting(bool value);
         void setForwarding(bool value);
         void onAutoMergeRequested();
-        void onInboundTransformRequested();
-        void onOutboundTransformRequested();
         void onSaveLoadFinished();
         void onItemClicked(const QModelIndex &index);
         void onFilter();

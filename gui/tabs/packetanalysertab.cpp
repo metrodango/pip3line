@@ -666,14 +666,6 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
             connect(orchestrator, &SourcesOrchestatorAbstract::guiRequested, orchCombo, &OrchestratorChooser::onGuiRequested);
         }
 
-        for (int i = 0 ; i < orchestrator->blockSourceCount(); i++) {
-            BlocksSource * bs = orchestrator->getBlockSource(i);
-            if (bs != nullptr) {
-                connect(bs, &BlocksSource::inboundTranformSelectionRequested, this, &PacketAnalyserTab::onInboundTransformRequested);
-                connect(bs, &BlocksSource::outboundTranformSelectionRequested, this, &PacketAnalyserTab::onOutboundTransformRequested);
-            }
-        }
-
         guiHelper->registerOrchestrator(orchestrator);
 
         if (orchestrator->getHasDirection())
@@ -1342,59 +1334,6 @@ void PacketAnalyserTab::onAutoMergeRequested()
     ui->packetTableView->selectionModel()->clear();
     packetModel->mergeConsecutivePackets();
 
-}
-
-void PacketAnalyserTab::onInboundTransformRequested()
-{
-    QObject *s = sender();
-    if (s != nullptr) {
-        BlocksSource * bs = static_cast<BlocksSource *>(s);
-        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
-        if (itemConfig == nullptr) {
-            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
-        }
-        itemConfig->setWayBoxVisible(true);
-        itemConfig->setFormatVisible(false);
-        itemConfig->setOutputTypeVisible(false);
-        int ret = itemConfig->exec();
-        if (ret == QDialog::Accepted) {
-            TransformAbstract * ta = itemConfig->getTransform();
-            if (ta != nullptr) {
-                bs->setInboundTranform(ta);
-            }
-        }
-
-        delete itemConfig;
-    } else {
-        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] sender is NULL T_T");
-    }
-}
-
-void PacketAnalyserTab::onOutboundTransformRequested()
-{
-    QObject *s = sender();
-
-    if (s != nullptr) {
-        BlocksSource * bs = static_cast<BlocksSource *>(s);
-        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(guiHelper, this);
-        if (itemConfig == nullptr) {
-            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
-        }
-        itemConfig->setWayBoxVisible(true);
-        itemConfig->setFormatVisible(false);
-        itemConfig->setOutputTypeVisible(false);
-        int ret = itemConfig->exec();
-        if (ret == QDialog::Accepted) {
-            TransformAbstract * ta = itemConfig->getTransform();
-            if (ta != nullptr) {
-                bs->setOutboundTranform(ta);
-            }
-        }
-
-        delete itemConfig;
-    } else {
-        qCritical() << tr("[PacketAnalyserTab::inboundTransformRequested] sender is NULL T_T");
-    }
 }
 
 void PacketAnalyserTab::onSaveLoadFinished()

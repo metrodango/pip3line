@@ -60,6 +60,7 @@ Released under AGPL see LICENSE for more information
 #include "crc32.h"
 #include "findandreplace.h"
 #include "tds7_enc.h"
+#include "jsonvalue.h"
 #include "../../version.h"
 
 #if QT_VERSION >= 0x050000
@@ -382,6 +383,11 @@ TransformAbstract *BasePlugins::getTransform(QString name)
         if (ta == nullptr) {
             qFatal("Cannot allocate memory for TDS7_ENC X{");
         }
+    } else if (name == JsonValue::id) {
+        ta = new(std::nothrow) JsonValue();
+        if (ta == nullptr) {
+            qFatal("Cannot allocate memory for JsonValue X{");
+        }
     }
 
     return ta;
@@ -450,6 +456,7 @@ const QStringList BasePlugins::getTransformList(QString typeName)
         enclist.append(NetworkMaskIPv4::id);
         enclist.append(NetworkMaskIPv6::id);
         enclist.append(Zlib::id);
+        enclist.append(JsonValue::id);
     } else if (typeName == DEFAULT_TYPE_TYPES_CASTING) {
         enclist.append(IPTranslateIPv4::id);
         enclist.append(MicrosoftTimestamp::id);
@@ -462,7 +469,6 @@ const QStringList BasePlugins::getTransformList(QString typeName)
         enclist.append(OctalNum);
         enclist.append(HexaNum);
     }
-
     return enclist;
 }
 

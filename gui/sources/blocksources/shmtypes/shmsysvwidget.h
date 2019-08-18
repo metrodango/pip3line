@@ -18,7 +18,7 @@ class KeyValidator : public QValidator
         Q_OBJECT
     public:
         explicit KeyValidator(QObject *parent = nullptr);
-        QValidator::State validate(QString & input, int & pos) const;
+        QValidator::State validate(QString & input, int & pos) const override;
         static int convert(QString input, bool *ok);
     private:
         Q_DISABLE_COPY(KeyValidator)
@@ -31,7 +31,7 @@ class ShmSysVWidget : public QWidget
 
     public:
         explicit ShmSysVWidget(SysV_Shm *obj, QWidget *parent = nullptr);
-        ~ShmSysVWidget();
+        ~ShmSysVWidget() override;
     public slots:
         void onApply();
         void onFilenameChanged(const QString &value);
@@ -39,7 +39,7 @@ class ShmSysVWidget : public QWidget
         void requestReset();
     private:
         Q_DISABLE_COPY(ShmSysVWidget)
-        void showEvent(QShowEvent *event);
+        void showEvent(QShowEvent *event) override;
         Ui::ShmSysVWidget *ui;
         SysV_Shm *connector;
         KeyValidator numberVal;

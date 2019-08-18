@@ -97,17 +97,17 @@ QStringList SharedMemorySource::getAvailableSHMTypes()
     return ret;
 }
 
-void SharedMemorySource::setShmType(int type)
+void SharedMemorySource::setShmType(int smtype)
 {
     SharedmemConnector * oldm = memConn;
     memConn = nullptr;
-    switch (type) {
+    switch (smtype) {
         case SharedmemConnector::POSIX_NATIVE_SHM:
             memConn = new(std::nothrow) SharedMemPosix();
             if (memConn == nullptr) {
                 qFatal("%s", GuiConst::MEM_ALLOC_ERROR_STR);
             }
-            shmType = type;
+            shmType = smtype;
             break;
         case SharedmemConnector::SYSV_SHM:
 #ifdef Q_OS_UNIX
@@ -115,7 +115,7 @@ void SharedMemorySource::setShmType(int type)
             if (memConn == nullptr) {
                 qFatal("%s", GuiConst::MEM_ALLOC_ERROR_STR);
             }
-            shmType = type;
+            shmType = smtype;
             break;
 #else
             qCritical() << tr("Ssytem V shm unsupported on this platform");

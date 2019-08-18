@@ -53,6 +53,8 @@ PipeClientWidget::PipeClientWidget(QWidget *parent) :
 PipeClientWidget::~PipeClientWidget()
 {
     delete ui;
+    delete proxyModel;
+    delete model;
 }
 
 void PipeClientWidget::onModelUpdated()

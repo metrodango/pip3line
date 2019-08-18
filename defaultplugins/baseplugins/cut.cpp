@@ -40,6 +40,7 @@ void Cut::transform(const QByteArray &input, QByteArray &output)
 {
     QList<QByteArray> list;
     QByteArray temp;
+    output.clear();
     if (lineByLine) {
         list = input.split('\n');
     } else {

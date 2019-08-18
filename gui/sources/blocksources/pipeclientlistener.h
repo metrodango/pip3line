@@ -7,6 +7,7 @@
 
 class PipeClientListener : public BlocksSource
 {
+        Q_OBJECT
     public:
         static const QString ID;
         struct PipeConnection {
@@ -15,17 +16,17 @@ class PipeClientListener : public BlocksSource
                 QString pipeName;
         };
         PipeClientListener(QObject *parent = nullptr);
-        ~PipeClientListener();
-        QString getName();
-        QString getDescription();
-        bool isStarted();
-        QHash<QString, QString> getConfiguration();
-        void setConfiguration(const  QHash<QString, QString> &conf);
-        QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
+        ~PipeClientListener() override;
+        QString getName() override;
+        QString getDescription() override;
+        bool isStarted() override;
+        QHash<QString, QString> getConfiguration() override;
+        void setConfiguration(const  QHash<QString, QString> &conf) override;
+        QWidget *getAdditionnalCtrls(QWidget * parent = nullptr) override;
     public slots:
-        void sendBlock(Block * block);
-        bool startListening();
-        void stopListening();
+        void sendBlock(Block * block) override;
+        bool startListening() override;
+        void stopListening() override;
         void setPipeName(const QString & name);
         void createConnection();
     private slots:
@@ -34,8 +35,8 @@ class PipeClientListener : public BlocksSource
         void onClientDeconnection();
     private:
         Q_DISABLE_COPY(PipeClientListener)
-        virtual QWidget *requestGui(QWidget * parent = nullptr);
-        void internalUpdateConnectionsInfo();
+        virtual QWidget *requestGui(QWidget * parent = nullptr) override;
+        void internalUpdateConnectionsInfo() override;
         QString pipeName;
         QHash<QLocalSocket *, PipeConnection> sockets;
         QHash<int,int> mapExtSourcesToLocal;

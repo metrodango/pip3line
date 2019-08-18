@@ -6,7 +6,7 @@
 #
 # Released under AGPL see LICENSE for more information
 
-QT       += core gui xml network concurrent widgets
+QT     += core gui xml network concurrent widgets
 CONFIG += debug c++14 warn_on
 
 CONFIG += CONF_SCINTILLA
@@ -30,8 +30,7 @@ unix {
 
     CONF_ADDR_SANITIZER {
         QMAKE_CXXFLAGS += -g -O1 -fsanitize=address -fno-omit-frame-pointer
-        QMAKE_LDFLAGS += -fsanitize=address
-        LIBS += -L"/usr/lib/clang/6.0.1/lib/linux" -shared -fPIC -lclang_rt.asan-x86_64
+        QMAKE_LFLAGS += -fsanitize=address
   }
 
     CONF_THREAD_SANITIZER {
@@ -148,16 +147,25 @@ SOURCES += main.cpp\
     shared/defaultdialog.cpp \
     shared/sendtomenu.cpp \
     sources/blocksources/udpclientlistener.cpp \
-    tabs/packetanalyser/proxyorchestrator.cpp \
     sources/blocksources/tlsserverlistener.cpp \
     sources/blocksources/tlsclientlistener.cpp \
     sources/blocksources/ipnetworkclientwidget.cpp \
     sources/blocksources/baseblocksourcewidget.cpp \
+    sources/blocksources/sharedmemorysource.cpp \
+    sources/blocksources/shmtypes/sharedmemorysourcebasewidget.cpp \
+    sources/blocksources/shmtypes/sharedmemconnector.cpp \
+    sources/blocksources/shmtypes/sysv_shm.cpp \
+    sources/blocksources/shmtypes/shmsysvwidget.cpp \
+    sources/blocksources/shmtypes/sharedmemposix.cpp \
+    sources/blocksources/shmtypes/sharedmemposixwidget.cpp \
+    sources/blocksources/fileblocksource.cpp \
+    sources/blocksources/filesourcewidget.cpp \
     tabs/packetanalyser/externalproxyorchestrator.cpp \
     shared/transformselectorwidget.cpp \
     sources/blocksources/socksproxyhelper.cpp \
     sources/blocksources/connectiondetails.cpp \
     tabs/packetanalyser/socksorchestrator.cpp \
+    tabs/packetanalyser/proxyorchestrator.cpp \
     tabs/packetanalyser/filterdialog.cpp \
     tabs/packetanalyser/filteritem.cpp \
     shared/transformguibutton.cpp \
@@ -166,15 +174,8 @@ SOURCES += main.cpp\
     sources/blocksources/pipeclientwidget.cpp \
     views/jsonview.cpp \
     shared/newconnectionbutton.cpp \
-    sources/blocksources/sharedmemorysource.cpp \
     tabs/packetanalyser/myoproxy.cpp \
-    tabs/packetanalyser/myoproxywidget.cpp \
-    sources/blocksources/shmtypes/sharedmemorysourcebasewidget.cpp \
-    sources/blocksources/shmtypes/sharedmemconnector.cpp \
-    sources/blocksources/shmtypes/sysv_shm.cpp \
-    sources/blocksources/shmtypes/shmsysvwidget.cpp \
-    sources/blocksources/shmtypes/sharedmemposix.cpp \
-    sources/blocksources/shmtypes/sharedmemposixwidget.cpp
+    tabs/packetanalyser/myoproxywidget.cpp
 
 HEADERS  += mainwindow.h \
     transformwidget.h \
@@ -297,7 +298,9 @@ HEADERS  += mainwindow.h \
     sources/blocksources/shmtypes/sysv_shm.h \
     sources/blocksources/shmtypes/shmsysvwidget.h \
     sources/blocksources/shmtypes/sharedmemposix.h \
-    sources/blocksources/shmtypes/sharedmemposixwidget.h
+    sources/blocksources/shmtypes/sharedmemposixwidget.h \
+    sources/blocksources/fileblocksource.h \
+    sources/blocksources/filesourcewidget.h
 
 FORMS    += mainwindow.ui \
     transformwidget.ui \
@@ -348,7 +351,8 @@ FORMS    += mainwindow.ui \
     tabs/packetanalyser/myoproxywidget.ui \
     sources/blocksources/shmtypes/sharedmemorysourcebasewidget.ui \
     sources/blocksources/shmtypes/shmsysvwidget.ui \
-    sources/blocksources/shmtypes/sharedmemposixwidget.ui
+    sources/blocksources/shmtypes/sharedmemposixwidget.ui \
+    sources/blocksources/filesourcewidget.ui
 
 OTHER_FILES += icons/pip3line.png \
     win.rc \

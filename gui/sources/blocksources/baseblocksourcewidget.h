@@ -14,7 +14,7 @@ class BaseBlockSourceWidget : public QTabWidget
         Q_OBJECT
     public:
         explicit BaseBlockSourceWidget(BlocksSource *bs, QWidget *parent = nullptr);
-        ~BaseBlockSourceWidget();
+        ~BaseBlockSourceWidget() override;
         void insertWidgetInGeneric(int index, QWidget * widget);
         void setTLSWidget(QWidget * widget);
     signals:

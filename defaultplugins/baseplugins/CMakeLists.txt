@@ -56,6 +56,7 @@ set ( baseplugins_HDRS
     html.h
     iptranslateipv4.h
     javascriptconcat.h
+    jsonvalue.h
     md4.h
     md5.h
     microsofttimestamp.h
@@ -98,6 +99,7 @@ set ( baseplugins_HDRS
     confgui/hmactransformwidget.h
     confgui/htmlwidget.h
     confgui/iptranslateipv4widget.h
+    confgui/jsonvaluewidget.h
     confgui/microsofttimestampwidget.h
     confgui/ntlmsspwidget.h
     confgui/numbertocharwidget.h
@@ -136,6 +138,7 @@ set ( baseplugins_SRCS
     html.cpp
     iptranslateipv4.cpp
     javascriptconcat.cpp
+    jsonvalue.cpp
     md4.cpp
     md5.cpp
     microsofttimestamp.cpp
@@ -178,6 +181,7 @@ set ( baseplugins_SRCS
     confgui/hmactransformwidget.cpp
     confgui/htmlwidget.cpp
     confgui/iptranslateipv4widget.cpp
+    confgui/jsonvaluewidget.cpp
     confgui/microsofttimestampwidget.cpp
     confgui/ntlmsspwidget.cpp
     confgui/numbertocharwidget.cpp
@@ -212,6 +216,7 @@ set ( baseplugins_UIS
     confgui/hmactransformwidget.ui
     confgui/htmlwidget.ui
     confgui/iptranslateipv4widget.ui
+    confgui/jsonvaluewidget.ui
     confgui/microsofttimestampwidget.ui
     confgui/ntlmsspwidget.ui
     confgui/numbertocharwidget.ui

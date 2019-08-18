@@ -316,7 +316,7 @@ void BlocksSource::setB64BlocksSeparator(char value)
 
 void BlocksSource::onConnectionClosed(int cid)
 {
-    Q_UNUSED(cid); // does nothing by default
+    Q_UNUSED(cid) // does nothing by default6
 }
 
 void BlocksSource::postBlockForSending(Block *block)

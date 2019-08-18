@@ -89,6 +89,9 @@ bool TransformMgmt::initialize(const QString &baseDirectory)
     }
     pluginsDirectories << QString("%1/%2").arg(baseDirectory).arg(APP_PLUGIN_DIRECTORY);
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    if (QSysInfo::WordSize == 64) {
+        pluginsDirectories << QDir(QString("%1/../lib64/pip3line").arg(baseDirectory)).absolutePath();
+    }
     pluginsDirectories << QDir(QString("%1/../lib/pip3line").arg(baseDirectory)).absolutePath();
 #endif
 

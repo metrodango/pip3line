@@ -125,6 +125,8 @@ set ( pip3line_HDRS
 	sources/searchabstract.h
 	sources/intermediatesource.h
 	sources/blocksources/blockssource.h
+        sources/blocksources/fileblocksource.h
+        sources/blocksources/filesourcewidget.h
 	sources/blocksources/ipblockssources.h
 	sources/blocksources/connectionsinfoswidget.h
 	sources/blocksources/connectiondetails.h
@@ -253,6 +255,8 @@ set ( pip3line_SRCS
 	sources/searchabstract.cpp
 	sources/intermediatesource.cpp
 	sources/blocksources/blockssource.cpp
+        sources/blocksources/fileblocksource.cpp
+        sources/blocksources/filesourcewidget.cpp
 	sources/blocksources/ipblockssources.cpp
 	sources/blocksources/connectionsinfoswidget.cpp
 	sources/blocksources/connectiondetails.cpp
@@ -371,6 +375,7 @@ set ( pip3line_UIS
 	sources/filewidget.ui
 	sources/blocksources/connectionsinfoswidget.ui
 	sources/blocksources/connectionswidget.ui
+        sources/blocksources/filesourcewidget.ui
 	sources/blocksources/ipnetworkserverwidget.ui
 	sources/blocksources/baseblocksourcewidget.ui
 	sources/blocksources/ipnetworkclientwidget.ui

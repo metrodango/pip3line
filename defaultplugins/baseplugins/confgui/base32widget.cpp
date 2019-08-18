@@ -46,7 +46,7 @@ void Base32Widget::onVariantchange(int newVariant)
 
 void Base32Widget::onPaddingChange(QString val)
 {
-    qDebug() << val;
+    //qDebug() << val;
     if (val.size() == 1) { // one and only character
         QByteArray c = val.toUtf8();
         if (c.size() > 1) { // ignoring multi-bytes characters

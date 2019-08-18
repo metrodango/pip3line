@@ -1,5 +1,6 @@
 #include "myoproxy.h"
 #include "packet.h"
+#include "guihelper.h"
 #include "myoproxywidget.h"
 #include "sources/blocksources/tlsserverlistener.h"
 #include "sources/blocksources/tlsclientlistener.h"
@@ -7,17 +8,16 @@
 #include "sources/blocksources/udpserverlistener.h"
 #include "sources/blocksources/pipeclientlistener.h"
 #include "sources/blocksources/sharedmemorysource.h"
+#include "sources/blocksources/fileblocksource.h"
 #include "shared/guiconst.h"
 #include <QDebug>
 
-const QStringList MYOProxy::SERVERS_LIST = QStringList() << TLSServerListener::ID
-                                               << UdpServerListener::ID;
-const QStringList MYOProxy::CLIENTS_LIST = QStringList() << TLSClientListener::ID
-                                               << UdpClientListener::ID
-                                               << PipeClientListener::ID
-                                               << SharedMemorySource::ID;
+const QStringList MYOProxy::SERVERS_LIST = MYOProxy::initServerList();
+const QStringList MYOProxy::CLIENTS_LIST = MYOProxy::initClientList();
 
-MYOProxy::MYOProxy(QObject *parent) : SourcesOrchestatorAbstract(parent)
+MYOProxy::MYOProxy(GuiHelper *guiHelper, QObject *parent) :
+    SourcesOrchestatorAbstract(parent),
+    guiHelper(guiHelper)
 {
     serverType = SERVER_INVALID;
     clientType = CLIENTS_INVALID;
@@ -77,6 +77,10 @@ void MYOProxy::setServer(MYOProxy::SERVERS serverVal)
             serverSource = new(std::nothrow) UdpServerListener();
             if (serverSource == nullptr) qFatal("Cannot allocate memory for UdpServerListener X{");
             break;
+        case FILE_SOURCE:
+            serverSource = new (std::nothrow) FileBlockSource(FileBlockSource::Reader);
+            if (serverSource == nullptr) qFatal("Cannot allocate memory for FileBlockSource X{");
+            break;
         default:
             qCritical() << tr("[MYOProxy::setServer] Invalid server type");
             return;
@@ -91,9 +95,15 @@ void MYOProxy::setServer(MYOProxy::SERVERS serverVal)
     connect(serverSource, &BlocksSource::log, this, &MYOProxy::log, Qt::QueuedConnection);
     connect(serverSource, &BlocksSource::updated, this, &MYOProxy::connectionsChanged, Qt::QueuedConnection);
     connect(serverSource, &BlocksSource::newConnection, this, &MYOProxy::connectionsChanged, Qt::QueuedConnection);
-    connect(serverSource, &BlocksSource::connectionClosed, clientSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+    connect(serverSource, &BlocksSource::inboundTranformSelectionRequested, guiHelper, &GuiHelper::onInboundTransformRequested);
+    connect(serverSource, &BlocksSource::outboundTranformSelectionRequested, guiHelper, &GuiHelper::onOutboundTransformRequested);
 
-    MYOProxyWidget *myop = dynamic_cast<MYOProxyWidget *>( confgui);
+    if (clientSource != nullptr) {
+        connect(serverSource, &BlocksSource::connectionClosed, clientSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::connectionClosed, serverSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+    }
+
+    MYOProxyWidget *myop = dynamic_cast<MYOProxyWidget *>(confgui);
     if (myop != nullptr) {
         myop->setServerWidget(serverSource->getGui());
     }
@@ -123,6 +133,10 @@ void MYOProxy::setClient(MYOProxy::CLIENTS clientVal)
             clientSource = new(std::nothrow) SharedMemorySource();
             if (clientSource == nullptr) qFatal("Cannot allocate memory for SharedMemorySource X{");
             break;
+        case FILE_SINK:
+            clientSource = new(std::nothrow) FileBlockSource(FileBlockSource::Writer);
+            if (clientSource == nullptr) qFatal("Cannot allocate memory for FileSourceSink X{");
+            break;
         default:
             qCritical() << tr("[MYOProxy::setClient] Invalid client type");
             return;
@@ -137,7 +151,14 @@ void MYOProxy::setClient(MYOProxy::CLIENTS clientVal)
     connect(clientSource, &BlocksSource::log, this, &MYOProxy::log, Qt::QueuedConnection);
     connect(clientSource, &BlocksSource::updated, this, &MYOProxy::connectionsChanged, Qt::QueuedConnection);
     connect(clientSource, &BlocksSource::newConnection, this, &MYOProxy::connectionsChanged, Qt::QueuedConnection);
-    connect(clientSource, &BlocksSource::connectionClosed, serverSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+
+    connect(clientSource, &BlocksSource::inboundTranformSelectionRequested, guiHelper, &GuiHelper::onInboundTransformRequested);
+    connect(clientSource, &BlocksSource::outboundTranformSelectionRequested, guiHelper, &GuiHelper::onOutboundTransformRequested);
+
+    if (serverSource != nullptr) {
+        connect(serverSource, &BlocksSource::connectionClosed, clientSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+        connect(clientSource, &BlocksSource::connectionClosed, serverSource, &BlocksSource::onConnectionClosed, Qt::QueuedConnection);
+    }
 
     MYOProxyWidget *myop = dynamic_cast<MYOProxyWidget *>(confgui);
     if (myop != nullptr) {
@@ -162,7 +183,9 @@ void MYOProxy::setConfiguration(QHash<QString, QString> conf)
 
     if (conf.contains(GuiConst::STATE_SERVER_TYPE)) {
         int num = conf.value(GuiConst::STATE_SERVER_TYPE).toInt(&ok);
-        if (ok && (num == SERVER_TCP || num == SERVER_UDP)) {
+        if (ok && (num == SERVER_TCP ||
+                   num == SERVER_UDP ||
+                   num == FILE_SOURCE)) {
             setServer(static_cast<MYOProxy::SERVERS>(num));
         }
     }
@@ -172,7 +195,8 @@ void MYOProxy::setConfiguration(QHash<QString, QString> conf)
         if (ok && (num == CLIENT_TCP ||
                    num == CLIENT_UDP ||
                    num == CLIENT_PIPE ||
-                   num == SHARED_MEM)) {
+                   num == SHARED_MEM ||
+                   num == FILE_SINK)) {
             setClient(static_cast<MYOProxy::CLIENTS>(num));
         }
     }
@@ -273,6 +297,26 @@ QWidget *MYOProxy::requestConfGui(QWidget *parent)
     }
 
     return myop;
+}
+
+QStringList MYOProxy::initServerList()
+{
+    QStringList ret;
+    ret << TLSServerListener::ID;
+    ret << UdpServerListener::ID;
+    ret << FileBlockSource::ID;
+    return ret;
+}
+
+QStringList MYOProxy::initClientList()
+{
+    QStringList ret;
+    ret << TLSClientListener::ID;
+    ret << UdpClientListener::ID;
+    ret << PipeClientListener::ID;
+    ret << SharedMemorySource::ID;
+    ret << FileBlockSource::ID;
+    return ret;
 }
 
 MYOProxy::CLIENTS MYOProxy::getClientType() const

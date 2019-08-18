@@ -445,9 +445,13 @@ JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
 
 JsonView::~JsonView()
 {
+    delete globalContextMenu;
     globalContextMenu = nullptr;
+    delete copyMenu;
     copyMenu = nullptr;
+    delete replaceMenu;
     replaceMenu = nullptr;
+    delete sendToMenu;
     sendToMenu = nullptr;
     delete tree;
     model = nullptr; // deleted by tree

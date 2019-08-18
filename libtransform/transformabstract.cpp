@@ -133,27 +133,29 @@ TransformAbstract::Way TransformAbstract::way()
 QByteArray TransformAbstract::fromHex(QByteArray in)
 {
 
-    QString invalid;
-    QString HEXCHAR("abcdefABCDEF0123456789");
+    QByteArray invalid;
+    QByteArray valid;
+    QByteArray HEXCHAR("abcdefABCDEF0123456789");
     for (int i = 0; i < in.size(); i++){
         if (!HEXCHAR.contains(in.at(i))) {
             if (!invalid.contains(in.at(i)))
                 invalid.append(in.at(i));
+        } else {
+            valid.append(in.at(i));
         }
     }
 
     if (!invalid.isEmpty()) {
-        emit error(tr("Invalid character(s) found in the hexadecimal stream: '%1', they will be skipped").arg(invalid),name());
+        emit error(tr("Invalid character(s) found in the hexadecimal stream: '%1', they will be skipped").arg(QString::fromUtf8(toPrintableString(invalid))),name());
     }
 
-    in.replace(invalid,"");
-
-    if (in.size()%2 != 0) {
-        in.chop(1);
+    if (valid.size()%2 != 0) {
+        valid.chop(1);
         emit error(tr("Invalid size for a hexadecimal stream, skipping the last byte."),name());
     }
 
-    return QByteArray::fromHex(in);
+
+    return QByteArray::fromHex(valid);
 }
 
 QString TransformAbstract::saveChar(const char c) const
@@ -198,7 +200,7 @@ QByteArray TransformAbstract::toPrintableString(const QByteArray &val, bool stri
                     ret.append("\\r");
                     break;
                 default:
-                ret.append("\\x").append(QByteArray(1,c).toHex());
+                    ret.append("\\x").append(QByteArray(1,c).toHex());
             }
         }
     }

@@ -104,7 +104,9 @@ SOURCES += baseplugins.cpp \
     confgui/crc32widget.cpp \
     findandreplace.cpp \
     confgui/findandreplacewidget.cpp \
-    tds7_enc.cpp
+    tds7_enc.cpp \
+    jsonvalue.cpp \
+    confgui/jsonvaluewidget.cpp
 
 
 greaterThan(QT_MAJOR_VERSION, 4): SOURCES += sha256.cpp \
@@ -194,7 +196,9 @@ HEADERS += baseplugins.h\
     confgui/crc32widget.h \
     findandreplace.h \
     confgui/findandreplacewidget.h \
-    tds7_enc.h
+    tds7_enc.h \
+    jsonvalue.h \
+    confgui/jsonvaluewidget.h
 
 greaterThan(QT_MAJOR_VERSION, 4): HEADERS += sha256.h \
     sha512.h \
@@ -237,7 +241,8 @@ FORMS += \
     confgui/byterotwidget.ui \
     confgui/hmactransformwidget.ui \
     confgui/crc32widget.ui \
-    confgui/findandreplacewidget.ui
+    confgui/findandreplacewidget.ui \
+    confgui/jsonvaluewidget.ui
 
 RESOURCES += \
     baseplugins_res.qrc

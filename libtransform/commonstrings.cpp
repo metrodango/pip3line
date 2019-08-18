@@ -77,7 +77,7 @@ namespace Pip3lineConst {
     const QString XMLCLEAN = "Clean";
     const QString XMLAUTORELOAD = "AutoReload";
     const QString XMLTZ = "TimeZone";
-
+    const QString XMLVALUE = "Value";
     const QString USER_DIRECTORY = ".pip3line";
     const int BLOCK_MAX_SIZE = 0x04000000;
 }

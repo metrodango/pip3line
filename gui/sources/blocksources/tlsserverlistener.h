@@ -18,11 +18,11 @@ class BaseTcpServer : public QTcpServer
         Q_OBJECT
     public:
         explicit BaseTcpServer(QObject *parent = nullptr);
-        ~BaseTcpServer();
+        ~BaseTcpServer() override;
     signals:
         void newClient(qintptr socketDescriptor);
     private slots:
-        void incomingConnection(qintptr socketDescriptor);
+        void incomingConnection(qintptr socketDescriptor) override;
     private:
         Q_DISABLE_COPY(BaseTcpServer)
 };
@@ -34,18 +34,18 @@ class TLSServerListener : public IPBlocksSources
     public:
         static const QString ID;
         explicit TLSServerListener(QHostAddress hostAddress = TLSServerListener::DEFAULT_ADDRESS, quint16 hostPort = TLSServerListener::DEFAULT_PORT, QObject *parent = nullptr);
-        ~TLSServerListener();
-        QString getName();
-        QString getDescription();
-        bool isStarted();
+        ~TLSServerListener() override;
+        QString getName() override;
+        QString getDescription() override;
+        bool isStarted() override;
         bool isSocks5Proxy() const;
         void setSocks5Proxy(bool value);
 
     public slots:
-        void sendBlock(Block *block);
-        bool startListening();
-        void stopListening();
-        void onConnectionClosed(int cid);
+        void sendBlock(Block *block) override;
+        bool startListening() override;
+        void stopListening() override;
+        void onConnectionClosed(int cid) override;
     signals:
         void newConnectionData(int sourceId, ConnectionDetails cd);
     private slots:
@@ -58,7 +58,7 @@ class TLSServerListener : public IPBlocksSources
         void onTLSUpdated(bool enabled);
     private:
         Q_DISABLE_COPY(TLSServerListener)
-        void internalUpdateConnectionsInfo();
+        void internalUpdateConnectionsInfo() override;
         bool startingTLS(QSslSocket *socket);
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;

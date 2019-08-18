@@ -13,7 +13,7 @@ Released under AGPL see LICENSE for more information
 #include <QString>
 #include "libtransform_global.h"
 
-#define LIB_TRANSFORM_VERSION 17
+#define LIB_TRANSFORM_VERSION 18
 
 namespace Pip3lineConst {
     // Default types
@@ -82,6 +82,7 @@ namespace Pip3lineConst {
     EXPORTING const QString XMLCLEAN;
     EXPORTING const QString XMLAUTORELOAD;
     EXPORTING const QString XMLTZ;
+    EXPORTING const QString XMLVALUE;
 
     EXPORTING const QString USER_DIRECTORY;
     EXPORTING const int BLOCK_MAX_SIZE;

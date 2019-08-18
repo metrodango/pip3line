@@ -126,6 +126,7 @@ class SSLOptionsWidget : public QWidget
         void onTLsv10Toggled(bool checked);
         void onTLsv11Toggled(bool checked);
         void onTLsv12Toggled(bool checked);
+        void onTLsv13Toggled(bool checked);
         void onHTTP11NextProtocolToggled(bool checked);
         void onSDPYNextProtocolToggled(bool checked);
         void onHTTP2NextProtocolToggled(bool checked);

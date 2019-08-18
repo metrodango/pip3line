@@ -199,7 +199,9 @@ void TLSServerListener::dataReceived()
         int clientId = clients.value(socket);
         if (socket->bytesAvailable() > 0) {
             QByteArray data  = socket->readAll();
+
             if (clientsProxyNeeded.contains(socket)) {
+                qDebug() << "Proxy data: " << qPrintable(data.toHex());
                 SocksProxyHelper * proxyHelper = clientsProxyNeeded.value(socket);
                 QByteArray resp = proxyHelper->processRequest(data);
                 if (proxyHelper->getState() == SocksProxyHelper::DONE) { // all is good
@@ -215,6 +217,7 @@ void TLSServerListener::dataReceived()
                     socket->write(resp);
 
                     if (tlscon) {
+                        qDebug() << "proxy tls selected";
                         if (!startingTLS(socket)) {
                             socket->disconnectFromHost();
                             int cid = clients.take(socket);
@@ -222,13 +225,14 @@ void TLSServerListener::dataReceived()
                             delete socket;
                             updateConnectionsInfo();
                             return;
+                        } else {
+                            qDebug() << tr("[TLSServerListener::packetReceived] Cannot start the server TLS connection");
                         }
                     }
 
                     emit newConnectionData(clientId,cd);
 
-                }
-                else if (proxyHelper->getState() == SocksProxyHelper::NEED_AUTH_DATA ||
+                } else if (proxyHelper->getState() == SocksProxyHelper::NEED_AUTH_DATA ||
                         proxyHelper->getState() == SocksProxyHelper::AUTHENTICATED) {
                     // just send the SOCKS response if we are still in the middle
                     socket->write(resp);

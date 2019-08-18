@@ -11,7 +11,6 @@ Released under AGPL see LICENSE for more information
 #ifndef BASE32_H
 #define BASE32_H
 
-
 #include "transformabstract.h"
 
 class Base32 : public TransformAbstract

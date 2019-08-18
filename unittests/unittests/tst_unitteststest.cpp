@@ -10,6 +10,7 @@ Released under AGPL see LICENSE for more information
 
 #include <QString>
 #include <QtTest>
+#include <QtTest/QtTest>
 #include <transformmgmt.h>
 #include <transformabstract.h>
 #include <QTextStream>
@@ -19,9 +20,8 @@ Released under AGPL see LICENSE for more information
 class UnittestsTest : public QObject
 {
         Q_OBJECT
-        
     public:
-        UnittestsTest();
+        explicit UnittestsTest();
         
     private slots:
         void logError(const QString mess);
@@ -42,6 +42,10 @@ class UnittestsTest : public QObject
         void testBytesToInteger();
         void testTimeStamp();
         void testMSTimeStamp();
+        void testsha3_224();
+        void testsha3_256();
+        void testsha3_384();
+        void testsha3_512();
         void randomFuzzing(TransformAbstract * tr, QString text = QString());
         QByteArray randomByteArray(int length = -1);
     private:
@@ -91,7 +95,7 @@ void UnittestsTest::testBase32()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -219,7 +223,7 @@ void UnittestsTest::testBase64()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -233,7 +237,7 @@ void UnittestsTest::testBase64()
     QCOMPARE(transf->transform(QByteArray("")), QByteArray(""));
 
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(configuration.value(PROP_WAY), QString::number((int)TransformAbstract::INBOUND));
     QCOMPARE(configuration.value(XMLVARIANT) , QString::number(0));
@@ -242,7 +246,7 @@ void UnittestsTest::testBase64()
     configuration.insert(XMLVARIANT,QString::number(1));
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(transf->transform(QByteArray(QString("un test 132*$<>?>?<").toUtf8())), QByteArray("dW4gdGVzdCAxMzIqJDw-Pz4_PA"));
     QCOMPARE(transf->transform(QByteArray("a")), QByteArray("YQ"));
@@ -254,7 +258,7 @@ void UnittestsTest::testBase64()
     configuration.insert(XMLVARIANT,QString::number(2));
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(transf->transform(QByteArray(QString("un test 132*$<>?>?<").toUtf8())), QByteArray("dW4gdGVzdCAxMzIqJDw-Pz4_PA2"));
     QCOMPARE(transf->transform(QByteArray("a")), QByteArray("YQ2"));
@@ -266,7 +270,7 @@ void UnittestsTest::testBase64()
     configuration.insert(XMLVARIANT,QString::number(0));
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(transf->transform(QByteArray("dW4gdGVzdCAxMzIqJDw+Pz4/PA==")), QByteArray(QString("un test 132*$<>?>?<").toUtf8()));
     QCOMPARE(transf->transform(QByteArray("YQ")), QByteArray("a"));
@@ -276,7 +280,7 @@ void UnittestsTest::testBase64()
     configuration.insert(XMLVARIANT,QString::number(1));
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(transf->transform(QByteArray("dW4gdGVzdCAxMzIqJDw-Pz4_PA")), QByteArray(QString("un test 132*$<>?>?<").toUtf8()));
     QCOMPARE(transf->transform(QByteArray("YQ")), QByteArray("a"));
@@ -286,7 +290,7 @@ void UnittestsTest::testBase64()
     configuration.insert(XMLVARIANT,QString::number(2));
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size() , 3);
+    QCOMPARE(configuration.size() , 4);
     QCOMPARE(configuration.value(PROP_NAME) , name);
     QCOMPARE(transf->transform(QByteArray("dW4gdGVzdCAxMzIqJDw-Pz4_PA2")), QByteArray(QString("un test 132*$<>?>?<").toUtf8()));
     QCOMPARE(transf->transform(QByteArray("YQ2")), QByteArray("a"));
@@ -303,7 +307,7 @@ void UnittestsTest::testBase64()
 
     QVERIFY(transf->setConfiguration(configuration));
     configuration = transf->getConfiguration();
-    QCOMPARE(configuration.size(),7);
+    QCOMPARE(configuration.size(),8);
     QCOMPARE(configuration.value(PROP_NAME), name);
     QCOMPARE(configuration.value(PROP_WAY), QString::number((int)TransformAbstract::OUTBOUND));
     QCOMPARE(configuration.value(XMLVARIANT), QString::number(3));
@@ -382,7 +386,7 @@ void UnittestsTest::testBase64UrlEncode()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -423,7 +427,7 @@ void UnittestsTest::testBinary()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -482,7 +486,7 @@ void UnittestsTest::testCharEncoding()
     int charEncodingParamscount = 5;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -527,7 +531,7 @@ void UnittestsTest::testCisco7()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -555,7 +559,7 @@ void UnittestsTest::testCut()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -608,7 +612,7 @@ void UnittestsTest::testCrc32()
     QHash<QString, QString> configuration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -643,7 +647,7 @@ void UnittestsTest::testHexencode()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -713,7 +717,7 @@ void UnittestsTest::testHieroglyphy()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -754,7 +758,7 @@ void UnittestsTest::testBytesToInteger()
     QHash<QString, QString> failconfiguration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -853,7 +857,7 @@ void UnittestsTest::testTimeStamp()
     QHash<QString, QString> configuration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -889,7 +893,7 @@ void UnittestsTest::testMSTimeStamp()
     QHash<QString, QString> configuration;
 
     TransformAbstract *transf = transformFactory->getTransform(name);
-    if (transf == 0)
+    if (transf == nullptr)
         QSKIP("Cannot find the transformation, skipping test",SkipSingle);
 
     connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
@@ -916,6 +920,77 @@ void UnittestsTest::testMSTimeStamp()
     QVERIFY(transf->setConfiguration(configuration));
     QCOMPARE(transf->transform(QByteArray("Sun 24 June 2007 00:57:54.296ms")),QByteArray("128271382742960000"));
 
+    delete transf;
+}
+
+void UnittestsTest::testsha3_224()
+{
+    QString name = "SHA3-224";
+    QHash<QString, QString> configuration;
+
+    TransformAbstract *transf = transformFactory->getTransform(name);
+    if (transf == nullptr)
+        QSKIP("Cannot find the transformation, skipping test",SkipSingle);
+
+    connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
+    connect(transf, SIGNAL(warning(QString,QString)), this, SLOT(logError(QString)));
+
+    QCOMPARE(transf->transform(QByteArray("")),QByteArray("\x6b\x4e\x03\x42\x36\x67\xdb\xb7\x3b\x6e\x15\x45\x4f\x0e\xb1\xab"
+                                                          "\xd4\x59\x7f\x9a\x1b\x07\x8e\x3f\x5b\x5a\x6b\xc7"));
+    delete transf;
+}
+
+void UnittestsTest::testsha3_256()
+{
+    QString name = "SHA3-256";
+    QHash<QString, QString> configuration;
+
+    TransformAbstract *transf = transformFactory->getTransform(name);
+    if (transf == nullptr)
+        QSKIP("Cannot find the transformation, skipping test",SkipSingle);
+
+    connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
+    connect(transf, SIGNAL(warning(QString,QString)), this, SLOT(logError(QString)));
+
+    QCOMPARE(transf->transform(QByteArray("")),QByteArray("\xa7\xff\xc6\xf8\xbf\x1e\xd7\x66\x51\xc1\x47\x56\xa0\x61\xd6\x62"
+                                                          "\xf5\x80\xff\x4d\xe4\x3b\x49\xfa\x82\xd8\x0a\x4b\x80\xf8\x43\x4a"));
+    delete transf;
+}
+
+void UnittestsTest::testsha3_384()
+{
+    QString name = "SHA3-384";
+    QHash<QString, QString> configuration;
+
+    TransformAbstract *transf = transformFactory->getTransform(name);
+    if (transf == nullptr)
+        QSKIP("Cannot find the transformation, skipping test",SkipSingle);
+
+    connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
+    connect(transf, SIGNAL(warning(QString,QString)), this, SLOT(logError(QString)));
+
+    QCOMPARE(transf->transform(QByteArray("")),QByteArray("\x0c\x63\xa7\x5b\x84\x5e\x4f\x7d\x01\x10\x7d\x85\x2e\x4c\x24\x85"
+                                                          "\xc5\x1a\x50\xaa\xaa\x94\xfc\x61\x99\x5e\x71\xbb\xee\x98\x3a\x2a"
+                                                          "\xc3\x71\x38\x31\x26\x4a\xdb\x47\xfb\x6b\xd1\xe0\x58\xd5\xf0\x04"));
+    delete transf;
+}
+
+void UnittestsTest::testsha3_512()
+{
+    QString name = "SHA3-512";
+    QHash<QString, QString> configuration;
+
+    TransformAbstract *transf = transformFactory->getTransform(name);
+    if (transf == nullptr)
+        QSKIP("Cannot find the transformation, skipping test",SkipSingle);
+
+    connect(transf, SIGNAL(error(QString, QString)), this, SLOT(logError(QString)));
+    connect(transf, SIGNAL(warning(QString,QString)), this, SLOT(logError(QString)));
+
+    QCOMPARE(transf->transform(QByteArray("")),QByteArray("\xa6\x9f\x73\xcc\xa2\x3a\x9a\xc5\xc8\xb5\x67\xdc\x18\x5a\x75\x6e"
+                                                          "\x97\xc9\x82\x16\x4f\xe2\x58\x59\xe0\xd1\xdc\xc1\x47\x5c\x80\xa6"
+                                                          "\x15\xb2\x12\x3a\xf1\xf5\xf9\x4c\x11\xe3\xe9\x40\x2c\x3a\xc5\x58"
+                                                          "\xf5\x00\x19\x9d\x95\xb6\xd3\xe3\x01\x75\x85\x86\x28\x1d\xcd\x26",64));
     delete transf;
 }
 
@@ -965,5 +1040,4 @@ void UnittestsTest::printConf(QHash<QString, QString> configuration)
 }
 
 QTEST_MAIN(UnittestsTest)
-
 #include "tst_unitteststest.moc"

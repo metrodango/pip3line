@@ -514,6 +514,17 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
         ui->tlsv12checkBox->setToolTip(UNAVAILABLE_STR);
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+    ui->tlsv13checkBox->setEnabled(false);
+    ui->tlsv13checkBox->setToolTip(UNAVAILABLE_STR);
+
+#else
+    if (!cipherModel->hasProtocol(QSsl::TlsV1_3)) {
+        ui->tlsv13checkBox->setEnabled(false);
+        ui->tlsv13checkBox->setToolTip(UNAVAILABLE_STR);
+    }
+#endif
+
     QAbstractItemModel * omodel = ui->ciphersTableView->model();
     ui->ciphersTableView->setModel(cipherModel);
     delete omodel;
@@ -614,6 +625,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     connect(ui->tlsv10checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv10Toggled);
     connect(ui->tlsv11checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv11Toggled);
     connect(ui->tlsv12checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv12Toggled);
+    connect(ui->tlsv13checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv13Toggled);
 
     connect(ui->http11CheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onHTTP11NextProtocolToggled);
     connect(ui->sdpyCheckBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSDPYNextProtocolToggled);
@@ -827,6 +839,12 @@ void SSLOptionsWidget::onSelectAllCiphers()
         ui->tlsv12checkBox->blockSignals(false);
     }
 
+    if (ui->tlsv13checkBox->isEnabled()) {
+        ui->tlsv13checkBox->blockSignals(true);
+        ui->tlsv13checkBox->setChecked(true);
+        ui->tlsv13checkBox->blockSignals(false);
+    }
+
     cipherModel->selectAllCiphers();
 }
 
@@ -862,6 +880,12 @@ void SSLOptionsWidget::onSelectNoneCipher()
         ui->tlsv12checkBox->blockSignals(false);
     }
 
+    if (ui->tlsv13checkBox->isEnabled()) {
+        ui->tlsv13checkBox->blockSignals(true);
+        ui->tlsv13checkBox->setChecked(false);
+        ui->tlsv13checkBox->blockSignals(false);
+    }
+
     cipherModel->SelectNone();
 }
 
@@ -893,6 +917,16 @@ void SSLOptionsWidget::onTLsv11Toggled(bool checked)
 void SSLOptionsWidget::onTLsv12Toggled(bool checked)
 {
     cipherModel->enableProtocol(QSsl::TlsV1_2, checked);
+}
+
+void SSLOptionsWidget::onTLsv13Toggled(bool checked)
+{
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+    qCritical() << tr("TLS 1.3 only supported with Qt >= 5.12.0");
+
+#else
+    cipherModel->enableProtocol(QSsl::TlsV1_3, checked);
+#endif
 }
 
 void SSLOptionsWidget::onHTTP11NextProtocolToggled(bool checked)

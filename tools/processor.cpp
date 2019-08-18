@@ -151,17 +151,24 @@ void Processor::writeBlock(const QByteArray &data)
     if (decode)
         temp = QByteArray::fromBase64(temp);
 
+    // qDebug() << "List size " << tlist.size();
     for (i = 0; i < tlist.size(); i++) {
-        if (i % 2 == 0)
+        if (i % 2 == 0) {
+            temp2.clear();
             tlist.at(i)->transform(temp,temp2);
-        else
+            // qDebug() << "Intermediate " << i << qPrintable(temp2);
+        } else {
+            temp.clear();
             tlist.at(i)->transform(temp2,temp);
+            // qDebug() << "Intermediate " << i << qPrintable(temp);
+        }
     }
     if (i % 2 == 0)
         outputval = &temp;
     else
         outputval = &temp2;
 
+    // qDebug() << "Final" << qPrintable(*outputval);
     if (!outputval->isEmpty()) {
         if (encode)
             *outputval = outputval->toBase64();

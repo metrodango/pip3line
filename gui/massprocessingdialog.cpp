@@ -110,7 +110,7 @@ MassProcessingDialog::~MassProcessingDialog()
 
 void MassProcessingDialog::setTranformChain(const QString &chainConf)
 {
-    //qDebug() << "Updating transform configuration" << chainConf;
+    // qDebug() << "Updating transform configuration" << qPrintable(chainConf);
     transformConf = chainConf;
     if (server != nullptr) {
         emit newServerTransformChain(transformConf);

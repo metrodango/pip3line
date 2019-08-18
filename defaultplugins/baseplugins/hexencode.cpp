@@ -134,6 +134,7 @@ void HexEncode::transform(const QByteArray &input, QByteArray &output) {
     }
     else {
         QString HEXCHAR("abcdefABCDEF0123456789");
+
         switch (type) {
             case NORMAL:
                 output = fromHex(input);

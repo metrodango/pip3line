@@ -43,8 +43,9 @@ SslConf::SslConf(QObject *parent) : QObject(parent)
 
 SslConf::~SslConf()
 {
-
+    delete guiConf;
 }
+
 QList<QSslCipher> SslConf::getSslCiphers() const
 {
     return sslCiphers;

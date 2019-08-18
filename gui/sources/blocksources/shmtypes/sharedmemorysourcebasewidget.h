@@ -15,7 +15,7 @@ class SharedMemorySourceBaseWidget : public QWidget
 
     public:
         explicit SharedMemorySourceBaseWidget(SharedMemorySource *source, QWidget *parent = nullptr);
-        ~SharedMemorySourceBaseWidget();
+        ~SharedMemorySourceBaseWidget() override;
         void addWidget(QWidget * gui);
     public slots:
         void onTypechanged(int index);

@@ -13,9 +13,9 @@ Released under AGPL see LICENSE for more information
 
 #define APPNAME "pip3line"
 
-#define VERSION_STRING "3.6.0"
+#define VERSION_STRING "3.7.0"
 #define VERSION_MAJOR 3
-#define VERSION_MINOR 6
+#define VERSION_MINOR 7
 #define VERSION_REV 0
 
 #ifndef GIT_COMMIT

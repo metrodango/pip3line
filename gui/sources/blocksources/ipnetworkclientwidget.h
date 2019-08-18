@@ -17,7 +17,7 @@ class IPNetworkClientWidget : public QWidget
         Q_OBJECT
     public:
         explicit IPNetworkClientWidget(IPBlocksSources *nlistener, QWidget *parent = nullptr);
-        ~IPNetworkClientWidget();
+        ~IPNetworkClientWidget() override;
     signals:
         void log(QString mess, QString source, Pip3lineConst::LOGLEVEL level);
         void newSNI(QString value);

@@ -18,7 +18,7 @@ class IPNetworkServerWidget : public QWidget
 
     public:
         explicit IPNetworkServerWidget(IPBlocksSources *nlistener, QWidget *parent = nullptr);
-        ~IPNetworkServerWidget();
+        ~IPNetworkServerWidget() override;
     public slots:
         void onTlsToggled(bool enabled);
     private slots:

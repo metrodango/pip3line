@@ -70,7 +70,7 @@ class BlocksSource : public QObject
         static BlocksSource * getSourceObject(int id);
 
         explicit BlocksSource(QObject *parent = nullptr);
-        virtual ~BlocksSource();
+        virtual ~BlocksSource() override;
         QWidget *getGui(QWidget * parent = nullptr);
         virtual QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
         bool isReadWrite();

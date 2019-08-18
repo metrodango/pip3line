@@ -13,6 +13,7 @@
 #include "sources/blocksources/tlsserverlistener.h"
 #include "sources/blocksources/tlsclientlistener.h"
 #include "sources/blocksources/sharedmemorysource.h"
+#include "sources/blocksources/fileblocksource.h"
 #include "guihelper.h"
 #include "shared/defaultdialog.h"
 #include "externalproxyorchestrator.h"
@@ -132,12 +133,14 @@ void OrchestratorChooser::onSelection(int index)
             orchestrator = temporchestrator;
             destructorLink = connect(orchestrator, &SourcesOrchestatorAbstract::destroyed, this, &OrchestratorChooser::onOrchestratorDeleted);
             emit newOrchestrator(temporchestrator);
-        } else {
+        } else { // cancelled
+            blockSignals(true);
             if (orchestrator != nullptr) {
-                blockSignals(true);
                 setCurrentIndex(static_cast<int>(orchestrator->getType())); // resetting to the previous one
-                blockSignals(false);
+            } else {
+                setCurrentIndex(0); // or not
             }
+            blockSignals(false);
             delete temporchestrator;
         }
     }
@@ -169,38 +172,38 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             }
             break;
         case SourcesOrchestatorAbstract::UDP_CLIENT:
-        {
-            qDebug() << "UDP client choosen";
-            bs = new(std::nothrow) UdpClientListener();
-            if (bs == nullptr) {
-                qFatal("Cannot allocate memory for UdpClientListener X{");
+            {
+                qDebug() << "UDP client choosen";
+                bs = new(std::nothrow) UdpClientListener();
+                if (bs == nullptr) {
+                    qFatal("Cannot allocate memory for UdpClientListener X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+
+                ci->setType(SourcesOrchestatorAbstract::UDP_CLIENT);
+                orch = ci;
+
             }
-
-            SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
-            if (ci == nullptr) {
-                qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
-            }
-
-            ci->setType(SourcesOrchestatorAbstract::UDP_CLIENT);
-            orch = ci;
-
-        }
             break;
         case SourcesOrchestatorAbstract::UDP_SERVER:
-        {
-            qDebug() << "UDP server choosen";
-            bs = new(std::nothrow) UdpServerListener();
-            if (bs == nullptr) {
-                qFatal("Cannot allocate memory for UdpServerListener X{");
-            }
+            {
+                qDebug() << "UDP server choosen";
+                bs = new(std::nothrow) UdpServerListener();
+                if (bs == nullptr) {
+                    qFatal("Cannot allocate memory for UdpServerListener X{");
+                }
 
-            SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
-            if (ci == nullptr) {
-                qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::UDP_SERVER);
+                orch = ci;
             }
-            ci->setType(SourcesOrchestatorAbstract::UDP_SERVER);
-            orch = ci;
-        }
             break;
         case SourcesOrchestatorAbstract::TCP_SERVER:
             {
@@ -217,7 +220,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 ci->setType(SourcesOrchestatorAbstract::TCP_SERVER);
                 orch = ci;
             }
-                break;
+            break;
         case SourcesOrchestatorAbstract::TCP_PROXY:
             qDebug() << "TCP proxy choosen";
             {
@@ -374,7 +377,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             break;
             case SourcesOrchestatorAbstract::MYO_PROXY:
             {
-                MYOProxy *myop = new(std::nothrow) MYOProxy();
+                MYOProxy *myop = new(std::nothrow) MYOProxy(guiHelper);
                 if (myop == nullptr) {
                     qFatal("Cannot allocate memory for MYOProxy X{");
                 }
@@ -398,8 +401,33 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 orch = ci;
             }
             break;
+            case SourcesOrchestatorAbstract::FILE_SOURCE:
+            {
+                FileBlockSource * fileSource = new(std::nothrow) FileBlockSource(FileBlockSource::Reader);
+                if (fileSource == nullptr) {
+                    qFatal("Cannot allocate memory for FileBlockSource X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(fileSource);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::FILE_SOURCE);
+                orch = ci;
+            }
+            break;
         default:
             qCritical() << tr("[OrchestratorChooser::createOrchestratorFromType] Unmanaged type: %1").arg(type);
+    }
+
+    if (orch != nullptr) {
+        for (int i = 0 ; i < orch->blockSourceCount(); i++) {
+            BlocksSource * bs = orch->getBlockSource(i);
+            if (bs != nullptr) {
+                connect(bs, &BlocksSource::inboundTranformSelectionRequested, guiHelper, &GuiHelper::onInboundTransformRequested);
+                connect(bs, &BlocksSource::outboundTranformSelectionRequested, guiHelper, &GuiHelper::onOutboundTransformRequested);
+            }
+        }
     }
 
     return orch;

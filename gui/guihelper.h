@@ -216,6 +216,8 @@ class GuiHelper : public QObject
         void calculatingHexTableSizes();
         void onFilterChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
         void onTabDestroyed();
+        void onInboundTransformRequested();
+        void onOutboundTransformRequested();
     signals:
         void newDataSelection(QByteArray selection);
         void newTabRequested(QByteArray initialValue);

@@ -13,7 +13,7 @@ class IPBlocksSources : public BlocksSource
         Q_OBJECT
     public:
         explicit IPBlocksSources(QHostAddress hostAddress = QHostAddress::LocalHost, quint16 hostPort = 443, QObject *parent = nullptr);
-        virtual ~IPBlocksSources();
+        virtual ~IPBlocksSources() override;
         virtual QHostAddress getHostAddress() const;
         virtual quint16 getHostPort() const;
         QString getHostname() const;
@@ -22,8 +22,8 @@ class IPBlocksSources : public BlocksSource
         QWidget * getSSLConfGui(QWidget *parent = nullptr);
         virtual QList<QSslCertificate> getPeerCerts();
         virtual QString getCurrentCipher();
-        virtual QHash<QString, QString> getConfiguration();
-        virtual void setConfiguration(const  QHash<QString, QString> &conf);
+        virtual QHash<QString, QString> getConfiguration() override;
+        virtual void setConfiguration(const  QHash<QString, QString> &conf) override;
 
     public slots:
         void setHostname(const QString &name);
@@ -31,7 +31,7 @@ class IPBlocksSources : public BlocksSource
         virtual void setHostAddress(const QHostAddress &addr);
     protected:
         Q_DISABLE_COPY(IPBlocksSources)
-        virtual QWidget *requestGui(QWidget * parent = nullptr);
+        virtual QWidget *requestGui(QWidget * parent = nullptr) override;
         QHostAddress hostAddress;
         quint16 hostPort;
         QString hostName;

@@ -15,10 +15,9 @@ class QTableView;
 class ConnectionsInfosWidget : public QWidget
 {
         Q_OBJECT
-
     public:
         explicit ConnectionsInfosWidget(BlocksSource *listener, QWidget *parent = nullptr);
-        ~ConnectionsInfosWidget();
+        ~ConnectionsInfosWidget() override;
     private slots:
         void onConnectionUpdated();
     private:

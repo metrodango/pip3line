@@ -4,6 +4,8 @@
 #include <QObject>
 #include "sourcesorchestatorabstract.h"
 
+class GuiHelper;
+
 class MYOProxy : public SourcesOrchestatorAbstract
 {
         Q_OBJECT
@@ -11,7 +13,8 @@ class MYOProxy : public SourcesOrchestatorAbstract
         enum SERVERS {
             SERVER_INVALID = 0,
             SERVER_TCP = 1,
-            SERVER_UDP =2
+            SERVER_UDP =2,
+            FILE_SOURCE = 3
         };
 
         enum CLIENTS {
@@ -19,13 +22,14 @@ class MYOProxy : public SourcesOrchestatorAbstract
             CLIENT_TCP = 1,
             CLIENT_UDP = 2,
             CLIENT_PIPE = 3,
-            SHARED_MEM = 4
+            SHARED_MEM = 4,
+            FILE_SINK = 5
         };
 
         static const QStringList SERVERS_LIST;
         static const QStringList CLIENTS_LIST;
 
-        explicit MYOProxy(QObject *parent = nullptr);
+        explicit MYOProxy(GuiHelper *guiHelper, QObject *parent = nullptr);
         ~MYOProxy() override;
         QList<Target<SourcesOrchestatorAbstract *> > getAvailableConnections() override;
         BlocksSource *getBlockSource(int index) override;
@@ -45,10 +49,13 @@ class MYOProxy : public SourcesOrchestatorAbstract
     private:
         Q_DISABLE_COPY(MYOProxy)
         QWidget *requestConfGui(QWidget *parent) override;
+        static QStringList initServerList();
+        static QStringList initClientList();
         BlocksSource * serverSource{nullptr};
         BlocksSource * clientSource{nullptr};
         MYOProxy::SERVERS serverType;
         MYOProxy::CLIENTS clientType;
+        GuiHelper *guiHelper;
 };
 
 #endif // MYOPROXY_H

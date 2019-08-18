@@ -15,7 +15,7 @@ class SharedMemPosixWidget : public QWidget
 
     public:
         explicit SharedMemPosixWidget(SharedMemPosix *connector, QWidget *parent = nullptr);
-        ~SharedMemPosixWidget();
+        ~SharedMemPosixWidget() override;
     public slots:
         void onSubmit();
     private:

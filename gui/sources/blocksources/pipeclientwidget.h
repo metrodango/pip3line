@@ -10,11 +10,11 @@ class PipesModel : public QAbstractTableModel
         Q_OBJECT
     public:
         explicit PipesModel(QObject *parent = nullptr);
-        ~PipesModel();
-        int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
-        int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
-        QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
-        QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+        ~PipesModel() override;
+        int columnCount ( const QModelIndex & parent = QModelIndex() ) const override;
+        int rowCount ( const QModelIndex & parent = QModelIndex() ) const override;
+        QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const override;
+        QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const override;
     public slots:
         void refresh();
     private:
@@ -50,7 +50,7 @@ class PipeClientWidget : public QWidget
 
     public:
         explicit PipeClientWidget(QWidget *parent = nullptr);
-        ~PipeClientWidget();
+        ~PipeClientWidget() override;
     signals:
         void newPipeName(const QString &mess);
     public slots:

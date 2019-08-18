@@ -192,6 +192,7 @@ namespace GuiConst
     const QString STATE_KEY = "Key";
     const QString STATE_SHMID = "Shmid";
     const QString STATE_JSON_STATE = "JsonState";
+    const QString STATE_DELAY = "Delay";
 
     const bool DEFAULT_AUTO_SAVE_ENABLED = true;
     const bool DEFAULT_AUTO_RESTORE_ENABLED = true;

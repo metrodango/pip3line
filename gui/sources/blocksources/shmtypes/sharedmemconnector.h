@@ -13,7 +13,7 @@ class SharedmemConnector : public QObject {
             SYSV_SHM = 2
         };
         explicit SharedmemConnector(const MemoryAccessType &type);
-        virtual ~SharedmemConnector();
+        virtual ~SharedmemConnector() override;
         virtual QString name() = 0;
         virtual bool connectToMem() = 0;
         virtual bool readData(QByteArray &data) = 0;

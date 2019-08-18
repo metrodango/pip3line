@@ -21,7 +21,7 @@ class SharedMemorySource : public BlocksSource
         QHash<QString, QString> getConfiguration() override;
         void setConfiguration(const  QHash<QString, QString> &conf) override;
         static QStringList getAvailableSHMTypes();
-        void setShmType(int type);
+        void setShmType(int smtype);
         int getShmType() const;
     public slots:
         void sendBlock(Block *block) override;

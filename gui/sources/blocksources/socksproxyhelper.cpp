@@ -6,6 +6,16 @@
 #include <QHostInfo>
 #include <QDebug>
 
+#if defined(Q_OS_WIN)
+#include <stdlib.h>
+#define bswap_32(x) _byteswap_ulong(x)
+#elif defined (Q_OS_DARWIN)
+#include <libkern/OSByteOrder.h>
+#define bswap_32(x) OSSwapInt32(x)
+#else
+#include <byteswap.h>
+#endif
+
 SocksProxyHelper::SocksProxyHelper(QHostAddress serverAddr, quint16 serverPort) :
     connectionState(INVALID),
     host(),
@@ -49,7 +59,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
     quint8 version = static_cast<quint8>(byteRead[0]);
 
     if (version != 0x05 ) {
-        qWarning() << "SOCKS 5 [base] only support version 5";
+        qWarning() << "SOCKS 5 [base] only support version 5 {" << version << "}";
         if (connectionState != INVALID) // meaning it is not first packet processed
             connectionState = REJECTED;
     } else if (connectionState == INVALID) { // if this part fail at any point, just return INVALID
@@ -138,6 +148,7 @@ QByteArray SocksProxyHelper::processRequest(QByteArray data)
 
                     quint32 addr_num = 0;
                     memcpy(&addr_num, addr_data.constData(),sizeof(quint32));
+                    addr_num = bswap_32(addr_num);
                     host.setAddress(addr_num);
                 } else if (addr_type == 3) { // domain name
                     bread = buff.read(byteRead, 1);

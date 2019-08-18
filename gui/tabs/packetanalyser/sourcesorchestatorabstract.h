@@ -27,7 +27,8 @@ class SourcesOrchestatorAbstract : public QObject
             SOCKS5_PROXY = 9,
             PIPE_CLIENT = 10,
             MYO_PROXY = 11,
-            SHARED_MEM = 12
+            SHARED_MEM = 12,
+            FILE_SOURCE = 13
         };
 
         explicit SourcesOrchestatorAbstract(QObject *parent = nullptr);

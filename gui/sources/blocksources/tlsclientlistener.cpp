@@ -10,8 +10,8 @@ const quint16 TLSClientListener::DEFAULT_PORT = 443;
 const QHostAddress TLSClientListener::DEFAULT_ADDRESS = QHostAddress("127.0.0.1");
 const QString TLSClientListener::ID = QString("TCP/TLS client");
 
-TLSClientListener::TLSClientListener(QHostAddress hostAddress, quint16 hostPort, QObject *parent) :
-    IPBlocksSources(hostAddress, hostPort, parent),
+TLSClientListener::TLSClientListener(QHostAddress nhostAddress, quint16 nhostPort, QObject *parent) :
+    IPBlocksSources(nhostAddress, nhostPort, parent),
     running(false)
 {
     flags = REFLEXION_OPTIONS | TLS_OPTIONS | TLS_ENABLED | GEN_IP_OPTIONS | B64BLOCKS_OPTIONS;
@@ -338,14 +338,18 @@ void TLSClientListener::onClientDeconnection()
 
                 int mid = Block::INVALID_ID;
                 QHashIterator<int, int> i(mapExtSourcesToLocal);
+                ClosingSocketWorker * cw = new(std::nothrow) ClosingSocketWorker();
+                connect(cw, &ClosingSocketWorker::connectionClosed, this, &TLSClientListener::connectionClosed,Qt::QueuedConnection);
                 while (i.hasNext()) {
                     i.next();
                     if (i.value() == cid) {
                         mid = i.key();
-                        emit connectionClosed(mid);
+                        cw->add(mid);
                         break;
                     }
                 }
+
+                QTimer::singleShot(300, cw, SLOT(sendEverything()));
 
                 // cleaning any mappings
                 if (mid != Block::INVALID_ID)
@@ -480,3 +484,23 @@ void TLSClientListener::internalUpdateConnectionsInfo()
     }
 }
 
+
+ClosingSocketWorker::ClosingSocketWorker(QObject *parent) :
+    QObject(parent)
+{
+
+}
+
+void ClosingSocketWorker::add(int cid)
+{
+    list.append(cid);
+}
+
+void ClosingSocketWorker::sendEverything()
+{
+    for (int i = 0; i < list.size(); i++) {
+        emit connectionClosed(list.at(i));
+    }
+
+    deleteLater();
+}

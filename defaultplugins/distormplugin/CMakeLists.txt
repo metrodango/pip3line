@@ -75,21 +75,21 @@ qt5_wrap_ui(UIS ${distormplugin_UIS})
 add_library ( distormplugin MODULE ${distormplugin_SRCS} ${UIS} )
 if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         find_package(Git QUIET)
-        if(GIT_FOUND)
+        if(GIT_FOUND AND NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make")
                 message(STATUS "fetching distorm")
                 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../.gitmodules" AND
                     EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../.git" )
                         execute_process(COMMAND ${GIT_EXECUTABLE} -C ${CMAKE_CURRENT_SOURCE_DIR}/../.. submodule update --init --recursive
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                            RESULT_VARIABLE GIT_SUBMOD_RESULT)
                         if(NOT GIT_SUBMOD_RESULT EQUAL "0")
                                 message(FATAL_ERROR "git submodule update failed: ${GIT_SUBMOD_RESULT}")
                         endif()
                 else()
                         execute_process(COMMAND ${GIT_EXECUTABLE} clone https://github.com/gdabah/distorm.git 
                                 ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE GIT_CLONE_RESULT)
+                                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                                RESULT_VARIABLE GIT_CLONE_RESULT)
                         if(NOT GIT_CLONE_RESULT EQUAL "0")
                                 message(FATAL_ERROR "git clone failed: ${GIT_CLONE_RESULT}")
                         endif()
@@ -98,7 +98,7 @@ if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         if (APPLE)
                 set ( OS_PATH "mac" )
                 execute_process ( COMMAND sed -i -E "s/-arch i386//" ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/mac/Makefile )
-		set(ENV{DISTORM_MODE} "static")
+                set(ENV{DISTORM_MODE} "static")
                 execute_process ( COMMAND sed -i -E "s/#ar rs/ar rs/" ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/mac/Makefile )
         else()
                 set ( OS_PATH "linux" )

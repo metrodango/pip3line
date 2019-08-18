@@ -28,6 +28,7 @@ Released under AGPL see LICENSE for more information
 #include "loggerwidget.h"
 #include "textinputdialog.h"
 #include "downloadmanager.h"
+#include "quickviewitemconfig.h"
 #include <transformmgmt.h>
 #include <QDragEnterEvent>
 #include <threadedprocessor.h>
@@ -197,6 +198,58 @@ void GuiHelper::onTabDestroyed()
     }
 }
 
+void GuiHelper::onInboundTransformRequested()
+{
+    QObject *s = sender();
+    if (s != nullptr) {
+        BlocksSource * bs = static_cast<BlocksSource *>(s);
+        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(this);
+        if (itemConfig == nullptr) {
+            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
+        }
+        itemConfig->setWayBoxVisible(true);
+        itemConfig->setFormatVisible(false);
+        itemConfig->setOutputTypeVisible(false);
+        int ret = itemConfig->exec();
+        if (ret == QDialog::Accepted) {
+            TransformAbstract * ta = itemConfig->getTransform();
+            if (ta != nullptr) {
+                bs->setInboundTranform(ta);
+            }
+        }
+
+        delete itemConfig;
+    } else {
+        qCritical() << tr("[GuiHelper::inboundTransformRequested] sender is NULL T_T");
+    }
+}
+
+void GuiHelper::onOutboundTransformRequested()
+{
+    QObject *s = sender();
+    if (s != nullptr) {
+        BlocksSource * bs = static_cast<BlocksSource *>(s);
+        QuickViewItemConfig *itemConfig = new(std::nothrow) QuickViewItemConfig(this);
+        if (itemConfig == nullptr) {
+            qFatal("Cannot allocate memory for QuickViewItemConfig X{");
+        }
+        itemConfig->setWayBoxVisible(true);
+        itemConfig->setFormatVisible(false);
+        itemConfig->setOutputTypeVisible(false);
+        int ret = itemConfig->exec();
+        if (ret == QDialog::Accepted) {
+            TransformAbstract * ta = itemConfig->getTransform();
+            if (ta != nullptr) {
+                bs->setOutboundTranform(ta);
+            }
+        }
+
+        delete itemConfig;
+    } else {
+        qCritical() << tr("[GuiHelper::onOutboundTransformRequested] sender is NULL T_T");
+    }
+}
+
 void GuiHelper::raisePip3lineWindow()
 {
     emit raiseWindowRequest();
@@ -243,6 +296,8 @@ TextInputDialog *GuiHelper::getNameDialog(QWidget *parent,const QString &default
 
 void GuiHelper::buildTransformComboBox(QComboBox *box, const QString &defaultSelected, bool applyFilter)
 {
+    // workaround the display bug with the number of visible element in a QComboBox
+    box->setStyleSheet("combobox-popup: 0;");
     // creating transform combo box
     // Adding the first element (unselectable)
     QString tempLabel = tr("Choose Transformation");

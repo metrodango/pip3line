@@ -6,23 +6,37 @@
 #include <QSslSocket>
 #include "connectiondetails.h"
 
+class ClosingSocketWorker : public QObject
+{
+        Q_OBJECT
+    public:
+        explicit ClosingSocketWorker(QObject *parent = nullptr);
+        void add(int cid);
+    public slots:
+        void sendEverything();
+    signals:
+        void connectionClosed(int cid);
+    private:
+        QList<int> list;
+};
+
 class TLSClientListener : public IPBlocksSources
 {
         Q_OBJECT
     public:
         static const QString ID;
         explicit TLSClientListener(QHostAddress hostAddress = TLSClientListener::DEFAULT_ADDRESS, quint16 hostPort = TLSClientListener::DEFAULT_PORT, QObject *parent = nullptr);
-        ~TLSClientListener();
-        QString getName();
-        QString getDescription();
-        bool isStarted();
-        QWidget *getAdditionnalCtrls(QWidget * parent = nullptr);
+        ~TLSClientListener() override;
+        QString getName() override;
+        QString getDescription() override;
+        bool isStarted() override;
+        QWidget *getAdditionnalCtrls(QWidget * parent = nullptr) override;
     public slots:
-        void sendBlock(Block *block);
-        bool startListening();
-        void stopListening();
+        void sendBlock(Block *block) override;
+        bool startListening() override;
+        void stopListening() override;
         void setSpecificConnection(int sourceId, ConnectionDetails cd);
-        void onConnectionClosed(int cid);
+        void onConnectionClosed(int cid) override;
         void createConnection();
     private slots:
         void dataReceived();
@@ -35,7 +49,7 @@ class TLSClientListener : public IPBlocksSources
         void onTLSUpdated(bool enabled);
     private:
         Q_DISABLE_COPY(TLSClientListener)
-        void internalUpdateConnectionsInfo();
+        void internalUpdateConnectionsInfo() override;
         static const quint16 DEFAULT_PORT;
         static const QHostAddress DEFAULT_ADDRESS;
         QHash<QSslSocket *, int> sockets;
