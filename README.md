@@ -21,7 +21,8 @@ Download the release zip [here](https://github.com/metrodango/pip3line/releases)
 ## Install on MacOs:
 
 ~~~
-$ brew install metrodango/pip3line/pip3line
+$ brew tap metrodango/pip3line
+$ brew install pip3line
 ~~~
 
 ## Install on Linux:
