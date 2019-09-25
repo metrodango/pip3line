@@ -330,9 +330,9 @@ namespace GuiConst
         QString ret;
         if (size < 1000)
             ret = QString("%1 B").arg(size);
-        else if (size >= 1000 && size < 1000000)
+        else if (size < 1000000)
             ret = QString("%1 KiB").arg(static_cast<double>(size)/static_cast<double>(1000),0,'f',2);
-        else if (size >= 1000000 && size < 1000000000)
+        else if (size < 1000000000)
             ret = QString("%1 MiB").arg(static_cast<double>(size)/static_cast<double>(1000000),0,'f',2);
 
         return ret;

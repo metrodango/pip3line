@@ -796,7 +796,7 @@ void PacketAnalyserTab::onDeleteTab(int index)
 
 void PacketAnalyserTab::onScrollBarChanged(int min, int max)
 {
-    Q_UNUSED(min);
+    Q_UNUSED(min)
     if (trackingLast)
         ui->packetTableView->verticalScrollBar()->setValue(max);
 }
@@ -1343,7 +1343,7 @@ void PacketAnalyserTab::onSaveLoadFinished()
 
 void PacketAnalyserTab::onItemClicked(const QModelIndex &index)
 {
-    Q_UNUSED(index);
+    Q_UNUSED(index)
 
     setTrackingLast(false);
 }
@@ -1412,8 +1412,8 @@ void PacketAnalyserTab::selectLastPacket()
     }
 }
 
-PacketAnalyserTabStateObj::PacketAnalyserTabStateObj(PacketAnalyserTab *tab) :
-    TabStateObj(tab)
+PacketAnalyserTabStateObj::PacketAnalyserTabStateObj(PacketAnalyserTab *ntab) :
+    TabStateObj(ntab)
 {
     setName(metaObject()->className());
 }
@@ -1668,7 +1668,7 @@ void PacketAnalyserTabStateObj::run()
                                             }
                                             format = talist.getFormat();
                                         } else {
-
+                                            qWarning() << tr("[PacketAnalyserTabStateObj] Transform chain is empty for index: %1").arg(index);
                                         }
                                     }
                                 }

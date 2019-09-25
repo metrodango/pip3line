@@ -456,9 +456,7 @@ void MassProcessingDialog::onKeepSynchronize(bool checked)
 
 void MassProcessingDialog::onLogsEnabled(bool checked)
 {
-    if (processor != nullptr) {
-
-    } else if (server != nullptr) {
+    if (server != nullptr) {
         server->setAllowForwardingLogs(checked);
     }
 }

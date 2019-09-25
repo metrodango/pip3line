@@ -560,7 +560,15 @@ ByteSourceAbstract::ByteSourceAbstract(QObject *parent) :
 ByteSourceAbstract::~ByteSourceAbstract()
 {
     delete searchObj;
-    clearAllMarkings();
+
+    cachedRange.clear();
+    if (userMarkingsRanges != nullptr) {
+        disconnect(userMarkingsRanges, &BytesRangeList::destroyed, this, &ByteSourceAbstract::onMarkingsListDeleted);
+        while(!userMarkingsRanges->isEmpty())
+            userMarkingsRanges->takeFirst().clear();
+        delete userMarkingsRanges;
+        userMarkingsRanges = nullptr;
+    }
     delete confGui;
 }
 
@@ -1160,7 +1168,7 @@ void ByteSourceAbstract::writeToFile(QString destFilename, QByteArray data)
                 break;
             else
                 data = data.mid(static_cast<int>(written) - 1);
-        };
+        }
 
         file.close();
     } else {

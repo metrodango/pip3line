@@ -124,7 +124,8 @@ bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
         }
 
     } else {
-
+        qCritical() << "[PcapIO::openExistingFile] File name string is empty :{";
+        return false;
     }
 
     if (file->isReadable()) {

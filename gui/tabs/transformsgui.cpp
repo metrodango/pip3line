@@ -28,8 +28,8 @@ Released under AGPL see LICENSE for more information
 #include "../state/closingstate.h"
 #include "../views/foldedview.h"
 
-TransformsGui::TransformsGui(GuiHelper *guiHelper, QWidget *parent) :
-    TabAbstract(guiHelper,parent)
+TransformsGui::TransformsGui(GuiHelper *nguiHelper, QWidget *parent) :
+    TabAbstract(nguiHelper,parent)
 {
     spacerIsUsed = false;
     ui = new(std::nothrow) Ui::TransformsGui();
@@ -465,20 +465,20 @@ void TransformsGui::onRegisterChain()
     }
 }
 
-void TransformsGui::onSavedSelected(const QString &name)
+void TransformsGui::onSavedSelected(const QString &chainName)
 {
-    if (name.isEmpty()) {
+    if (chainName.isEmpty()) {
         QMessageBox::critical(this,tr("Error"),tr("The selected name is empty T_T"),QMessageBox::Ok);
         qWarning() << tr("[TransformsGui] The selected name is empty T_T");
         return;
     }
-    TransformChain tc = transformFactory->loadChainFromSaved(name);
+    TransformChain tc = transformFactory->loadChainFromSaved(chainName);
     if (tc.isEmpty()) {
         QMessageBox::critical(this,tr("Error"),tr("The returned chain is empty. Check the logs."),QMessageBox::Ok);
     } else {
         resetAll();
         setCurrentTransformChain(tc);
-        emit chainChanged(transformFactory->getSavedConfs().value(name));
+        emit chainChanged(transformFactory->getSavedConfs().value(chainName));
     }
 }
 
@@ -656,12 +656,12 @@ void TransformsGui::onTransformChanged()
     emit chainChanged(getCurrentChainConf());
 }
 
-void TransformsGui::onNameChangeRequest(QString name)
+void TransformsGui::onNameChangeRequest(QString chainName)
 {
     QObject * obj = sender();
 
-    if (obj == firstTransformWidget  && !name.isEmpty()) {
-        setName(name);
+    if (obj == firstTransformWidget  && !chainName.isEmpty()) {
+        setName(chainName);
     }
 }
 
@@ -698,7 +698,6 @@ void TransformGuiStateObj::run()
         // first saving the transformWidget states so that they are saved last.
         for (int i = size - 1  ; i > -1; i--) { // need to reverse the order due to the stack behaviour
             tw = tgtab->transformWidgetList.at(i);
-            tw->getSource();
             // if there is no Transform configured, removing the tab (it does not do anything anyway)
             // unless this is the last one
             if (tw->getTransform() != nullptr || i == size - 1) {
