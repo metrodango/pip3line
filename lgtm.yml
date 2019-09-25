@@ -18,10 +18,11 @@ extraction:
         - qtbase5-dev
     after_prepare:
       - mkdir build
-      - cd build
     configure:
       command:
+        - cd build
         - cmake .. -DALL=ON -DWITH_SCINTILLA=ON
     index:
       build_command:
+        - cd build
         - make -j8 
