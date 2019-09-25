@@ -1,6 +1,9 @@
 # Pip3line
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/570b18ced7044b7193d49fc1c9409316)](https://www.codacy.com/app/metrodango/pip3line?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=metrodango/pip3line&amp;utm_campaign=Badge_Grade)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/metrodango/pip3line.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/metrodango/pip3line/alerts/)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/metrodango/pip3line.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/metrodango/pip3line/context:cpp)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/metrodango/pip3line.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/metrodango/pip3line/context:python)
 
 Linux / MacOS Builds
 
