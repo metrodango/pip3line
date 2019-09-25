@@ -922,6 +922,7 @@ void SSLOptionsWidget::onTLsv12Toggled(bool checked)
 void SSLOptionsWidget::onTLsv13Toggled(bool checked)
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+    Q_UNUSED(checked)
     qCritical() << tr("TLS 1.3 only supported with Qt >= 5.12.0");
 
 #else

@@ -9,8 +9,8 @@
 const QString FileBlockSource::ID = QString("File");
 const int FileBlockSource::MIN_DELAY = 100;
 const int FileBlockSource::MAX_DELAY = 10000;
-const QString FileBlockSource::ID_SOURCE = QString("File source, reading only");;
-const QString FileBlockSource::ID_SINK = QString("File sink, writing only");;
+const QString FileBlockSource::ID_SOURCE = QString("File source, reading only");
+const QString FileBlockSource::ID_SINK = QString("File sink, writing only");
 
 FileBlockSource::FileBlockSource(Type sourcefiletype, QObject *parent) :
     BlocksSource(parent),
