@@ -1805,7 +1805,7 @@ void PacketAnalyserTabStateObj::run()
 PacketAnalyserTabClosingStateObj::PacketAnalyserTabClosingStateObj(PacketAnalyserTab *tab) :
     tab(tab)
 {
-    name = metaObject()->className();
+    //name = metaObject()->className();
 }
 
 PacketAnalyserTabClosingStateObj::~PacketAnalyserTabClosingStateObj()

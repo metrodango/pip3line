@@ -39,10 +39,10 @@ AppStateObj::~AppStateObj()
 
 void AppStateObj::run()
 {
-    qDebug() << "Save/load" << name;
+    qDebug() << "Save/load" << getName();
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         if (writer != nullptr)
-            writer->writeStartElement(name);
+            writer->writeStartElement(getName());
         else {
             emit log(tr("Writer is null T_T"),this->metaObject()->className(), Pip3lineConst::LERROR);
             return;
@@ -59,7 +59,7 @@ void AppStateObj::run()
         }
     } else {
         if (flags & GuiConst::STATE_LOADSAVE_DIALOG_POS &&
-                reader->name() == name) {
+                reader->name() == getName()) {
             QXmlStreamAttributes attrList = reader->attributes();
             sdata = readByteArray(attrList.value(GuiConst::STATE_WIDGET_GEOM));
             if (!sdata.isEmpty())

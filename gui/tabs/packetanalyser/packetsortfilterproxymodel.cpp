@@ -277,7 +277,7 @@ bool PacketSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInd
 SortFilterProxyStateObj::SortFilterProxyStateObj(PacketSortFilterProxyModel *proxyModel) :
     proxyModel(proxyModel)
 {
-    name = metaObject()->className();
+    //name = metaObject()->className();
 }
 
 SortFilterProxyStateObj::~SortFilterProxyStateObj()

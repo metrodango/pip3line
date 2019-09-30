@@ -24,7 +24,7 @@ class BaseStateAbstract : public QObject
     public:
         explicit BaseStateAbstract(QObject *parent = nullptr);
         virtual ~BaseStateAbstract();
-        QString getName() const;
+        QString getName();
         void setName(const QString &value);
         virtual void run();
         QXmlStreamWriter *getWriter() const;
@@ -96,7 +96,6 @@ class BaseStateAbstract : public QObject
         quint64 flags;
         QString name;
         QString actionName;
-        static const QString NAME_NOT_SET;
         static const QChar B_ZERO;
         static const QChar B_ONE;
         static const char COMPRESSED_MARKER;

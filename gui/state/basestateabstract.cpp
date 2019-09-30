@@ -14,7 +14,6 @@ Released under AGPL see LICENSE for more information
 #include <QThread>
 #include "../shared/guiconst.h"
 
-const QString BaseStateAbstract::NAME_NOT_SET = "(Name Not Set)";
 const QChar BaseStateAbstract::B_ZERO = '0';
 const QChar BaseStateAbstract::B_ONE = '1';
 const char BaseStateAbstract::COMPRESSED_MARKER = '#';
@@ -23,10 +22,8 @@ BaseStateAbstract::BaseStateAbstract(QObject *parent) :
     QObject(parent),
     writer(nullptr),
     reader(nullptr),
-    flags(0),
-    name(NAME_NOT_SET)
+    flags(0)
 {
-    name = metaObject()->className();
 }
 
 BaseStateAbstract::~BaseStateAbstract()
@@ -34,8 +31,12 @@ BaseStateAbstract::~BaseStateAbstract()
 
 }
 
-QString BaseStateAbstract::getName() const
+QString BaseStateAbstract::getName()
 {
+    if (name.isEmpty()) {
+        name = metaObject()->className();
+    }
+
     return name;
 }
 
@@ -137,7 +138,7 @@ bool BaseStateAbstract::readNext(QString expected)
 
 bool BaseStateAbstract::readNextStart()
 {
-    return readNextStart(name);
+    return readNextStart(getName());
 }
 
 // read next and return true if the next start element is "expected"

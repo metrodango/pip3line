@@ -17,7 +17,7 @@ Released under AGPL see LICENSE for more information
 
 ClosingState::ClosingState(QString expected)
 {
-    name = metaObject()->className();
+    //name = metaObject()->className();
     closingTokenExpected = expected;
  //   qDebug() << "Create" << this;
 }

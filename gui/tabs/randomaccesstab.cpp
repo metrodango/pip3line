@@ -282,7 +282,7 @@ bool RandomAccessTab::eventFilter(QObject *obj, QEvent *event)
 RandomAccessStateObj::RandomAccessStateObj(RandomAccessTab *tab) :
     TabStateObj(tab)
 {
-    name = metaObject()->className();
+    //name = metaObject()->className();
 }
 
 RandomAccessStateObj::~RandomAccessStateObj()
@@ -335,7 +335,7 @@ RandomAccessClosingStateObj::RandomAccessClosingStateObj(RandomAccessTab *tab) :
     tab(tab)
 {
     scrollIndex = 0;
-    name = metaObject()->className();
+    //name = metaObject()->className();
 }
 
 RandomAccessClosingStateObj::~RandomAccessClosingStateObj()

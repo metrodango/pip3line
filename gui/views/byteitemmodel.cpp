@@ -200,7 +200,7 @@ bool ByteItemModel::setData(const QModelIndex &index, const QVariant &value, int
         if (hexVal.isEmpty())
             return false;
 
-        qint64 pos = hexColumncount * index.row() + index.column();
+        qint64 pos = static_cast<qint64>(hexColumncount) * static_cast<qint64>(index.row()) + static_cast<qint64>(index.column());
         qint64 size = byteSource->viewSize();
         if (size <= 0)
             return false;

@@ -660,7 +660,7 @@ GenericTabClosingStateObj::GenericTabClosingStateObj(GenericTab *tab) :
 {
     scrollIndex = 0;
     currentIndex = 0;
-    name = metaObject()->className();
+    //name = metaObject()->className();
 }
 
 GenericTabClosingStateObj::~GenericTabClosingStateObj()
