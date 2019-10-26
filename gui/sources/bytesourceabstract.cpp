@@ -1232,7 +1232,7 @@ bool ByteSourceAbstract::isOffsetValid(quint64 )
 ByteSourceStateObj::ByteSourceStateObj(ByteSourceAbstract *bs) :
     bs(bs)
 {
-    name = metaObject()->className();
+
 }
 
 ByteSourceStateObj::~ByteSourceStateObj()
