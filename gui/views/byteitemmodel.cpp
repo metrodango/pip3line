@@ -296,7 +296,8 @@ int ByteItemModel::position(const QModelIndex &index) const
 {
     if (index.isValid() && index.column() < hexColumncount && index.column() > -1 ) {
         qint64 pos = static_cast<qint64>(hexColumncount) * static_cast<qint64>(index.row()) + static_cast<qint64>(index.column());
-        return ((pos < byteSource->viewSize() && pos < INT_MAX) ? static_cast<int>(pos) : INVALID_POSITION);
+        // given that byteSource->viewSize() returns an int, pos is always < INT_MAX
+        return (pos < static_cast<qint64>(byteSource->viewSize()) ? static_cast<int>(pos) : INVALID_POSITION);
     } else {
         return INVALID_POSITION;
     }
