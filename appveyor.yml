@@ -20,14 +20,6 @@ environment:
       platform: x64
       config: Release
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      QTDIR: 'C:\Qt\5.14.0\msvc2017_64'
-      PATH: '%QTDIR%\bin;%PATH%'
-      QSCINTILLA_VERSION: '2.11.4'
-      compiler: vs2019
-      platform: x64
-      config: Release
-
 install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
