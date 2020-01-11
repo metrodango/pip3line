@@ -5,11 +5,14 @@ IF "%QTDIR%"=="" SET QTDIR=C:\Qt\5.14.0\msvc2017_64
 IF "%1"=="" goto Usage
 SET GOTVERSION=false
 IF NOT "%1"=="vs2017" SET GOTVERSION=true
-IF NOT "%1"=="vs2019" SET GOTVERSION=true
 
 IF "%GOTVERSION%"=="false" GOTO Usage
 
+
 SET VSVERSION=%1
+
+echo Visual Studio selected %VSVERSION%
+
 REM Default Qt dir
 SET BASE_DIR_QT=%QTDIR%
 
@@ -22,8 +25,7 @@ SET QT_LIBS=%QTDIR%
 echo QT libs selected %QT_LIBS%
 
 REM Openssl lib
-IF "%VSVERSION%"=="vs2017" set "OPENSSL_PATH=C:\OpenSSL-v111-Win64"
-IF "%VSVERSION%"=="vs2019" set "OPENSSL_PATH=C:\OpenSSL-v111-Win64"
+IF "%VSVERSION%"=="vs2017" set OPENSSL_PATH=C:\OpenSSL-v111-Win64
 
 REM needed to copy the necessary Angle libs
 REM SET ANGLEUSE=false
@@ -84,10 +86,6 @@ SET "QSCINTILLA_PATH=..\ext\QScintilla_gpl\Qt4Qt5\release"
 IF NOT EXIST %QSCINTILLA_PATH% GOTO Nonexistentqscintilla
 copy %QSCINTILLA_PATH%"\qscintilla2_qt5.dll"
 
-REM For OpenSSL 1.1.0 "NG"
-REM copy %OPENSSL_PATH%"\bin\libcrypto-1_1-x64.dll"
-REM copy %OPENSSL_PATH%"\bin\libssl-1_1-x64.dll"
-
 REM if you are using the ANGLE version of the Qt windows binaries
 REM you need to copy a couple of more files
 REM IF "%ANGLEUSE%"=="false" GOTO EndInstall
@@ -110,10 +108,9 @@ GOTO End
 :Usage
 ECHO.
 ECHO Need Qt Visual Studio version, i.e.
-ECHO %~n0.bat vs2019
+ECHO %~n0.bat vs2017
 ECHO 
 ECHO Available versions :
-ECHO     vs2019 : VS 2019 amd64
 ECHO     vs2017 : VS 2017 amd64
 GOTO End
 
