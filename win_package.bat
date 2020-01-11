@@ -1,11 +1,11 @@
 @echo off
 
-IF "%QTDIR%"=="" SET QTDIR=C:\Qt\5.11.2\msvc2017_64
+IF "%QTDIR%"=="" SET QTDIR=C:\Qt\5.14.0\msvc2017_64
 
 IF "%1"=="" goto Usage
 SET GOTVERSION=false
-IF NOT "%1"=="2015_32" SET GOTVERSION=true 
-IF NOT "%1"=="2017_64" SET GOTVERSION=true
+IF NOT "%1"=="vs2017" SET GOTVERSION=true
+IF NOT "%1"=="vs2019" SET GOTVERSION=true
 
 IF "%GOTVERSION%"=="false" GOTO Usage
 
@@ -15,18 +15,20 @@ SET BASE_DIR_QT=%QTDIR%
 
 REM IF "%VSVERSION%"=="2015_32" set QT_LIBS=%BASE_DIR_QT%"\msvc2015"
 REM IF "%VSVERSION%"=="2017_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2017_64"
+REM IF "%VSVERSION%"=="2019_64" set QT_LIBS=%BASE_DIR_QT%"\msvc2019_64"
 
 SET QT_LIBS=%QTDIR%
 
 echo QT libs selected %QT_LIBS%
 
 REM Openssl lib
-IF "%VSVERSION%"=="2015_32" set "OPENSSL_PATH=C:\OpenSSL-Win32"
-IF "%VSVERSION%"=="2017_64" set "OPENSSL_PATH=C:\OpenSSL-Win64"
+IF "%VSVERSION%"=="vs2017" set "OPENSSL_PATH=C:\OpenSSL-v111-Win64"
+IF "%VSVERSION%"=="vs2019" set "OPENSSL_PATH=C:\OpenSSL-v111-Win64"
 
 REM needed to copy the necessary Angle libs
-SET ANGLEUSE=false
-IF "%VSVERSION%"=="2017_64" SET ANGLEUSE=true 
+REM SET ANGLEUSE=false
+REM IF "%VSVERSION%"=="2017_64" SET ANGLEUSE=true 
+REM IF "%VSVERSION%"=="2019_64" SET ANGLEUSE=true 
 
 IF NOT EXIST %QT_LIBS% GOTO Nonexistentdir
 
@@ -49,15 +51,15 @@ md extras > nul 2> nul
 xcopy "..\extras\*" ".\extras" /s /i
 
 REM QT libraries
-echo [2] Copying QT libraries
-copy %QT_LIBS%"\bin\Qt5Core.dll"
-copy %QT_LIBS%"\bin\Qt5Gui.dll"
-copy %QT_LIBS%"\bin\Qt5Network.dll"
-copy %QT_LIBS%"\bin\Qt5Svg.dll"
-copy %QT_LIBS%"\bin\Qt5Widgets.dll"
-copy %QT_LIBS%"\bin\Qt5XmlPatterns.dll"
-copy %QT_LIBS%"\bin\Qt5Concurrent.dll"
-copy %QT_LIBS%"\bin\Qt5PrintSupport.dll"
+REM echo [2] Copying QT libraries
+REM copy %QT_LIBS%"\bin\Qt5Core.dll"
+REM copy %QT_LIBS%"\bin\Qt5Gui.dll"
+REM copy %QT_LIBS%"\bin\Qt5Network.dll"
+REM copy %QT_LIBS%"\bin\Qt5Svg.dll"
+REM copy %QT_LIBS%"\bin\Qt5Widgets.dll"
+REM copy %QT_LIBS%"\bin\Qt5XmlPatterns.dll"
+REM copy %QT_LIBS%"\bin\Qt5Concurrent.dll"
+REM copy %QT_LIBS%"\bin\Qt5PrintSupport.dll"
 
 echo [3] Copying QT mandatory plugins
 REM QT mandatory plug-ins, if missing the application won't even start
@@ -88,11 +90,11 @@ REM copy %OPENSSL_PATH%"\bin\libssl-1_1-x64.dll"
 
 REM if you are using the ANGLE version of the Qt windows binaries
 REM you need to copy a couple of more files
-IF "%ANGLEUSE%"=="false" GOTO EndInstall
-echo [6] Copying ANGLE Libraries
-copy %QT_LIBS%"\bin\d3dcompiler_47.dll"
-copy %QT_LIBS%"\bin\libEGL.dll"
-copy %QT_LIBS%"\bin\libGLESv2.dll"
+REM IF "%ANGLEUSE%"=="false" GOTO EndInstall
+REM echo [6] Copying ANGLE Libraries
+REM copy %QT_LIBS%"\bin\d3dcompiler_47.dll"
+REM copy %QT_LIBS%"\bin\libEGL.dll"
+REM copy %QT_LIBS%"\bin\libGLESv2.dll"
 
 :EndInstall
 
@@ -108,11 +110,11 @@ GOTO End
 :Usage
 ECHO.
 ECHO Need Qt Visual Studio version, i.e.
-ECHO %~n0.bat 2015
+ECHO %~n0.bat vs2019
 ECHO 
 ECHO Available versions :
-ECHO     2017_64 : VS 2017 amd64
-ECHO     2015_32 : VS 2015 x86
+ECHO     vs2019 : VS 2019 amd64
+ECHO     vs2017 : VS 2017 amd64
 GOTO End
 
 :Nonexistentdir

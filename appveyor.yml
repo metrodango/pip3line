@@ -1,4 +1,4 @@
-version: 3.7.0.{build}
+version: 3.7.1.rc.{build}
 
 skip_commits:
   files:
@@ -13,10 +13,17 @@ skip_commits:
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      QTDIR: 'C:\Qt\5.13.0\msvc2017_64'
+      QTDIR: 'C:\Qt\5.14.0\msvc2017_64'
       PATH: '%QTDIR%\bin;%PATH%'
-      QSCINTILLA_VERSION: '2.11.2'
+      QSCINTILLA_VERSION: '2.11.4'
       compiler: vs2017
+      platform: x64
+      config: Release
+   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      QTDIR: 'C:\Qt\5.14.0\msvc2017_64'
+      PATH: '%QTDIR%\bin;%PATH%'
+      QSCINTILLA_VERSION: '2.11.4'
+      compiler: vs2019
       platform: x64
       config: Release
 
@@ -44,7 +51,7 @@ build_script:
 - cd ..
 
 after_build:
-- win_package.bat 2017_64
+- win_package.bat $($env:compiler)
 - ps: ren package "pip3line_$($env:APPVEYOR_BUILD_VERSION)_win_x64"
 - 7z a pip3line_%APPVEYOR_BUILD_VERSION%_win_x64.zip pip3line_%APPVEYOR_BUILD_VERSION%_win_x64
 
