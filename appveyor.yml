@@ -32,10 +32,12 @@ install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
 - powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
-- appveyor DownloadFile https://www.riverbankcomputing.com/static/Downloads/QScintilla/%QSCINTILLA_VERSION%/QScintilla_gpl-%QSCINTILLA_VERSION%.zip
-- 7z x .\QScintilla_gpl-%QSCINTILLA_VERSION%.zip -o.\ext\
-- ps: ren "ext\QScintilla_gpl-$($env:QSCINTILLA_VERSION)" QScintilla_gpl
-- ps: pushd ext\QScintilla_gpl\Qt4Qt5
+- ps: $source = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($env:QSCINTILLA_VERSION)/QScintilla-$($env:QSCINTILLA_VERSION).zip"
+- ps: $destination = "QScintilla.zip"
+- ps: Invoke-WebRequest $source -OutFile $destination
+- 7z x .\QScintilla.zip -o.\ext\
+- ps: ren "ext\QScintilla" QScintilla
+- ps: pushd ext\QScintilla\Qt4Qt5
 - qmake
 - nmake
 - ps: popd
