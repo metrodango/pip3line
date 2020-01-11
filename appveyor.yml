@@ -21,7 +21,7 @@ environment:
       config: Release
 
 install:
-- call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+- call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
 - powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
 - ps: $source = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($env:QSCINTILLA_VERSION)/QScintilla-$($env:QSCINTILLA_VERSION).zip"
