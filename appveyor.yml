@@ -36,8 +36,8 @@ install:
 - ps: $destination = "QScintilla.zip"
 - ps: Invoke-WebRequest $source -OutFile $destination
 - 7z x .\QScintilla.zip -o.\ext\
-- ps: ren "ext\QScintilla" QScintilla
-- ps: pushd ext\QScintilla\Qt4Qt5
+- ps: ren "ext\QScintilla-$($env:QSCINTILLA_VERSION)" QScintilla_gpl
+- ps: pushd ext\QScintilla_gpl\Qt4Qt5
 - qmake
 - nmake
 - ps: popd
