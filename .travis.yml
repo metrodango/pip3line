@@ -30,6 +30,7 @@ matrix:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
+      brew unlink python@2;
       brew reinstall cmake qt5 python3 qscintilla2 openssl git;
     else
       sudo apt-get -qq update;
