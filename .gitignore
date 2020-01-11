@@ -23,3 +23,4 @@ extras/burp_plugin/out
 *.jardesc
 extras/burp_plugin/.classpath
 *.swp
+Pip3line.app
