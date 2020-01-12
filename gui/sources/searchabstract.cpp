@@ -30,7 +30,12 @@ SourceReader::~SourceReader()
 SearchWorker::SearchWorker(SourceReader * device,QObject *parent)
     : QObject(parent)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     progress.storeRelaxed(0);
+#else
+    progress.store(0);
+#endif
+
     startOffset = 0;
     endOffset = 0;
     BufferSize = GEN_BLOCK_SIZE;
@@ -69,7 +74,11 @@ void SearchWorker::cancel()
 
 void SearchWorker::search()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     progress.storeRelaxed(0);
+#else
+    progress.store(0);
+#endif
     cancelled = false;
     int len = searchSize -1;
     quint64 curOffset = startOffset;
@@ -143,7 +152,12 @@ void SearchWorker::search()
                 foundList->append(br);
             }
             // updating stats
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             progress.storeRelaxed(realOffset - startOffset);
+#else
+            progress.store(realOffset - startOffset);
+#endif
+
 //            if (realOffset > nextStat) {
 //                emit progressUpdate(realOffset - startOffset);
 //                nextStat += static_cast<quint64>(statsStep);
@@ -169,7 +183,11 @@ void SearchWorker::search()
 
 quint64 SearchWorker::getProgress() const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     return progress.loadRelaxed();
+#else
+    return progress.load();
+#endif
 }
 
 void SearchWorker::setStatsStep(int value)
