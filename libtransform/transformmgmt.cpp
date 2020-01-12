@@ -151,8 +151,12 @@ bool TransformMgmt::loadTransforms(bool verbose) {
                 list[j] = list[j].mid(0,MAX_TYPE_NAME_LENGTH);
             }
         }
-
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         typesSet.unite(QSet<QString>(list.begin(), list.end()));
+#else
+        typesSet.unite(QSet<QString>::fromList(list));
+#endif
+
     }
 
     typesSet.insert(DEFAULT_TYPE_USER);

@@ -1212,7 +1212,11 @@ void GuiHelper::refreshAll()
     refreshAutoSaveTimer();
 
     QStringList blacklist = settings->value(SETTINGS_FILTER_BLACKLIST, QStringList()).toStringList();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     typesBlacklist = QSet<QString>(blacklist.begin(), blacklist.end());
+#else
+    typesBlacklist = blacklist.toSet();
+#endif
 
     QHash<QString, QVariant> hash = settings->value(SETTINGS_MARKINGS_COLORS).toHash();
     if (hash.isEmpty())
