@@ -347,7 +347,11 @@ namespace GuiConst
     {
         QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
 //        qDebug() << QObject::tr("width") << fm.width(value);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
         return fm.horizontalAdvance(value);
+#else
+        return fm.width(value);
+#endif
     }
 }
 
