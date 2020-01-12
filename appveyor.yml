@@ -39,8 +39,7 @@ install:
 before_build:
 - mkdir build
 - cd build
-- cmake ../ -DALL=ON -DWITH_SCINTILLA=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%"
-
+- cmake ../ -DALL=ON -DWITH_SCINTILLA=ON -G "NMake Makefiles" "-DCMAKE_PREFIX_PATH=%QTDIR%" -DOPENSSL_ROOT_DIR="C:\OpenSSL-v111-Win64"
 build_script:
 - nmake
 - cd ..
