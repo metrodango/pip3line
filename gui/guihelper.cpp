@@ -1051,7 +1051,7 @@ void GuiHelper::calculatingHexTableSizes()
 {
     QFontMetrics fm(GlobalsValues::GLOBAL_REGULAR_FONT);
     GlobalsValues::HEXCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFF");
-    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFFFF");
+    GlobalsValues::TEXTCOLUMNWIDTH = calculateStringWidthWithGlobalFont("FFFFFFFFFFFFFFFFF");
 //    qDebug() << tr("height") << fm.height() << fm.capHeight() << QString("%1, %2px %3f")
 //                .arg(GlobalsValues::GLOBAL_REGULAR_FONT.family())
 //                .arg(GlobalsValues::GLOBAL_REGULAR_FONT.pointSize())
