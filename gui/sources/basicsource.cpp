@@ -14,6 +14,7 @@ Released under AGPL see LICENSE for more information
 #include <QTime>
 #include <QFile>
 #include <QFileInfo>
+#include <QElapsedTimer>
 #include "state/basestateabstract.h"
 #include "shared/guiconst.h"
 
@@ -365,8 +366,8 @@ bool BasicSource::validateOffsetAndSize(quint64 offset, int length)
 }
 
 
-BasicSourceStateObj::BasicSourceStateObj(BasicSource *bs) :
-    ByteSourceStateObj(bs)
+BasicSourceStateObj::BasicSourceStateObj(BasicSource *nbs) :
+    ByteSourceStateObj(nbs)
 {
     setName(bs->metaObject()->className());
 }
@@ -382,7 +383,7 @@ void BasicSourceStateObj::internalRun()
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         if (flags & GuiConst::STATE_LOADSAVE_DATA) {
             rawData = static_cast<BasicSource *>(bs)->getRawData();
-            QTime timer;
+            QElapsedTimer timer;
             timer.start();
             writer->writeTextElement(GuiConst::STATE_DATA, write(rawData));
         }

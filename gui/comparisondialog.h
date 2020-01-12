@@ -18,6 +18,7 @@ Released under AGPL see LICENSE for more information
 #include <QAtomicInteger>
 #include <QBitArray>
 #include <QBasicTimer>
+#include <QElapsedTimer>
 #include "sources/bytesourceabstract.h"
 
 namespace Ui {
@@ -135,7 +136,7 @@ class ComparisonDialog : public AppDialog
         QColor marksColor;
         QThread * workerThread;
         CompareWorker *worker;
-        QTime compareTimer;
+        QElapsedTimer compareTimer;
         QBasicTimer statsTimer;
         static const int BUTTONS_TO_SAVE;
 };

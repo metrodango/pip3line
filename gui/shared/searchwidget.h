@@ -18,6 +18,7 @@ Released under AGPL see LICENSE for more information
 #include <QAbstractListModel>
 #include <QTime>
 #include <QBasicTimer>
+#include <QElapsedTimer>
 #include "../sources/bytesourceabstract.h"
 
 class GuiHelper;
@@ -63,7 +64,7 @@ class FoundOffsetsModel : public QAbstractListModel
         Q_DISABLE_COPY(FoundOffsetsModel)
         BytesRangeList * ranges;
         SearchAbstract * searchDelegate;
-        QTime searchTimer;
+        QElapsedTimer searchTimer;
         int lastSelected;
 };
 

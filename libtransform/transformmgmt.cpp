@@ -152,12 +152,12 @@ bool TransformMgmt::loadTransforms(bool verbose) {
             }
         }
 
-        typesSet.unite(QSet<QString>::fromList(list));
+        typesSet.unite(QSet<QString>(list.begin(), list.end()));
     }
 
     typesSet.insert(DEFAULT_TYPE_USER);
 
-    typesList = typesSet.toList();
+    typesList = typesSet.values();
     typesList.sort(Qt::CaseInsensitive);
 
     // loading transforms from plugins
@@ -838,7 +838,7 @@ QSettings *TransformMgmt::getSettingsObj()
 QList<TransformAbstract *> TransformMgmt::getTransformInstances()
 {
     QMutexLocker locker(&deletedLock);
-    return transformInstances.toList();
+    return transformInstances.values();
 }
 
 

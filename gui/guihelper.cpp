@@ -1212,7 +1212,7 @@ void GuiHelper::refreshAll()
     refreshAutoSaveTimer();
 
     QStringList blacklist = settings->value(SETTINGS_FILTER_BLACKLIST, QStringList()).toStringList();
-    typesBlacklist = blacklist.toSet();
+    typesBlacklist = QSet<QString>(blacklist.begin(), blacklist.end());
 
     QHash<QString, QVariant> hash = settings->value(SETTINGS_MARKINGS_COLORS).toHash();
     if (hash.isEmpty())
@@ -1597,6 +1597,6 @@ void GuiHelper::onFilterChanged(const QModelIndex &topLeft, const QModelIndex &)
     } else {
         typesBlacklist.remove(item);
     }
-    settings->setValue(SETTINGS_FILTER_BLACKLIST, static_cast<QStringList>(typesBlacklist.toList()));
+    settings->setValue(SETTINGS_FILTER_BLACKLIST, static_cast<QStringList>(typesBlacklist.values()));
     emit filterChanged();
 }

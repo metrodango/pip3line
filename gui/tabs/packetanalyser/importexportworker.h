@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QIODevice>
 #include <QTime>
+#include <QElapsedTimer>
 #include "shared/guiconst.h"
 #include "pcapio/pcapdef.h"
 #include "packetmodelabstract.h"
@@ -73,7 +74,7 @@ class ImportExportWorker : public QObject
         bool exportFormattedXML;
         bool exportFormattedJson;
         bool enableCompression;
-        QTime timer;
+        QElapsedTimer timer;
         QList<QSharedPointer<Packet> > loadedPackets;
         bool plainBase64;
         bool plainToFile;

@@ -31,7 +31,7 @@ Released under AGPL see LICENSE for more information
 CompareWorker::CompareWorker(ByteSourceAbstract *sA, ByteSourceAbstract *sB, QObject *parent) :
     QObject(parent)
 {
-    curProgress.store(0);
+    curProgress.storeRelaxed(0);
     sourceA = sA;
     connect(this, &CompareWorker::newMarkingsA, sourceA, &ByteSourceAbstract::setNewMarkings, Qt::QueuedConnection);
     sourceB = sB;
@@ -202,7 +202,7 @@ void CompareWorker::setMarkColor(const QColor &value)
 
 quint64 CompareWorker::getProgress() const
 {
-    return curProgress.load();
+    return curProgress.loadRelaxed();
 }
 
 quint64 CompareWorker::getComparisonSize() const

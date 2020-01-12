@@ -23,8 +23,8 @@ Released under AGPL see LICENSE for more information
 
 using namespace GuiConst;
 
-AnalyseDialog::AnalyseDialog(GuiHelper *guiHelper, QWidget *parent) :
-    AppDialog(guiHelper, parent)
+AnalyseDialog::AnalyseDialog(GuiHelper *nguiHelper, QWidget *parent) :
+    AppDialog(nguiHelper, parent)
 {
     ui = new(std::nothrow) Ui::AnalyseDialog();
     if (ui == nullptr) {
@@ -194,7 +194,9 @@ void AnalyseDialog::charFrequencyAnalysis()
             totalChar++;
         }
     }
-    QList<ulong> vals = QList<ulong>::fromSet(charAnalysis.values().toSet());
+
+
+    QList<ulong> vals = charAnalysis.values();
     std::sort(vals.begin(),vals.end(), std::greater<ulong>());
     for (int i = 0; i < vals.size(); i++) {
         double percent = (static_cast<double>(vals.at(i)) * 100) / double(totalChar);

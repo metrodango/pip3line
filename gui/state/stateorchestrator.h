@@ -11,6 +11,7 @@ Released under AGPL see LICENSE for more information
 #ifndef STATEORCHESTRATOR_H
 #define STATEORCHESTRATOR_H
 
+#include <QElapsedTimer>
 #include <QObject>
 #include <QStack>
 #include <QTime>
@@ -53,7 +54,7 @@ class StateOrchestrator : public QObject
         QThread *localthread;
         quint64 flags;
         QString actionName;
-        QTime timer;
+        QElapsedTimer timer;
         QString fileName;
         QFile *file;
         QXmlStreamWriter * writer;
