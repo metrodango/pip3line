@@ -19,12 +19,6 @@ if (-not (Test-Path $openssldir)) {
 
 Write-Output "Visual Studio selected => $($version)"
 
-$QTbasesdir = "$($qtdir)/msvc2017_64"
-if (-not (Test-Path $QTbasesdir)) {
-    Write-Output "QT binary dir cannot be found => $($QTbasesdir)"
-    Exit 1
-}
-
 $packagedir =  "$($PSScriptRoot)\package"
 if (-not (Test-Path $packagedir)) {
      Write-Output "Creating package dir"
@@ -38,7 +32,7 @@ Copy-Item -Path "$($PSScriptRoot)\bin\pip3line.exe" -Destination "$($packagedir)
 Copy-Item -Path "$($PSScriptRoot)\bin\pip3linecmd.exe" -Destination "$($packagedir)"
 
 # missing librarY (??)
-Copy-Item -Path "$($QTbasesdir)\bin\Qt5PrintSupport.dll" -Destination "$($packagedir)"
+Copy-Item -Path "$($qtdir)\bin\Qt5PrintSupport.dll" -Destination "$($packagedir)"
 
 Write-Output "Copying distorm lib"
 
@@ -84,6 +78,6 @@ $plugins = Get-ChildItem -Path "plugins" -Name | ForEach-Object {"plugins\$_"}
 
 Write-Output "$($plugins)"
 
-iex "$($QTbasesdir)\bin\windeployqt.exe --release pip3line.exe transform.dll $($plugins)"
+iex "$($qtdir)\bin\windeployqt.exe --release pip3line.exe transform.dll $($plugins)"
 
 Pop-Location
