@@ -46,7 +46,7 @@ build_script:
 - cd ..
 
 after_build:
-- win_package.ps1 $($QTDIR) $($env:compiler) "C:\OpenSSL-v111-Win64"
+- powershell -exec bypass -File win_package.ps1 $($QTDIR) $($env:compiler) "C:\OpenSSL-v111-Win64"
 - ps: ren package "pip3line_$($env:APPVEYOR_BUILD_VERSION)_win_x64"
 - 7z a pip3line_%APPVEYOR_BUILD_VERSION%_win_x64.zip pip3line_%APPVEYOR_BUILD_VERSION%_win_x64
 
