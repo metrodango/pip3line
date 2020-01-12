@@ -5,11 +5,11 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 iex "git submodule update --init --recursive"
 
-iex "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
+iex "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141 /p:WindowsTargetPlatformVersion=10.0.17763.0"
 
-$qscintilla_version = "2.10.8"
-$qscintilla_file = "QScintilla_gpl-$($qscintilla_version).zip"
-$qscintilla_url = "https://sourceforge.net/projects/pyqt/files/QScintilla2/QScintilla-$($qscintilla_version)/QScintilla_gpl-$($qscintilla_version).zip"
+$qscintilla_version = "2.11.4"
+$qscintilla_file = "QScintilla-$($qscintilla_version).zip"
+$qscintilla_url = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($qscintilla_version)/QScintilla-$($qscintilla_version).zip"
 
 echo $qscintilla_url
 
@@ -22,7 +22,7 @@ if (-not (Test-Path $work_dir\$($qscintilla_file))) {
 
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$($work_dir)\$($qscintilla_file)", "$($work_dir)")
 
-Rename-Item "$($work_dir)\QScintilla_gpl-$($qscintilla_version)" "$($work_dir)\QScintilla_gpl"
+Rename-Item "$($work_dir)\QScintilla-$($qscintilla_version)" "$($work_dir)\QScintilla_gpl"
 
 Set-Location "$($work_dir)\QScintilla_gpl\Qt4Qt5"
 
