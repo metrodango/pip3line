@@ -23,7 +23,7 @@ environment:
 install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
-- powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141"
+- powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141 /p:WindowsTargetPlatformVersion=10.0.17763.0"
 - ps: $source = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($env:QSCINTILLA_VERSION)/QScintilla-$($env:QSCINTILLA_VERSION).zip"
 - ps: $destination = "QScintilla.zip"
 - ps: Invoke-WebRequest $source -OutFile $destination
@@ -46,7 +46,7 @@ build_script:
 - cd ..
 
 after_build:
-- win_package.bat $($env:compiler)
+- win_package.ps1 $(QTDIR) $($env:compiler) "C:\OpenSSL-v111-Win64"
 - ps: ren package "pip3line_$($env:APPVEYOR_BUILD_VERSION)_win_x64"
 - 7z a pip3line_%APPVEYOR_BUILD_VERSION%_win_x64.zip pip3line_%APPVEYOR_BUILD_VERSION%_win_x64
 

@@ -25,7 +25,7 @@ SET QT_LIBS=%QTDIR%
 echo QT libs selected %QT_LIBS%
 
 REM Openssl lib
-IF "%VSVERSION%"=="vs2017" set OPENSSL_PATH=C:\OpenSSL-v111-Win64
+SET OPENSSL_PATH=C:\OpenSSL-v111-Win64
 
 REM needed to copy the necessary Angle libs
 REM SET ANGLEUSE=false
@@ -39,7 +39,7 @@ REM copying binaries to the package directory
 REM
 @setlocal enableextensions enabledelayedexpansion
 
-echo [1] Copying pip3line binaries 
+echo [X] Copying pip3line binaries 
 md package > nul 2> nul
 cd package
 copy "..\lib\transform.dll"
@@ -48,7 +48,7 @@ copy "..\bin\pip3linecmd.exe"
 md plugins > nul 2> nul
 copy "..\bin\plugins\*.dll" ".\plugins"
 
-echo [1.1] Copying extras
+echo [X] Copying extras
 md extras > nul 2> nul
 xcopy "..\extras\*" ".\extras" /s /i
 
@@ -63,24 +63,19 @@ REM copy %QT_LIBS%"\bin\Qt5XmlPatterns.dll"
 REM copy %QT_LIBS%"\bin\Qt5Concurrent.dll"
 REM copy %QT_LIBS%"\bin\Qt5PrintSupport.dll"
 
-echo [3] Copying QT mandatory plugins
+echo [X] Copying QT mandatory plugins
 REM QT mandatory plug-ins, if missing the application won't even start
 md platforms
 copy %QT_LIBS%"\plugins\platforms\qminimal.dll" ".\platforms"
 copy %QT_LIBS%"\plugins\platforms\qwindows.dll" ".\platforms"
 
-echo [4] Copying distorm lib (if present)
+echo [X] Copying distorm lib (if present)
 REM Distorm3 lib
 SET "DISTORM_PATH=..\ext\distorm"
 IF NOT EXIST %DISTORM_PATH% GOTO Nonexistentdistorm
 copy %DISTORM_PATH%"\distorm3.dll"
 
-echo [5] Copying OpenSSL lib (if present) %OPENSSL_PATH%
-IF NOT EXIST "%OPENSSL_PATH%" GOTO NonexistentOpenssl
-
-copy "%OPENSSL_PATH%\bin\*.dll"
-
-echo [6] Copying QScintilla lib (if present)
+echo [X] Copying QScintilla lib (if present)
 REM Qscintilla lib
 SET "QSCINTILLA_PATH=..\ext\QScintilla_gpl\Qt4Qt5\release"
 IF NOT EXIST %QSCINTILLA_PATH% GOTO Nonexistentqscintilla
@@ -98,12 +93,18 @@ REM copy %QT_LIBS%"\bin\libGLESv2.dll"
 
 SET WINDEPLOY=%QT_LIBS%\bin\windeployqt.exe --release pip3line.exe
 
-echo [7] Running Qt deployement tool %WINDEPLOY%
+echo [X] Running Qt deployement tool %WINDEPLOY%
 
 %WINDEPLOY%
 
 cd ..
 GOTO End
+
+echo [X] Copying OpenSSL lib (if present) %OPENSSL_PATH%
+IF NOT EXIST "%OPENSSL_PATH%" GOTO NonexistentOpenssl
+
+copy "%OPENSSL_PATH%\bin\*.dll"
+
 
 :Usage
 ECHO.
