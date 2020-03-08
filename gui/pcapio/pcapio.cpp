@@ -87,7 +87,8 @@ const QByteArray PcapIO::PCAP_MAGIC_BE = "\xa1\xb2\xc3\xd4";
 
 PcapIO::PcapIO(QString filename, QObject *parent) :
     QObject(parent),
-    filename(filename)
+    filename(filename),
+    file(nullptr)
 {
     ownFileObject = true;
     initAttributes();
@@ -111,21 +112,23 @@ PcapIO::~PcapIO()
 bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
 {
     errorString.clear();
-    if (!filename.isEmpty()) {
-        file = new(std::nothrow) QFile(filename);
-        if (file == nullptr) {
-            qFatal("[PcapIO::open] Cannot allocate memory for QFile");
-        }
+    if (file == nullptr) {
+        if (!filename.isEmpty()) {
+            file = new(std::nothrow) QFile(filename);
+            if (file == nullptr) {
+                qFatal("[PcapIO::open] Cannot allocate memory for QFile");
+            }
 
-        if (!file->open(mode)) {
-            errorString = tr("Cannot open pcap file: %1").append(file->errorString());
-            qCritical() << "[PcapIO::openExistingFile]" << errorString;
+            if (!file->open(mode)) {
+                errorString = tr("Cannot open pcap file: %1").append(file->errorString());
+                qCritical() << "[PcapIO::openExistingFile]" << errorString;
+                return false;
+            }
+
+        } else {
+            qCritical() << "[PcapIO::openExistingFile] File name string is empty :{";
             return false;
         }
-
-    } else {
-        qCritical() << "[PcapIO::openExistingFile] File name string is empty :{";
-        return false;
     }
 
     if (file->isReadable()) {
@@ -140,7 +143,7 @@ bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
         }
     } else {
         errorString = tr("Cannot read pcap file");
-        qCritical() << "[PcapIO::openExistingFile]" << errorString;
+        qCritical() << "[PcapIO::openExistingFile]" << qPrintable(errorString);
         return false;
     }
 
@@ -150,16 +153,18 @@ bool PcapIO::openExistingFile(QIODevice::OpenModeFlag mode)
 
 bool PcapIO::createAndOpenFile()
 {
-    if (!filename.isEmpty()) {
-        file = new(std::nothrow) QFile(filename);
-        if (file == nullptr) {
-            qFatal("[PcapIO::createAndOpenNewFile] Cannot allocate memory for QFile");
-        }
+    if (file == nullptr) {
+        if (!filename.isEmpty()) {
+            file = new(std::nothrow) QFile(filename);
+            if (file == nullptr) {
+                qFatal("[PcapIO::createAndOpenNewFile] Cannot allocate memory for QFile");
+            }
 
-        if (!file->open(QIODevice::ReadWrite)) {
-            errorString = tr("Cannot open pcap file: %1").arg(file->errorString());
-            qCritical() << "[PcapIO::createAndOpenFile]" << errorString;
-            return false;
+            if (!file->open(QIODevice::ReadWrite)) {
+                errorString = tr("Cannot open pcap file: %1").arg(file->errorString());
+                qCritical() << "[PcapIO::createAndOpenFile]" << errorString;
+                return false;
+            }
         }
     }
 
@@ -229,6 +234,10 @@ quint64 PcapIO::numberOfPackets()
 
 PcapPacket *PcapIO::nextPacket()
 {
+    if (file == nullptr) {
+
+        return nullptr;
+    }
     PcapPacket * ret = new(std::nothrow) PcapPacket();
     if (ret == nullptr) {
         qFatal("[PcapIO::nextPacket] Cannot allocate memory for PcapPacket X{");
@@ -377,6 +386,9 @@ void PcapIO::initAttributes()
 
 bool PcapIO::readUInt32(quint32 *temp, QString field)
 {
+    if (file == nullptr) {
+        return false;
+    }
     QByteArray fourBytes(sizeof(quint32), '\0');
     qint64 read = file->read(fourBytes.data(), sizeof(quint32));
     if (read != sizeof(quint32)) {
@@ -395,6 +407,9 @@ bool PcapIO::readUInt32(quint32 *temp, QString field)
 
 bool PcapIO::readUInt16(quint16 *temp, QString field)
 {
+    if (file == nullptr) {
+        return false;
+    }
     QByteArray twoBytes(sizeof(quint16), '\0');
     qint64 read = file->read(twoBytes.data(), sizeof(quint16));
     if (read != sizeof(quint16)) {
@@ -413,6 +428,9 @@ bool PcapIO::readUInt16(quint16 *temp, QString field)
 
 bool PcapIO::readByteArray(QByteArray *temp, qint64 length, QString field)
 {
+    if (file == nullptr) {
+        return false;
+    }
     if (temp == nullptr) {
         qWarning() << "[PcapIO::readByteArray] null bytearray:" << field;
         return false;
@@ -505,6 +523,9 @@ QByteArray PcapIO::generatePcapHeader()
 
 bool PcapIO::readExistingFile()
 {
+    if (file == nullptr) {
+        return false;
+    }
     if (!file->isReadable())
         return false;
 
