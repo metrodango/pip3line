@@ -142,6 +142,8 @@ void ImportExportWorker::run()
     if (target->isOpen())
         target->close();
 
+    target->deleteLater();
+
 
     emit finished();
 }
@@ -206,6 +208,8 @@ void ImportExportWorker::loadFromPcap(QIODevice *file)
     } else {
         emit log(tr("Cannot open the pcap source file: %1").arg(pfile->getErrorString()), "Pcap import",Pip3lineConst::LERROR);
     }
+
+    delete pfile;
 
     //qDebug() << "perf 10: " << timer.restart();
 }
