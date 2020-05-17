@@ -88,7 +88,6 @@ GuiHelper::GuiHelper(TransformMgmt *ntransformFactory, QNetworkAccessManager *nm
 
     refreshAll();
 
-
     centralTransProc = new(std::nothrow) ThreadedProcessor();
     if (centralTransProc == nullptr) {
         qFatal("Cannot allocate memory for action CentralProcessor X{");

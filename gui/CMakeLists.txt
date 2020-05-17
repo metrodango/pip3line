@@ -125,8 +125,8 @@ set ( pip3line_HDRS
 	sources/searchabstract.h
 	sources/intermediatesource.h
 	sources/blocksources/blockssource.h
-        sources/blocksources/fileblocksource.h
-        sources/blocksources/filesourcewidget.h
+    sources/blocksources/fileblocksource.h
+    sources/blocksources/filesourcewidget.h
 	sources/blocksources/ipblockssources.h
 	sources/blocksources/connectionsinfoswidget.h
 	sources/blocksources/connectiondetails.h
@@ -255,8 +255,8 @@ set ( pip3line_SRCS
 	sources/searchabstract.cpp
 	sources/intermediatesource.cpp
 	sources/blocksources/blockssource.cpp
-        sources/blocksources/fileblocksource.cpp
-        sources/blocksources/filesourcewidget.cpp
+    sources/blocksources/fileblocksource.cpp
+    sources/blocksources/filesourcewidget.cpp
 	sources/blocksources/ipblockssources.cpp
 	sources/blocksources/connectionsinfoswidget.cpp
 	sources/blocksources/connectiondetails.cpp
@@ -310,7 +310,7 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/filteritem.cpp
 	tabs/packetanalyser/filterengine.cpp
 	tabs/packetanalyser/myoproxy.cpp
-        tabs/packetanalyser/myoproxywidget.cpp
+    tabs/packetanalyser/myoproxywidget.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp
@@ -364,7 +364,7 @@ set ( pip3line_UIS
 	tabs/packetanalyser/importexportdialog.ui
 	tabs/packetanalyser/packetanalyseroptionsdialog.ui
 	tabs/packetanalyser/filterdialog.ui
-        tabs/packetanalyser/myoproxywidget.ui
+    tabs/packetanalyser/myoproxywidget.ui
 	floatingdialog.ui
 	quickviewdialog.ui
 	quickviewitem.ui
@@ -375,7 +375,7 @@ set ( pip3line_UIS
 	sources/filewidget.ui
 	sources/blocksources/connectionsinfoswidget.ui
 	sources/blocksources/connectionswidget.ui
-        sources/blocksources/filesourcewidget.ui
+	sources/blocksources/filesourcewidget.ui
 	sources/blocksources/ipnetworkserverwidget.ui
 	sources/blocksources/baseblocksourcewidget.ui
 	sources/blocksources/ipnetworkclientwidget.ui
@@ -406,23 +406,19 @@ qt5_add_resources(RSCS ${pip3line_RSCS})
 
 add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
 
-set ( EXTERN_LIBS ${EXTERN_LIBS} )
-
 if(WIN32)
     target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent Qt5::WinMain )
 endif(WIN32)
 
-
 target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent ${EXTERN_LIBS} )
 
 if(UNIX)
-     install (TARGETS pip3line DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-     if (NOT APPLE)
-	install (FILES pip3line.desktop DESTINATION /usr/share/applications PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-	install (FILES icons/pip3line.png DESTINATION /usr/share/icons/hicolor/128x128/apps PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-     endif()
-     include( GNUInstallDirs )
-     install(FILES pip3line.1
-        DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1 COMPONENT doc)
+	install (TARGETS pip3line DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+	if (NOT APPLE)
+		install (FILES pip3line.desktop DESTINATION /usr/share/applications PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+		install (FILES icons/pip3line.png DESTINATION /usr/share/icons/hicolor/128x128/apps PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+	endif()
+	include( GNUInstallDirs )
+	install(FILES pip3line.1 DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1 COMPONENT doc)
 endif(UNIX)
 

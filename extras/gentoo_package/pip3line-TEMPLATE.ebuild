@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-PYTHON_COMPAT=( python{2_7,3_{4,5,6,7}} )
+PYTHON_COMPAT=( python{2_7,3_{4,5,6,7,8}} )
 
 inherit cmake-utils python-r1
 
@@ -43,14 +43,18 @@ RDEPEND="
 	ssl? ( dev-libs/openssl:0= )"
 
 DEPEND="${RDEPEND}
-	distorm? ( dev-vcs/git )"
+	distorm? ( dev-vcs/git sys-devel/make )"
+
+CMAKE_MAKEFILE_GENERATOR="emake"
 
 src_unpack() {
-	if [ "${A}" != "" ]; then
+
+	einfo "Unpacking  ${A}"
+	pakclist=${A}
+	if [ "${pakclist}" != "" ]; then
 		unpack ${A}
 		if [ "${DISTORMV}" != "" ]; then # we are in a versioned ebuild, we need to link the distorm src dir inside the pip3line one
-		   
-			cp -ar ${WORKDIR}/distorm-${DISTORMV}/* ${WORKDIR}/${P}/ext/distorm
+			cp -ar "${WORKDIR}"/distorm-"${DISTORMV}"/* "${WORKDIR}"/"${P}"/ext/distorm
 		fi
 	fi
 }

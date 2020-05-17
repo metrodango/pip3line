@@ -24,3 +24,4 @@ extras/burp_plugin/out
 extras/burp_plugin/.classpath
 *.swp
 Pip3line.app
+_lgtm_*
