@@ -13,7 +13,7 @@ Windows Builds
 
 [![Build status](https://ci.appveyor.com/api/projects/status/5ck7rc2sq4py9u39/branch/master?svg=true)](https://ci.appveyor.com/project/metrodango/pip3line/branch/master)
 
-Raw bytes manipulation utility, able to apply well known and less well known transformations.
+Raw bytes manipulation utility, able to apply well known and less well known transformations, quick binary search, network proxy interception and more.
 
 ## Install on Windows:
 
