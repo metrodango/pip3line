@@ -14,12 +14,12 @@ project( python3plugin )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DPYTHONPLUGIN_LIBRARY -DQT_NO_KEYWORDS -DBUILD_PYTHON_3)
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
+find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 
 # no need for harcoded libs here, if none are supplied or found, failing the build
 

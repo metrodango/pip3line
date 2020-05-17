@@ -969,6 +969,7 @@ void SSLOptionsWidget::onHTTP2NextProtocolToggled(bool checked)
 
     emit allowedNextProtocolsUpdated(allowedNextProtocols);
 #else
+    Q_UNUSED(checked)
     qCritical() << tr("[SSLOptionsWidget::onHTTP2NextProtocolToggled] unsupported T_T");
 #endif
 }

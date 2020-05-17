@@ -12,8 +12,12 @@ message ( STATUS "Configuring pip3line gui --" )
 project( pip3line )
 set ( CMAKE_BUILD_TYPE Release )
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOUIC_SEARCH_PATHS shared)
 
 if (WITH_SCINTILLA)
     set (QSCINTILLA_HOME "${PROJECT_SOURCE_DIR}\\..\\ext\\QScintilla_gpl")
@@ -33,11 +37,7 @@ if (WITH_SCINTILLA)
     endif()
 endif(WITH_SCINTILLA)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
-find_package(Qt5Network)
-find_package(Qt5Concurrent)
+find_package(Qt5 COMPONENTS Core Widgets Svg Network Concurrent REQUIRED)
 
 include_directories (
 	../libtransform)
@@ -124,9 +124,9 @@ set ( pip3line_HDRS
 	sources/largefile.h
 	sources/searchabstract.h
 	sources/intermediatesource.h
-	sources/blocksources/blockssource.h
-    sources/blocksources/fileblocksource.h
-    sources/blocksources/filesourcewidget.h
+        sources/blocksources/blockssource.h
+        sources/blocksources/fileblocksource.h
+        sources/blocksources/filesourcewidget.h
 	sources/blocksources/ipblockssources.h
 	sources/blocksources/connectionsinfoswidget.h
 	sources/blocksources/connectiondetails.h
@@ -254,9 +254,9 @@ set ( pip3line_SRCS
 	sources/largefile.cpp
 	sources/searchabstract.cpp
 	sources/intermediatesource.cpp
-	sources/blocksources/blockssource.cpp
-    sources/blocksources/fileblocksource.cpp
-    sources/blocksources/filesourcewidget.cpp
+        sources/blocksources/blockssource.cpp
+        sources/blocksources/fileblocksource.cpp
+        sources/blocksources/filesourcewidget.cpp
 	sources/blocksources/ipblockssources.cpp
 	sources/blocksources/connectionsinfoswidget.cpp
 	sources/blocksources/connectiondetails.cpp
@@ -309,8 +309,8 @@ set ( pip3line_SRCS
 	tabs/packetanalyser/filterdialog.cpp
 	tabs/packetanalyser/filteritem.cpp
 	tabs/packetanalyser/filterengine.cpp
-	tabs/packetanalyser/myoproxy.cpp
-    tabs/packetanalyser/myoproxywidget.cpp
+        tabs/packetanalyser/myoproxy.cpp
+        tabs/packetanalyser/myoproxywidget.cpp
 	shared/offsetgotowidget.cpp
 	shared/searchwidget.cpp
 	shared/readonlybutton.cpp
@@ -337,8 +337,8 @@ set ( pip3line_SRCS
 	state/statedialog.cpp
 	state/statestatuswidget.cpp
 	pcapio/pcapdef.cpp
-	pcapio/pcapio.cpp
-	)
+        pcapio/pcapio.cpp
+)
 
 set ( pip3line_UIS
 	mainwindow.ui
@@ -363,8 +363,8 @@ set ( pip3line_UIS
 	tabs/packetanalysertab.ui
 	tabs/packetanalyser/importexportdialog.ui
 	tabs/packetanalyser/packetanalyseroptionsdialog.ui
-	tabs/packetanalyser/filterdialog.ui
-    tabs/packetanalyser/myoproxywidget.ui
+        tabs/packetanalyser/filterdialog.ui
+        tabs/packetanalyser/myoproxywidget.ui
 	floatingdialog.ui
 	quickviewdialog.ui
 	quickviewitem.ui
@@ -395,16 +395,13 @@ set ( pip3line_UIS
 	views/hexview.ui
 	views/textview.ui
 	views/foldedview.ui
-	)
+)
 
 set ( pip3line_RSCS
 	gui_res.qrc
-	)
+)
 
-qt5_wrap_ui(UIS ${pip3line_UIS})
-qt5_add_resources(RSCS ${pip3line_RSCS})
-
-add_executable ( pip3line WIN32 ${pip3line_SRCS} ${UIS} ${RSCS})
+add_executable ( pip3line WIN32 ${pip3line_UIS} ${pip3line_SRCS} ${pip3line_RSCS})
 
 if(WIN32)
     target_link_libraries ( pip3line Qt5::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent Qt5::WinMain )

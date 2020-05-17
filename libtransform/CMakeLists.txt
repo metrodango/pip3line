@@ -13,7 +13,9 @@ project( transform )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DLIBTRANSFORM_LIBRARY)
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 file(STRINGS commonstrings.h VERSION_FILE)
@@ -73,9 +75,7 @@ set ( transform_UIS
     moduletransformwidget.ui
     )
 
-qt5_wrap_ui(UIS ${transform_UIS})
-
-add_library ( transform SHARED ${transform_SRCS} ${RSCS} ${UIS} )
+add_library ( transform SHARED ${transform_SRCS} ${RSCS} ${transform_UIS} )
 
 if (UNIX)
     set_target_properties(transform PROPERTIES VERSION ${LIBTRANSFORM_VERSION_MAJOR}
@@ -84,7 +84,7 @@ if (UNIX)
             "${transform_HDRS};${transform_MOCS};LibTransform")
 endif(UNIX)
 
-target_link_libraries(transform Qt5::Widgets Qt5::Svg Qt5::Concurrent)
+target_link_libraries(transform PRIVATE Qt5::Widgets Qt5::Svg Qt5::Concurrent)
 
 IF(UNIX)
         include( GNUInstallDirs )

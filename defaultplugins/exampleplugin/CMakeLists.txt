@@ -13,13 +13,12 @@ project( exampleplugin )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DEXAMPLEPLUGIN_LIBRARY )
 
-
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
+find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 
 include_directories (
     ../../libtransform/)

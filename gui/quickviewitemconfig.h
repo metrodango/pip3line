@@ -22,8 +22,8 @@ Released under AGPL see LICENSE for more information
 using namespace Pip3lineConst;
 
 namespace Ui {
-class QuickViewItemConfig;
-class TransformDisplayConf;
+    class QuickViewItemConfig;
+    class TransformDisplayConf;
 }
 
 class QuickViewItemConfig : public QDialog

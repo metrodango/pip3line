@@ -13,15 +13,12 @@ project( baseplugins )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DBASEPLUGINS_LIBRARY)
 
-
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
-find_package(Qt5Network)
-find_package(Qt5XmlPatterns)
+find_package(Qt5 COMPONENTS Core Widgets Svg XmlPatterns Network REQUIRED)
 
 include_directories (
     ../../libtransform/)
@@ -262,12 +259,9 @@ set ( baseplugins_RSCS
     baseplugins_res.qrc
     )
 
-qt5_wrap_ui(UIS ${baseplugins_UIS})
-QT5_ADD_RESOURCES(RSCS ${baseplugins_RSCS})
-
 set ( EXTERN_LIB transform )
 
-add_library ( baseplugins MODULE ${baseplugins_SRCS} ${UIS} ${RSCS} )
+add_library ( baseplugins MODULE ${baseplugins_SRCS} ${baseplugins_UIS} ${baseplugins_RSCS} )
 
 target_link_libraries ( baseplugins Qt5::Widgets Qt5::Svg Qt5::Network Qt5::XmlPatterns ${EXTERN_LIB} )
 

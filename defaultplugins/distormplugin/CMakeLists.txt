@@ -15,12 +15,12 @@ project( distormplugin )
 set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DDISTORM_LIBRARY )
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
+find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 
 include_directories (
     ${DISTORM3_INCLUDE_PATH}
@@ -58,21 +58,19 @@ set ( distormplugin_HDRS
     distormplugin.h
     distormwidget.h
     distormtransf.h
-    )
+)
 
 set ( distormplugin_SRCS
     distormplugin.cpp
     distormwidget.cpp
     distormtransf.cpp
-    )
+)
     
 set ( distormplugin_UIS
     distormwidget.ui
-    )
+)
 
-qt5_wrap_ui(UIS ${distormplugin_UIS})
-
-add_library ( distormplugin MODULE ${distormplugin_SRCS} ${UIS} )
+add_library ( distormplugin MODULE ${distormplugin_SRCS} ${distormplugin_UIS} )
 if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         find_package(Git QUIET)
         if(GIT_FOUND AND NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make")
