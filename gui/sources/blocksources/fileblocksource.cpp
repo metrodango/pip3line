@@ -165,7 +165,7 @@ void FileBlockSource::sendBlock(Block *block)
 
         data = applyOutboundTransform(data);
 
-        stream << data << endl;
+        stream << data << Qt::endl;
         stream.flush();
     } else {
         emit log(tr("File source cannot be used for writing !"), ID, Pip3lineConst::LERROR);

@@ -31,7 +31,7 @@ OpenSSLHashes::OpenSSLHashes(const QString &nhashName)
     else if (!hashList.isEmpty()) {
         hashName = hashList.at(0);
     } else {
-        cerr << "Error in Openssl hashes plugins: no hash function loaded." << endl;
+        cerr << "Error in Openssl hashes plugins: no hash function loaded." << Qt::endl;
     }
 }
 

@@ -185,9 +185,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    // initializing the default random generator
-    qsrand(static_cast<uint>(QDateTime::currentDateTime().time().msec()));
-
     int ret = 0;
     w = new(std::nothrow) MainWindow(debugging);
     if (w != nullptr) {

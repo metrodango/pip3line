@@ -13,6 +13,8 @@ Released under AGPL see LICENSE for more information
 
 #include "transformabstract.h"
 
+#include <QRandomGenerator>
+
 class Padding : public TransformAbstract
 {
     Q_OBJECT
@@ -40,7 +42,7 @@ class Padding : public TransformAbstract
         bool setBlockSize(int val);
         QString help() const override;
     private:
-
+        QRandomGenerator rand;
         char padChar;
         PaddingVariant choosenVariant;
         int blockSize;

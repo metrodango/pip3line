@@ -206,7 +206,8 @@ void HexDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, c
                     if (selectionActive)
                         length = 1;
     //                if (start < textSize)
-                        textData.setSelection(start,length);
+
+                    textData.setSelection(start,length);
                 }
             }
         }
@@ -654,23 +655,23 @@ void ByteTableView::wheelEvent(QWheelEvent *event)
     int moved = 0;
     if (verticalScrollBar()->isVisible()) {
         if (verticalScrollBar()->sliderPosition() == 0
-                && event->delta() >= 0
+                && event->angleDelta().y() >= 0
                 && currentModel->getSource()->tryMoveUp(hexColumncount)) {
             setAttribute(Qt::WA_NoMousePropagation,true);
             moved = hexColumncount;
 
         } else if (verticalScrollBar()->sliderPosition() == verticalScrollBar()->maximum()
-                 && event->delta() < 0
+                 && event->angleDelta().y() < 0
                  && currentModel->getSource()->tryMoveDown(hexColumncount)) {
             setAttribute(Qt::WA_NoMousePropagation,true);
             moved = -1 * hexColumncount;
         }
     } else {
-        if (event->delta() >= 0 && currentModel->getSource()->tryMoveUp(hexColumncount)) {
+        if (event->angleDelta().y() >= 0 && currentModel->getSource()->tryMoveUp(hexColumncount)) {
             setAttribute(Qt::WA_NoMousePropagation,true);
             moved = hexColumncount;
         }
-        else if (event->delta() < 0 && currentModel->getSource()->tryMoveDown(hexColumncount)) {
+        else if (event->angleDelta().y() < 0 && currentModel->getSource()->tryMoveDown(hexColumncount)) {
             setAttribute(Qt::WA_NoMousePropagation,true);
             moved = -1 * hexColumncount;
         }

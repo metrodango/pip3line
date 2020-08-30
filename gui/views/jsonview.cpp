@@ -297,7 +297,7 @@ bool JsonModel::setData(const QModelIndex &index, const QVariant &value, int rol
 Qt::ItemFlags JsonModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-              return nullptr;
+              return Qt::NoItemFlags;
 
     JsonItem* item = static_cast<JsonItem*>(index.internalPointer());
     JsonItem::Type vtype = item->getValueType();

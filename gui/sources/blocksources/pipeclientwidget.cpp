@@ -196,7 +196,7 @@ void PipesModel::refresh()
         QByteArray data = linuxSockets.readAll();
         linuxSockets.close();
         bool ok = false;
-        QHash<quint64, ProcessProperties> procList = getProcList();
+        QMultiHash<quint64, ProcessProperties> procList = getProcList();
 
         QList<QByteArray> lines = data.split('\n');
         if (lines.size() > 0) {
@@ -277,9 +277,9 @@ void PipesModel::refresh()
     endResetModel();
 }
 
-QHash<quint64, PipesModel::ProcessProperties> PipesModel::getProcList()
+QMultiHash<quint64, PipesModel::ProcessProperties> PipesModel::getProcList()
 {
-    QHash<quint64, ProcessProperties> procList;
+    QMultiHash<quint64, ProcessProperties> procList;
 
 #if defined(Q_OS_LINUX)
     QDir dproc("/proc");
@@ -308,7 +308,7 @@ QHash<quint64, PipesModel::ProcessProperties> PipesModel::getProcList()
                     quint64 inode = socketRegexp.cap(1).toULong(&ok);
                     if (ok) {
                         pp.pid = pid;
-                        procList.insertMulti(inode, pp);
+                        procList.insert(inode, pp);
                       //  qDebug() << fdi.symLinkTarget();
                     }
                 }

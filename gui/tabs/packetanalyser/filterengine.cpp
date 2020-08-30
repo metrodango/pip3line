@@ -260,7 +260,7 @@ bool FilterEngine::assertExpr(QString expression)
     }
 
     // spliting by space
-    strTokens = expression.split(" ",QString::SkipEmptyParts);
+    strTokens = expression.split(" ",Qt::SkipEmptyParts);
     //debugprintstrlist(strTokens);
     // splitting by parenthesis
     QStringList temp;

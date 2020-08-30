@@ -269,7 +269,7 @@ void GuiHelper::updateSortedTabs()
     QSetIterator<TabAbstract *> i(tabs);
     while (i.hasNext()) {
      TabAbstract * tg = i.next();
-     sortedTabs.insertMulti(tg->getName(), tg);
+     sortedTabs.insert(tg->getName(), tg);
     }
 }
 

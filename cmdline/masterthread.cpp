@@ -112,7 +112,7 @@ void MasterThread::logError(const QString mess, const QString &source)
         if (!source.isEmpty()) {
             *errlog << source << ": ";
         }
-        *errlog << mess << endl;
+        *errlog << mess << Qt::endl;
     }
 }
 
@@ -122,6 +122,6 @@ void MasterThread::logStatus(const QString mess, const QString &source)
         if (!source.isEmpty()) {
             *messlog << source << ": ";
         }
-        *messlog << mess << endl;
+        *messlog << mess << Qt::endl;
     }
 }

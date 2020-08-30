@@ -22,7 +22,7 @@ FixProtocol::FixProtocol()
     QFile referenceFile;
     referenceFile.setFileName(":/definitions/FIX44.xml");
     if (!referenceFile.open(QIODevice::ReadOnly)) {
-        cout << tr("Error while opening the reference file:\n %1").arg(referenceFile.errorString()) << endl;
+        cout << tr("Error while opening the reference file:\n %1").arg(referenceFile.errorString()) << Qt::endl;
     }
     query.setFocus(&referenceFile);
     referenceFile.close();

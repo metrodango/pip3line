@@ -36,7 +36,7 @@ class PipesModel : public QAbstractTableModel
         };
         static const int COLUMN_COUNT;
         static const QStringList headersList;
-        QHash<quint64, ProcessProperties> getProcList();
+        QMultiHash<quint64, ProcessProperties> getProcList();
         QList<PipePropperties> pipesList;
 };
 

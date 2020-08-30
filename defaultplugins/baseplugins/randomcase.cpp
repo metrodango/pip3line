@@ -13,7 +13,8 @@ Released under AGPL see LICENSE for more information
 #include <QTime>
 #include <QDebug>
 
-RandomCase::RandomCase()
+RandomCase::RandomCase() :
+    rand(QRandomGenerator::securelySeeded())
 {
 
 }
@@ -48,11 +49,10 @@ void RandomCase::reRandomize()
 
 void RandomCase::transform(const QByteArray &input, QByteArray &output) {
     output.clear();
-    qsrand(static_cast<uint>(QTime::currentTime().msec())); // non cryptographic quality, boo
     QByteArray temp;
     for (int i = 0; i < input.size(); i++) {
         temp.append(input.at(i));
-        int rval = qrand();
+        quint32 rval = rand.generate();
         output.append((rval % 2 == 0) ? temp.toUpper() : temp.toLower());
         temp.clear();
     }

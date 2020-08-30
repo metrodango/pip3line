@@ -13,6 +13,8 @@ Released under AGPL see LICENSE for more information
 
 #include "transformabstract.h"
 
+#include <QRandomGenerator>
+
 class RandomCase : public TransformAbstract
 {
     Q_OBJECT
@@ -29,7 +31,8 @@ class RandomCase : public TransformAbstract
         QString help() const override;
     public slots:
         void reRandomize();
-
+    private:
+        QRandomGenerator rand;
 };
 
 #endif // RANDOMCASE_H

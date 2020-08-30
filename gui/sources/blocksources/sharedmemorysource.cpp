@@ -66,7 +66,7 @@ QHash<QString, QString> SharedMemorySource::getConfiguration()
 {
     QHash<QString, QString> ret = BlocksSource::getConfiguration();
     if (memConn != nullptr) {
-        ret.unite(memConn->getConfiguration());
+        ret.insert(memConn->getConfiguration());
     }
     return ret;
 }
