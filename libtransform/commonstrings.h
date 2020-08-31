@@ -103,7 +103,7 @@ namespace Pip3lineConst {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 #define QTENDL Qt::endl
 #else
-        QTENDL endl
+#define QTENDL endl
 #endif
 
 #endif // XMLCOMMON_H
