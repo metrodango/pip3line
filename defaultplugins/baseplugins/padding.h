@@ -42,7 +42,9 @@ class Padding : public TransformAbstract
         bool setBlockSize(int val);
         QString help() const override;
     private:
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         QRandomGenerator rand;
+#endif
         char padChar;
         PaddingVariant choosenVariant;
         int blockSize;

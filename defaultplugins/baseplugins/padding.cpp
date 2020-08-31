@@ -16,11 +16,16 @@ Released under AGPL see LICENSE for more information
 const QString Padding::id = "Padding";
 
 Padding::Padding() :
-    rand(QRandomGenerator::securelySeeded()),
+
     padChar('\x01'),
     choosenVariant(ZERO),
     blockSize(8)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    rand = QRandomGenerator::securelySeeded();
+#else
+    qsrand(static_cast<uint>(QTime::currentTime().msec())); // non cryptographic quality, boo
+#endif
 
 }
 
@@ -162,7 +167,11 @@ void Padding::transform(const QByteArray &input, QByteArray &output) {
         {
 
             for (int i = 0; i < paddingLength; i++)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
                 output.append(static_cast<char>(rand.bounded(256)));
+#else
+                output.append(static_cast<char>((qrand()) % 256));
+#endif
         }
             break;
         case PKCS7:

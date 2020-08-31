@@ -32,7 +32,9 @@ class RandomCase : public TransformAbstract
     public slots:
         void reRandomize();
     private:
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         QRandomGenerator rand;
+#endif
 };
 
 #endif // RANDOMCASE_H

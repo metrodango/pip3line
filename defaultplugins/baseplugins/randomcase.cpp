@@ -13,10 +13,13 @@ Released under AGPL see LICENSE for more information
 #include <QTime>
 #include <QDebug>
 
-RandomCase::RandomCase() :
-    rand(QRandomGenerator::securelySeeded())
+RandomCase::RandomCase()
 {
-
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    rand = QRandomGenerator::securelySeeded();
+#else
+    qsrand(static_cast<uint>(QTime::currentTime().msec())); // non cryptographic quality, boo
+#endif
 }
 
 const QString RandomCase::id = "Random Case";
@@ -52,7 +55,11 @@ void RandomCase::transform(const QByteArray &input, QByteArray &output) {
     QByteArray temp;
     for (int i = 0; i < input.size(); i++) {
         temp.append(input.at(i));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
         quint32 rval = rand.generate();
+#else
+        int rval = qrand();
+#endif
         output.append((rval % 2 == 0) ? temp.toUpper() : temp.toLower());
         temp.clear();
     }
