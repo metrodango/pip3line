@@ -777,7 +777,13 @@ void FilterCIDs::setConfiguration(const QHash<QString, QString> &conf)
     bool ok  = false;
 
     if (conf.contains(GuiConst::STATE_CID_LIST)) {
-        QStringList list = conf.value(GuiConst::STATE_CID_LIST).split(FilterCIDs::SEP,Qt::SkipEmptyParts);
+        QStringList list = conf.value(GuiConst::STATE_CID_LIST).split(FilterCIDs::SEP,
+                                                              #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                                      Qt::SkipEmptyParts
+                                                              #else
+                                                                      QString::SkipEmptyParts
+                                                              #endif
+                                                                      );
         for (int i = 0; i < list.size(); i++) {
             int val = list.at(i).toInt(&ok);
             if (ok) {

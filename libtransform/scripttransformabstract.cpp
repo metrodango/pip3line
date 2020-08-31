@@ -96,7 +96,13 @@ bool ScriptTransformAbstract::setConfiguration(QHash<QString, QString> propertie
     if (!moduleName.isEmpty()) {
         QString parametersList = propertiesList.value(PROP_MODULE_PARAMS, QString());
         if (!parametersList.isEmpty()) {
-            QStringList list = parametersList.split("|", Qt::SkipEmptyParts);
+            QStringList list = parametersList.split("|",
+                                        #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                Qt::SkipEmptyParts
+                                        #else
+                                                QString::SkipEmptyParts
+                                        #endif
+                                                );
             for (int i = 0 ; i < list.size(); i++) {
                 QStringList param = list.at(i).split(":");
                 if (param.size() != 2) {

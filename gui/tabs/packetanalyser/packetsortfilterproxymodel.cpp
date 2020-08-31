@@ -228,7 +228,13 @@ void PacketSortFilterProxyModel::setConfiguration(const QHash<QString, QString> 
     }
 
     if (conf.contains(GuiConst::STATE_PACKET_PROXY_EQUALITY_TARGET_COLUMNS)) {
-        QStringList equalList = conf.value(GuiConst::STATE_PACKET_PROXY_EQUALITY_TARGET_COLUMNS).split(GuiConst::STATE_FIELD_SEPARATOR, Qt::SkipEmptyParts);
+        QStringList equalList = conf.value(GuiConst::STATE_PACKET_PROXY_EQUALITY_TARGET_COLUMNS).split(GuiConst::STATE_FIELD_SEPARATOR,
+                                                                                               #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                                                                       Qt::SkipEmptyParts
+                                                                                               #else
+                                                                                                       QString::SkipEmptyParts
+                                                                                               #endif
+                                                                                                       );
         if (!equalList.isEmpty()) {
             equalityColumns.clear();
             for (int i = 0; i < equalList.size(); i++) {

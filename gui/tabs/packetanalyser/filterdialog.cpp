@@ -55,7 +55,13 @@ CIDValidator::~CIDValidator()
 QValidator::State CIDValidator::validate(QString &input, int &) const
 {
     QValidator::State ret = QValidator::Acceptable;
-    QStringList clist = input.split(FilterCIDs::SEP, Qt::SkipEmptyParts);
+    QStringList clist = input.split(FilterCIDs::SEP,
+                                #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                        Qt::SkipEmptyParts
+                                #else
+                                        QString::SkipEmptyParts
+                                #endif
+                                        );
     for (int i = 0; i < clist.size(); i++) {
         bool ok = false;
         clist.at(i).toInt(&ok);
@@ -534,7 +540,13 @@ QSharedPointer<FilterItem> FilterDialog::getCurrentConfItem()
         item = ditem;
     } else if (colSelected == PacketModelAbstract::COLUMN_CID) {
         QSharedPointer<FilterCIDs> ditem = QSharedPointer<FilterCIDs>(new(std::nothrow ) FilterCIDs());
-        QStringList clist = ui->cidLineEdit->text().split(FilterCIDs::SEP, Qt::SkipEmptyParts);
+        QStringList clist = ui->cidLineEdit->text().split(FilterCIDs::SEP,
+                                                  #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                          Qt::SkipEmptyParts
+                                                  #else
+                                                          QString::SkipEmptyParts
+                                                  #endif
+                                                          );
         QList<int> cilist;
         for (int i = 0; i < clist.size(); i++) {
             bool ok = false;

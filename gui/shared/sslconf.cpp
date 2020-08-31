@@ -206,9 +206,21 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
     if (conf.contains(CONF_SSL_CIPHERS)) {
         sslCiphers.clear();
         QString ciphers_str = conf.value(CONF_SSL_CIPHERS);
-        QStringList cipherListstr = ciphers_str.split(CONF_SSL_CIPHER_SEPARATOR, Qt::SkipEmptyParts);
+        QStringList cipherListstr = ciphers_str.split(CONF_SSL_CIPHER_SEPARATOR,
+                                              #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                      Qt::SkipEmptyParts
+                                              #else
+                                                      QString::SkipEmptyParts
+                                              #endif
+                                                      );
         for (int i = 0; i < cipherListstr.size(); i++) {
-            QStringList compoCipher = cipherListstr.at(i).split(GuiConst::STATE_FIELD_SEPARATOR, Qt::SkipEmptyParts);
+            QStringList compoCipher = cipherListstr.at(i).split(GuiConst::STATE_FIELD_SEPARATOR,
+                                                    #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                            Qt::SkipEmptyParts
+                                                    #else
+                                                            QString::SkipEmptyParts
+                                                    #endif
+                                                            );
             if (compoCipher.size() == 2) {
                 int protoVal = compoCipher.at(0).toInt(&ok);
                 if (ok && (protoVal == QSsl::SslV2 ||
@@ -253,7 +265,13 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
 
     if (conf.contains(CONF_SSL_ALLOWED_NEXT_PROTOCOLS)) {
         allowedNextProtocols.clear();
-        QStringList allowedNextList = conf.value(CONF_SSL_ALLOWED_NEXT_PROTOCOLS).split(GuiConst::STATE_FIELD_SEPARATOR, Qt::SkipEmptyParts);
+        QStringList allowedNextList = conf.value(CONF_SSL_ALLOWED_NEXT_PROTOCOLS).split(GuiConst::STATE_FIELD_SEPARATOR,
+                                                                                #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                                                        Qt::SkipEmptyParts
+                                                                                #else
+                                                                                        QString::SkipEmptyParts
+                                                                                #endif
+                                                                                        );
         for (int i = 0; i < allowedNextList.size(); i++) {
             QByteArray val = QByteArray::fromHex(allowedNextList.at(i).toUtf8());
             if (!val.isEmpty()) {
@@ -264,7 +282,13 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
 
     if (conf.contains(CONF_SSL_ELLIPTICS_CURVES)) {
         ellipticCurves.clear();
-        QStringList ellipticCurvesList = conf.value(CONF_SSL_ELLIPTICS_CURVES).split(GuiConst::STATE_FIELD_SEPARATOR, Qt::SkipEmptyParts);
+        QStringList ellipticCurvesList = conf.value(CONF_SSL_ELLIPTICS_CURVES).split(GuiConst::STATE_FIELD_SEPARATOR,
+                                                                             #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                                                                                     Qt::SkipEmptyParts
+                                                                             #else
+                                                                                     QString::SkipEmptyParts
+                                                                             #endif
+                                                                                     );
         for (int i = 0; i < ellipticCurvesList.size(); i++) {
             QSslEllipticCurve curve = QSslEllipticCurve::fromShortName(ellipticCurvesList.at(i));
             if (curve.isValid()) {
