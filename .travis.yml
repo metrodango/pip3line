@@ -32,7 +32,7 @@ before_install:
       brew update;
       brew unlink python@2;
       brew upgrade cmake qt5 python3 openssl git;
-      brew install qscintilla2
+      brew install qscintilla2;
     else
       sudo apt-get -qq update;
     fi
