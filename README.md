@@ -32,7 +32,7 @@ $ brew install pip3line
 
 ### Gentoo
 
-copy the template ebuild from *extras/gentoo_package/pip3line-TEMPLATE.ebuild*  into a local Gentoo repository, with the relevant versionning info, for example:
+copy the template ebuild from *extras/gentoo_package/pip3line-TEMPLATE.ebuild*  into a local Gentoo repository, with the relevant versioning info, for example:
 
 ~~~
 pip3line-9999.ebuild (for the github based ebuild)

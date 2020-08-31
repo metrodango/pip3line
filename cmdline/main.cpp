@@ -25,21 +25,22 @@ Released under AGPL see LICENSE for more information
 #define TRANSFORM_NAME_PARAM "-t"
 #define VERBOSEPARAM "-v"
 
+
 void usage() {
     QTextStream cout(stdout);
 
-    cout << "pip3linecmd" << QString(" %1").arg(VERSION_STRING) << QObject::tr(" Using libtransform v%1").arg(LIB_TRANSFORM_VERSION) << Qt::endl;
-    cout << "Usage: pip3linecmd" << " [options]" << Qt::endl;
-    cout << "       " << BINARY_INPUT_PARAM << QObject::tr(" Treat the input as one binary block (as opposed to text file with lines)") << Qt::endl;
-    cout << "       " << FILE_PARAM << QObject::tr(" [configuration file] name of the configuration file to use (generated from the GUI)") <<Qt:: endl;
-    cout << "       " << HELP_PARAM << QObject::tr(" Display this help") << Qt::endl;
+    cout << "pip3linecmd" << QString(" %1").arg(VERSION_STRING) << QObject::tr(" Using libtransform v%1").arg(LIB_TRANSFORM_VERSION) << QTENDL;
+    cout << "Usage: pip3linecmd" << " [options]" << QTENDL;
+    cout << "       " << BINARY_INPUT_PARAM << QObject::tr(" Treat the input as one binary block (as opposed to text file with lines)") << QTENDL;
+    cout << "       " << FILE_PARAM << QObject::tr(" [configuration file] name of the configuration file to use (generated from the GUI)") << QTENDL;
+    cout << "       " << HELP_PARAM << QObject::tr(" Display this help") << QTENDL;
     cout << "       " << INBOUND_PARAM << QObject::tr(" Inbound \"way\" the transform is going to be run. It usually means encoding/encrypting."
-                                                      " Ignored if the transform is one way.") << Qt::endl;
-    cout << "       " << NOERRORPARAM << QObject::tr(" do not show errors") << Qt::endl;
+                                                      " Ignored if the transform is one way.") << QTENDL;
+    cout << "       " << NOERRORPARAM << QObject::tr(" do not show errors") << QTENDL;
     cout << "       " << OUTBOUND_PARAM << QObject::tr(" Outbound \"way\" the transform is going to be run. It usually means decoding/decrypting. "
-                                                       "Ignored if the transform is one way.") << Qt::endl;
-    cout << "       " << TRANSFORM_NAME_PARAM << QObject::tr(" [Transform name] name of an existing Transform to use") << Qt::endl;
-    cout << "       " << VERBOSEPARAM << QObject::tr(" verbose") << Qt::endl;
+                                                       "Ignored if the transform is one way.") << QTENDL;
+    cout << "       " << TRANSFORM_NAME_PARAM << QObject::tr(" [Transform name] name of an existing Transform to use") << QTENDL;
+    cout << "       " << VERBOSEPARAM << QObject::tr(" verbose") << QTENDL;
 }
 
 #ifdef Q_OS_LINUX
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
     }
 
     if (args.contains(INBOUND_PARAM) && args.contains(OUTBOUND_PARAM)) {
-        cerr << QObject::tr("Cannot have %1 and %2 at the same time").arg(INBOUND_PARAM).arg(OUTBOUND_PARAM) << Qt::endl;
+        cerr << QObject::tr("Cannot have %1 and %2 at the same time").arg(INBOUND_PARAM).arg(OUTBOUND_PARAM) << QTENDL;
         usage();
         return -1;
     }
@@ -127,11 +128,11 @@ int main(int argc, char *argv[])
     }
 
     if (args.contains(TRANSFORM_NAME_PARAM) && args.contains(FILE_PARAM)) {
-        cerr << QObject::tr("Cannot have %1 and %2 at the same time").arg(TRANSFORM_NAME_PARAM).arg(FILE_PARAM) << Qt::endl;
+        cerr << QObject::tr("Cannot have %1 and %2 at the same time").arg(TRANSFORM_NAME_PARAM).arg(FILE_PARAM) << QTENDL;
         usage();
         return -1;
     } else if (!args.contains(TRANSFORM_NAME_PARAM) && !args.contains(FILE_PARAM)) {
-        cerr << QObject::tr("Need either a configuration file or a transform name to run") << Qt::endl;
+        cerr << QObject::tr("Need either a configuration file or a transform name to run") << QTENDL;
         usage();
         return -1;
     }
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
     if (args.contains(FILE_PARAM)) {
         int index = args.indexOf(FILE_PARAM);
         if (index >= args.size() - 1 || index < 0) {
-            cerr << QObject::tr("Need a file name for parameter %1").arg(FILE_PARAM) << Qt::endl;
+            cerr << QObject::tr("Need a file name for parameter %1").arg(FILE_PARAM) << QTENDL;
             usage();
             return -1;
         }
@@ -152,7 +153,7 @@ int main(int argc, char *argv[])
     if (args.contains(TRANSFORM_NAME_PARAM)) {
         int index = args.indexOf(TRANSFORM_NAME_PARAM);
         if (index >= args.size() - 1 || index < 0) {
-            cerr << QObject::tr("Need a name for parameter %1").arg(TRANSFORM_NAME_PARAM) << Qt::endl;
+            cerr << QObject::tr("Need a name for parameter %1").arg(TRANSFORM_NAME_PARAM) << QTENDL;
             usage();
             return -1;
         }

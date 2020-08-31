@@ -70,7 +70,7 @@ TransformMgmt::~TransformMgmt()
         cout << "TransformAbstract instances still present T_T (Memory leak)\n";
         QSetIterator<TransformAbstract *> i(transformInstances);
          while (i.hasNext())
-             cout << " => " << i.next() << Qt::endl;
+             cout << " => " << i.next() << QTENDL;
     }
 
     qDebug() << "end of destructor";
@@ -122,7 +122,7 @@ bool TransformMgmt::reset()
         cout << "TransformAbstract instances still present during reset T_T (Memory leak)";
         QSetIterator<TransformAbstract *> i(transformInstances);
          while (i.hasNext())
-             cout << " => " << i.next() << Qt::endl;
+             cout << " => " << i.next() << QTENDL;
     }
     deletedLock.unlock();
 

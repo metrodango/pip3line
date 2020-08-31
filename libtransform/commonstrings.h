@@ -100,4 +100,10 @@ namespace Pip3lineConst {
     typedef QList<Message> Messages;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#define QTENDL Qt::endl
+#else
+        QTENDL endl
+#endif
+
 #endif // XMLCOMMON_H
