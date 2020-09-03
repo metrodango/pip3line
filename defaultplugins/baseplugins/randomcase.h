@@ -12,8 +12,9 @@ Released under AGPL see LICENSE for more information
 #define RANDOMCASE_H
 
 #include "transformabstract.h"
-
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 #include <QRandomGenerator>
+#endif
 
 class RandomCase : public TransformAbstract
 {
