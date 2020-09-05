@@ -66,7 +66,12 @@ QHash<QString, QString> SharedMemorySource::getConfiguration()
 {
     QHash<QString, QString> ret = BlocksSource::getConfiguration();
     if (memConn != nullptr) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         ret.insert(memConn->getConfiguration());
+#else
+        ret.unite(memConn->getConfiguration());
+#endif
+
     }
     return ret;
 }
