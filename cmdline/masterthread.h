@@ -14,13 +14,14 @@ Released under AGPL see LICENSE for more information
 #include <QThread>
 #include <QString>
 #include <QTextStream>
+#include <Qt>
 #include <transformmgmt.h>
 #include "../tools/processor.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 #define QTENDL Qt::endl
 #else
-        QTENDL endl
+#define QTENDL endl
 #endif
 
 class MasterThread : public QThread
