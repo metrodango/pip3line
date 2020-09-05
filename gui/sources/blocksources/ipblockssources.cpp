@@ -114,7 +114,12 @@ QHash<QString, QString> IPBlocksSources::getConfiguration()
         ret.insert(GuiConst::STATE_NAME, hostName);
 
     if (isTLSEnabled())
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
         ret.insert(sslConfiguration->getConfiguration());
+#else
+        ret.unite(sslConfiguration->getConfiguration());
+#endif
+
 
     return ret;
 }

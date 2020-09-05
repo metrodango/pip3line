@@ -17,6 +17,7 @@ Released under AGPL see LICENSE for more information
 #include "bytesourceabstract.h"
 
 int SourceReader::MAX_READ_SIZE = 0x4000; // 16KB, this should be more than enough
+
 SourceReader::SourceReader()
 {
 
