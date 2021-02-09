@@ -223,11 +223,14 @@ void SslConf::setConfiguration(QHash<QString, QString> conf)
                                                             );
             if (compoCipher.size() == 2) {
                 int protoVal = compoCipher.at(0).toInt(&ok);
-                if (ok && (protoVal == QSsl::SslV2 ||
-                           protoVal == QSsl::SslV3 ||
-                           protoVal == QSsl::TlsV1_0 ||
-                           protoVal == QSsl::TlsV1_1 ||
-                           protoVal == QSsl::TlsV1_2)) {
+                if (ok && (
+#if QT_VERSION < 0x050F00
+                         protoVal == QSsl::SslV2 ||
+                         protoVal == QSsl::SslV3 ||
+#endif
+                         protoVal == QSsl::TlsV1_0 ||
+                         protoVal == QSsl::TlsV1_1 ||
+                         protoVal == QSsl::TlsV1_2)) {
                     QSslCipher ciph = QSslCipher(compoCipher.at(1), static_cast<QSsl::SslProtocol>(protoVal));
                     if (!ciph.isNull()) {
                         sslCiphers.append(ciph);

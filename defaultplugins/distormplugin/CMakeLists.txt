@@ -101,11 +101,20 @@ if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         else()
                 set ( OS_PATH "linux" )
         endif()
-        message(STATUS "${OS_PATH} build")
-        add_custom_target(build_distorm_lib ALL 
-                COMMAND "$(MAKE)" clib
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/${OS_PATH}
-                COMMENT "distorm make file")
+        message(STATUS "${OS_PATH} build / ${CMAKE_GENERATOR}")
+        if (${CMAKE_GENERATOR} MATCHES "Ninja")
+            message(STATUS "Ninja generator")
+            add_custom_target(build_distorm_lib ALL
+                    COMMAND make clib
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/${OS_PATH}
+                    COMMENT "distorm make file")
+        else()
+            message(STATUS "Other generator")
+            add_custom_target(build_distorm_lib ALL
+                    COMMAND "$(MAKE)" clib
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../ext/distorm/make/${OS_PATH}
+                    COMMENT "distorm make file")
+        endif()
         add_library (distorm3 STATIC IMPORTED)
         SET_TARGET_PROPERTIES(distorm3 PROPERTIES
                 IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/../../ext/distorm/distorm3.a)

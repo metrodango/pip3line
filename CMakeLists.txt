@@ -127,6 +127,8 @@ else()
     )
 endif()
 
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+
 if (ALL STREQUAL "ON" OR ALL STREQUAL "yes")
     message ( STATUS  "Selecting all packages")
     SET (WITH_LIB ON)

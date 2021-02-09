@@ -79,7 +79,7 @@ void RegularExp::transform(const QByteArray &input, QByteArray &output)
                     QStringList::iterator it = list.begin();
                     while (it != list.end()) {
                         if (!(*it).isEmpty()) {
-                            output.append(*it).append("\n");
+                            output.append((*it).toUtf8()).append("\n");
                             ++it;
                         }
                      }
@@ -89,7 +89,7 @@ void RegularExp::transform(const QByteArray &input, QByteArray &output)
                 } else {
                     QString val = list.at(selectedGroup);
                     if (!val.isEmpty())
-                        output.append(val).append('\n');
+                        output.append(val.toUtf8()).append('\n');
                 }
 
             } else {

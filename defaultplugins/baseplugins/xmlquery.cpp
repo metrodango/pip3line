@@ -66,7 +66,7 @@ void XmlQuery::transform(const QByteArray &input, QByteArray &output)
             output.clear();
             for (int i = 0; i < qout.size(); i++) {
                 if (!qout.at(i).isEmpty())
-                    output.append(qout.at(i)).append('\n');
+                    output.append(qout.at(i).toUtf8()).append('\n');
             }
         } else {
             QBuffer buffer(&output);

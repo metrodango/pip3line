@@ -76,7 +76,6 @@ class SSLCurvesModel : public QAbstractTableModel
         QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
         bool setData(const QModelIndex &index, const QVariant &value, int role);
         Qt::ItemFlags flags(const QModelIndex &index) const;
-
         QVector<QSslEllipticCurve> getEnabledCurvesList() const;
         void setCurvesList(const QVector<QSslEllipticCurve> &value);
         void setEnabledCurvesList(const QVector<QSslEllipticCurve> &value);
@@ -121,8 +120,10 @@ class SSLOptionsWidget : public QWidget
         void onSelectAllCiphers();
         void onSelectNoneCipher();
         void onSelectNoneCurves();
+#if QT_VERSION < 0x050F00
         void onSSLv2Toggled(bool checked);
         void onSSLv3Toggled(bool checked);
+#endif
         void onTLsv10Toggled(bool checked);
         void onTLsv11Toggled(bool checked);
         void onTLsv12Toggled(bool checked);

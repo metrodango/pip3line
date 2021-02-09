@@ -114,20 +114,20 @@ void HexEncode::transform(const QByteArray &input, QByteArray &output) {
                 break;
             case ESCAPED:
                 for (i = 0; i < temp.size(); i += 2) {
-                    output.append(QString("\\x%1%2").arg(temp.at(i)).arg(temp.at(i+1)));
+                    output.append(QString("\\x%1%2").arg(temp.at(i)).arg(temp.at(i+1)).toUtf8());
                 }
                 break;
             case CSTYLE:
                 output.append("{");
                 for (i = 0; i < temp.size(); i += 2) {
-                    output.append(QString(" 0x%1%2,").arg(temp.at(i)).arg(temp.at(i+1)));
+                    output.append(QString(" 0x%1%2,").arg(temp.at(i)).arg(temp.at(i+1)).toUtf8());
                 }
                 output.chop(1);
                 output.append(" }");
                 break;
             case CSV:
                 for (i = 0; i < temp.size(); i += 2) {
-                    output.append(QString("%1%2,").arg(temp.at(i)).arg(temp.at(i+1)));
+                    output.append(QString("%1%2,").arg(temp.at(i)).arg(temp.at(i+1)).toUtf8());
                 }
                 break;
         }

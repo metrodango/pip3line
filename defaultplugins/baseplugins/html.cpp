@@ -125,7 +125,7 @@ QByteArray Html::encode(char c)
     QByteArray ret;
     ret.append('&');
     if (useName && reserverdCharNames.contains(c)) {
-        ret.append(reserverdCharNames[c]);
+        ret.append(reserverdCharNames[c].toUtf8());
     } else if (useHexadecimal) {
         ret.append('#').append('x');
         QByteArray byt;

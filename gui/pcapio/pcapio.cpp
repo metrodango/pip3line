@@ -20,7 +20,7 @@ quint32 PcapPacket::getTimestampRaw() const
 
 QDateTime PcapPacket::getTimestamp() const {
 
-    QDateTime val = QDateTime::fromTime_t(timestamp);
+    QDateTime val = QDateTime::fromSecsSinceEpoch(timestamp);
 
     // loosing precision here as QDateTime does not go down to microseconds.
     val = val.addMSecs(static_cast<qint64>(microsec) / 1000);
@@ -34,7 +34,7 @@ void PcapPacket::setTimestamp(const quint32 &value)
 
 void PcapPacket::setTimestamp(const QDateTime &value)
 {
-    timestamp = value.toTime_t();
+    timestamp = value.toSecsSinceEpoch();
     // QTime garantee that msec() returns a value between 0 and 999, so no risk of overflow here
     int msec = value.time().msec();
     // checking anyway ;P

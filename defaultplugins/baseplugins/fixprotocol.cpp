@@ -108,7 +108,7 @@ QByteArray FixProtocol::translateField(QByteArray val)
     } else if (qout.size() > 1) {
         emit warning(tr("Strange, found multiple value for field number %1 (taking the first one)").arg(fieldNum),id);
     }
-    ret.append(qout.at(0)).append('(').append(list.at(0)).append(')').append(" = ");
+    ret.append(qout.at(0).toUtf8()).append('(').append(list.at(0)).append(')').append(" = ");
 
     query.setQuery("/fix/fields/field[@number=$field]/value[@enum=$val]/@description/string()");
     if (!query.isValid()) {
@@ -127,6 +127,6 @@ QByteArray FixProtocol::translateField(QByteArray val)
     } else if (qout.size() > 1) {
         emit warning(tr("Strange, found multiple value for field value %1 (taking the first one)").arg(QString(list.at(1))),id);
     }
-    ret.append(qout.at(0)).append('(').append(list.at(1)).append(')');
+    ret.append(qout.at(0).toUtf8()).append('(').append(list.at(1)).append(')');
     return ret;
 }

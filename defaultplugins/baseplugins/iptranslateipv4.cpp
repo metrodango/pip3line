@@ -43,7 +43,7 @@ void IPTranslateIPv4::transform(const QByteArray &input, QByteArray &output)
             if (littleEndian)
                 num = reverseBytes(num);
             ip.setAddress(num);
-            output.append(ip.toString());
+            output.append(ip.toString().toUtf8());
         } else {
             emit error(tr("Invalid unsigned integer value for an IPv4 address"),id);
         }

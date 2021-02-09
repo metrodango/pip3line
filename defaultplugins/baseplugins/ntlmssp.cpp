@@ -143,7 +143,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
     memcpy(&type, temp.data(),sizeof(quint32));
 
     if (NTMLSSP_TYPE.contains(type)) {
-        output.append("Message TYPE: ").append(NTMLSSP_TYPE.value(type)).append("\n");
+        output.append("Message TYPE: ").append(NTMLSSP_TYPE.value(type).toUtf8()).append("\n");
     } else {
         emit error(tr("Unkown NTLMSSP message (8-11)"),id);
         output.append("NTLMSSP TYPE: Unkown ").append(QByteArray::number(type)).append("\n");
@@ -172,7 +172,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
         if (str.isEmpty())
             output.append("Calling Worksation Domain: NULL").append("\n");
         else
-            output.append("Calling Worksation Domain: ").append(str).append("\n");
+            output.append("Calling Worksation Domain: ").append(str.toUtf8()).append("\n");
 
 
         if (!readSecurityBuffer(buf, &length, &maxLength, &offset, sizeLimit)) {
@@ -185,7 +185,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
         if (str.isEmpty())
             output.append("Calling Worksation Name: NULL").append("\n");
         else
-            output.append("Calling Worksation Name: ").append(QString::fromUtf8(temp)).append("\n");
+            output.append("Calling Worksation Name: ").append(temp).append("\n");
 
         output.append(extractOSVersion(buf));
 
@@ -242,7 +242,7 @@ void Ntlmssp::transform(const QByteArray &input, QByteArray &output)
             str = extractTargetInfo(temp2);
             str.prepend("\n");
         }
-        output.append("Target Info List: ").append(str);
+        output.append("Target Info List: ").append(str.toUtf8());
 
         output.append(extractOSVersion(buf));
 
@@ -382,7 +382,7 @@ QByteArray Ntlmssp::extractFlags(quint32 flags)
          i.next();
 
          if ((flags & i.key()) != 0) {
-             res.append("  ").append(i.value()).append("\n");
+             res.append("  ").append(i.value().toUtf8()).append("\n");
          }
      }
      if (!res.isEmpty()) {
@@ -424,7 +424,7 @@ QByteArray Ntlmssp::extractTargetInfo(QByteArray &data)
         memcpy(&length, temp.data(),2);
         if (typeString == 0) { // end
             QByteArray remaining = buf.readAll().toHex();
-            str.append("  ").append(TARGET_INFO.value(typeString));
+            str.append("  ").append(TARGET_INFO.value(typeString).toUtf8());
             if (!remaining.isEmpty()) {
                str.append(": ").append(remaining);
             }
@@ -444,7 +444,7 @@ QByteArray Ntlmssp::extractTargetInfo(QByteArray &data)
                 emit error(tr("Incorrect Length for timestamp"),id);
                 return str;
             }
-            str.append("  ").append(TARGET_INFO.value(typeString)).append(": ").append(toTimeStamp(temp)).append("\n");
+            str.append("  ").append(TARGET_INFO.value(typeString).toUtf8()).append(": ").append(toTimeStamp(temp)).append("\n");
         } else if (typeString == 0x0006) {
             if (temp.size() != 4) {
                 emit error(tr("Invalid flags (INFO)"),id);
@@ -452,11 +452,11 @@ QByteArray Ntlmssp::extractTargetInfo(QByteArray &data)
             }
             memcpy(&flags, temp.data(),4);
 
-            str.append("  ").append(TARGET_INFO.value(typeString)).append(": ").append(temp.toHex()).append("\n");
+            str.append("  ").append(TARGET_INFO.value(typeString).toUtf8()).append(": ").append(temp.toHex()).append("\n");
         } else if (typeString == 0x0008 || typeString == 0x000A) {
-            str.append("  ").append(TARGET_INFO.value(typeString)).append(": ").append(temp.toHex()).append("\n");
+            str.append("  ").append(TARGET_INFO.value(typeString).toUtf8()).append(": ").append(temp.toHex()).append("\n");
         } else if (TARGET_INFO.contains(typeString)) {
-            str.append("  ").append(TARGET_INFO.value(typeString)).append(": ").append(getString(temp)).append("\n");
+            str.append("  ").append(TARGET_INFO.value(typeString).toUtf8()).append(": ").append(getString(temp)).append("\n");
         } else {
             str.append("  ").append("Unknown").append(": ").append(temp.toHex()).append("\n");
         }

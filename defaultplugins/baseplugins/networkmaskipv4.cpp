@@ -42,7 +42,7 @@ void NetworkMaskIPv4::transform(const QByteArray &input, QByteArray &output)
             else
                 ipVal  = 0xFFFFFFFF << (32 - num);
             ip.setAddress(ipVal);
-            output.append(ip.toString());
+            output.append(ip.toString().toUtf8());
         } else {
             emit error(tr("Not a valid IPv4 netmask value"),id);
         }

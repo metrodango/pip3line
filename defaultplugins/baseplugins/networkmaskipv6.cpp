@@ -49,7 +49,7 @@ void NetworkMaskIPv6::transform(const QByteArray &input, QByteArray &output)
                 ipVal[i] = 0x00;
             }
             ip.setAddress(ipVal);
-            output.append(ip.toString());
+            output.append(ip.toString().toUtf8());
         } else {
             emit error(tr("Not a valid IPv6 netmask value"),id);
         }

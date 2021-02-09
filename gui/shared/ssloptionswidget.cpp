@@ -489,6 +489,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
 
     cipherModel->setEnabledCipherList(sslConfiguration.ciphers());
 
+#if QT_VERSION < 0x050F00
     if (!cipherModel->hasProtocol(QSsl::SslV2)) {
         ui->sslv2checkBox->setEnabled(false);
         ui->sslv2checkBox->setToolTip(UNAVAILABLE_STR);
@@ -498,6 +499,7 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
         ui->sslv3checkBox->setEnabled(false);
         ui->sslv3checkBox->setToolTip(UNAVAILABLE_STR);
     }
+#endif
 
     if (!cipherModel->hasProtocol(QSsl::TlsV1_0)) {
         ui->tlsv10checkBox->setEnabled(false);
@@ -620,8 +622,14 @@ SSLOptionsWidget::SSLOptionsWidget(QSslConfiguration defaultconf,
     //connect(ui->sslVerifModeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [=](int index) {onSSLVerifModeChanged(index);});
     connect(ui->sslVerifModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSSLVerifModeChanged(int)));
 
+#if QT_VERSION < 0x050F00
     connect(ui->sslv2checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSSLv2Toggled);
     connect(ui->sslv3checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onSSLv3Toggled);
+#else
+    ui->sslv2checkBox->setDisabled(true);
+    ui->sslv3checkBox->setDisabled(true);
+#endif
+
     connect(ui->tlsv10checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv10Toggled);
     connect(ui->tlsv11checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv11Toggled);
     connect(ui->tlsv12checkBox, &QCheckBox::toggled, this, &SSLOptionsWidget::onTLsv12Toggled);
@@ -894,6 +902,7 @@ void SSLOptionsWidget::onSelectNoneCurves()
     curvesModel->SelectNone();
 }
 
+#if QT_VERSION < 0x050F00
 void SSLOptionsWidget::onSSLv2Toggled(bool checked)
 {
     cipherModel->enableProtocol(QSsl::SslV2, checked);
@@ -903,6 +912,7 @@ void SSLOptionsWidget::onSSLv3Toggled(bool checked)
 {
     cipherModel->enableProtocol(QSsl::SslV3, checked);
 }
+#endif
 
 void SSLOptionsWidget::onTLsv10Toggled(bool checked)
 {
