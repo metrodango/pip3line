@@ -8,6 +8,7 @@ https://github.com/metrodango/pip3line
 Released under AGPL see LICENSE for more information
 **/
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <QFileInfo>
 
@@ -118,8 +119,10 @@ PythonModules::PythonModules(QString name, Pip3lineCallback *callback) :
 
     // initialize the Python interpreter without signal handler
     Py_InitializeEx(0);
+#if PY_VERSION_HEX < 0x03070000
     // initialize thread support
     PyEval_InitThreads();
+#endif
     // saving thread state
     pymainstate = PyEval_SaveThread();
 

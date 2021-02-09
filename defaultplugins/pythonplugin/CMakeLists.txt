@@ -1,4 +1,4 @@
-####
+#
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,8 +6,9 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+#
 
+cmake_minimum_required(VERSION 3.18)
 message ( STATUS "Configuring the Python 3 plugin --" )
 project( python3plugin )
 
@@ -19,31 +20,34 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Xlinker -export-dynamic")
+
 find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 
 # no need for harcoded libs here, if none are supplied or found, failing the build
 
 if (NOT PYTHON3_INCLUDE_DIRS OR NOT PYTHON3_LIBRARIES)
-    find_package(PythonLibs 3 )
-    if( NOT PYTHONLIBS_FOUND)
+    find_package(Python COMPONENTS Development)
+    if( NOT Python_FOUND)
         message ( FATAL_ERROR "Python 3 includes/libs haven't been found or supplied" )
     endif()
 else()
-    message ( STATUS "Python 3 include & libs paths has been supplied by user" )
-    set (PYTHON_INCLUDE_DIRS  ${PYTHON3_INCLUDE_DIRS})
-    set (PYTHON_LIBRARIES ${PYTHON3_LIBRARIES})
+    message ( STATUS "Python 3 include & libs paths have been supplied by user" )
+    set (Python_INCLUDE_DIRS  ${PYTHON3_INCLUDE_DIRS})
+    set (Python_LIBRARIES ${PYTHON3_LIBRARIES})
 endif()
 
-if (PYTHON_INCLUDE_DIRS AND PYTHON_LIBRARIES)
-    message ( STATUS "Python 3 include: ${PYTHON_INCLUDE_DIRS}" )
-    message ( STATUS "Python 3 libs: ${PYTHON_LIBRARIES}" )
+if (Python_INCLUDE_DIRS AND Python_LIBRARIES)
+    message ( STATUS "Python 3 include: ${Python_INCLUDE_DIRS}" )
+    message ( STATUS "Python 3 libs: ${Python_LIBRARIES}" )
+    message ( STATUS "Python 3 link options: ${Python_LINK_OPTIONS}" )
     include_directories (
-        ${PYTHON_INCLUDE_DIRS}
+        ${Python_INCLUDE_DIRS}
         ../../libtransform/
         )
 
     link_directories (
-        ${PYTHON_LIBRARIES}
+        ${Python_LIBRARY_DIRS}
         ${PROJECT_SOURCE_DIR}/../../lib
         )
 
@@ -68,7 +72,10 @@ if (PYTHON_INCLUDE_DIRS AND PYTHON_LIBRARIES)
 
     add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
 
-    target_link_libraries ( python3plugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} ${PYTHON_LIBRARIES} )
+    target_link_libraries ( python3plugin
+        PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIB}
+        PUBLIC ${Python_LIBRARIES}
+        )
 
     IF(UNIX)
         include( GNUInstallDirs )
