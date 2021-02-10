@@ -20,8 +20,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Xlinker -export-dynamic")
-
 find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 
 # no need for harcoded libs here, if none are supplied or found, failing the build
