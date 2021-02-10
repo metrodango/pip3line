@@ -47,7 +47,11 @@ void TimeStamp::transform(const QByteArray &input, QByteArray &output)
         timestamp.setTimeSpec(getTimeSpec());
         uint val1 = input.toUInt(&ok);
         if (ok) {
+#if QT_VERSION >= 0x050800
             timestamp.setSecsSinceEpoch(val1);
+#else
+            timestamp.setTime_t(val1);
+#endif
             output = timestamp.toString(DEFAULT_DATE_FORMAT).toUtf8();
         } else {
             qint64 val2 = input.toLongLong(&ok);
@@ -86,7 +90,13 @@ void TimeStamp::transform(const QByteArray &input, QByteArray &output)
                 emit error(tr("Cannot parse the input"),id);
                 return;
             } else {
-                output = QByteArray::number(timestamp.toSecsSinceEpoch());
+                output = QByteArray::number(
+#if QT_VERSION >= 0x050800
+                            timestamp.toSecsSinceEpoch()
+#else
+                            timestamp.toTime_t()
+#endif
+                            );
             }
         } else {
             output = QByteArray::number(timestamp.toMSecsSinceEpoch());
