@@ -8,7 +8,7 @@
 # Released under AGPL see LICENSE for more information
 #
 
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.12)
 message ( STATUS "Configuring the Python 3 plugin --" )
 project( python3plugin )
 
