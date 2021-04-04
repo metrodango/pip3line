@@ -15,6 +15,7 @@ Released under AGPL see LICENSE for more information
 #include <QScrollBar>
 #include <QDebug>
 #include <QTextCodec>
+#include <QApplication>
 #include <QMessageBox>
 #include <QTextDocumentFragment>
 #include <QTimer>
@@ -91,6 +92,7 @@ TextView::TextView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     scintEditor->setReadOnly(byteSource->isReadonly());
     scintEditor->setWrapMode(QsciScintilla::WrapCharacter);
     scintEditor->setBackgroundRole(QPalette::Base);
+    scintEditor->setCaretForegroundColor(QApplication::palette().text().color());
 
     lexerCombobox = new(std::nothrow) QComboBox();
     if (lexerCombobox == nullptr) {

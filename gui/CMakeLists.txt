@@ -21,7 +21,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS shared)
 
 if (WITH_SCINTILLA)
     set (QSCINTILLA_HOME "${PROJECT_SOURCE_DIR}\\..\\ext\\QScintilla_gpl")
-    message ( STATUS "Enabling QScintilla support --" )
+    message ( STATUS "Enabling QScintilla support -- Warning QScintilla has its own drawbacks, not always the best choice" )
     add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
         ${QSCINTILLA_HOME}\\Qt4Qt5 /usr/local/include/

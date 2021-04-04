@@ -16,7 +16,9 @@ Released under AGPL see LICENSE for more information
 #include <QStyle>
 #include <QDebug>
 #include <QSettings>
-
+#ifdef SCINTILLA
+#include <Qsci/qsciglobal.h>
+#endif
 AboutDialog::AboutDialog(GuiHelper *guiHelper, QWidget *parent) :
     AppDialog(guiHelper, parent)
 {
@@ -50,6 +52,10 @@ AboutDialog::AboutDialog(GuiHelper *guiHelper, QWidget *parent) :
     info.append(tr("<p>Current PATH: %1").arg(QString::fromUtf8(qgetenv("PATH"))));
     QSettings setting("HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\3.5\\", QSettings::NativeFormat);
     info.append(tr("<p>Current value: %1").arg(setting.value("InstallPath").toString()));
+#endif
+
+#ifdef SCINTILLA
+    info.append(tr("<p>Compiled with Scintilla: %1").arg(QSCINTILLA_VERSION_STR));
 #endif
     ui->infoTextEdit->append(info);
 }
