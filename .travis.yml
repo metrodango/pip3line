@@ -8,14 +8,11 @@ branches:
 matrix:
   include:
     - os: linux
-      dist: xenial
-      compiler: gcc
-    - os: linux
-      dist: bionic
-      compiler: gcc
-    - os: linux
       dist: focal
       compiler: clang
+   - os: linux
+      dist: focal
+      compiler: gcc
     - os: osx
       compiler: clang
       osx_image: xcode13.2
@@ -25,8 +22,7 @@ matrix:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
-      brew unlink python@2;
-      brew upgrade cmake qt5 python3 openssl git;
+      brew install openssl;
       brew install qscintilla2;
     else
       sudo apt-get -qq update;

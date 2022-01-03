@@ -28,6 +28,8 @@ $ brew tap metrodango/pip3line
 $ brew install pip3line
 ~~~
 
+> If an error occur at start regarding missing shared library libtransform, make sure that the homebrew *lib* directory is in the path, or just create a link it from */usr/local/lib*
+
 ## Install on Linux:
 
 ### Gentoo

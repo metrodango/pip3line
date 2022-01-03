@@ -16,7 +16,7 @@ environment:
       QTDIR: 'C:\Qt\5.15.2\msvc2019_64'
       OPENSSLDIR: 'C:\OpenSSL-v111-Win64'
       PATH: '%QTDIR%\bin;%PATH%'
-      QSCINTILLA_VERSION: '2.11.6'
+      QSCINTILLA_VERSION: '2.13.1'
       compiler: vs2017
       platform: x64
       config: Release
@@ -25,7 +25,7 @@ install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 - git submodule update --init --recursive
 - powershell -command "msbuild ext\distorm\make\win32\distorm.sln  /p:Configuration=dll /p:Platform=x64 /p:PlatformToolset=v141 /p:WindowsTargetPlatformVersion=10.0.17763.0"
-- ps: $source = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($env:QSCINTILLA_VERSION)/QScintilla-$($env:QSCINTILLA_VERSION).zip"
+- ps: $source = "https://www.riverbankcomputing.com/static/Downloads/QScintilla/$($env:QSCINTILLA_VERSION)/QScintillai_src-$($env:QSCINTILLA_VERSION).zip"
 - ps: $destination = "QScintilla.zip"
 - ps: Invoke-WebRequest $source -OutFile $destination
 - 7z x .\QScintilla.zip -o.\ext\
