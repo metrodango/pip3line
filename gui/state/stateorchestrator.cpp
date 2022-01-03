@@ -11,7 +11,6 @@ Released under AGPL see LICENSE for more information
 #include "stateorchestrator.h"
 #include "basestateabstract.h"
 #include <QTimer>
-#include <QThread>
 #include <QDebug>
 #include <QSetIterator>
 #include <QFile>
@@ -26,26 +25,46 @@ Released under AGPL see LICENSE for more information
 
 StateOrchestrator::StateOrchestrator(QString fileName, quint64 flags) :
     QObject(nullptr),
-    localthread(nullptr),
     flags(flags),
     fileName(fileName),
     file(nullptr),
     writer(nullptr),
     reader(nullptr)
 {
-    localthread = new(std::nothrow) QThread();
-    if (localthread == nullptr) {
-        qFatal("Cannot allocate memory for StateOrchestrator local thread X{");
-    }
-    moveToThread(localthread);
-    localthread->start();
+    moveToThread(&localthread);
+    localthread.start();
 
     if (isSaving()) {
         actionName = GuiConst::STATE_ACTION_SAVE_STR;
     } else {
         actionName = GuiConst::STATE_ACTION_RESTORE_STR;
     }
-   // qDebug() << this << "created";
+    if (fileName.isEmpty()) {
+        qCritical() << tr("[StateOrchestrator::StateOrchestrator] Filename is empty T_T");
+    }
+    // qDebug() << this << "created";
+}
+
+StateOrchestrator::StateOrchestrator(QByteArray config, quint64 flags) :
+    QObject(nullptr),
+    flags(flags),
+    file(nullptr),
+    writer(nullptr),
+    reader(nullptr),
+    configData(config)
+{
+    moveToThread(&localthread);
+    localthread.start();
+
+    if (isSaving()) {
+        actionName = GuiConst::STATE_ACTION_SAVE_STR;
+    } else {
+        actionName = GuiConst::STATE_ACTION_RESTORE_STR;
+    }
+
+    if (configData.isEmpty()) {
+        qCritical() << tr("[StateOrchestrator::StateOrchestrator] Byte array is empty T_T");
+    }
 }
 
 StateOrchestrator::~StateOrchestrator()
@@ -70,10 +89,10 @@ bool StateOrchestrator::start()
 
 void StateOrchestrator::stop()
 {
-    localthread->exit();
-    if (!localthread->wait())
+    localthread.exit();
+    if (!localthread.wait())
         qCritical() << tr("Could not stop the local thread for StateOrchestrator T_T");
-    delete localthread;
+
     if (!executionStack.isEmpty()) {
          qCritical() << tr("Execution stack is not empty T_T");
          while (!executionStack.isEmpty()) {
@@ -131,6 +150,11 @@ void StateOrchestrator::onFinished()
     emit finished();
 }
 
+QByteArray StateOrchestrator::getConfigData() const
+{
+    return configData;
+}
+
 QXmlStreamWriter *StateOrchestrator::getWriter() const
 {
     return writer;
@@ -141,21 +165,25 @@ bool StateOrchestrator::initialize()
     bool ret = false;
 
     if (isSaving()) {
+        if (!fileName.isEmpty()) { // saving to file
+            QFileInfo fi(fileName);
+            QTemporaryFile *tfile = new(std::nothrow) QTemporaryFile(fi.absolutePath().append(QDir::separator()));
+            file = tfile;
 
-        QFileInfo fi(fileName);
-        QTemporaryFile *tfile = new(std::nothrow) QTemporaryFile(fi.absolutePath().append(QDir::separator()));
-        file = tfile;
+            if (tfile == nullptr) {
+                qFatal("Cannot allocate memory for QTemporaryFile X{");
+            }
 
-        if (tfile == nullptr) {
-            qFatal("Cannot allocate memory for QTemporaryFile X{");
+            ret = tfile->open();
+            if (!ret) {
+                emit log(tr("Cannot open temporary state file for saving: %1").arg(tfile->errorString()),metaObject()->className(), Pip3lineConst::LERROR);
+                return false;
+            }
+            writer = new(std::nothrow) QXmlStreamWriter(tfile);
+        } else { // saving to memory
+            configData.clear();
+            writer = new(std::nothrow) QXmlStreamWriter(&configData);
         }
-
-        ret = tfile->open();
-        if (!ret) {
-            emit log(tr("Cannot open temporary state file for saving: %1").arg(tfile->errorString()),metaObject()->className(), Pip3lineConst::LERROR);
-            return false;
-        }
-        writer = new(std::nothrow) QXmlStreamWriter(tfile);
 
         if (writer == nullptr) {
             qFatal("Cannot allocate memory for QXmlStreamWriter X{");
@@ -165,17 +193,21 @@ bool StateOrchestrator::initialize()
         writer->writeStartElement(GuiConst::STATE_PIP3LINE_DOC);
 
     } else {
-        file = new(std::nothrow) QFile(fileName); // file is automatically deleted when the orchestrator is deleted
-        if (file == nullptr) {
-            qFatal("Cannot allocate memory for QFile X{");
-        }
+        if (!fileName.isEmpty()) { // loading from file
+            file = new(std::nothrow) QFile(fileName); // QFile is deleted when the orchestrator is deleted
+            if (file == nullptr) {
+                qFatal("Cannot allocate memory for QFile X{");
+            }
 
-        ret = file->open(QIODevice::ReadOnly);
-        if (!ret) {
-            emit log(tr("Cannot open state file for loading: %1").arg(file->errorString()),metaObject()->className(), Pip3lineConst::LERROR);
-            return false;
+            ret = file->open(QIODevice::ReadOnly);
+            if (!ret) {
+                emit log(tr("Cannot open state file for loading: %1").arg(file->errorString()),metaObject()->className(), Pip3lineConst::LERROR);
+                return false;
+            }
+            reader = new(std::nothrow) QXmlStreamReader(file);
+        } else {// loading from memory
+            reader = new(std::nothrow) QXmlStreamReader(configData);
         }
-        reader = new(std::nothrow) QXmlStreamReader(file);
 
         if (reader == nullptr) {
             qFatal("Cannot allocate memory for QXmlStreamReader X{");

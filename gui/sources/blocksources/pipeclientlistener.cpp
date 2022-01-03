@@ -83,12 +83,33 @@ QWidget *PipeClientListener::getAdditionnalCtrls(QWidget *parent)
     return but;
 }
 
+int PipeClientListener::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        int mappedSid = Block::INVALID_ID;
+        if (mapExtSourcesToLocal.contains(sourceId)) {
+            mappedSid = mapExtSourcesToLocal.value(sourceId);
+        }
+
+        foreach (PipeConnection pc , sockets) {
+            int suid = pc.sid;
+            // either we are sending directly to the blocksource or getting the block from another one
+            if (sourceId == suid || mappedSid == suid) {
+                targetId = suid;
+                break;
+            }
+        }
+    }
+    return targetId;
+}
+
 void PipeClientListener::sendBlock(Block *block)
 {
     if (running) {
         QByteArray data = applyOutboundTransform(block->getData());
         qint64 size = data.size();
-        int sid = -1;
+        int sid = Block::INVALID_ID;
         if (mapExtSourcesToLocal.contains(block->getSourceid())) {
             sid = mapExtSourcesToLocal.value(block->getSourceid());
         }
@@ -243,11 +264,12 @@ void PipeClientListener::dataReceived()
                 if (i.value() == sid)
                     sid = i.key();
             }
-
-            Block * datab = new(std::nothrow) Block(data,sid);
-            if (datab == nullptr) qFatal("[PipeClientListener::dataReceived] Cannot allocate Block for PipeClientListener X{");
-
-            emit blockReceived(datab);
+            data = applyInboundTransform(data);
+            if (!data.isEmpty()) {
+                Block * datab = new(std::nothrow) Block(data,sid);
+                if (datab == nullptr) qFatal("[PipeClientListener::dataReceived] Cannot allocate Block for PipeClientListener X{");
+                emit blockReceived(datab);
+            }
         }
     } else {
         qCritical() << tr("[PipeClientListener::dataReceived] cast failed T_T");

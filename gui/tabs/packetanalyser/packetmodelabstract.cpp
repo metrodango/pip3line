@@ -9,7 +9,6 @@ Released under AGPL see LICENSE for more information
 **/
 
 #include "packetmodelabstract.h"
-#include "packet.h"
 #include <QDebug>
 #include <QChar>
 #include <QIcon>
@@ -245,20 +244,25 @@ void PacketModelAbstract::addUserColumn(const QString &name, TransformAbstract *
         delete transform;
         return;
     }
-    Usercolumn col;
-    col.transform = transform;
-    col.format = outFormat;
+    const QRegExp xmlregexp = QRegExp("^[a-zA-Z_][-a-zA-Z0-9_\\.]{1,50}$");
+    if (xmlregexp.exactMatch(name)) {
+        Usercolumn col;
+        col.transform = transform;
+        col.format = outFormat;
 
-    userColumnsDef.insert(name,col);
-    int newIndex = columnNames.size();
-    beginInsertColumns(QModelIndex(),newIndex,newIndex);
-    columnNames << name;
-    endInsertColumns();
-    if (transform != nullptr) {
-        connect(transform, &TransformAbstract::confUpdated, this, &PacketModelAbstract::transformUpdated);
-        internalAddUserColumn(name,transform);
+        userColumnsDef.insert(name,col);
+        int newIndex = columnNames.size();
+        beginInsertColumns(QModelIndex(),newIndex,newIndex);
+        columnNames << name;
+        endInsertColumns();
+        if (transform != nullptr) {
+            connect(transform, &TransformAbstract::confUpdated, this, &PacketModelAbstract::transformUpdated);
+            internalAddUserColumn(name,transform);
+        }
+        emit columnsUpdated();
+    } else {
+        emit log(tr("Column names cannot have special characters apart from \".\" and \"_\", it causes a tricky bug T_T. Ignoring %1").arg(name), "PacketModel", Pip3lineConst::LERROR);
     }
-    emit columnsUpdated();
 }
 
 void PacketModelAbstract::removeUserColumn(const QString &name)

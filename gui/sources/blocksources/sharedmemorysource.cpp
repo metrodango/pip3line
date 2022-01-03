@@ -148,6 +148,17 @@ int SharedMemorySource::getShmType() const
     return shmType;
 }
 
+int SharedMemorySource::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        if (extsources.contains(sourceId)) {
+            targetId = sourceId;
+        }
+    }
+    return targetId;
+}
+
 void SharedMemorySource::sendBlock(Block *block)
 {
     if (running && memConn != nullptr) {
@@ -156,8 +167,9 @@ void SharedMemorySource::sendBlock(Block *block)
         if (!extsources.contains(sid)) {
             extsources.append(sid);
         }
-        memConn->writeData(block->getData());
-        currentData = block->getData();
+        QByteArray data = applyOutboundTransform(block->getData());
+        memConn->writeData(data);
+        currentData = data;
     } else {
         qCritical() << tr("[SharedMemorySource::sendBlock] Not running and/or shared mem obj is null");
     }
@@ -167,17 +179,21 @@ void SharedMemorySource::sendBlock(Block *block)
 
 void SharedMemorySource::checkData()
 {
-
     if (running && memConn != nullptr) {
         QByteArray data;
         if (memConn->readData(data)) {
             if (currentData != data) {
                 currentData = data;
-                Block * bl = new(std::nothrow) Block(data,Block::INVALID_ID);
-                if (bl == nullptr) {
-                    qFatal("Cannot allocate memory");
+                data = applyInboundTransform(data);
+                if (data.isEmpty()) {
+                    Block * bl = new(std::nothrow) Block(data,Block::INVALID_ID);
+                    if (bl == nullptr) {
+                        qFatal("Cannot allocate memory");
+                    }
+                    emit blockReceived(bl);
+                } else {
+                    qDebug() << tr("SharedMemorySource Data packet is empty, ignoring");
                 }
-                emit blockReceived(bl);
 //                for (int i = 0; i < extsources.size(); i++) {
 //                    int bid = extsources.at(i);
 //                    Block * bl = new(std::nothrow) Block(data,bid);

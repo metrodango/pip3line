@@ -32,6 +32,7 @@ class FileBlockSource : public BlocksSource
         FileBlockSource::Type getSourcefiletype() const;
         void setSourcefiletype(const Type &value);
         int getReadDelay() const;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block * block) override;
         bool startListening() override;

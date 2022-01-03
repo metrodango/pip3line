@@ -17,13 +17,14 @@ Released under AGPL see LICENSE for more information
 #include <QTimer>
 #include <QQueue>
 #include "sources/blocksources/blockssource.h"
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 namespace Ui {
 class PacketAnalyserTab;
 }
 
 class DetachTabButton;
-class Packet;
 class PacketModelAbstract;
 class PacketStyledItemDelegate;
 class PacketSortFilterProxyModel;
@@ -31,7 +32,6 @@ class HexView;
 class QMenu;
 class QAction;
 class QDialog;
-class Block;
 class PacketAnalyserOptionsDialog;
 class SourcesOrchestatorAbstract;
 class NewViewButton;
@@ -47,7 +47,7 @@ class PacketAnalyserTab : public TabAbstract
     public:
         explicit PacketAnalyserTab(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~PacketAnalyserTab();
-        void loadFromFile(QString fileName);
+        void loadFromFile(QString fileName) override;
         int getBlockCount() const;
         ByteSourceAbstract *getSource(int blockIndex);
         ByteTableView *getHexTableView(int blockIndex);
@@ -63,6 +63,7 @@ class PacketAnalyserTab : public TabAbstract
         void unregisterFromGlobal();
         bool getTrackChanges() const;
         void setTrackChanges(bool value);
+        void loadConfigFrom(const QString filename, const QByteArray config = QByteArray());
     private slots:
         void onAddNewColumn();
         void onImport();

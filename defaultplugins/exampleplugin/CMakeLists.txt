@@ -10,7 +10,7 @@
 
 message ( STATUS "Configuring the example plugin --" )
 project( exampleplugin )
-set ( CMAKE_BUILD_TYPE Release )
+#set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DEXAMPLEPLUGIN_LIBRARY )
 
 set(CMAKE_AUTOUIC ON)

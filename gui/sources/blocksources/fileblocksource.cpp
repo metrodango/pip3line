@@ -16,7 +16,7 @@ FileBlockSource::FileBlockSource(Type sourcefiletype, QObject *parent) :
     BlocksSource(parent),
     sourcefiletype(sourcefiletype)
 {
-    flags = 0;
+    flags = B64BLOCKS_OPTIONS;
     readDelay = 200;
 
     connect(&timer, &QTimer::timeout, this, &FileBlockSource::readNextBlock);
@@ -118,6 +118,9 @@ void FileBlockSource::readNextBlock()
 
 void FileBlockSource::processIncomingDataBlock(QByteArray &data)
 {
+    if (isB64Blocks()) {
+        data = QByteArray::fromBase64(data);
+    }
     data = applyInboundTransform(data);
 
     if (!data.isEmpty()) {
@@ -133,6 +136,15 @@ void FileBlockSource::processIncomingDataBlock(QByteArray &data)
 int FileBlockSource::getReadDelay() const
 {
     return readDelay;
+}
+
+int FileBlockSource::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourcefiletype == Writer) {
+        targetId = BlocksSource::getTargetIdFor(sourceId);
+    }
+    return targetId;
 }
 
 void FileBlockSource::setReadDelay(int value)

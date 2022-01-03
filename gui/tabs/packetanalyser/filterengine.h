@@ -5,8 +5,8 @@
 #include <QSharedPointer>
 #include <QStack>
 #include "filteritem.h"
-
-class Packet;
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class BasicToken
 {

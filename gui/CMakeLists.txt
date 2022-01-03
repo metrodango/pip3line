@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,11 +6,16 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
+cmake_minimum_required(VERSION 3.5)
 message ( STATUS "Configuring pip3line gui --" )
 project( pip3line )
-set ( CMAKE_BUILD_TYPE Release )
+#set ( CMAKE_BUILD_TYPE Release )
+
+set(CMAKE_CXX_STANDARD 17)
+
+set (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../bin)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -107,6 +112,7 @@ set ( pip3line_HDRS
 	textinputdialog.h
 	comparisondialog.h
 	appdialog.h
+        additionaluidialog.h
 	../tools/processor.h
 	../tools/pipeserver.h
 	../tools/streamprocessor.h
@@ -149,6 +155,11 @@ set ( pip3line_HDRS
 	sources/blocksources/shmtypes/sysv_shm.h
 	sources/blocksources/shmtypes/sharedmemposix.h
 	sources/blocksources/shmtypes/sharedmemorysourcebasewidget.h
+        sources/blocksources/dtlsclientlistener.h
+        sources/blocksources/dtlsserverlistener.h
+        sources/blocksources/dtlscommon.h
+        sources/blocksources/dtlsclientlistenerwidget.h
+        sources/blocksources/dtlsserverlistenerwidget.h
 	views/hexview.h
 	views/textview.h
 	views/bytetableview.h
@@ -165,7 +176,6 @@ set ( pip3line_HDRS
 	tabs/packetanalysertab.h
 	tabs/packetanalyser/importexportdialog.h
 	tabs/packetanalyser/importexportworker.h
-	tabs/packetanalyser/packet.h
 	tabs/packetanalyser/memorypacketmodel.h
 	tabs/packetanalyser/packetanalyseroptionsdialog.h
 	tabs/packetanalyser/packetmodelabstract.h
@@ -198,6 +208,8 @@ set ( pip3line_HDRS
 	shared/defaultcontrolgui.h
 	shared/defaultdialog.h
 	shared/sendtomenu.h
+        shared/sendtobutton.h
+        shared/targetswidget.h
 	shared/transformguibutton.h
 	shared/transformselectorwidget.h
 	shared/newconnectionbutton.h
@@ -238,6 +250,7 @@ set ( pip3line_SRCS
 	textinputdialog.cpp
 	comparisondialog.cpp
 	appdialog.cpp
+        additionaluidialog.cpp
 	../tools/processor.cpp
 	../tools/textprocessor.cpp
 	../tools/pipeserver.cpp
@@ -278,6 +291,11 @@ set ( pip3line_SRCS
 	sources/blocksources/shmtypes/sharedmemposixwidget.cpp
 	sources/blocksources/shmtypes/sysv_shm.cpp
 	sources/blocksources/shmtypes/shmsysvwidget.cpp
+        sources/blocksources/dtlsclientlistener.cpp
+        sources/blocksources/dtlsserverlistener.cpp
+        sources/blocksources/dtlscommon.cpp
+        sources/blocksources/dtlsclientlistenerwidget.cpp
+        sources/blocksources/dtlsserverlistenerwidget.cpp
 	views/hexview.cpp
 	views/bytetableview.cpp
 	views/byteitemmodel.cpp
@@ -294,7 +312,6 @@ set ( pip3line_SRCS
 	tabs/packetanalysertab.cpp
 	tabs/packetanalyser/importexportdialog.cpp
 	tabs/packetanalyser/importexportworker.cpp
-	tabs/packetanalyser/packet.cpp
 	tabs/packetanalyser/memorypacketmodel.cpp
 	tabs/packetanalyser/packetanalyseroptionsdialog.cpp
 	tabs/packetanalyser/packetmodelabstract.cpp
@@ -328,6 +345,8 @@ set ( pip3line_SRCS
 	shared/defaultcontrolgui.cpp
 	shared/defaultdialog.cpp
 	shared/sendtomenu.cpp
+        shared/sendtobutton.cpp
+        shared/targetswidget.cpp
 	shared/transformselectorwidget.cpp
 	shared/transformguibutton.cpp
 	shared/newconnectionbutton.cpp
@@ -354,6 +373,7 @@ set ( pip3line_UIS
 	infodialog.ui
 	settingsdialog.ui
 	pluginconfwidget.ui
+        additionaluidialog.ui
 	comparisondialog.ui
 	textinputdialog.ui
 	tabs/transformsgui.ui
@@ -380,6 +400,8 @@ set ( pip3line_UIS
 	sources/blocksources/baseblocksourcewidget.ui
 	sources/blocksources/ipnetworkclientwidget.ui
 	sources/blocksources/pipeclientwidget.ui
+        sources/blocksources/dtlsclientlistenerwidget.ui
+        sources/blocksources/dtlsserverlistenerwidget.ui
 	sources/blocksources/shmtypes/shmsysvwidget.ui
 	sources/blocksources/shmtypes/sharedmemposixwidget.ui
 	sources/blocksources/shmtypes/sharedmemorysourcebasewidget.ui
@@ -389,6 +411,7 @@ set ( pip3line_UIS
 	shared/messagepanelwidget.ui
 	shared/defaultcontrolgui.ui
 	shared/defaultdialog.ui
+        shared/targetswidget.ui
 	shared/transformselectorwidget.ui
 	state/statedialog.ui
 	state/statestatuswidget.ui

@@ -9,9 +9,9 @@
 #include <QItemSelection>
 #include <transformabstract.h>
 #include <QSharedPointer>
-#include "packet.h"
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
-class Packet;
 class TransformRequest;
 class TransformMgmt;
 

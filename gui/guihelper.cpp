@@ -42,7 +42,6 @@ Released under AGPL see LICENSE for more information
 #include "tabs/randomaccesstab.h"
 #include "shared/guiconst.h"
 #include "sources/blocksources/tlsserverlistener.h"
-#include "tabs/packetanalyser/packet.h"
 
 using namespace GuiConst;
 
@@ -143,6 +142,11 @@ void GuiHelper::sendToNewTab(const QByteArray &initialValue)
 void GuiHelper::sendToNewHexEditor(const QByteArray &initialValue)
 {
     emit newHexEditorRequested(initialValue);
+}
+
+void GuiHelper::newPacketAnalyser(const QByteArray config, const QString name)
+{
+    emit newPacketAnalyserRequested(config, name);
 }
 
 void GuiHelper::setUniveralReceiver(TabAbstract *tab)

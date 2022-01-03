@@ -56,6 +56,7 @@
         <file>icons/document-export-2.png</file>
         <file>icons/view-filter.png</file>
         <file>icons/emblem-conflicting.png</file>
+        <file>icons/icons8-curly-arrow-48.png</file>
     </qresource>
     <qresource prefix="/xmlconfs">
         <file>defaultsxml/base32decode.xml</file>

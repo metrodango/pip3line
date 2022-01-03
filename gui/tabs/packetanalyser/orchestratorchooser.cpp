@@ -12,20 +12,24 @@
 #include "sources/blocksources/udpclientlistener.h"
 #include "sources/blocksources/tlsserverlistener.h"
 #include "sources/blocksources/tlsclientlistener.h"
+#include "sources/blocksources/dtlsclientlistener.h"
+#include "sources/blocksources/dtlsserverlistener.h"
 #include "sources/blocksources/sharedmemorysource.h"
 #include "sources/blocksources/fileblocksource.h"
+#include "sources/blocksources/pipeclientlistener.h"
 #include "guihelper.h"
 #include "shared/defaultdialog.h"
 #include "externalproxyorchestrator.h"
 #include "proxyorchestrator.h"
 #include "socksorchestrator.h"
 #include "myoproxy.h"
-#include "sources/blocksources/pipeclientlistener.h"
+
 
 OrchestratorChooser::OrchestratorChooser(GuiHelper *guiHelper, SourcesOrchestatorAbstract *orchestrator, QWidget *parent) :
     QComboBox(parent),
     orchestrator(orchestrator),
-    guiHelper(guiHelper)
+    guiHelper(guiHelper),
+    confDialog(nullptr)
 {
 
     addItem(tr("Select IO type"));
@@ -81,28 +85,33 @@ int OrchestratorChooser::showConfPanel(SourcesOrchestatorAbstract *targetOrchest
 {
     int ret = QDialog::Rejected;
     if (targetOrchestrator != nullptr) {
-        DefaultDialog *confDialog = new(std::nothrow) DefaultDialog(this);
         if (confDialog == nullptr) {
-            qFatal("Cannot allocate memory for DefaultDialog X{");
-        }
+            confDialog = new(std::nothrow) DefaultDialog(this);
+            if (confDialog == nullptr) {
+                qFatal("Cannot allocate memory for DefaultDialog X{");
+            }
 
-        confDialog->setWindowTitle(tr("Configuration"));
-        confDialog->resize(400,300);
+            confDialog->setWindowTitle(tr("Configuration"));
+            confDialog->resize(400,300);
+        }
 
         QWidget * confWidget = targetOrchestrator->getConfGui(nullptr);
 
         if (confWidget != nullptr) {
             confDialog->setMainWidget(confWidget);
         }
-        if (blocking)
+        if (blocking) {
             ret = confDialog->exec();
-        else {
+            delete confDialog;
+            confDialog = nullptr;
+        } else {
             confDialog->raise();
             confDialog->show();
         }
     } else {
         qCritical() << tr("[OrchestratorChooser::showConfPanel] orchestrator is nullptr T_T");
     }
+
 
     return ret;
 }
@@ -189,6 +198,24 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
             }
             break;
+        case SourcesOrchestatorAbstract::DTLS_CLIENT:
+            {
+                qDebug() << "DTLS client choosen";
+                bs = new(std::nothrow) DTLSClientListener();
+                if (bs == nullptr) {
+                    qFatal("Cannot allocate memory for DTLSClientListener X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+
+                ci->setType(SourcesOrchestatorAbstract::DTLS_CLIENT);
+                orch = ci;
+
+            }
+            break;
         case SourcesOrchestatorAbstract::UDP_SERVER:
             {
                 qDebug() << "UDP server choosen";
@@ -202,6 +229,22 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                     qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
                 }
                 ci->setType(SourcesOrchestatorAbstract::UDP_SERVER);
+                orch = ci;
+            }
+            break;
+        case SourcesOrchestatorAbstract::DTLS_SERVER:
+            {
+                qDebug() << "DTLS server choosen";
+                bs = new(std::nothrow) DtlsServerListener();
+                if (bs == nullptr) {
+                    qFatal("Cannot allocate memory for DtlsServerListener X{");
+                }
+
+                SingleSourceOrchestrator *ci = new(std::nothrow) SingleSourceOrchestrator(bs);
+                if (ci == nullptr) {
+                    qFatal("Cannot allocate memory for SingleSourceOrchestrator X{");
+                }
+                ci->setType(SourcesOrchestatorAbstract::DTLS_SERVER);
                 orch = ci;
             }
             break;
@@ -270,6 +313,33 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 qFatal("Cannot allocate memory for ProxyOrchestrator X{");
             }
             ci->setType(SourcesOrchestatorAbstract::UDP_PROXY);
+            orch = ci;
+            break;
+        }
+        case SourcesOrchestatorAbstract::DTLS_PROXY:
+        {
+            qDebug() << "DTLS proxy choosen";
+            BlocksSource *dtlsServer = new(std::nothrow) DtlsServerListener();
+            if (dtlsServer == nullptr) {
+                qFatal("Cannot allocate memory for DtlsServerListener X{");
+            }
+
+            dtlsServer->setFlags(BlocksSource::TLS_OPTIONS | BlocksSource::TLS_ENABLED);
+
+            BlocksSource *dtlsClient = new(std::nothrow) DTLSClientListener();
+            if (dtlsClient == nullptr) {
+                qFatal("Cannot allocate memory for DTLSClientListener X{");
+            }
+
+            dtlsClient->setFlags(BlocksSource::TLS_OPTIONS |
+                                 BlocksSource::TLS_ENABLED |
+                                 BlocksSource::GEN_IP_OPTIONS);
+
+            ProxyOrchestrator *ci = new(std::nothrow) ProxyOrchestrator(dtlsServer,dtlsClient);
+            if (ci == nullptr) {
+                qFatal("Cannot allocate memory for ProxyOrchestrator X{");
+            }
+            ci->setType(SourcesOrchestatorAbstract::DTLS_PROXY);
             orch = ci;
             break;
         }
@@ -421,8 +491,10 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
     }
 
     if (orch != nullptr) {
+
         for (int i = 0 ; i < orch->blockSourceCount(); i++) {
             BlocksSource * bs = orch->getBlockSource(i);
+            qInfo() << bs << "requested";
             if (bs != nullptr) {
                 connect(bs, &BlocksSource::inboundTranformSelectionRequested, guiHelper, &GuiHelper::onInboundTransformRequested);
                 connect(bs, &BlocksSource::outboundTranformSelectionRequested, guiHelper, &GuiHelper::onOutboundTransformRequested);

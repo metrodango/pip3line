@@ -12,7 +12,7 @@ message( STATUS "Configuring the Distorm plugin --")
 
 project( distormplugin )
 
-set ( CMAKE_BUILD_TYPE Release )
+# set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DDISTORM_LIBRARY )
 
 set(CMAKE_AUTOUIC ON)

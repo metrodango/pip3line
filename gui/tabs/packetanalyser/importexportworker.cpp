@@ -8,7 +8,6 @@
 #include <QJsonValue>
 #include <QApplication>
 #include "pcapio/pcapio.h"
-#include "packet.h"
 #include "shared/guiconst.h"
 #include "state/basestateabstract.h"
 

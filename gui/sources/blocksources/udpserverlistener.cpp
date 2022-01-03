@@ -1,6 +1,5 @@
 #include "udpserverlistener.h"
 #include <QThread>
-#include <QTabWidget>
 #include "shared/guiconst.h"
 #include "connectionswidget.h"
 #include <QDebug>
@@ -22,14 +21,12 @@ UdpServerListener::UdpServerListener(QHostAddress hostAddress, quint16 hostPort,
     updateConnectionsTimer.moveToThread(&serverThread);
     moveToThread(&serverThread);
     serverThread.start();
-
 }
 
 UdpServerListener::~UdpServerListener()
 {
     serverThread.quit();
     serverThread.wait();
-
 }
 
 QString UdpServerListener::getName()
@@ -47,25 +44,51 @@ bool UdpServerListener::isStarted()
     return (udpSocket != nullptr && udpSocket->state() == QAbstractSocket::BoundState);
 }
 
+int UdpServerListener::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        for (int i = 0; i < clients.size(); i++) {
+            int suid = clients.at(i)->getSid();
+            if (sourceId == suid) {
+                targetId = suid;
+                break;
+            }
+        }
+    }
+    return targetId;
+}
+
 void UdpServerListener::sendBlock(Block *block)
 {
     if (udpSocket != nullptr) {
         QByteArray data = applyOutboundTransform(block->getData());
 
         if (data.size() > MAX_DATAGRAM_SIZE ) {
-            emit log(tr("The UDP packet is too large. It will be truncated to %1 bytes").arg(MAX_DATAGRAM_SIZE),ID,Pip3lineConst::LWARNING);
+            emit log(tr("The UDP packet is too large. It will be truncated to %1 bytes").arg(MAX_DATAGRAM_SIZE),
+                     ID,
+                     Pip3lineConst::LWARNING);
             data  = data.mid(0,MAX_DATAGRAM_SIZE);
         }
 
         bool foundSource = false;
         for (int i = 0; i < clients.size(); i++) {
-            ConnectionDetails client = clients.at(i);
-            if (block->getSourceid() ==  client.getSid()) {
-                qint64 bwritten = udpSocket->writeDatagram(data,client.getAdress(),client.getPort());
+            QSharedPointer<ConnectionDetails> client = clients.at(i);
+            if (block->getSourceid() ==  client->getSid()) {
+                qint64 bwritten = udpSocket->writeDatagram(data, client->getAddress(), client->getPort());
+                if (bwritten == -1) {
+                    emit log(tr("[%1:%2] UDP Sending error: %3")
+                             .arg(client->getAddress().toString())
+                             .arg(client->getPort()).arg(udpSocket->errorString()),ID,Pip3lineConst::LERROR);
+                } else {
+                    client->bumpLastTimestamp();
+                }
                 if (bwritten != data.size()) {
                     emit log(tr("The UDP packet was not send entirely '-_-"),ID,Pip3lineConst::LWARNING);
                 }
                 foundSource = true;
+
+                break;
             }
         }
 
@@ -98,7 +121,7 @@ bool UdpServerListener::startListening()
     connect(udpSocket, &QUdpSocket::readyRead, this, &UdpServerListener::packetReceived);
 
     if (!udpSocket->bind(hostAddress, hostPort)) {
-        emit log(tr("UDP server error: %1").arg(udpSocket->errorString()),ID,Pip3lineConst::LERROR);
+        emit log(tr("UDP server error: %1").arg(udpSocket->errorString()), ID, Pip3lineConst::LERROR);
         delete udpSocket;
         udpSocket = nullptr;
         return false;
@@ -118,11 +141,9 @@ void UdpServerListener::stopListening()
         delete udpSocket;
         udpSocket = nullptr;
         for (int i = 0 ; i < clients.size(); i++) {
-            BlocksSource::releaseID(clients.at(i).getSid());
+            BlocksSource::releaseID(clients.at(i)->getSid());
         }
         clients.clear();
-
-
         emit stopped();
         triggerUpdate();
     }
@@ -132,7 +153,7 @@ void UdpServerListener::stopListening()
 void UdpServerListener::packetReceived()
 {
     QByteArray data;
-    QHostAddress sender;
+    QHostAddress senderIP;
     quint16 senderPort;
 
     qint64 datagramSize = udpSocket->pendingDatagramSize();
@@ -144,67 +165,76 @@ void UdpServerListener::packetReceived()
     }
 
     qint64 bread = 0;
-    bread += udpSocket->readDatagram(data.data(), data.size(), &sender, &senderPort);
+    bread += udpSocket->readDatagram(data.data(), data.size(), &senderIP, &senderPort);
 
     if (bread != datagramSize) {
         qCritical() << tr("[UdpClientListener::dataReceived] not all the data was read T_T");
     }
-
-    ConnectionDetails client(sender,senderPort);
 
     if (data.isEmpty()){
         emit log(tr("Received data block is empty, ignoring."),ID, Pip3lineConst::LERROR);
         return;
     }
 
+    QSharedPointer<ConnectionDetails> client;
+
     int sid = Block::INVALID_ID;
-    int index = clients.indexOf(client);
-    if (index > -1) {
-        sid = clients.at(index).getSid();
+    int index = clients.connectionIndex(senderIP,senderPort);
+    if (index > Block::INVALID_ID) {
+        client = clients.at(index);
+        sid = client->getSid();
     } else {
         if (clients.size() > 1000000)
-            emit log(tr("The number of UDP server \"connections\" as reached 1 Millions. Dude for real ?"),ID, Pip3lineConst::LERROR);
+            emit log(tr("The number of UDP server \"connections\" as reached 1 Millions. For real ?"),ID, Pip3lineConst::LERROR);
+        client = QSharedPointer<ConnectionDetails>(new(std::nothrow) ConnectionDetails(senderIP,senderPort));
         sid = newSourceID(this);
-        client.setSid(sid);
+        client->setSid(sid);
         clients.append(client);
         updateConnectionsInfo();
     }
+    client->bumpLastTimestamp();
 
-    Block * datab = new(std::nothrow) Block(data,sid);
-    if (datab == nullptr) qFatal("Cannot allocate Block for UdpServerListener X{");
+    data = applyInboundTransform(data);
+    if (!data.isEmpty()) {
+        Block * datab = new(std::nothrow) Block(data,sid);
+        if (datab == nullptr) qFatal("Cannot allocate Block for UdpServerListener X{");
 
-    emit blockReceived(datab);
+        emit blockReceived(datab);
+    } else {
+        qDebug() << tr("[%1:%2] Processed Data packet is empty, ignoring").arg(senderIP.toString()).arg(senderPort);
+    }
 }
 
 void UdpServerListener::checkTimeouts()
 {
-    QList<ConnectionDetails> list = clients; // copying we don't want to interfer with the original yet
+    QList<QSharedPointer<ConnectionDetails> > list = clients; // copying we don't want to interfer with the original yet
     bool listUpdated = false;
     qint64 current = QDateTime::currentMSecsSinceEpoch();
     for (int i = 0 ; i < list.size(); i++) {
-        ConnectionDetails uc = list.at(i);
-        if ((current - uc.getCreationTimeStamp().toMSecsSinceEpoch()) > GuiConst::DEFAULT_UDP_TIMEOUT_MS) {
-            qDebug() << tr("UDP Client timeout [%2:%1]").arg(uc.getAdress().toString()).arg(uc.getPort());
-            BlocksSource::releaseID(uc.getSid());
+        QSharedPointer<ConnectionDetails> uc = list.at(i);
+        if ((current - uc->getLastPacketTimeStamp().toMSecsSinceEpoch()) > GuiConst::DEFAULT_UDP_TIMEOUT_MS) {
+            qDebug() << tr("UDP Client timeout [%2:%1]").arg(uc->getAddress().toString()).arg(uc->getPort());
+            BlocksSource::releaseID(uc->getSid());
             clients.removeAll(uc);
             listUpdated = true;
         }
     }
 
-    if (listUpdated)
+    if (listUpdated) {
         updateConnectionsInfo();
+    }
 }
 
 void UdpServerListener::internalUpdateConnectionsInfo()
 {
     connectionsInfo.clear();
     for (int i = 0 ; i < clients.size(); i++) {
-        ConnectionDetails client = clients.at(i);
-        QString desc = client.getAdress().toString();
-        desc.append(QString(":%1/udp").arg(client.getPort()));
+        QSharedPointer<ConnectionDetails> client = clients.at(i);
+        QString desc = client->getAddress().toString();
+        desc.append(QString(":%1/udp").arg(client->getPort()));
         Target<BlocksSource *> tac;
         tac.setDescription(desc);
-        tac.setConnectionID(client.getSid());
+        tac.setConnectionID(client->getSid());
         tac.setSource(this);
         connectionsInfo.append(tac);
     }

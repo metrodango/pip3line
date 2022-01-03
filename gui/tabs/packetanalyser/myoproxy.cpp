@@ -1,5 +1,4 @@
 #include "myoproxy.h"
-#include "packet.h"
 #include "guihelper.h"
 #include "myoproxywidget.h"
 #include "sources/blocksources/tlsserverlistener.h"

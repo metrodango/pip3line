@@ -7,7 +7,8 @@
 #include <QByteArray>
 #include <QDateTime>
 #include <QRegExp>
-#include "packet.h"
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class FilterItem : public QObject
 {

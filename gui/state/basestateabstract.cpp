@@ -147,6 +147,7 @@ bool BaseStateAbstract::readNextStart()
 bool BaseStateAbstract::readNextStart(QString expected)
 {
     if (reader != nullptr) {
+
         if (reader->readNextStartElement()) {
             if (expected.isEmpty())
                 return true;

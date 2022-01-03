@@ -8,9 +8,10 @@
 # Released under AGPL see LICENSE for more information
 ####
 
+cmake_minimum_required(VERSION 3.5)
 message ( STATUS "Configuring the base plugin --" )
 project( baseplugins )
-set ( CMAKE_BUILD_TYPE Release )
+#set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DBASEPLUGINS_LIBRARY)
 
 set(CMAKE_AUTOUIC ON)
@@ -21,7 +22,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 COMPONENTS Core Widgets Svg XmlPatterns Network REQUIRED)
 
 include_directories (
-    ../../libtransform/)
+    ../../libtransform/
+)
 
 if (WIN32)
     link_directories (

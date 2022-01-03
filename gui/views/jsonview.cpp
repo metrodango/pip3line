@@ -79,15 +79,9 @@ QVariant JsonItem::data(int column) const
             ret = itemName;
     } else {
         if (valueType == ARRAY) {
-            QString str = ARRAY_STR;
-            if (children.isEmpty())
-                str.append(" (empty)");
-            ret = str;
+            ret = QString("%1 (%2)").arg(ARRAY_STR).arg(children.size());
         } else if (valueType == OBJECT) {
-            QString str = OBJECT_STR;
-            if (children.isEmpty())
-                str.append(" (empty)");
-            ret = str;
+            ret = QString("%1 (%2)").arg(OBJECT_STR).arg(children.size());
         } else if (value.isBool()){
             ret = value.toBool() ? QString("true") : QString("false");
         } else if (value.isDouble()) {
@@ -422,6 +416,7 @@ JsonView::JsonView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidg
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     tree->setSizeAdjustPolicy(QTreeView::AdjustToContents);
+    tree->setWordWrap(true);
     globalContextMenu = nullptr;
     copyMenu = nullptr;
     replaceMenu = nullptr;

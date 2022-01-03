@@ -87,7 +87,7 @@ bool TransformMgmt::initialize(const QString &baseDirectory)
     if (baseDirectory.isEmpty()) {
         qDebug() << tr("Application dir path is empty. Plugins won't probably load.");
     }
-    pluginsDirectories << QString("%1/%2").arg(baseDirectory).arg(APP_PLUGIN_DIRECTORY);
+    pluginsDirectories << QString("%1/%2").arg(baseDirectory, APP_PLUGIN_DIRECTORY);
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     if (QSysInfo::WordSize == 64) {
         pluginsDirectories << QDir(QString("%1/../lib64/pip3line").arg(baseDirectory)).absolutePath();
@@ -180,7 +180,8 @@ bool TransformMgmt::loadTransforms(bool verbose) {
                      transformNameList.insert(nameList.at(k), j.value());
                      count++;
                  } else {
-                     emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from {%3}").arg(nameList.at(k)).arg(transformNameList.value(nameList.at(k))->pluginName()).arg(j.key()),id);
+                     emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from {%3}")
+                                  .arg(nameList.at(k), transformNameList.value(nameList.at(k))->pluginName(), j.key()),id);
                  }
              }
              if (count != 0 && verbose)
@@ -200,7 +201,8 @@ bool TransformMgmt::loadTransforms(bool verbose) {
         if (conf.isEmpty()) {
             logError(tr("The saved configuration %1 returned an empty configuration").arg(name), id);
         } else if (transformNameList.contains(name)) {
-            emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from the persistent store").arg(name).arg(transformNameList.value(name)->pluginName()),id);
+            emit warning(tr("Duplicate: a transformation named [%1] is already in use from {%2}, ignoring the one from the persistent store")
+                         .arg(name, transformNameList.value(name)->pluginName()),id);
         } else {
             savedConf.insert(name, conf);
             enclist.append(name);
@@ -266,7 +268,8 @@ bool TransformMgmt::loadPlugins()
         TransformFactoryPluginInterface *tro = qobject_cast<TransformFactoryPluginInterface *>(plugin);
         if (tro != nullptr) {
            registerPlugin(tro);
-           emit status(tr("Loaded static plugin: {%1} version %2 (compiled with Qt %3)").arg(tro->pluginName()).arg(tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
+           emit status(tr("Loaded static plugin: {%1} version %2 (compiled with Qt %3)")
+                       .arg(tro->pluginName(), tro->pluginVersion()).arg(tro->compiledWithQTversion()),id);
         } else {
             emit error(tr("Static plugin is using the wrong interface"),id);
             noError = false;

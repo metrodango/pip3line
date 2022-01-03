@@ -1,5 +1,4 @@
 #include "externalproxyorchestrator.h"
-#include "packet.h"
 #include <QDebug>
 
 ExternalProxyOrchestrator::ExternalProxyOrchestrator(BlocksSource *inboundSource, BlocksSource *outboundSource, QObject *parent) :

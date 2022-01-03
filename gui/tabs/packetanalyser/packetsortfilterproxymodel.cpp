@@ -1,5 +1,4 @@
 #include "packetsortfilterproxymodel.h"
-#include "packet.h"
 #include "shared/guiconst.h"
 #include <QDebug>
 #include <QHostAddress>

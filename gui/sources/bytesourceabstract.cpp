@@ -1079,7 +1079,7 @@ void ByteSourceAbstract::historyClear()
     history.clear();
 }
 
-void ByteSourceAbstract::historyApply(ByteSourceAbstract::HistItem item, bool forward)
+void ByteSourceAbstract::historyApply(Pip3lineCommon::HistItem item, bool forward)
 {
     applyingHistory = true;
     if (item.action == REPLACE) {
@@ -1142,7 +1142,7 @@ void ByteSourceAbstract::historyAddReplace(quint64 offset, QByteArray before, QB
     historyAdd(item);
 }
 
-void ByteSourceAbstract::historyAdd(ByteSourceAbstract::HistItem item)
+void ByteSourceAbstract::historyAdd(Pip3lineCommon::HistItem item)
 {
     if (applyingHistory) // don't touch the history if we are applying a history item (this one should not be needed)
         return;
@@ -1274,7 +1274,7 @@ void ByteSourceStateObj::run()
             writer->writeEndElement(); // STATE_USERMARKINGS
         }
 
-        QList<ByteSourceAbstract::HistItem> history = bs->history;
+        QList<Pip3lineCommon::HistItem> history = bs->history;
         if ((flags & GuiConst::STATE_LOADSAVE_DATA) && (flags & GuiConst::STATE_LOADSAVE_HISTORY) && !history.isEmpty()) {
             size = history.size();
             writer->writeStartElement(GuiConst::STATE_HEX_HISTORY);
@@ -1282,7 +1282,7 @@ void ByteSourceStateObj::run()
             writer->writeAttribute(GuiConst::STATE_SIZE, write(size));
 
             for (int i = 0; i < size; i++) {
-                ByteSourceAbstract::HistItem hi = history.at(i);
+                Pip3lineCommon::HistItem hi = history.at(i);
                 writer->writeStartElement(GuiConst::STATE_HEX_HISTORY_ITEM);
                 writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_OFFSET, write(hi.offset));
                 writer->writeAttribute(GuiConst::STATE_HEX_HISTORY_ACTION, write(static_cast<int>(hi.action)));
@@ -1429,7 +1429,7 @@ void ByteSourceStateObj::run()
        //         logStatus(QString("History items to restore: %1").arg(lsize));
                 for (int i = 0; i < lsize; i++) {
                     if (readNextStart(GuiConst::STATE_HEX_HISTORY_ITEM)) {
-                        ByteSourceAbstract::HistItem hi;
+                        Pip3lineCommon::HistItem hi;
                         if (attributes.hasAttribute(GuiConst::STATE_HEX_HISTORY_OFFSET)) {
                             hi.offset = readUInt64(attributes.value(GuiConst::STATE_HEX_HISTORY_OFFSET),&ok);
                             if (!ok) {
@@ -1449,7 +1449,7 @@ void ByteSourceStateObj::run()
                             continue;
                         }
                         else
-                            hi.action = static_cast<ByteSourceAbstract::HistAction>(action);
+                            hi.action = static_cast<Pip3lineCommon::HistAction>(action);
 
                         hi.before = readByteArray(attributes.value(GuiConst::STATE_HEX_HISTORY_BEFORE));
 

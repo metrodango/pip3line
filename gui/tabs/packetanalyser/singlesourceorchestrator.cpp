@@ -1,6 +1,5 @@
 #include "singlesourceorchestrator.h"
 #include "sources/blocksources/blockssource.h"
-#include "packet.h"
 #include <QDebug>
 #include <shared/defaultcontrolgui.h>
 

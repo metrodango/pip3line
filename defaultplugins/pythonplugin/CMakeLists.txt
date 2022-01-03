@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.12)
 message ( STATUS "Configuring the Python 3 plugin --" )
 project( python3plugin )
 
-set ( CMAKE_BUILD_TYPE Release )
+# set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DPYTHONPLUGIN_LIBRARY -DQT_NO_KEYWORDS -DBUILD_PYTHON_3)
 
 set(CMAKE_AUTOUIC ON)

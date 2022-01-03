@@ -2,11 +2,12 @@
 #include "tabs/tababstract.h"
 #include "sources/blocksources/blockssource.h"
 #include "tabs/packetanalyser/sourcesorchestatorabstract.h"
-#include "tabs/packetanalyser/packet.h"
 #include "guihelper.h"
 #include <QAction>
 #include <QList>
 #include <QDebug>
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 SendToMenu::SendToMenu(GuiHelper *guiHelper, QString title, QWidget *parent) :
     QMenu(title,parent),
@@ -158,13 +159,13 @@ void SendToMenu::processingAction(QAction *action, const QByteArray &data)
         } else if (sendToBlockSourceMapping.contains(action)) {
             Target<BlocksSource *> ta = sendToBlockSourceMapping.value(action);
          //   qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
-            Block * datab = new(std::nothrow) Block(data,ta.getConnectionID());
+            Block * datab = new(std::nothrow) Block(data, ta.getConnectionID());
             if (datab == nullptr) qFatal("Cannot allocate Block for sendTo X{");
             ta.getSource()->postBlockForSending(datab);
         } else if (sendToOrchestratorMapping.contains(action)) {
             Target<SourcesOrchestatorAbstract *> ta = sendToOrchestratorMapping.value(action);
         //    qDebug() << "sending to " << ta.getSource()->getName() << ta.getDescription();
-            QSharedPointer<Packet> datap = QSharedPointer<Packet> (new(std::nothrow) Packet(data,ta.getConnectionID()));
+            QSharedPointer<Packet> datap = QSharedPointer<Packet> (new(std::nothrow) Packet(data, ta.getConnectionID()));
             if (datap == nullptr) qFatal("Cannot allocate Packet for sendTo X{");
             datap->setInjected(true);
             ta.getSource()->postPacket(datap);

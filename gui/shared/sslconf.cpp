@@ -77,6 +77,7 @@ QSslConfiguration SslConf::getSslConfiguration()
     sslConfiguration.setPeerVerifyMode(sslVerificationMode);
     sslConfiguration.setAllowedNextProtocols(allowedNextProtocols);
     sslConfiguration.setEllipticCurves(ellipticCurves);
+    sslConfiguration.setProtocol(protocolVersion);
     return sslConfiguration;
 }
 
@@ -339,6 +340,7 @@ void SslConf::setSslConfiguration(const QSslConfiguration &value)
     sslVerificationMode = sslConfiguration.peerVerifyMode();
     allowedNextProtocols = sslConfiguration.allowedNextProtocols();
     ellipticCurves = sslConfiguration.ellipticCurves();
+    protocolVersion = sslConfiguration.protocol();
 }
 
 void SslConf::clearOtherCAs()
@@ -383,6 +385,21 @@ QString SslConf::concat(const QStringList &list)
     }
     temp.chop(1);
     return temp;
+}
+
+QByteArray SslConf::getPsk() const
+{
+    return psk;
+}
+
+void SslConf::setPsk(const QByteArray &value)
+{
+    psk = value;
+}
+
+void SslConf::setProtocol(QSsl::SslProtocol proto)
+{
+    protocolVersion = proto;
 }
 
 QVector<QSslEllipticCurve> SslConf::getEllipticCurves() const

@@ -7,6 +7,7 @@
 #include <QTimer>
 #include "connectiondetails.h"
 #include <QThread>
+#include <QSharedPointer>
 
 class UdpServerListener : public IPBlocksSources
 {
@@ -18,6 +19,7 @@ class UdpServerListener : public IPBlocksSources
         QString getName() override;
         QString getDescription() override;
         bool isStarted() override;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block *block) override;
         bool startListening() override;
@@ -33,7 +35,7 @@ class UdpServerListener : public IPBlocksSources
         static const QHostAddress DEFAULT_ADDRESS;
         QUdpSocket *udpSocket;
         QThread serverThread;
-        QList<ConnectionDetails> clients;
+        ConnectionDetailsList clients;
         QTimer connectionsTimer;
 };
 

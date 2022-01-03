@@ -15,6 +15,8 @@ Released under AGPL see LICENSE for more information
 #include <transformabstract.h>
 #include <transformmgmt.h>
 #include <QWidget>
+#include <QRegExp>
+#include <QRegExpValidator>
 #include <commonstrings.h>
 #include "guihelper.h"
 #include "infodialog.h"
@@ -31,6 +33,7 @@ class QuickViewItemConfig : public QDialog
         Q_OBJECT
         
     public:
+        static const QRegExp LIMIT_NAME_REGEXP;
         explicit QuickViewItemConfig(GuiHelper *guiHelper, QWidget *parent = nullptr);
         ~QuickViewItemConfig();
         TransformAbstract * getTransform();
@@ -48,6 +51,8 @@ class QuickViewItemConfig : public QDialog
         void setOutputTypeVisible(bool val);
         void closeEvent(QCloseEvent *event);
         void setReadonlyVisible(bool value);
+        bool isLimitingNameCharacters() const;
+        void setLimitNameCharacters(bool enable);
     private slots:
         void onTransformSelect(QString name);
         void onInboundWayChange(bool checked);
@@ -66,6 +71,7 @@ class QuickViewItemConfig : public QDialog
         QWidget *confGui;
         InfoDialog * infoDialog;
         OutputFormat format;
+        QRegExpValidator validator;
         bool wayBoxVisible;
         bool formatBoxVisible;
         bool outputTypeVisible;

@@ -25,12 +25,15 @@ class TLSClientListener : public IPBlocksSources
         Q_OBJECT
     public:
         static const QString ID;
-        explicit TLSClientListener(QHostAddress hostAddress = TLSClientListener::DEFAULT_ADDRESS, quint16 hostPort = TLSClientListener::DEFAULT_PORT, QObject *parent = nullptr);
+        explicit TLSClientListener(QHostAddress hostAddress = TLSClientListener::DEFAULT_ADDRESS,
+                                   quint16 hostPort = TLSClientListener::DEFAULT_PORT,
+                                   QObject *parent = nullptr);
         ~TLSClientListener() override;
         QString getName() override;
         QString getDescription() override;
         bool isStarted() override;
         QWidget *getAdditionnalCtrls(QWidget * parent = nullptr) override;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block *block) override;
         bool startListening() override;

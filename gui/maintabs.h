@@ -27,7 +27,8 @@ Released under AGPL see LICENSE for more information
 #include "shared/guiconst.h"
 #include "state/basestateabstract.h"
 #include "state/closingstate.h"
-#include "tabs/packetanalyser/packet.h"
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class QAction;
 
@@ -51,6 +52,7 @@ class MainTabs : public QTabWidget
         TabAbstract *newHexEditorTab(QByteArray data = QByteArray());
         TabAbstract *newCurrentMemTab();
         TabAbstract *newPacketAnalyserTab(QList<QSharedPointer<Packet> > packets = QList<QSharedPointer<Packet> >());
+        TabAbstract *newPacketAnalyserTab(const QByteArray config, const QString tabname = QString());
         int integrateTab(TabAbstract * newTab);
         void onDeleteTab(int index);
         void showLogs();

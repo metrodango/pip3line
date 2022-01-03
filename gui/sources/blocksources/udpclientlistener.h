@@ -16,6 +16,7 @@ class UdpClientListener : public IPBlocksSources
         QString getName() override;
         QString getDescription() override;
         bool isStarted() override;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block *block) override;
         bool startListening() override;

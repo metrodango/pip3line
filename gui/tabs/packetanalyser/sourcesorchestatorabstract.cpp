@@ -3,7 +3,6 @@
 #include "shared/defaultcontrolgui.h"
 #include <QHBoxLayout>
 #include <QPushButton>
-#include "packet.h"
 #include <QDebug>
 
 const QStringList SourcesOrchestatorAbstract::OrchestratorsList = SourcesOrchestatorAbstract::initSourcesStrings();
@@ -218,7 +217,11 @@ QStringList SourcesOrchestatorAbstract::initSourcesStrings()
          << "UNIX Local socket client"
 #endif
          << "MYO Proxy"
-         << "Shared Memory";
+         << "Shared Memory"
+         << "File"
+         << "DTLS client"
+         << "DTLS Server"
+         << "DTLS Proxy";
 
     return list;
 }

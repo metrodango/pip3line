@@ -355,7 +355,7 @@ namespace GuiConst
 
 namespace GuiStyles {
      const QString LineEditError = "QLineEdit { background-color: #FFB1B2; }";
-     const QString LineEditOk = "QLineEdit { background-color: #b3e7ff; }";
+     const QString LineEditOk = "QLineEdit { background-color: #419648; foreground-color: #ffffff; }";
      const QString ComboBoxError = "QComboBox { color : red; }";
      const QString PushButtonReadonly = "QPushButton { color : #FF0000; }";
      const QString LineEditWarning = "";

@@ -6,8 +6,8 @@
 #include <commonstrings.h>
 #include "sources/blocksources/blockssource.h"
 #include "sources/blocksources/target.h"
-
-class Packet;
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class SourcesOrchestatorAbstract : public QObject
 {
@@ -28,7 +28,10 @@ class SourcesOrchestatorAbstract : public QObject
             PIPE_CLIENT = 10,
             MYO_PROXY = 11,
             SHARED_MEM = 12,
-            FILE_SOURCE = 13
+            FILE_SOURCE = 13,
+            DTLS_CLIENT = 14,
+            DTLS_SERVER = 15,
+            DTLS_PROXY = 16
         };
 
         explicit SourcesOrchestatorAbstract(QObject *parent = nullptr);

@@ -195,8 +195,21 @@
         <property name="toolTip">
          <string>Highlight changes whenever a modification occurs. Only applies to hex view.</string>
         </property>
+        <property name="statusTip">
+         <string>show changes between blocks</string>
+        </property>
         <property name="text">
-         <string>show changes</string>
+         <string>track</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="appendCheckBox">
+        <property name="toolTip">
+         <string>Append any incoming data instead of replacing the data</string>
+        </property>
+        <property name="text">
+         <string>Append</string>
         </property>
        </widget>
       </item>
@@ -250,7 +263,7 @@
         <x>0</x>
         <y>0</y>
         <width>713</width>
-        <height>413</height>
+        <height>422</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="mainLayout">

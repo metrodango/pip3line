@@ -254,10 +254,14 @@ void TLSServerListener::dataReceived()
                 processIncomingB64Block(data, clientId);
 
             } else {
-                Block * datab = new(std::nothrow) Block(data, clientId);
-                if (datab == nullptr) qFatal("Cannot allocate Block for TLSServerListener X{");
-
-                emit blockReceived(datab);
+                data = applyInboundTransform(data);
+                if (!data.isEmpty()) {
+                    Block * datab = new(std::nothrow) Block(data, clientId);
+                    if (datab == nullptr) qFatal("Cannot allocate Block for TLSServerListener X{");
+                    emit blockReceived(datab);
+                } else {
+                    qDebug() << tr("[%1:%2] TLS Data packet is empty, ignoring").arg(socket->peerAddress().toString()).arg(socket->peerPort());
+                }
             }
         }
     } else {
@@ -304,10 +308,18 @@ void TLSServerListener::handlingClient(qintptr socketDescriptor)
     }
 
     if (socket != nullptr) {
-        emit log(tr("New %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()),actualID, Pip3lineConst::PLSTATUS);
+        int cid = BlocksSource::newSourceID(this);
+        emit log(tr("[%1:%2] => New client [%3:%4 | cid: %5]")
+                 .arg(hostAddress.toString())
+                 .arg(hostPort)
+                 .arg(socket->peerAddress().toString())
+                 .arg(socket->peerPort())
+                 .arg(cid)
+                 ,actualID,
+                 Pip3lineConst::PLSTATUS);
         connect(socket, &QSslSocket::disconnected, this, &TLSServerListener::onClientDeconnection,Qt::QueuedConnection);
 
-        clients.insert(socket, BlocksSource::newSourceID(this));
+        clients.insert(socket, cid);
         updateConnectionsInfo();
     }
 }
@@ -410,7 +422,7 @@ bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
     qDebug() << tr("Trying to start TLS for %1:%2").arg(sslsocket->peerAddress().toString()).arg(sslsocket->peerPort());
     //connect(sslsocket, qOverload<const QList<QSslError> &>(&QSslSocket::sslErrors), this, &TLSServerListener::onSslErrors,Qt::QueuedConnection);
     connect(sslsocket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)), Qt::QueuedConnection);
-    connect(sslsocket, &QSslSocket::modeChanged,this, &TLSServerListener::onSSLModeChange,Qt::QueuedConnection);
+    connect(sslsocket, &QSslSocket::modeChanged, this, &TLSServerListener::onSSLModeChange, Qt::QueuedConnection);
     sslsocket->setSslConfiguration(sslConfiguration->getSslConfiguration());
     sslsocket->startServerEncryption();
 
@@ -419,9 +431,14 @@ bool TLSServerListener::startingTLS(QSslSocket *sslsocket)
 
 void TLSServerListener::handlingDisconnect(QSslSocket *socket)
 {
-    emit log(tr("Disconnection for %1:%2").arg(socket->peerAddress().toString()).arg(socket->peerPort()), actualID, Pip3lineConst::PLSTATUS);
+
     if (clients.contains(socket)) {
         int rsid = clients.take(socket);
+        emit log(tr("[%1:%2] Disconnection for [cid: %3]")
+                 .arg(hostAddress.toString())
+                 .arg(hostPort)
+                 .arg(rsid),
+                 actualID, Pip3lineConst::PLSTATUS);
 
         // clearing any remaining b64 data for this SID
         if (b64BlockTempDataList.contains(rsid)) {
@@ -432,6 +449,11 @@ void TLSServerListener::handlingDisconnect(QSslSocket *socket)
         delete socket;
         emit connectionClosed(rsid);
         updateConnectionsInfo();
+    } else {
+        emit log(tr("[%1:%2] Disconnection for unkown")
+                 .arg(hostAddress.toString())
+                 .arg(hostPort)
+                 , actualID, Pip3lineConst::PLSTATUS);
     }
 }
 
@@ -443,6 +465,20 @@ bool TLSServerListener::isSocks5Proxy() const
 void TLSServerListener::setSocks5Proxy(bool value)
 {
     socksProxy = value;
+}
+
+int TLSServerListener::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        foreach (int suid , clients) {
+            if (sourceId == suid) {
+                targetId = suid;
+                break;
+            }
+        }
+    }
+    return targetId;
 }
 
 

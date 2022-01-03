@@ -13,8 +13,8 @@ Released under AGPL see LICENSE for more information
 
 #include "packetmodelabstract.h"
 #include <QStringList>
-
-class Packet;
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class MemoryPacketModel : public PacketModelAbstract
 {

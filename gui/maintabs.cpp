@@ -64,7 +64,8 @@ MainTabs::MainTabs(GuiHelper *nguiHelper) :
     connect(guiHelper, &GuiHelper::deletedTabsUpdated, this, &MainTabs::updateTabHeaderMenu,Qt::QueuedConnection);
     connect(tabHeaderContextMenu, &QMenu::triggered, this, &MainTabs::onDeletedTabSelected);
     connect(guiHelper, &GuiHelper::tabRevived, this, &MainTabs::integrateTab);
-    connect(guiHelper, &GuiHelper::newPacketAnalyserRequested, this, &MainTabs::newPacketAnalyserTab);
+    connect(guiHelper, SIGNAL(newPacketAnalyserRequested(QList<QSharedPointer<Packet> >)), this, SLOT(newPacketAnalyserTab(QList<QSharedPointer<Packet> >)));
+    connect(guiHelper, SIGNAL(newPacketAnalyserRequested(const QByteArray, const QString)), this, SLOT(newPacketAnalyserTab(const QByteArray, const QString)));
 }
 
 MainTabs::~MainTabs()
@@ -403,6 +404,23 @@ TabAbstract *MainTabs::newPacketAnalyserTab(QList<QSharedPointer<Packet> >  pack
     if (!packets.isEmpty()) {
         pat->addPackets(packets);
     }
+
+    return pat;
+}
+
+TabAbstract *MainTabs::newPacketAnalyserTab(const QByteArray config, const QString tabname)
+{
+    PacketAnalyserTab *pat =new(std::nothrow) PacketAnalyserTab(guiHelper);
+    if (pat == nullptr) {
+        qFatal("Cannot allocate memory for PacketAnalyserTab X{");
+    }
+
+    integrateTab(pat);
+
+    pat->loadConfigFrom(QString(), config);
+
+    pat->setName(tabname.isEmpty() ? generateUniqueName(tr("Packet analyser")) : generateUniqueName(tabname));
+
 
     return pat;
 }

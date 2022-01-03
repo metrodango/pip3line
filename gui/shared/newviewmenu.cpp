@@ -166,10 +166,10 @@ void NewViewMenu::onNewViewTab(QAction *action)
         itemConfig->setOutputTypeVisible(false);
         itemConfig->setReadonlyVisible(true);
         int ret = itemConfig->exec();
-        if (ret == QDialog::Accepted) {
-            TransformAbstract * ta = itemConfig->getTransform();
-            vt.transform = ta;
-            vt.tabName = itemConfig->getName();
+        TransformAbstract * ta = itemConfig->getTransform();
+        vt.transform = ta;
+        vt.tabName = itemConfig->getName();
+        if (ret == QDialog::Accepted && !vt.tabName.isEmpty() && vt.transform != nullptr) {
             vt.readonly = itemConfig->getReadonly();
             if (action == newHexViewAction) {
                 vt.type = TabAbstract::HEXVIEW;

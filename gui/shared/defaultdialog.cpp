@@ -7,7 +7,6 @@ DefaultDialog::DefaultDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setModal(false);
-
 }
 
 DefaultDialog::~DefaultDialog()

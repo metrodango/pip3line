@@ -11,7 +11,7 @@
 message( STATUS "Configuring the OpenSSL plugin --")
 project( opensslplugin )
 
-set ( CMAKE_BUILD_TYPE Release )
+# set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DOPENSSLPLUGIN_LIBRARY)
 
 set(CMAKE_AUTOUIC ON)

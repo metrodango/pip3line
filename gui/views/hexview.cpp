@@ -33,8 +33,9 @@ Released under AGPL see LICENSE for more information
 #include <climits>
 #include <transformabstract.h>
 #include "shared/guiconst.h"
-#include <tabs/packetanalyser/packet.h>
 #include <tabs/packetanalyser/sourcesorchestatorabstract.h>
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 using namespace GuiConst;
 
 HexView::HexView(ByteSourceAbstract *nbyteSource, GuiHelper *nguiHelper, QWidget *parent, bool takeByteSourceOwnership) :

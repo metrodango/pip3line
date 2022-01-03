@@ -30,6 +30,7 @@ TLSClientListener::~TLSClientListener()
 {
     workerThread.quit();
     workerThread.wait();
+    mapExtSourcesToLocal.clear();
 }
 
 QString TLSClientListener::getName()
@@ -57,6 +58,26 @@ QWidget *TLSClientListener::getAdditionnalCtrls(QWidget *parent)
     return but;
 }
 
+int TLSClientListener::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        int mappedSid = Block::INVALID_ID;
+        if (mapExtSourcesToLocal.contains(sourceId)) {
+            mappedSid = mapExtSourcesToLocal.value(sourceId);
+        }
+
+        foreach (int suid , sockets) {
+            // either we are sending directly to the blocksource or getting the block from another one
+            if (sourceId == suid || mappedSid == suid) {
+                targetId = suid;
+                break;
+            }
+        }
+    }
+    return targetId;
+}
+
 void TLSClientListener::sendBlock(Block *block)
 {
     if (running) {
@@ -65,11 +86,12 @@ void TLSClientListener::sendBlock(Block *block)
         qint64 size = data.size();
         qint64 bwritten = 0;
 
-        int sid = -1;
-        if (mapExtSourcesToLocal.contains(block->getSourceid())) {
-            sid = mapExtSourcesToLocal.value(block->getSourceid());
-        }
+        int sid = Block::INVALID_ID;
         int bid = block->getSourceid();
+        if (mapExtSourcesToLocal.contains(bid)) {
+            sid = mapExtSourcesToLocal.value(bid);
+        }
+
         bool foundSource = false;
 
         QHashIterator<QSslSocket *, int> i(sockets);
@@ -83,6 +105,7 @@ void TLSClientListener::sendBlock(Block *block)
                     bwritten += socket->write(&(data.data()[bwritten - 1]),size - bwritten);
                 }
                 foundSource = true;
+                break;
             }
         }
 
@@ -106,7 +129,7 @@ void TLSClientListener::sendBlock(Block *block)
 
             if (specificConnectionsData.contains(bid)) {
                 ConnectionDetails cd = specificConnectionsData.value(bid);
-                tempAddr = cd.getAdress();
+                tempAddr = cd.getAddress();
                 tempPort = cd.getPort();
                 tlsEnabled = cd.isTlsEnabled();
                 specificConnectionsData.remove(bid);
@@ -226,7 +249,7 @@ void TLSClientListener::createConnection()
         qFatal("Cannot allocate memory for QSslSocket X{");
     }
     connect(socket, &QSslSocket::readyRead, this, &TLSClientListener::dataReceived, Qt::QueuedConnection);
-    //connect(socket, qOverload<QAbstractSocket::SocketError>(&QSslSocket::error),this, &TLSClientListener::onError,Qt::QueuedConnection);
+    // connect(socket, qOverload<QAbstractSocket::SocketError>(&QSslSocket::error),this, &TLSClientListener::onError,Qt::QueuedConnection);
     connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)), Qt::QueuedConnection);
     connect(socket, &QSslSocket::disconnected, this, &TLSClientListener::onClientDeconnection,Qt::QueuedConnection);
 
@@ -238,7 +261,7 @@ void TLSClientListener::createConnection()
 
     if (tlsEnabled) {
         qDebug() << "CA certs:" << sslConfiguration->getSslConfiguration().caCertificates().size();
-        //connect(socket, qOverload<const QList<QSslError> &>(&QSslSocket::sslErrors), this, &TLSClientListener::onSslErrors,Qt::QueuedConnection);
+        // connect(socket, qOverload<const QList<QSslError> &>(&QSslSocket::sslErrors), this, &TLSClientListener::onSslErrors,Qt::QueuedConnection);
         connect(socket, SIGNAL(sslErrors(QList<QSslError>)), this, SLOT(onSslErrors(QList<QSslError>)), Qt::QueuedConnection);
         connect(socket, &QSslSocket::modeChanged,this, &TLSClientListener::onSSLModeChange,Qt::QueuedConnection);
         connect(socket, &QSslSocket::encrypted, this, &TLSClientListener::onTLSStarted);
@@ -278,14 +301,19 @@ void TLSClientListener::dataReceived()
             QHashIterator<int, int> i(mapExtSourcesToLocal);
             while (i.hasNext()) {
                 i.next();
-                if (i.value() == sid)
+                if (i.value() == sid) {
                     sid = i.key();
+                    break;
+                }
             }
 
-            Block * datab = new(std::nothrow) Block(data,sid);
-            if (datab == nullptr) qFatal("Cannot allocate Block for TLSClientListener X{");
+            data = applyInboundTransform(data);
+            if (!data.isEmpty()) {
+                Block * datab = new(std::nothrow) Block(data,sid);
+                if (datab == nullptr) qFatal("Cannot allocate Block for TLSClientListener X{");
 
-            emit blockReceived(datab);
+                emit blockReceived(datab);
+            }
         }
     } else {
         qCritical() << tr("[TLSClientListener::dataReceived] cast failed");

@@ -56,7 +56,9 @@ class SslConf : public QObject
         static QString sslModeToString(int mode);
         QList<QByteArray> getAllowedNextProtocols() const;
         QVector<QSslEllipticCurve> getEllipticCurves() const;
-
+        QByteArray getPsk() const;
+        void setPsk(const QByteArray &value);
+        void setProtocol(QSsl::SslProtocol proto);
     signals:
         void log(QString message, QString source, Pip3lineConst::LOGLEVEL level);
     public slots:
@@ -105,6 +107,8 @@ class SslConf : public QObject
         bool useSNI;
         QList<QByteArray> allowedNextProtocols;
         QVector<QSslEllipticCurve> ellipticCurves;
+        QByteArray psk;
+        QSsl::SslProtocol protocolVersion;
 };
 
 #endif // SSLCONF_H

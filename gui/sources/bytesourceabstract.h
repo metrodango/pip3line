@@ -24,6 +24,8 @@ Released under AGPL see LICENSE for more information
 #include "searchabstract.h"
 #include "../shared/guiconst.h"
 #include "../state/basestateabstract.h"
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class SourceWidgetAbstract;
 class BytesRange;
@@ -110,14 +112,6 @@ class ByteSourceAbstract : public QObject
             GUI_CONFIG,
             GUI_BUTTONS,
             GUI_UPPER_VIEW
-        };
-
-        enum HistAction {INSERT = 0, REMOVE = 1, REPLACE = 2};
-        struct HistItem {
-               HistAction action;
-               quint64 offset;
-               QByteArray before;
-               QByteArray after;
         };
 
         enum MarkingLayer {USER_MARKINGS = 0, SEARCH_MARKINGS = 1, COMPARE_MARKINGS = 2};
@@ -221,7 +215,7 @@ class ByteSourceAbstract : public QObject
         enum TabType {TAB_GENERIC = 0, TAB_TRANSFORM = 1, TAB_LARGERANDOM = 2};
         virtual QWidget * requestGui(QWidget *parent,ByteSourceAbstract::GUI_TYPE type);
         virtual SearchAbstract *requestSearchObject(QObject *parent);
-        void historyApply(HistItem item, bool forward);
+        void historyApply(Pip3lineCommon::HistItem item, bool forward);
         void historyAddInsert(quint64 offset, QByteArray after);
         void historyAddRemove(quint64 offset, QByteArray before);
         void historyAddReplace(quint64 offset, QByteArray before, QByteArray after);
@@ -238,7 +232,7 @@ class ByteSourceAbstract : public QObject
 
         BytesRangeList * userMarkingsRanges; // markings
         int currentHistoryPointer;
-        QList<HistItem> history; // edit history
+        QList<Pip3lineCommon::HistItem> history; // edit history
 
         quint32 capabilities; // does not need to be saved as it is specific to the source
 

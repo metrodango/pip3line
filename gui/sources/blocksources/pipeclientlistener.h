@@ -23,6 +23,7 @@ class PipeClientListener : public BlocksSource
         QHash<QString, QString> getConfiguration() override;
         void setConfiguration(const  QHash<QString, QString> &conf) override;
         QWidget *getAdditionnalCtrls(QWidget * parent = nullptr) override;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block * block) override;
         bool startListening() override;

@@ -29,7 +29,6 @@ Released under AGPL see LICENSE for more information
 #include "packetanalyser/importexportworker.h"
 #include "packetanalyser/packetsortfilterproxymodel.h"
 #include "packetanalyser/packetstyleditemdelegate.h"
-#include "packetanalyser/packet.h"
 #include "packetanalyser/sourcesorchestatorabstract.h"
 #include <QDebug>
 #include <QModelIndex>
@@ -275,7 +274,7 @@ PacketAnalyserTab::~PacketAnalyserTab()
     // byteSource should be destroyed by hexview (owner)
 }
 
-void PacketAnalyserTab::loadFromFile(QString )
+void PacketAnalyserTab::loadFromFile( QString )
 {
     qCritical() << "[PacketAnalyserTab::loadFromFile] not implemented T_T";
 }
@@ -340,48 +339,7 @@ void PacketAnalyserTab::onImport()
 
     if (ied->exec() == QDialog::Accepted) {
         if (ied->opGuiConfSelected()) {
-
-            // we need to clear stuff first
-            packetModel->clearUserColumns();
-
-            int tabcount = ui->viewTabWidget->count();
-            QList<QWidget *> list;
-            for (int i = 0; i < tabcount; i++) {
-                if (ui->viewTabWidget->indexOf(hexView) != i)
-                    list.append(ui->viewTabWidget->widget(i));
-            }
-            for (int i = 0; i < list.size(); i++) {
-                delete list.at(i);
-            }
-            list.clear();
-
-            // then load the conf
-            quint64 flags = 0;
-
-            StateOrchestrator *stateOrchestrator = new(std::nothrow) StateOrchestrator(ied->getFileName(),
-                                                                                       flags);
-            if (stateOrchestrator == nullptr) {
-                qFatal("Cannot allocate memory for StateOrchestrator X{");
-            }
-
-            connect(stateOrchestrator, &StateOrchestrator::finished, this, &PacketAnalyserTab::onSaveLoadFinished);
-            connect(stateOrchestrator, &StateOrchestrator::log, logger, &LoggerWidget::logMessage);
-
-            setEnabled(false); // disabling the tab temporarly
-            if (!stateOrchestrator->initialize()) {
-                delete stateOrchestrator;
-                stateOrchestrator = nullptr;
-                setEnabled(true);
-                return;
-            }
-
-            PacketAnalyserTabStateObj *stateObj = new(std::nothrow) PacketAnalyserTabStateObj(this);
-            if (stateObj == nullptr) {
-                qFatal("Cannot allocate memory for PacketAnalyserTabStateObj X{");
-            }
-
-            stateOrchestrator->addState(stateObj);
-            stateOrchestrator->start();
+            loadConfigFrom(ied->getFileName());
         } else {
             ImportExportWorker *worker = new(std::nothrow) ImportExportWorker(packetModel,
                                                                               ied->getFileName(),
@@ -684,7 +642,6 @@ void PacketAnalyserTab::setOrchestrator(SourcesOrchestatorAbstract *orch)
 void PacketAnalyserTab::receiveNewPacket(QSharedPointer<Packet> packet)
 {
     if (intercepting) {
-
         if (packetQueue.size() == 0) {
             packetModel->addPacket(packet);
             selectLastPacket();
@@ -763,6 +720,7 @@ void PacketAnalyserTab::onAddNewColumn()
     itemConfig->setWayBoxVisible(true);
     itemConfig->setFormatVisible(true);
     itemConfig->setOutputTypeVisible(false);
+    itemConfig->setLimitNameCharacters(true);
     int ret = itemConfig->exec();
     if (ret == QDialog::Accepted) {
         TransformAbstract * ta = itemConfig->getTransform();
@@ -911,6 +869,58 @@ void PacketAnalyserTab::setTrackChanges(bool value)
     }
 }
 
+void PacketAnalyserTab::loadConfigFrom(const QString filename, const QByteArray config)
+{
+    // we need to clear stuff first
+    packetModel->clearUserColumns();
+
+    int tabcount = ui->viewTabWidget->count();
+    QList<QWidget *> list;
+    for (int i = 0; i < tabcount; i++) {
+        if (ui->viewTabWidget->indexOf(hexView) != i)
+            list.append(ui->viewTabWidget->widget(i));
+    }
+    for (int i = 0; i < list.size(); i++) {
+        delete list.at(i);
+    }
+    list.clear();
+
+    // then load the conf
+    quint64 flags = 0;
+    StateOrchestrator *stateOrchestrator = nullptr;
+    if (!filename.isEmpty()) {
+        stateOrchestrator = new(std::nothrow) StateOrchestrator(filename,flags);
+    } else if (!config.isEmpty()) {
+        stateOrchestrator = new(std::nothrow) StateOrchestrator(config,flags);
+    } else {
+        qCritical() << tr("[PacketAnalyserTab::loadConfigFrom] Either specify a filename or a configuration, both cannot be empty T_T");
+        return;
+    }
+
+    if (stateOrchestrator == nullptr) {
+        qFatal("Cannot allocate memory for StateOrchestrator X{");
+    }
+
+    connect(stateOrchestrator, &StateOrchestrator::finished, this, &PacketAnalyserTab::onSaveLoadFinished);
+    connect(stateOrchestrator, &StateOrchestrator::log, logger, &LoggerWidget::logMessage);
+
+    setEnabled(false); // disabling the tab temporarly
+    if (!stateOrchestrator->initialize()) {
+        delete stateOrchestrator;
+        stateOrchestrator = nullptr;
+        setEnabled(true);
+        return;
+    }
+
+    PacketAnalyserTabStateObj *stateObj = new(std::nothrow) PacketAnalyserTabStateObj(this);
+    if (stateObj == nullptr) {
+        qFatal("Cannot allocate memory for PacketAnalyserTabStateObj X{");
+    }
+
+    stateOrchestrator->addState(stateObj);
+    stateOrchestrator->start();
+}
+
 bool PacketAnalyserTab::isTrackingLast() const
 {
     return trackingLast;
@@ -1051,6 +1061,7 @@ void PacketAnalyserTab::buildContextMenu()
     }
     connect(sendToMenu, &QMenu::triggered, this, &PacketAnalyserTab::onSendToTriggered, Qt::UniqueConnection);
     globalContextMenu->addMenu(sendToMenu);
+
     globalContextMenu->addSeparator();
 
     copyAsMenu = new(std::nothrow) QMenu(tr("Copy as"));

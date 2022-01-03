@@ -9,6 +9,7 @@ Released under AGPL see LICENSE for more information
 **/
 
 #include "transformsgui.h"
+#include "ui_transformsgui.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDebug>
@@ -16,17 +17,17 @@ Released under AGPL see LICENSE for more information
 #include <QStandardItem>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include "../sources/bytesourceabstract.h"
-#include "../textinputdialog.h"
-#include "../loggerwidget.h"
-#include "../guihelper.h"
-#include "../massprocessingdialog.h"
-#include "../transformwidget.h"
-#include "ui_transformsgui.h"
-#include "../shared/detachtabbutton.h"
-#include "../shared/universalreceiverbutton.h"
-#include "../state/closingstate.h"
-#include "../views/foldedview.h"
+#include "sources/bytesourceabstract.h"
+#include "textinputdialog.h"
+#include "loggerwidget.h"
+#include "guihelper.h"
+#include "massprocessingdialog.h"
+#include "transformwidget.h"
+#include "shared/detachtabbutton.h"
+#include "shared/universalreceiverbutton.h"
+#include "state/closingstate.h"
+#include "views/foldedview.h"
+#include "shared/sendtobutton.h"
 
 TransformsGui::TransformsGui(GuiHelper *nguiHelper, QWidget *parent) :
     TabAbstract(nguiHelper,parent)
@@ -65,6 +66,13 @@ TransformsGui::TransformsGui(GuiHelper *nguiHelper, QWidget *parent) :
     }
 
     ui->toolbarLayout->insertWidget(ui->toolbarLayout->indexOf(ui->massProcessingPushButton) + 1,detachButton);
+
+    SendToButton * sendToButton = new(std::nothrow) SendToButton(guiHelper, this);
+    if (sendToButton == nullptr) {
+        qFatal("Cannot allocate memory for SendToButton X{");
+    }
+
+    ui->toolbarLayout->insertWidget(ui->toolbarLayout->indexOf(ui->registerPushButton) - 1,sendToButton);
 
     urb = new(std::nothrow) UniversalReceiverButton(this, guiHelper);
     if (urb == nullptr) {
@@ -205,7 +213,13 @@ void TransformsGui::setCurrentTransformChain(TransformChain talist)
 
 void TransformsGui::setData(const QByteArray &data)
 {
-    firstTransformWidget->input(data);
+    if (ui->appendCheckBox->isChecked()) {
+        QByteArray odata = firstTransformWidget->getSource()->getRawData();
+        odata.append(data);
+        firstTransformWidget->input(odata);
+    } else {
+        firstTransformWidget->input(data);
+    }
 }
 
 void TransformsGui::loadFromFile(QString fileName)

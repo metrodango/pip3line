@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,9 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
+
+#set ( CMAKE_BUILD_TYPE Release )
 
 if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.0)
     cmake_minimum_required( VERSION 3.1 )
@@ -60,9 +62,13 @@ add_definitions(-DGIT_COMMIT=\"${GIT_COMMIT}\")
 message( STATUS "General Configuration --" )
 
 project( pip3lineall )
-set ( CMAKE_BUILD_TYPE Release )
 
-add_definitions(-DQT_NO_DEBUG_OUTPUT)
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DQT_NO_DEBUG_OUTPUT)
+    message(STATUS " [${CMAKE_BUILD_TYPE}] Disabling Qt Debug Output")
+else()
+    message(STATUS " [${CMAKE_BUILD_TYPE}] Enabling Qt Debug Output")
+endif()
 
 set (CMAKE_CXX_STANDARD 14)
 

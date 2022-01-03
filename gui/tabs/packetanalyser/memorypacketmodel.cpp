@@ -1,5 +1,4 @@
 #include "memorypacketmodel.h"
-#include "packet.h"
 #include <threadedprocessor.h>
 #include <transformmgmt.h>
 #include "sources/blocksources/blockssource.h"

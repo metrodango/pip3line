@@ -17,41 +17,6 @@ Released under AGPL see LICENSE for more information
 #include <transformmgmt.h>
 #include <QXmlStreamWriter>
 
-const int Block::INVALID_ID = -1;
-
-Block::Block(QByteArray data, int sourceid):
-    data(data),
-    sourceid(sourceid)
-{
-
-}
-
-Block::~Block()
-{
-    //qDebug() << "Destroying" << this;
-}
-
-QByteArray Block::getData() const
-{
-    return data;
-}
-
-void Block::setData(const QByteArray &value)
-{
-    data = value;
-}
-
-int Block::getSourceid() const
-{
-    return sourceid;
-}
-
-void Block::setSourceid(int value)
-{
-    sourceid = value;
-}
-
-
 int BlocksSource::currentid = 0;
 QMutex BlocksSource::idlock;
 QHash<int,BlocksSource *> BlocksSource::idSourceTable;
@@ -218,6 +183,13 @@ void BlocksSource::setOutboundTranform(TransformAbstract *transform)
     outboundTranform = transform;
     if (outboundTranform != nullptr)
         emit outboundTranformModfied();
+}
+
+int BlocksSource::getTargetIdFor(int sourceId)
+{
+    Q_UNUSED(sourceId)
+    // by default send the current sid
+    return sid;
 }
 
 TransformAbstract *BlocksSource::getInboundTranform() const

@@ -32,13 +32,17 @@ void ClosingState::run()
     if (flags & GuiConst::STATE_SAVE_REQUEST) {
         writer->writeEndElement();
     } else if (closingTokenExpected.isEmpty()) { // just read the next end element
-        while (reader->readNext() != QXmlStreamReader::EndElement);
+        QXmlStreamReader::TokenType token = reader->readNext();
+        while ( token != QXmlStreamReader::EndElement && token != QXmlStreamReader::Invalid) {
+            token = reader->readNext();
+        }
     } else {
         if (reader->name() != closingTokenExpected || reader->tokenType() != QXmlStreamReader::EndElement) {
             //only read the next end element if the current one is not the expected one and an EndElement
-            while (reader->readNext() != QXmlStreamReader::EndElement);
+            QXmlStreamReader::TokenType token = reader->readNext();
+            while ( token != QXmlStreamReader::EndElement && token != QXmlStreamReader::Invalid) {
+                token = reader->readNext();
+            }
         }
     }
 }
-
-

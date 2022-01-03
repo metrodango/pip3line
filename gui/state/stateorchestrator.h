@@ -14,10 +14,10 @@ Released under AGPL see LICENSE for more information
 #include <QElapsedTimer>
 #include <QObject>
 #include <QStack>
+#include <QThread>
 #include <QTime>
 #include <commonstrings.h>
 
-class QThread;
 class BaseStateAbstract;
 class QFile;
 class QXmlStreamWriter;
@@ -31,12 +31,14 @@ class StateOrchestrator : public QObject
         Q_OBJECT
     public:
         explicit StateOrchestrator(QString fileName, quint64 flags);
+        explicit StateOrchestrator(QByteArray config, quint64 flags);
         ~StateOrchestrator();
         QXmlStreamWriter *getWriter() const;
         bool initialize();
         bool isSaving();
         StateDialog * getStatusDialog(QWidget *parent = nullptr);
         StateStatusWidget *getStatusGui(QWidget *parent = nullptr);
+        QByteArray getConfigData() const;
 
     public slots:
         bool start();
@@ -51,7 +53,7 @@ class StateOrchestrator : public QObject
         Q_DISABLE_COPY(StateOrchestrator)
         void onFinished();
         QStack<BaseStateAbstract *> executionStack;
-        QThread *localthread;
+        QThread localthread;
         quint64 flags;
         QString actionName;
         QElapsedTimer timer;
@@ -59,6 +61,7 @@ class StateOrchestrator : public QObject
         QFile *file;
         QXmlStreamWriter * writer;
         QXmlStreamReader *reader;
+        QByteArray configData;
 };
 
 

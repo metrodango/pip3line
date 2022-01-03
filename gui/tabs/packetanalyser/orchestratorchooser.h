@@ -6,6 +6,7 @@
 
 class SourcesOrchestatorAbstract;
 class GuiHelper;
+class DefaultDialog;
 
 class OrchestratorChooser : public QComboBox
 {
@@ -29,6 +30,7 @@ class OrchestratorChooser : public QComboBox
         SourcesOrchestatorAbstract *orchestrator{nullptr};
         GuiHelper *guiHelper;
         QMetaObject::Connection destructorLink;
+        DefaultDialog *confDialog;
 };
 
 #endif // ORCHESTRATORCHOOSER_H

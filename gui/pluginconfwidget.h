@@ -26,6 +26,8 @@ class PluginConfWidget : public QWidget
     public:
         explicit PluginConfWidget(TransformFactoryPluginInterface * plugin, QWidget *parent = nullptr);
         ~PluginConfWidget();
+    private slots:
+        void onPacketHandlerClicked();
     private:
         Q_DISABLE_COPY(PluginConfWidget)
         Ui::PluginConfWidget *ui;

@@ -19,6 +19,7 @@ class QStringList;
 class QWidget;
 class Pip3lineCallback;
 class TransformAbstract;
+class PacketHandler;
 
 class TransformFactoryPluginInterface
 {
@@ -33,6 +34,8 @@ class TransformFactoryPluginInterface
         virtual QString compiledWithQTversion() const = 0;
         virtual int getLibTransformVersion() const = 0;
         virtual QString pluginVersion() const = 0;
+        virtual const QStringList getPacketHandlerList() { return QStringList(); }
+        virtual PacketHandler * getPacketHandler(const QString &) {return nullptr;}
 };
 
 #define pluginIID "com.pip3line/1.2"

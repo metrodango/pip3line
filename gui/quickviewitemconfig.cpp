@@ -14,9 +14,11 @@ Released under AGPL see LICENSE for more information
 #include <QDebug>
 
 const QString QuickViewItemConfig::LOGID = "QuickViewItemConfig";
+const QRegExp QuickViewItemConfig::LIMIT_NAME_REGEXP = QRegExp("^[a-zA-Z_][-a-zA-Z0-9_\\.]{1,100}$");
 
 QuickViewItemConfig::QuickViewItemConfig(GuiHelper *nguiHelper, QWidget *parent) :
-    QDialog(parent,Qt::WindowSystemMenuHint | Qt::WindowTitleHint)
+    QDialog(parent,Qt::WindowSystemMenuHint | Qt::WindowTitleHint),
+    validator(LIMIT_NAME_REGEXP)
 {
     ui = new(std::nothrow) Ui::QuickViewItemConfig();
     if (ui == nullptr) {
@@ -245,7 +247,9 @@ void QuickViewItemConfig::integrateTransform()
         // never need to delete confgui, as it is taken care of by TransformAbstract upon destruction
 
         uiTransform->infoPushButton->setEnabled(true);
-        uiTransform->nameLineEdit->setText(currentTransform->name());
+        if (uiTransform->nameLineEdit->text().isEmpty()) {
+            uiTransform->nameLineEdit->setText(currentTransform->name());
+        }
         if (confGui != nullptr) {
             uiTransform->mainLayout->addWidget(confGui);
         }
@@ -261,4 +265,18 @@ void QuickViewItemConfig::onTransformDelete()
     uiTransform->transformComboBox->blockSignals(false);
     uiTransform->wayGroupBox->setVisible(false);
     uiTransform->formatGroupBox->setVisible(false);
+}
+
+bool QuickViewItemConfig::isLimitingNameCharacters() const
+{
+    return uiTransform->nameLineEdit->validator() != nullptr;
+}
+
+void QuickViewItemConfig::setLimitNameCharacters(bool enable)
+{
+    if (enable) {
+        uiTransform->nameLineEdit->setValidator(&validator);
+    } else {
+        uiTransform->nameLineEdit->setValidator(nullptr);
+    }
 }

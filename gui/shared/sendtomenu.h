@@ -23,7 +23,6 @@ class SendToMenu : public QMenu
     signals:
         void newTabRequested(QByteArray data);
         void sendToRequest(QAction * action);
-
     private:
         Q_DISABLE_COPY(SendToMenu)
         GuiHelper *guiHelper;

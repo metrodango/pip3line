@@ -1,5 +1,4 @@
 #include "proxyorchestrator.h"
-#include "packet.h"
 #include <QDebug>
 
 ProxyOrchestrator::ProxyOrchestrator(BlocksSource *serverSource, BlocksSource *clientSource, QObject *parent) :

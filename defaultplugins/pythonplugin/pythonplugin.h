@@ -25,7 +25,6 @@ class PYTHONPLUGINSHARED_EXPORT PythonPlugin : public QObject, public TransformF
         Q_PLUGIN_METADATA(IID pluginIID FILE "pythonplugin.json")
         Q_INTERFACES(TransformFactoryPluginInterface)
     public:
-
         explicit PythonPlugin();
         ~PythonPlugin();
         void setCallBack(Pip3lineCallback * callback);

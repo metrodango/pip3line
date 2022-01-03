@@ -11,8 +11,8 @@
 #include "shared/guiconst.h"
 #include "pcapio/pcapdef.h"
 #include "packetmodelabstract.h"
-
-class Packet;
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class ImportExportWorker : public QObject
 {

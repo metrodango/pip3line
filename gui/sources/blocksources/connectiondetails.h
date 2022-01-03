@@ -3,14 +3,17 @@
 
 #include <QHostAddress>
 #include <QDateTime>
+#include <QDtls>
+#include <QSharedPointer>
 
 class ConnectionDetails {
     public:
-        ConnectionDetails();
+        explicit ConnectionDetails();
         explicit ConnectionDetails(QHostAddress clientAddress, quint16 clientPort, bool tlsEnabled = false);
         ConnectionDetails(const ConnectionDetails &other); // copy constructor
-        QHostAddress getAdress() const;
-        void setAdress(const QHostAddress &value);
+        ~ConnectionDetails();
+        QHostAddress getAddress() const;
+        void setAddress(const QHostAddress &value);
         quint16 getPort() const;
         void setPort(const quint16 &value);
         bool operator==(const ConnectionDetails& other) const;
@@ -22,18 +25,34 @@ class ConnectionDetails {
         void setTlsEnabled(bool value);
         QString getHostname() const;
         void setHostname(const QString &value);
+        QSharedPointer<QDtls> getDtlscontext() const;
+        void setDtlscontext(const QSharedPointer<QDtls> &value);
+        void bumpLastTimestamp();
+        QDateTime getLastPacketTimeStamp() const;
+        int getTimeoutRetry() const;
+        void setTimeoutRetry(int value);
+        void incrTimeoutRetries();
     private:
-        QHostAddress adress;
+        QHostAddress address;
         quint16 port;
         bool tlsEnabled;
         QDateTime creationTimeStamp;
+        QDateTime lastPacketTimeStamp;
         int sid;
         QString hostname;
+        QSharedPointer<QDtls> dtlscontext;
+        int timeoutRetry;
+};
+
+class ConnectionDetailsList : public QList<QSharedPointer<ConnectionDetails> > {
+        using QList::QList;
+    public:
+        int connectionIndex(const QHostAddress &clientAddress, const quint16 &clientPort);
 };
 
 inline uint qHash(const ConnectionDetails &key)
 {
-    return qHash(key.getAdress()) ^ qHash(key.getPort());
+    return qHash(key.getAddress()) ^ qHash(key.getPort());
 }
 
 #endif // CONNECTIONDETAILS_H

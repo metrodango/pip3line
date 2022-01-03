@@ -22,23 +22,10 @@ Released under AGPL see LICENSE for more information
 #include <QReadWriteLock>
 #include <QTimer>
 #include <commonstrings.h>
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class QWidget;
-
-class Block {
-    public:
-        static const int INVALID_ID;
-        explicit Block(QByteArray data, int sourceid);
-        ~Block();
-        QByteArray getData() const;
-        void setData(const QByteArray &value);
-        int getSourceid() const;
-        void setSourceid(int value);
-    private:
-        Q_DISABLE_COPY(Block)
-        QByteArray data;
-        int sourceid;
-};
 
 class BlocksSource : public QObject
 {
@@ -94,7 +81,7 @@ class BlocksSource : public QObject
         void setInboundTranform(TransformAbstract *transform);
         TransformAbstract *getOutboundTranform() const;
         void setOutboundTranform(TransformAbstract *transform);
-
+        virtual int getTargetIdFor(int sourceId);
     signals:
         void blockReceived(Block *block);
         void blockToBeSend(Block *block);

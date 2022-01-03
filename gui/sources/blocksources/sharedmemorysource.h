@@ -23,6 +23,7 @@ class SharedMemorySource : public BlocksSource
         static QStringList getAvailableSHMTypes();
         void setShmType(int smtype);
         int getShmType() const;
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block *block) override;
         bool startListening() override;

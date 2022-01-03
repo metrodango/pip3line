@@ -49,20 +49,42 @@ bool UdpClientListener::isStarted()
     return running;
 }
 
+int UdpClientListener::getTargetIdFor(int sourceId)
+{
+    int targetId = Block::INVALID_ID;
+    if (sourceId != Block::INVALID_ID) {
+        int mappedSid = Block::INVALID_ID;
+        if (mapExtSourcesToLocal.contains(sourceId)) {
+            mappedSid = mapExtSourcesToLocal.value(sourceId);
+        }
+
+        foreach (ConnectionDetails cd , udpSockets) {
+            int suid = cd.getSid();
+            // either we are sending directly to the blocksource or getting the block from another one
+            if (sourceId == suid || mappedSid == suid) {
+                targetId = suid;
+                break;
+            }
+        }
+    }
+    return targetId;
+}
+
 void UdpClientListener::sendBlock(Block *block)
 {
     if (running) {
         QByteArray data = applyOutboundTransform(block->getData());
         if (data.size() > MAX_UDP_DATAGRAM_SIZE_HARD ) {
-            emit log(tr("The UDP packet is too large. It will be truncated to %1 bytes").arg(MAX_UDP_DATAGRAM_SIZE_HARD),ID,Pip3lineConst::LWARNING);
+            emit log(tr("The UDP packet is too large. It will be truncated to %1 bytes").arg(MAX_UDP_DATAGRAM_SIZE_HARD), ID, Pip3lineConst::LWARNING);
             data  = data.mid(0,MAX_UDP_DATAGRAM_SIZE_HARD);
         }
 
         int sid = -1;
-        if (mapExtSourcesToLocal.contains(block->getSourceid())) {
-            sid = mapExtSourcesToLocal.value(block->getSourceid());
-        }
         int bid = block->getSourceid();
+        if (mapExtSourcesToLocal.contains(bid)) {
+            sid = mapExtSourcesToLocal.value(bid);
+        }
+
         bool foundSource = false;
 
         QHashIterator<QUdpSocket *, ConnectionDetails> i(udpSockets);
@@ -72,7 +94,7 @@ void UdpClientListener::sendBlock(Block *block)
             if (bid == suid || sid == suid) { // either we are sending directly to the blocksource or getting the block from another one
                 qint64 bwritten = i.key()->writeDatagram(data,hostAddress,hostPort);
                 if (bwritten != data.size()) {
-                    emit log(tr("The UDP packet was not send entirely '-_-"),ID,Pip3lineConst::LWARNING);
+                    emit log(tr("The UDP packet was not send entirely '-_-"), ID, Pip3lineConst::LWARNING);
                 }
                 foundSource = true;
             }
@@ -175,15 +197,16 @@ void UdpClientListener::dataReceived()
             qCritical() << tr("[UdpClientListener::dataReceived] not all the data was read ....");
         }
 
+        data = applyInboundTransform(data);
+
         if (data.isEmpty()){
-            emit log(tr("Received data block is empty, ignoring."),ID, Pip3lineConst::LERROR);
+            emit log(tr("Received data block is empty, ignoring."), ID, Pip3lineConst::LERROR);
             return;
         }
 
         int sid = udpSockets.value(socket).getSid();
         Block * datab = new(std::nothrow) Block(data,sid);
         if (datab == nullptr) qFatal("Cannot allocate Block for UdpServerListener X{");
-
 
         QHashIterator<int, int> i(mapExtSourcesToLocal);
         while (i.hasNext()) {
@@ -211,7 +234,7 @@ void UdpClientListener::checkTimeouts()
             qCritical() << tr("[UdpClientListener::checkTimeouts] null UDPClient returned T_T");
         }
         if ((current - uc.getCreationTimeStamp().toMSecsSinceEpoch()) > GuiConst::DEFAULT_UDP_TIMEOUT_MS) {
-            qDebug() << tr("UDP Client timeout [%2:%1]").arg(uc.getAdress().toString()).arg(uc.getPort());
+            qDebug() << tr("UDP Client timeout [%2:%1]").arg(uc.getAddress().toString()).arg(uc.getPort());
             BlocksSource::releaseID(uc.getSid());
             delete socket;
             udpSockets.remove(socket);

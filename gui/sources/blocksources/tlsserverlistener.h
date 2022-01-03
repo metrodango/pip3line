@@ -5,8 +5,6 @@
 #include <QSslSocket>
 #include <QHash>
 #include <QTcpServer>
-#include <QMutex>
-#include <QReadWriteLock>
 #include "connectiondetails.h"
 
 class QWidget;
@@ -40,7 +38,7 @@ class TLSServerListener : public IPBlocksSources
         bool isStarted() override;
         bool isSocks5Proxy() const;
         void setSocks5Proxy(bool value);
-
+        int getTargetIdFor(int sourceId) override;
     public slots:
         void sendBlock(Block *block) override;
         bool startListening() override;

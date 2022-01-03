@@ -26,6 +26,8 @@ Released under AGPL see LICENSE for more information
 #include <QSslConfiguration>
 #include "shared/guiconst.h"
 #include <commonstrings.h>
+#include <pipelinecommon.h>
+using namespace Pip3lineCommon;
 
 class TransformsGui;
 class QSettings;
@@ -44,7 +46,8 @@ class QTimer;
 class BlocksSource;
 class SourcesOrchestatorAbstract;
 class PacketAnalyserTab;
-class Packet;
+
+
 
 class GuiHelper : public QObject
 {
@@ -59,6 +62,8 @@ class GuiHelper : public QObject
         void sendNewSelection(const QByteArray &selection);
         void sendToNewTab(const QByteArray &initialValue = QByteArray());
         void sendToNewHexEditor(const QByteArray &initialValue = QByteArray());
+
+        void newPacketAnalyser(const QByteArray config, const QString name);
 
         void setUniveralReceiver(TabAbstract * tab);
 
@@ -223,6 +228,7 @@ class GuiHelper : public QObject
         void newTabRequested(QByteArray initialValue);
         void newHexEditorRequested(const QByteArray &initialValue);
         void newPacketAnalyserRequested(QList<QSharedPointer<Packet> >);
+        void newPacketAnalyserRequested(const QByteArray, const QString);
         void filterChanged();
         void markingsUpdated();
         void importExportUpdated();

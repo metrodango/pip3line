@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,12 +6,14 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
+cmake_minimum_required(VERSION 3.5)
 message( STATUS "Configuring libtransform --" )
 project( transform )
-set ( CMAKE_BUILD_TYPE Release )
+#set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall -DLIBTRANSFORM_LIBRARY)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -40,6 +42,7 @@ set ( transform_HDRS
     composedtransform.h
     deleteablelistitem.h
     hexwidget.h
+    libtransform_global.h
     modulesmanagement.h
     modulesmanagementwidget.h
     moduletransformwidget.h
@@ -50,6 +53,8 @@ set ( transform_HDRS
     transformchain.h
     transformfactoryplugininterface.h
     transformmgmt.h
+    packethandler.h
+    pipelinecommon.h
     )
 
 set ( transform_SRCS
@@ -66,6 +71,8 @@ set ( transform_SRCS
     transformabstract.cpp
     transformchain.cpp
     transformmgmt.cpp
+    packethandler.cpp
+    pipelinecommon.cpp
     )
 
 set ( transform_UIS
