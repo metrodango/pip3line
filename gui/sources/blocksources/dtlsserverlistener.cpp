@@ -8,6 +8,13 @@
 #include "dtlsserverlistenerwidget.h"
 #include "dtlscommon.h"
 #include <QDebug>
+#ifdef _MSC_VER
+#include <stdlib.h>
+#define __bswap_64(x) _byteswap_uint64(x)
+#elif defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define __bswap_64(x) OSSwapInt64(x)
+#endif
 
 const quint16 DtlsServerListener::DEFAULT_PORT = 3443;
 const QHostAddress DtlsServerListener::DEFAULT_ADDRESS = QHostAddress::LocalHost;

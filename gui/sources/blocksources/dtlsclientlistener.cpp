@@ -8,6 +8,13 @@
 #include <QPushButton>
 #include <QDebug>
 #include <QSslPreSharedKeyAuthenticator>
+#ifdef _MSC_VER
+#include <stdlib.h>
+#define __bswap_64(x) _byteswap_uint64(x)
+#elif defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define __bswap_64(x) OSSwapInt64(x)
+#endif
 
 const int DTLSClientListener::MAX_DTLS_DATAGRAM_SIZE_HARD = 64000;
 const quint16 DTLSClientListener::DEFAULT_PORT = 443;
