@@ -29,15 +29,15 @@ if (WITH_SCINTILLA)
     message ( STATUS "Enabling QScintilla support -- Warning QScintilla has its own drawbacks, not always the best choice" )
     add_definitions ( -DSCINTILLA -DQSCINTILLA_DLL)
     include_directories (
-        ${QSCINTILLA_HOME}\\Qt4Qt5 /usr/local/include/
+        ${QSCINTILLA_HOME}\\src /usr/local/include/
     )
     if (WIN32)
         link_directories (
-             ${QSCINTILLA_HOME}\\Qt4Qt5\\release
+             ${QSCINTILLA_HOME}\\src
         )
     else()
         link_directories (
-             ${QSCINTILLA_HOME}\\Qt4Qt5 /usr/local/lib/
+             ${QSCINTILLA_HOME}\\src /usr/local/lib/
         )
     endif()
 endif(WITH_SCINTILLA)
