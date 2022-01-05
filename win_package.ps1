@@ -43,12 +43,13 @@ if (-not (Test-Path "$($PSScriptRoot)\ext\distorm")) {
 Copy-Item -Path "$($PSScriptRoot)\ext\distorm\distorm3.dll" -Destination "$($packagedir)"
 
 Write-Output "Copying QScintilla lib"
+$qscintilla_dir = "$($PSScriptRoot)\ext\QScintilla_gpl\src\release"
 
-if (-not (Test-Path "$($PSScriptRoot)\ext\QScintilla_gpl\Qt4Qt5\release")) {
-    Write-Output "Distorm dir cannot be found => $($PSScriptRoot)\ext\QScintilla_gpl\Qt4Qt5\release"
+if (-not (Test-Path $qscintilla_dir)) {
+    Write-Output "QScintilla dir cannot be found => $($qscintilla_dir)"
     Exit 1
 }
-Copy-Item -Path "$($PSScriptRoot)\ext\QScintilla_gpl\Qt4Qt5\release\qscintilla2_qt5.dll" -Destination "$($packagedir)"
+Copy-Item -Path "$($qscintilla_dir)\qscintilla2_qt5.dll" -Destination "$($packagedir)"
 
 Write-Output "Copying plugins libs"
 
