@@ -1,16 +1,17 @@
+---
 language: cpp
 sudo: required
 
 branches:
   only:
-  - master
+    - master
 
 matrix:
   include:
     - os: linux
       dist: focal
       compiler: clang
-   - os: linux
+    - os: linux
       dist: focal
       compiler: gcc
     - os: osx
@@ -18,7 +19,7 @@ matrix:
       osx_image: xcode13.2
       env:
         - CMAKE_PREFIX_PATH=/usr/local/opt/qt5:/usr/local/opt/openssl
-      
+
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
@@ -42,16 +43,16 @@ script: make
 addons:
   apt:
     packages:
-    - cmake
-    - git
-    - libdistorm3-dev
-    - libqt5concurrent5
-    - libqt5gui5
-    - libqt5network5
-    - libqt5scintilla2-dev
-    - libqt5svg5-dev
-    - libqt5widgets5
-    - libqt5xmlpatterns5-dev
-    - libssl-dev
-    - python3-dev
-    - qtbase5-dev
+      - cmake
+      - git
+      - libdistorm3-dev
+      - libqt5concurrent5
+      - libqt5gui5
+      - libqt5network5
+      - libqt5scintilla2-dev
+      - libqt5svg5-dev
+      - libqt5widgets5
+      - libqt5xmlpatterns5-dev
+      - libssl-dev
+      - python3-dev
+      - qtbase5-dev
