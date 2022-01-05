@@ -299,7 +299,11 @@ void DtlsServerListener::packetReceived()
                                 break;
                             }
                         }
+#if defined(__GNUC__) || defined(__GNUG__)
                         [[gnu::fallthrough]];
+#elif defined(__clang__)
+                        [[clang::fallthrough]];
+#endif
                     case QDtls::HandshakeInProgress:
                         //6qDebug() << QString::fromUtf8(data.toHex());
                         if (!dtlscontext->doHandshake(udpSocket, data)) {
