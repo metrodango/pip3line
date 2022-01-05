@@ -7,7 +7,7 @@
 
 Linux / MacOS Builds
 
-[![Build Status](https://travis-ci.org/metrodango/pip3line.svg?branch=master)](https://travis-ci.org/metrodango/pip3line)
+[![Build Status](https://app.travis-ci.com/metrodango/pip3line.svg?branch=master)](https://travis-ci.com/metrodango/pip3line)
 
 Windows Builds
 

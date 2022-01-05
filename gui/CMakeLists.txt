@@ -33,11 +33,11 @@ if (WITH_SCINTILLA)
     )
     if (WIN32)
         link_directories (
-             ${QSCINTILLA_HOME}\\src
+             ${QSCINTILLA_HOME}\\src\\release
         )
     else()
         link_directories (
-             ${QSCINTILLA_HOME}\\src /usr/local/lib/
+             ${QSCINTILLA_HOME}\\src\\release /usr/local/lib/
         )
     endif()
 endif(WITH_SCINTILLA)
