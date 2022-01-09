@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,7 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
 message( STATUS "Configuring the Distorm plugin --")
 
@@ -20,7 +20,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Svg)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+endif(QT6_FOUND)
 
 include_directories (
     ${DISTORM3_INCLUDE_PATH}
@@ -121,7 +125,7 @@ if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         add_dependencies(distormplugin build_distorm_lib)
 endif ()
 set ( EXTERN_LIBS transform distorm3 )
-target_link_libraries ( distormplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+target_link_libraries ( distormplugin Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
 
 IF(UNIX)
     include( GNUInstallDirs )

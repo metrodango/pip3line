@@ -1,4 +1,4 @@
-####
+#
 # pip3line: easy encoder/decoder and more
 # Copyright (C) 2012-2013  Gabriel Caudrelier<gabriel.caudrelier@gmail.com>
 #
@@ -14,19 +14,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Pip3line.  If not, see <http://www.gnu.org/licenses/>.
-####
+#
 
 message ( STATUS "Configuring pip3linecmd --" )
 project( pip3linecmd )
 # set ( CMAKE_BUILD_TYPE Release )
 add_definitions ( -Wall )
 
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Qt6 COMPONENTS Widgets Svg)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+endif(QT6_FOUND)
 
 include_directories (
     ../libtransform
@@ -61,10 +68,10 @@ set ( pip3linecmd_SRCS
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
 if(WIN32)
-    target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg Qt5::WinMain)
+    target_link_libraries ( pip3linecmd Qt::Widgets Qt::Svg Qt::WinMain)
 endif(WIN32)
 
-target_link_libraries ( pip3linecmd Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+target_link_libraries ( pip3linecmd Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
 
 if(UNIX)
     include( GNUInstallDirs )

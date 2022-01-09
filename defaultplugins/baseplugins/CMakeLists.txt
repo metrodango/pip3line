@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,7 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
 cmake_minimum_required(VERSION 3.5)
 message ( STATUS "Configuring the base plugin --" )
@@ -19,7 +19,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Svg XmlPatterns Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Svg Network Concurrent)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg XmlPatterns Network Concurrent REQUIRED)
+endif(QT6_FOUND)
+
 
 include_directories (
     ../../libtransform/
@@ -265,7 +270,12 @@ set ( EXTERN_LIB transform )
 
 add_library ( baseplugins MODULE ${baseplugins_SRCS} ${baseplugins_UIS} ${baseplugins_RSCS} )
 
-target_link_libraries ( baseplugins Qt5::Widgets Qt5::Svg Qt5::Network Qt5::XmlPatterns ${EXTERN_LIB} )
+if (NOT Qt6_FOUND)
+    target_link_libraries ( baseplugins Qt::Widgets Qt::Svg Qt::Network Qt::XmlPatterns ${EXTERN_LIB} )
+else()
+    target_link_libraries ( baseplugins Qt::Widgets Qt::Svg Qt::Network ${EXTERN_LIB} )
+endif(QT6_FOUND)
+
 
 IF(UNIX)
     include( GNUInstallDirs )

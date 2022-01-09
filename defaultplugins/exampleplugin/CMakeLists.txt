@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,7 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
 message ( STATUS "Configuring the example plugin --" )
 project( exampleplugin )
@@ -18,7 +18,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Svg)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+endif(QT6_FOUND)
 
 include_directories (
     ../../libtransform/)
@@ -44,7 +48,7 @@ set ( EXTERN_LIB transform )
 
 add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 
-target_link_libraries ( exampleplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
+target_link_libraries ( exampleplugin Qt::Widgets Qt::Svg ${EXTERN_LIB} )
 
 IF(UNIX)
     include( GNUInstallDirs )

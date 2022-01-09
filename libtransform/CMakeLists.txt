@@ -32,10 +32,11 @@ else()
     message( STATUS "Lib transform version : ${LIBTRANSFORM_VERSION_MAJOR}")
 endif()
 
-find_package(Qt5Widgets)
-find_package(Qt5Core)
-find_package(Qt5Svg)
-find_package(Qt5Concurrent)
+find_package(Qt6 COMPONENTS Core Widgets Svg Concurrent)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg Concurrent REQUIRED)
+endif(QT6_FOUND)
 
 set ( transform_HDRS
     commonstrings.h
@@ -91,7 +92,7 @@ if (UNIX)
             "${transform_HDRS};${transform_MOCS};LibTransform")
 endif(UNIX)
 
-target_link_libraries(transform PRIVATE Qt5::Widgets Qt5::Svg Qt5::Concurrent)
+target_link_libraries(transform PRIVATE Qt::Widgets Qt::Svg Qt::Concurrent)
 
 IF(UNIX)
         include( GNUInstallDirs )

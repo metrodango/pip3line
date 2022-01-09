@@ -20,7 +20,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Svg)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+endif(QT6_FOUND)
 
 # no need for harcoded libs here, if none are supplied or found, failing the build
 
@@ -71,7 +75,7 @@ if (Python_INCLUDE_DIRS AND Python_LIBRARIES)
     add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
 
     target_link_libraries ( python3plugin
-        PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIB}
+        PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIB}
         PUBLIC ${Python_LIBRARIES}
         )
 

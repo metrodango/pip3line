@@ -19,7 +19,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Svg)
+
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+endif(QT6_FOUND)
 
 include_directories (
     ../../libtransform/
@@ -51,7 +55,7 @@ if (OPENSSL_FOUND)
     )
 
     add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
-    target_link_libraries ( opensslplugin Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+    target_link_libraries ( opensslplugin Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
 
     IF(UNIX)
         include( GNUInstallDirs )
