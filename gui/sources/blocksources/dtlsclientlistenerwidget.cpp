@@ -1,3 +1,5 @@
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
 #include "dtlsclientlistenerwidget.h"
 #include "ui_dtlsclientlistenerwidget.h"
 #include "dtlsclientlistener.h"
@@ -23,3 +25,4 @@ void DtlsClientListenerWidget::onSrcPortUseToggle(bool value)
 {
     blocksource->setUseSrcPorts(value);
 }
+#endif

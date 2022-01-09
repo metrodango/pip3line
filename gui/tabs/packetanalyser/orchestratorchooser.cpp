@@ -4,10 +4,12 @@
 #include "sourcesorchestatorabstract.h"
 #include <QDebug>
 #include <QDialog>
+#include <QtGlobal>
 #include <QHBoxLayout>
 #include <QStylePainter>
 #include "shared/guiconst.h"
 #include <QStandardItemModel>
+#include <QMessageBox>
 #include "sources/blocksources/udpserverlistener.h"
 #include "sources/blocksources/udpclientlistener.h"
 #include "sources/blocksources/tlsserverlistener.h"
@@ -200,6 +202,8 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             break;
         case SourcesOrchestatorAbstract::DTLS_CLIENT:
             {
+
+#if QT_FEATURE_dtls != -1
                 qDebug() << "DTLS client choosen";
                 bs = new(std::nothrow) DTLSClientListener();
                 if (bs == nullptr) {
@@ -213,7 +217,9 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
 
                 ci->setType(SourcesOrchestatorAbstract::DTLS_CLIENT);
                 orch = ci;
-
+#else
+                QMessageBox::critical(this, "Qt dtls Feature not available", "Qt dtls feature was not enabled at compile time, all dtls functionalities are disable");
+#endif // dtls
             }
             break;
         case SourcesOrchestatorAbstract::UDP_SERVER:
@@ -234,6 +240,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             break;
         case SourcesOrchestatorAbstract::DTLS_SERVER:
             {
+#if QT_FEATURE_dtls != -1
                 qDebug() << "DTLS server choosen";
                 bs = new(std::nothrow) DtlsServerListener();
                 if (bs == nullptr) {
@@ -246,6 +253,9 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
                 }
                 ci->setType(SourcesOrchestatorAbstract::DTLS_SERVER);
                 orch = ci;
+#else
+                QMessageBox::critical(this, "Qt dtls Feature not available", "Qt dtls feature was not enabled at compile time, all dtls functionalities are disable");
+#endif // dtls
             }
             break;
         case SourcesOrchestatorAbstract::TCP_SERVER:
@@ -318,6 +328,7 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
         }
         case SourcesOrchestatorAbstract::DTLS_PROXY:
         {
+#if QT_FEATURE_dtls != -1
             qDebug() << "DTLS proxy choosen";
             BlocksSource *dtlsServer = new(std::nothrow) DtlsServerListener();
             if (dtlsServer == nullptr) {
@@ -342,6 +353,9 @@ SourcesOrchestatorAbstract *OrchestratorChooser::createOrchestratorFromType(int 
             ci->setType(SourcesOrchestatorAbstract::DTLS_PROXY);
             orch = ci;
             break;
+#else
+            QMessageBox::critical(this, "Qt dtls Feature not available", "Qt dtls feature was not enabled at compile time, all dtls functionalities are disable");
+#endif // dtls
         }
         case SourcesOrchestatorAbstract::BLOCKS_EXTERNAL_PROXY_UDP:
         {

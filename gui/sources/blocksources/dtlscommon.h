@@ -1,10 +1,11 @@
 ﻿#ifndef DTLSCOMMON_H
 #define DTLSCOMMON_H
 
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include <QSslError>
 #include <QString>
-
-
 
 namespace DtlsCommon
 {
@@ -90,4 +91,5 @@ namespace DtlsCommon
     void printSslErrors(QVector<QSslError> errors);
 }
 
+#endif // dtls
 #endif // DTLSCOMMON_H

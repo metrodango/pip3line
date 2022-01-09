@@ -1,4 +1,7 @@
-﻿#include "dtlsclientlistener.h"
+﻿#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
+#include "dtlsclientlistener.h"
 #include "shared/sslconf.h"
 #include "shared/newconnectionbutton.h"
 #include "connectionswidget.h"
@@ -672,3 +675,4 @@ QWidget *DTLSClientListener::requestGui(QWidget *parent)
 
     return base;
 }
+#endif // dtls feature

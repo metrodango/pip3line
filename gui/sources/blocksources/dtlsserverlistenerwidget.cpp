@@ -1,3 +1,6 @@
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include "dtlsserverlistenerwidget.h"
 #include "ui_dtlsserverlistenerwidget.h"
 #include "dtlsserverlistener.h"
@@ -23,3 +26,4 @@ void DtlsServerListenerWidget::onEnableClientVerifiation(bool value)
 {
     blocksource->setDtlsVerificationEnabled(value);
 }
+#endif

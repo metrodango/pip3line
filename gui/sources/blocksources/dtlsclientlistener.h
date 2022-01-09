@@ -1,6 +1,9 @@
 #ifndef DTLSCLIENTLISTENER_H
 #define DTLSCLIENTLISTENER_H
 
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include "ipblockssources.h"
 #include <QHash>
 #include <QDtls>
@@ -54,4 +57,5 @@ class DTLSClientListener : public IPBlocksSources
         bool useSrcPorts;
 };
 
+#endif // dtls
 #endif // DTLSCLIENTLISTENER_H

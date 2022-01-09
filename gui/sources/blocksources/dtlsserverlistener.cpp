@@ -1,3 +1,6 @@
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include "dtlsserverlistener.h"
 #include <QThread>
 #include "shared/guiconst.h"
@@ -506,3 +509,4 @@ void DtlsServerListener::setConfiguration(const QHash<QString, QString> &conf)
         }
     }
 }
+#endif

@@ -1,6 +1,9 @@
 ﻿#ifndef DTLSSERVERLISTENER_H
 #define DTLSSERVERLISTENER_H
 
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include "ipblockssources.h"
 #include <QHostAddress>
 #include <QUdpSocket>
@@ -54,5 +57,7 @@ class DtlsServerListener : public IPBlocksSources
         int getClientIndex(const QHostAddress &clientAddress, const quint16 &clientPort);
         bool dtlsVerificationEnabled;
 };
+
+#endif // dtls
 
 #endif // DTLSSERVERLISTENER_H

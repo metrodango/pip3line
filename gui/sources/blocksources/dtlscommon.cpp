@@ -1,3 +1,6 @@
+#include <QtGlobal>
+#if QT_FEATURE_dtls != -1
+
 #include "dtlscommon.h"
 #include <QDebug>
 
@@ -164,3 +167,4 @@ namespace DtlsCommon
         }
     }
 }
+#endif
