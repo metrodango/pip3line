@@ -46,7 +46,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg Network Concurrent)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg Network Concurrent REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 include_directories (
 	../libtransform)
@@ -430,11 +430,19 @@ set ( pip3line_RSCS
 
 add_executable ( pip3line WIN32 ${pip3line_UIS} ${pip3line_SRCS} ${pip3line_RSCS})
 
-if(WIN32)
-    target_link_libraries ( pip3line Qt::Widgets Qt::Svg Qt::Network Qt::Concurrent Qt::WinMain )
-endif(WIN32)
-
-target_link_libraries ( pip3line Qt::Widgets Qt::Svg Qt::Network Qt::Concurrent ${EXTERN_LIBS} )
+if (Qt6_FOUND)
+    if(WIN32)
+        target_link_libraries ( pip3line PRIVATE Qt::Widgets Qt::Svg Qt::Network Qt::Concurrent Qt::WinMain ${EXTERN_LIBS} )
+    else(WIN32)
+        target_link_libraries ( pip3line PRIVATE Qt::Widgets Qt::Svg Qt::Network Qt::Concurrent ${EXTERN_LIBS} )
+    endif(WIN32)
+else()
+    if(WIN32)
+        target_link_libraries ( pip3line PRIVATE Qt::Widgets Qt::Svg Qt::Network Qt::Concurrent Qt::WinMain ${EXTERN_LIBS} )
+    else(WIN32)
+        target_link_libraries ( pip3line PRIVATE Qt::Widgets Qt5::Svg Qt5::Network Qt5::Concurrent ${EXTERN_LIBS} )
+    endif(WIN32)
+endif()
 
 if(UNIX)
 	install (TARGETS pip3line DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)

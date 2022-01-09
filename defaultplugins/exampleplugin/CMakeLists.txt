@@ -22,7 +22,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 include_directories (
     ../../libtransform/)
@@ -48,7 +48,13 @@ set ( EXTERN_LIB transform )
 
 add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 
-target_link_libraries ( exampleplugin Qt::Widgets Qt::Svg ${EXTERN_LIB} )
+
+if (Qt6_FOUND)
+    target_link_libraries ( exampleplugin PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIB} )
+else()
+    target_link_libraries ( exampleplugin PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
+endif()
+
 
 IF(UNIX)
     include( GNUInstallDirs )

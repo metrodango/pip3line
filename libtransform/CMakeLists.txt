@@ -36,7 +36,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg Concurrent)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg Concurrent REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 set ( transform_HDRS
     commonstrings.h
@@ -92,7 +92,11 @@ if (UNIX)
             "${transform_HDRS};${transform_MOCS};LibTransform")
 endif(UNIX)
 
-target_link_libraries(transform PRIVATE Qt::Widgets Qt::Svg Qt::Concurrent)
+if (Qt6_FOUND)
+    target_link_libraries(transform PRIVATE Qt::Widgets Qt::Svg Qt::Concurrent)
+else()
+    target_link_libraries(transform PRIVATE Qt5::Widgets Qt5::Svg Qt5::Concurrent)
+endif()
 
 IF(UNIX)
         include( GNUInstallDirs )

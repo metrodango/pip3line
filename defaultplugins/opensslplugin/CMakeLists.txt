@@ -1,4 +1,4 @@
-####
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,7 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-####
+###
 
 message( STATUS "Configuring the OpenSSL plugin --")
 project( opensslplugin )
@@ -23,7 +23,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 include_directories (
     ../../libtransform/
@@ -55,7 +55,12 @@ if (OPENSSL_FOUND)
     )
 
     add_library ( opensslplugin MODULE ${opensslplugin_SRCS} )
-    target_link_libraries ( opensslplugin Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+    if (Qt6_FOUND)
+        target_link_libraries ( opensslplugin PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+    else()
+        target_link_libraries ( opensslplugin PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+    endif()
+
 
     IF(UNIX)
         include( GNUInstallDirs )

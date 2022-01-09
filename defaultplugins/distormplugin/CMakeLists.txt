@@ -24,7 +24,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 include_directories (
     ${DISTORM3_INCLUDE_PATH}
@@ -125,7 +125,12 @@ if(UNIX AND WITH_DISTORM_LINK_STATICALLY)
         add_dependencies(distormplugin build_distorm_lib)
 endif ()
 set ( EXTERN_LIBS transform distorm3 )
-target_link_libraries ( distormplugin Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+
+if (Qt6_FOUND)
+    target_link_libraries ( distormplugin PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+else()
+    target_link_libraries ( distormplugin PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+endif()
 
 IF(UNIX)
     include( GNUInstallDirs )

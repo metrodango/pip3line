@@ -23,7 +23,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg Network Concurrent)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg XmlPatterns Network Concurrent REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 
 include_directories (
@@ -270,12 +270,11 @@ set ( EXTERN_LIB transform )
 
 add_library ( baseplugins MODULE ${baseplugins_SRCS} ${baseplugins_UIS} ${baseplugins_RSCS} )
 
-if (NOT Qt6_FOUND)
-    target_link_libraries ( baseplugins Qt::Widgets Qt::Svg Qt::Network Qt::XmlPatterns ${EXTERN_LIB} )
+if (Qt6_FOUND)
+    target_link_libraries ( baseplugins PRIVATE Qt::Widgets Qt::Svg Qt::Network ${EXTERN_LIB} )
 else()
-    target_link_libraries ( baseplugins Qt::Widgets Qt::Svg Qt::Network ${EXTERN_LIB} )
-endif(QT6_FOUND)
-
+    target_link_libraries ( baseplugins PRIVATE Qt5::Widgets Qt5::Svg Qt5::Network Qt5::XmlPatterns ${EXTERN_LIB} )
+endif()
 
 IF(UNIX)
     include( GNUInstallDirs )

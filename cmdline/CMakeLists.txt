@@ -33,11 +33,11 @@ find_package(Qt6 COMPONENTS Widgets Svg)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 include_directories (
     ../libtransform
-    )
+)
 
 link_directories (
     ${PROJECT_SOURCE_DIR}/../lib
@@ -67,11 +67,19 @@ set ( pip3linecmd_SRCS
 
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
-if(WIN32)
-    target_link_libraries ( pip3linecmd Qt::Widgets Qt::Svg Qt::WinMain)
-endif(WIN32)
-
-target_link_libraries ( pip3linecmd Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+if (Qt6_FOUND)
+    if(WIN32)
+        target_link_libraries ( pip3linecmd PRIVATE Qt::Widgets Qt::Svg Qt::WinMain ${EXTERN_LIBS} )
+    else(WIN32)
+        target_link_libraries ( pip3linecmd PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
+    endif(WIN32)
+else()
+    if(WIN32)
+        target_link_libraries ( pip3linecmd PRIVATE Qt5::Widgets Qt5::Svg Qt5::WinMain ${EXTERN_LIBS} )
+    else(WIN32)
+        target_link_libraries ( pip3linecmd PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
+    endif(WIN32)
+endif()
 
 if(UNIX)
     include( GNUInstallDirs )

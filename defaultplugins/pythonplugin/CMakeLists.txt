@@ -1,4 +1,4 @@
-#
+###
 # Released as open source by Gabriel Caudrelier
 #
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
@@ -6,7 +6,7 @@
 # https://github.com/metrodango/pip3line
 #
 # Released under AGPL see LICENSE for more information
-#
+###
 
 cmake_minimum_required(VERSION 3.12)
 message ( STATUS "Configuring the Python 3 plugin --" )
@@ -24,7 +24,7 @@ find_package(Qt6 COMPONENTS Core Widgets Svg)
 
 if (NOT Qt6_FOUND)
     find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif(QT6_FOUND)
+endif()
 
 # no need for harcoded libs here, if none are supplied or found, failing the build
 
@@ -74,10 +74,18 @@ if (Python_INCLUDE_DIRS AND Python_LIBRARIES)
 
     add_library ( python3plugin MODULE ${pythonplugin_SRCS} )
 
-    target_link_libraries ( python3plugin
-        PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIB}
-        PUBLIC ${Python_LIBRARIES}
-        )
+    if (Qt6_FOUND)
+        target_link_libraries ( python3plugin
+            PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIB}
+            PUBLIC ${Python_LIBRARIES}
+            )
+    else()
+        target_link_libraries ( python3plugin
+            PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIB}
+            PUBLIC ${Python_LIBRARIES}
+            )
+    endif()
+
 
     IF(UNIX)
         include( GNUInstallDirs )
