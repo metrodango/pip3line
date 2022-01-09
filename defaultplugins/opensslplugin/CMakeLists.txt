@@ -22,7 +22,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt6 COMPONENTS Core Widgets Svg)
 
 if (NOT Qt6_FOUND)
-    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg REQUIRED)
+    find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
 endif(QT6_FOUND)
 
 include_directories (

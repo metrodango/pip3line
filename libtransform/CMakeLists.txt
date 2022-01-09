@@ -35,7 +35,7 @@ endif()
 find_package(Qt6 COMPONENTS Core Widgets Svg Concurrent)
 
 if (NOT Qt6_FOUND)
-    find_package(Qt5 5.15 COMPONENTS Core Widgets Svg Concurrent REQUIRED)
+    find_package(Qt5 COMPONENTS Core Widgets Svg Concurrent REQUIRED)
 endif(QT6_FOUND)
 
 set ( transform_HDRS
