@@ -19,12 +19,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt6 COMPONENTS Core Widgets Svg Network Concurrent)
-
-if (NOT Qt6_FOUND)
-    find_package(Qt5 COMPONENTS Core Widgets Svg XmlPatterns Network Concurrent REQUIRED)
-endif()
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg Network Concurrent)
 
 include_directories (
     ../../libtransform/
@@ -271,7 +267,7 @@ set ( EXTERN_LIB transform )
 add_library ( baseplugins MODULE ${baseplugins_SRCS} ${baseplugins_UIS} ${baseplugins_RSCS} )
 
 if (Qt6_FOUND)
-    target_link_libraries ( baseplugins PRIVATE Qt::Widgets Qt::Svg Qt::Network ${EXTERN_LIB} )
+    target_link_libraries ( baseplugins PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Network ${EXTERN_LIB} )
 else()
     target_link_libraries ( baseplugins PRIVATE Qt5::Widgets Qt5::Svg Qt5::Network Qt5::XmlPatterns ${EXTERN_LIB} )
 endif()

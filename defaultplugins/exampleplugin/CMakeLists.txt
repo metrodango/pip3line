@@ -18,11 +18,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt6 COMPONENTS Core Widgets Svg)
-
-if (NOT Qt6_FOUND)
-    find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif()
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg)
 
 include_directories (
     ../../libtransform/)
@@ -48,12 +45,7 @@ set ( EXTERN_LIB transform )
 
 add_library ( exampleplugin MODULE ${exampleplugin_SRCS} )
 
-
-if (Qt6_FOUND)
-    target_link_libraries ( exampleplugin PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIB} )
-else()
-    target_link_libraries ( exampleplugin PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIB} )
-endif()
+target_link_libraries ( exampleplugin PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg ${EXTERN_LIB} )
 
 
 IF(UNIX)

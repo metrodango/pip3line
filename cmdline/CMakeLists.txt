@@ -29,11 +29,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 COMPONENTS Widgets Svg)
-
-if (NOT Qt6_FOUND)
-    find_package(Qt5 COMPONENTS Core Widgets Svg REQUIRED)
-endif()
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg)
 
 include_directories (
     ../libtransform
@@ -67,19 +64,11 @@ set ( pip3linecmd_SRCS
 
 add_executable ( pip3linecmd ${pip3linecmd_SRCS} )
 
-if (Qt6_FOUND)
-    if(WIN32)
-        target_link_libraries ( pip3linecmd PRIVATE Qt::Widgets Qt::Svg Qt::WinMain ${EXTERN_LIBS} )
-    else(WIN32)
-        target_link_libraries ( pip3linecmd PRIVATE Qt::Widgets Qt::Svg ${EXTERN_LIBS} )
-    endif(WIN32)
-else()
-    if(WIN32)
-        target_link_libraries ( pip3linecmd PRIVATE Qt5::Widgets Qt5::Svg Qt5::WinMain ${EXTERN_LIBS} )
-    else(WIN32)
-        target_link_libraries ( pip3linecmd PRIVATE Qt5::Widgets Qt5::Svg ${EXTERN_LIBS} )
-    endif(WIN32)
-endif()
+if(WIN32)
+    target_link_libraries ( pip3linecmd PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::WinMain ${EXTERN_LIBS} )
+else(WIN32)
+    target_link_libraries ( pip3linecmd PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg ${EXTERN_LIBS} )
+endif(WIN32)
 
 if(UNIX)
     include( GNUInstallDirs )
