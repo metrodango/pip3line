@@ -76,7 +76,7 @@ Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
 
 https://github.com/metrodango/pip3line
 
-Released under AGPL-3.0 see LICENSE for more information
+see LICENSE for more information
 ~~~
 
 
