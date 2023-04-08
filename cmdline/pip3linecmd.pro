@@ -4,7 +4,7 @@
 #
 # https://github.com/metrodango/pip3line
 #
-# Released under AGPL see LICENSE for more information
+# Released under BSD 3-Clause see LICENSE for more information
 
 QT      += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

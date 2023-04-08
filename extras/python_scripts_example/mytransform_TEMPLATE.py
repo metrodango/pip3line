@@ -4,7 +4,7 @@
 # Released as open source by Gabriel Caudrelier
 # Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
 # https://github.com/metrodango/pip3line
-# Released under AGPL see LICENSE for more information
+# Released under BSD 3-Clause see LICENSE for more information
 
 # [Optional] you can precise that this transformation is bidirectional and check for the
 # Pip3line_INBOUND module attribute later on (see gzip and bz2 for examples)

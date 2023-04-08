@@ -4,7 +4,7 @@
 #
 # https://github.com/metrodango/pip3line
 #
-# Released under AGPL see LICENSE for more information
+# Released under BSD 3-Clause see LICENSE for more information
 
 QT     += core gui xml network concurrent widgets
 CONFIG += debug c++14 warn_on

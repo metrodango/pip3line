@@ -5,7 +5,7 @@
 #
 # https://github.com/metrodango/pip3line
 #
-# Released under AGPL see LICENSE for more information
+# Released under BSD 3-Clause see LICENSE for more information
 ###
 
 cmake_minimum_required(VERSION 3.12)

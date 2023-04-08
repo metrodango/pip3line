@@ -5,7 +5,7 @@ Developed by Gabriel Caudrelier, gabriel dot caudrelier at gmail dot com
 
 https://github.com/metrodango/pip3line
 
-Released under AGPL see LICENSE for more information
+Released under BSD 3-Clause see LICENSE for more information
 **/
 
 #include "transformabstract.h"
@@ -90,7 +90,7 @@ QString TransformAbstract::help() const
 QString TransformAbstract::credits() const
 {
     QString credits;
-    credits.append(tr("<p>Released as open source by Gabriel Caudrelier </p><p>Developped by Gabriel Caudrelier - gabriel.caudrelier@gmail.com</p><p>Released under AGPL see LICENSE file for more information</p> "));
+    credits.append(tr("<p>Released as open source by Gabriel Caudrelier </p><p>Developped by Gabriel Caudrelier - gabriel.caudrelier@gmail.com</p><p>Released under BSD 3-Clause see LICENSE file for more information</p> "));
     return credits;
 }
 

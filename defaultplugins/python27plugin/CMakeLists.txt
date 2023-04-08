@@ -5,7 +5,7 @@
 #
 # https://github.com/metrodango/pip3line
 #
-# Released under AGPL see LICENSE for more information
+# Released under BSD 3-Clause see LICENSE for more information
 ####
 
 message ( STATUS "Configuring the Python 2.7 plugin --" )
